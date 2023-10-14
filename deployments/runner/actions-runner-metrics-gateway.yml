@@ -1,0 +1,56 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: actions-runner-metrics
+  namespace: istio-system
+spec:
+  commonName: actions-runner-metrics.manabie.io
+  dnsNames:
+  - actions-runner-metrics.manabie.io
+  issuerRef:
+    kind: ClusterIssuer
+    name: stag-manabie-gateway
+  secretName: cert-actions-runner-metrics
+---
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: actions-runner-metrics
+  namespace: istio-system
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - hosts:
+    - actions-runner-metrics.manabie.io
+    port:
+      name: https-actions-runner-metrics
+      number: 443
+      protocol: HTTPS
+    tls:
+      credentialName: cert-actions-runner-metrics
+      mode: SIMPLE
+      privateKey: sds
+      serverCertificate: sds
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: actions-runner-metrics
+  namespace: actions-runner-system
+spec:
+  exportTo:
+  - istio-system
+  gateways:
+  - istio-system/actions-runner-metrics
+  hosts:
+  - actions-runner-metrics.manabie.io
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: actions-runner-controller-actions-metrics-server
+        port:
+          number: 80

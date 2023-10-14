@@ -1,0 +1,18 @@
+{{- if .Values.enabled -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "gandalf.fullname" . }}
+  labels:
+    {{- include "gandalf.labels" . | nindent 4 }}
+data:
+  gandalf.common.config.yaml: |
+{{ tpl ("configs/gandalf.common.config.yaml" | .Files.Get) . | indent 4 }}
+  gandalf.config.yaml: |
+{{ tpl (printf "configs/%s/%s/gandalf.config.yaml" .Values.global.vendor .Values.global.environment | .Files.Get) . | indent 4 }}
+
+{{- if (lookup "v1" "ConfigMap" (printf "%s-%s-unleash" .Values.global.environment .Values.global.vendor) "unleash") }}
+  unleash.import.yaml: |
+{{ get (lookup "v1" "ConfigMap" (printf "%s-%s-unleash" .Values.global.environment .Values.global.vendor) "unleash").data "import.yaml" | indent 4 }}
+{{- end }}
+{{- end -}}

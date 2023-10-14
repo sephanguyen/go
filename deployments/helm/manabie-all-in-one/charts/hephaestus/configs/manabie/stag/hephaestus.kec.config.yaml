@@ -1,0 +1,11 @@
+common:
+  google_cloud_project: staging-manabie-online
+
+
+datalake:
+  alloydb:
+    user: 'stag-kafka-connect@staging-manabie-online.iam'
+
+datawarehouses:
+  kec:
+    user: 'stag-dwh-kafka-connect@staging-manabie-online.iam'

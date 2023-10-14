@@ -1,0 +1,108 @@
+syntax = "proto3";
+
+package aphelios.vision.v1;
+
+enum OmrServiceStatus{
+  SUCCESS = 0;
+  ERROR_IN_GET_TOP_VIEW = 1;
+  ERROR_IN_ID_QUESTION_DETECTOR = 2;
+  ERROR_IN_ANSWER_DETECTOR = 3;
+  ERROR_IN_BUBBLE_DETECTOR = 4;
+  ERROR_IN_QUESTION_FIELD_DETECTOR = 5;
+  ERROR_IN_GRADING = 6;
+}
+
+
+service GetTopViewService {
+  rpc GetTopView(GetTopViewRequest) returns (GetTopViewResponse);
+}
+
+service IdQuestionDetectorService {
+  rpc IdQuestionDetector(IdQuestionRequest) returns (IdQuestionResponse);
+}
+
+service AnswerDetectorService {
+  rpc AnswerDetector(AnswerDetectorRequest) returns (AnswerDetectorResponse);
+}
+
+service BubbleDetectorService{
+  rpc BubbleDetector(BubbleDetectionRequest) returns (BubbleDetectionResponse);
+}
+service QuestionFieldDetectorService {
+  rpc QuestionFieldDetector(QuestionFieldRequest) returns (QuestionFieldResponse);
+}
+
+service OMRGradingService {
+  rpc OMRGrading(OMRGradingRequest) returns (OMRGradingResponse);
+}
+
+
+message GetTopViewRequest {
+  string id = 1;
+  string image_url = 2;
+}
+
+message GetTopViewResponse {
+  string id = 1;
+  string image_url = 2;
+  OmrServiceStatus status = 3;
+}
+
+message IdQuestionRequest {
+  string id = 1;
+  string image_url = 2;
+}
+
+message IdQuestionResponse {
+  string id = 1;
+  string ans_img_url = 2;
+  string bin_img_url = 3;
+  OmrServiceStatus status = 4;
+}
+
+message QuestionFieldRequest {
+  string id = 1;
+  string b64_img = 2;
+}
+
+message QuestionFieldResponse{
+  string id = 1;
+  string bbox_list = 2;
+  OmrServiceStatus status = 3;
+}
+
+message AnswerDetectorRequest {
+  string id = 1;
+  string top_view_img_url = 2;
+  string bin_img_url = 3;
+  string ans_img_url = 4;
+}
+
+message AnswerDetectorResponse {
+  string id = 1;
+  string image_url = 2;
+  repeated int32 bubble_choice = 3;
+  OmrServiceStatus status = 4;
+}
+
+message BubbleDetectionRequest {
+  string id = 1;
+  string b64_img = 2;
+}
+
+message BubbleDetectionResponse{
+  string id = 1;
+  string bbox_list = 2;
+  OmrServiceStatus status = 3;
+}
+
+message OMRGradingRequest{
+  string id = 1;
+  string b64_img = 2;
+}
+
+message OMRGradingResponse{
+  string id = 1;
+  string result = 2;
+  OmrServiceStatus status = 3;
+}

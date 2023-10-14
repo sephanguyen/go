@@ -1,0 +1,2 @@
+ALTER TABLE public.class_member ADD COLUMN IF NOT EXISTS start_date timestamp with time zone default NULL;
+ALTER TABLE public.class_member ADD COLUMN IF NOT EXISTS end_date timestamp with time zone default NULL;

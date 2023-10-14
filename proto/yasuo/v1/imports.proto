@@ -1,0 +1,82 @@
+syntax = "proto3";
+
+package yasuo.v1;
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/yasuo/v1;ypb";
+
+message ImportSchoolsRequest {
+  bytes payload = 1;
+}
+
+message ImportSchoolsResponse {}
+
+message ImportPresetStudyPlansRequest {
+  bytes payload = 1;
+}
+
+message ImportPresetStudyPlansResponse {}
+
+message ImportCoursesRequest {
+  bytes payload = 1;
+}
+
+message ImportCoursesResponse {
+  bool successful = 1;
+}
+
+message ImportBooksRequest {
+  bytes payload = 1;
+}
+
+message ImportBooksResponse {
+  bool successful = 1;
+}
+
+message ImportChaptersRequest {
+  string file_name = 1;
+  bytes payload = 2;
+}
+
+message ImportChaptersResponse {
+  bool successful = 1;
+}
+
+message ImportTopicsRequest {
+  bytes payload = 1;
+}
+
+message ImportTopicsResponse {}
+
+message ImportLearningObjectivesRequest {
+  string file_name = 1;
+  bytes payload = 2;
+}
+
+message ImportLearningObjectivesResponse {}
+
+message ImportQuizzesRequest {
+  string file_name = 1;
+  bytes payload = 2;
+}
+
+message ImportQuizzesResponse {
+  bool successful = 1;
+}
+
+service ImportService {
+  rpc ImportSchools(stream ImportSchoolsRequest)
+      returns (ImportSchoolsResponse);
+
+  rpc ImportPresetStudyPlans(stream ImportPresetStudyPlansRequest)
+      returns (ImportPresetStudyPlansResponse);
+
+  rpc ImportCourses(stream ImportCoursesRequest)
+      returns (ImportCoursesResponse);
+  rpc ImportChapters(stream ImportChaptersRequest)
+      returns (ImportChaptersResponse);
+  rpc ImportBooks(stream ImportBooksRequest) returns (ImportBooksResponse);
+  rpc ImportTopics(stream ImportTopicsRequest) returns (ImportTopicsResponse);
+  rpc ImportLearningObjectives(stream ImportLearningObjectivesRequest)
+      returns (ImportLearningObjectivesResponse);
+  rpc ImportQuizzes(stream ImportQuizzesRequest)
+      returns (ImportQuizzesResponse);
+}

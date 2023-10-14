@@ -1,0 +1,78 @@
+common:
+  name: eureka
+  organization: {{ .Values.global.vendor }}
+  environment: '{{ include "util.runtimeEnvironment" . }}'
+  actual_environment: '{{ include "util.environment" . }}'
+  sa_email: {{ include "util.serviceAccountEmail" . }}
+  log:
+    app_level: debug
+    log_payload: true
+  stats_enabled: true
+  remote_trace:
+    enabled: true
+    otel_collector_receiver: http://opentelemetry-collector.monitoring.svc.cluster.local:14268/api/traces
+  grpc:
+    trace_enabled: true
+    handler_timeout: -1s # disable timeout
+    client_name: com.manabie.eureka
+    client_version: {{ .Values.clientVersion }}
+  image_tag: {{ include "util.imageTag" . }}
+postgres_migrate:
+  source: file:///migrations/eureka
+  database:
+    cloudsql_instance: '{{ .Values.global.cloudSQLLMSInstance }}'
+    cloudsql_use_public_ip: {{ .Values.global.cloudSQLUsePublicIP }}
+    cloudsql_auto_iam_authn: true
+    cloudsql_impersonate_service_account_email: '{{ include "util.databaseMigrationServiceAccountEmail" .}}'
+    user: '{{ include "util.databaseMigrationUser" . }}'
+    host: '{{ include "util.databaseHost" . }}'
+    port: '5432'
+    dbname: '{{ .Values.global.dbPrefix }}eureka'
+    max_conns: 2
+    retry_attempts: 10
+    retry_wait_internal: 5s
+postgres_v2:
+  eureka:
+    cloudsql_instance: '{{ .Values.global.cloudSQLLMSInstance }}'
+    cloudsql_use_public_ip: {{ .Values.global.cloudSQLUsePublicIP }}
+    cloudsql_auto_iam_authn: true
+    user: '{{ include "util.databaseUser" . }}'
+    host: '{{ include "util.databaseHost" . }}'
+    port: '5432'
+    dbname: '{{ .Values.global.dbPrefix }}eureka'
+    max_conns: 8
+    retry_attempts: 10
+    retry_wait_interval: '5s'
+bob_addr: bob:5050
+yasuo_addr: yasuo:5250
+fatima_addr: fatima:5450
+shamir_addr: shamir:5650
+usermgmt_addr: usermgmt:6150
+master_addr: mastermgmt:6450
+natsjs:
+  address: "nats://nats-jetstream.{{ .Values.global.environment }}-{{ .Values.global.vendor }}-nats-jetstream.svc.cluster.local:4223"
+  user: "Eureka"
+  max_redelivery: 10
+  default_ack_wait: 30s
+  reconnect_wait: 10s
+  max_reconnect: -1
+  is_local: {{ include "util.natsIsLocal" . }}
+syllabus_time_monitor:
+  course_student_upserted: 15
+  learning_item_upserted: 15
+syllabus_slack_webhook: "https://hooks.slack.com/services/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"
+storage:
+  endpoint: https://storage.googleapis.com
+  region: asia
+  maximum_url_expiry_duration: 1800s
+  minimum_url_expiry_duration: 1s
+  default_url_expiry_duration: 60s
+  secure: true
+unleash_client:
+  url: '{{ include "util.unleashURL" . }}'
+  app_name: "manabie-backend-eureka-unleash-client"
+  api_token: ce4ed2eba3a72d6b5be23c7aa9b71178753f5908cf2dcbbca29442b5b81d397f
+hasura_cache_config:
+  hasura_host: '{{ include "util.cache.hasuraHost" . }}'
+  redis_addr: '{{ include "util.cache.redisAddress" . }}'
+  ttl_in_seconds: 600

@@ -1,0 +1,7 @@
+common:
+  google_cloud_project: student-coach-e1e95
+vendor: manabie
+issuers:
+  - issuer: https://securetoken.google.com/student-coach-e1e95
+    audience: student-coach-e1e95
+    jwks_endpoint: https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com

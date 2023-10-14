@@ -1,0 +1,126 @@
+name: "slack-alert-reply"
+description: "Reply to a thread on Slack to report the status of the build/deploy job."
+
+inputs:
+  actor:
+    required: false
+    description: triggering actor of the send alert
+  repo:
+    required: false
+    description: be OR fe OR me
+  release_tag:
+    required: false
+    description: tag of the release
+  channel:
+    required: true
+    description: channel to reply/update message to
+  message-timestamp:
+    required: true
+    description: Message timestamp
+  current-job:
+    required: true
+    description: Current job name
+  job-outcome:
+    required: false
+    description: Outcome of be job
+  statuses:
+    required: false
+    description: Statuses of jobs
+  SLACK_TOKEN:
+    required: true
+    description: Slack token
+
+outputs:
+  status:
+    description: status of reported job/jobs
+    value: "${{ steps.status.outputs.status }}"
+
+runs:
+  using: composite
+  steps:
+    - id: statusMap
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const statusMap = {
+            'running': ':github_running:',
+            'success': ':github_success:',
+            'failure': ':github_failure:',
+            'skipped': ':github_skipped:',
+            'cancelled': ':github_cancelled:'
+          }
+          core.setOutput('statusMap', statusMap);
+
+    - id: status
+      uses: actions/github-script@v6
+      with:
+        script: |
+          if ('${{ inputs.repo }}' == 'backend') {
+            core.setOutput('status', '${{ inputs.job-outcome }}')
+            return
+          }
+
+          function checkStatus(statusObject) {
+            let statuses = []
+            Object.entries(statusObject).forEach(job => {
+              const [key, value] = job;
+              statuses.push(value.status);
+            });
+            
+            if (statuses.includes('cancelled')) return 'cancelled'
+            if (statuses.includes('failure')) return 'failure'
+            if (statuses.every(item => item === 'skipped')) return 'skipped'
+            return 'success'
+          }
+
+          const status = checkStatus(${{ inputs.statuses }})
+
+          core.setOutput('status', status)
+
+    - id: prepare-reply
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const statusMap = ${{ steps.statusMap.outputs.statusMap }}
+          const status = "${{ steps.status.outputs.status }}"
+          const current_deployment = "${{ inputs.current-job }}"
+          core.setOutput('current_deployment', current_deployment)
+          const message = statusMap[status] + " " + current_deployment
+          core.setOutput('message', message);
+
+    - name: Send Thread Reply
+      uses: archive/github-actions-slack@master
+      with:
+        slack-function: send-message
+        slack-bot-user-oauth-access-token: ${{ inputs.SLACK_TOKEN }}
+        slack-channel: ${{ inputs.channel }}
+        slack-optional-thread_ts: ${{ inputs.message-timestamp }}
+        slack-text: ${{ steps.prepare-reply.outputs.message }}
+
+    # - id: get-slack-user-id
+    #   if: ${{ !inputs.actor && contains(env.ENVIRONMENT, 'staging') && steps.status.outputs.status == 'failure' }}
+    #   uses: ./.github/actions/get-slack-user-id
+    #   with:
+    #     release_repo: ${{ inputs.repo }}
+    #     release_tag: ${{ inputs.release_tag }}
+    #     SLACK_TOKEN: ${{ inputs.SLACK_TOKEN }}
+
+    # - id: prepare-alert
+    #   if: steps.get-slack-user-id.outputs.userId != ''
+    #   uses: actions/github-script@v6
+    #   with:
+    #     script: |
+    #       const userId = '${{ steps.get-slack-user-id.outputs.userId }}'
+    #       const current_deployment = '${{ steps.prepare-reply.outputs.current_deployment }}'
+    #       const message = `<@${userId}> ${current_deployment} release has failed. Please help us check the issue.`
+    #       core.setOutput('message', message)
+
+    # - name: Send Thread Reply
+    #   if: steps.prepare-alert.outputs.message != ''
+    #   uses: archive/github-actions-slack@master
+    #   with:
+    #     slack-function: send-message
+    #     slack-bot-user-oauth-access-token: ${{ inputs.SLACK_TOKEN }}
+    #     slack-channel: ${{ inputs.channel }}
+    #     slack-optional-thread_ts: ${{ inputs.message-timestamp }}
+    #     slack-text: ${{ steps.prepare-alert.outputs.message }}

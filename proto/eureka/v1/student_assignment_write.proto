@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package eureka.v1;
+
+import "eureka/v1/enums.proto";
+import "eureka/v1/assignments.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/eureka/v1;epb";
+
+message SubmitAssignmentRequest {
+  StudentSubmission submission = 1; 
+} 
+
+message SubmitAssignmentResponse {
+  string submission_id = 1;
+}
+
+message GradeStudentSubmissionRequest {
+  SubmissionGrade grade = 1;
+  SubmissionStatus status = 2;
+}
+
+message GradeStudentSubmissionResponse {
+  string submission_grade_id = 1;
+}
+
+message UpdateStudentSubmissionsStatusRequest {
+  repeated string submission_ids = 1;
+  SubmissionStatus status = 2;
+}
+
+message UpdateStudentSubmissionsStatusResponse {
+  bool successfully = 1;
+}
+
+service StudentAssignmentWriteService {
+  rpc SubmitAssignment(SubmitAssignmentRequest) //TODO: PHASE 2
+      returns (SubmitAssignmentResponse);
+  rpc GradeStudentSubmission(GradeStudentSubmissionRequest)
+      returns (GradeStudentSubmissionResponse);
+  rpc UpdateStudentSubmissionsStatus(UpdateStudentSubmissionsStatusRequest)
+      returns (UpdateStudentSubmissionsStatusResponse);
+}

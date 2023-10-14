@@ -1,0 +1,56 @@
+name: tier_test_coverage_check
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '45 3 * * *' # run at 10:45 Vietnam Time Daily
+
+jobs:
+  check-tier-test:
+    runs-on: ["self-hosted", "custom-runner", "medium-runner"]
+    steps:
+      - name: Collect Workflow Telemetry
+        continue-on-error: true
+        timeout-minutes: 5
+        uses: manabie-com/workflow-telemetry-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.BUILD_GITHUB_TOKEN }}
+        with:
+          comment_on_pr: false
+
+      - name: Checkout backend source
+        uses: actions/checkout@v3
+        timeout-minutes: 5
+
+      - id: version
+        uses: ./.github/actions/tool-version
+
+      - uses: actions/setup-go@v4
+        with:
+          go-version: "${{ steps.version.outputs.go }}"
+
+      - name: Check tier test coverage be
+        run: |
+          # TODO: post process
+          tiers=("blocker" "critical")
+          for tier in "${tiers[@]}"; do
+            TEST_DIR="./features" TEST_TIER="${tier}" make check-tiertest
+          done
+
+      - name: Checkout eibanam source
+        uses: actions/checkout@v3
+        timeout-minutes: 5
+        with:
+          repository: manabie-com/eibanam
+          path: eibanam
+          ref: 'develop'
+          token: ${{ secrets.BUILD_GITHUB_TOKEN }}
+
+      - name: Check tier test coverage eibanam
+        run: |
+          # TODO: post process
+          tiers=("blocker" "critical")
+          for tier in "${tiers[@]}"; do
+            TEST_DIR="./eibanam/test-suites/squads" TEST_TIER="${tier}" make check-tiertest
+          done
+
+

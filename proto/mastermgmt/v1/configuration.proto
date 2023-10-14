@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package mastermgmt.v1;
+
+import "common/v1/requests.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/mastermgmt/v1;mpb";
+
+message Configuration {
+  string id = 1;
+  string config_key = 2;
+  string config_value = 3;
+  string created_at = 4;
+  string updated_at = 5;
+  string config_value_type = 6;
+}
+
+message GetConfigurationByKeyRequest {
+  string key = 1;
+}
+
+message GetConfigurationByKeyResponse {
+  Configuration configuration = 1;
+}
+
+message GetConfigurationsRequest {
+  common.v1.Paging paging = 1;
+  string keyword = 2;
+  string organization_id = 3;
+  string user_id = 4;
+}
+
+message GetConfigurationsResponse {
+  repeated Configuration items = 1;
+  common.v1.Paging next_page = 2;
+  common.v1.Paging previous_page = 3;
+}
+
+service ConfigurationService {
+  rpc GetConfigurationByKey(GetConfigurationByKeyRequest) returns (GetConfigurationByKeyResponse);
+  rpc GetConfigurations(GetConfigurationsRequest) returns (GetConfigurationsResponse);
+}
+
+service InternalService {
+  rpc GetConfigurations(GetConfigurationsRequest) returns (GetConfigurationsResponse);
+}

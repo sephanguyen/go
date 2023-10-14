@@ -1,0 +1,83 @@
+apiVersion: actions.summerwind.dev/v1alpha1
+kind: RunnerDeployment
+metadata:
+  name: 1-4-persistent-runnerdeploy
+  namespace: actions-runner-system
+spec:
+  template:
+    metadata:
+      labels:
+        app: 1-4-persistent-runnerdeploy
+      annotations:
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+    spec:
+      organization: manabie-com
+      dockerdWithinRunnerContainer: true
+      ephemeral: false
+      image: asia-docker.pkg.dev/student-coach-e1e95/manaverse/actions-runner-dind:v2.307.1-ubuntu-20.04
+      labels:
+        - custom-runner
+        - default-image-runner
+        - medium-runner
+        - 1-4-persistent-runner
+      env:
+      - name: DISABLE_RUNNER_UPDATE
+        value: "true"
+      nodeSelector:
+        cloud.google.com/gke-nodepool: "t2d-standard-1-runners-on-demand"
+      tolerations:
+      - effect: NoSchedule
+        key: "t2d-standard-1-runners-on-demand"
+        operator: Exists
+      dockerRegistryMirror: https://mirror.gcr.io/
+      imagePullPolicy: IfNotPresent
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: runner-deployment-name
+                    operator: In
+                    values:
+                      - 1-4-persistent-runnerdeploy
+              topologyKey: kubernetes.io/hostname
+---
+apiVersion: actions.summerwind.dev/v1alpha1
+kind: HorizontalRunnerAutoscaler
+metadata:
+  name: 1-4-persistent-runnerdeploy-autoscaler
+  namespace: actions-runner-system
+spec:
+  maxReplicas: 10
+  metrics:
+  - repositoryNames:
+    - backend
+    - school-portal-admin
+    type: TotalNumberOfQueuedAndInProgressWorkflowRuns
+  minReplicas: 0
+  scaleDownDelaySecondsAfterScaleOut: 300
+  scaleTargetRef:
+    name: 1-4-persistent-runnerdeploy
+  scaleUpTriggers:
+  - amount: 1
+    duration: 30m
+    githubEvent:
+      workflowJob: {}
+  scheduledOverrides:
+    # On Sundays at 11:30 PM to next Monday 03:30 AM
+    - startTime: '2023-05-28T23:30:00+07:00'
+      endTime: '2023-05-29T03:30:00+07:00'
+      minReplicas: 3
+      recurrenceRule:
+        frequency: Weekly
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: 1-4-persistent-runnerdeploy
+  namespace: actions-runner-system
+spec:
+  maxUnavailable: 0
+  selector:
+    matchLabels:
+      runner-deployment-name: 1-4-persistent-runnerdeploy

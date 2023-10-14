@@ -1,0 +1,3 @@
+package repository
+
+// for message queuing: kafka, MQ...

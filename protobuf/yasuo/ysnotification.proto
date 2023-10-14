@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package manabie.yasuo;
+
+import "bob/enum.proto";
+import "google/protobuf/timestamp.proto";
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option (gogoproto.goproto_registration) = true;
+option go_package = "github.com/manabie-com/backend/pkg/genproto/yasuo;pb";
+
+message Notification {
+  string id = 1;
+  string title = 2;
+  string description = 3;
+  string type = 4;
+  string target = 5;
+  string data = 6;
+  google.protobuf.Timestamp schedule_at = 7;
+  manabie.bob.NotificationEvent event = 8;
+}
+
+message CreateNotificationRequest { Notification notification = 1; }
+
+message CreateNotificationResponse { string notificationID = 1; }
+
+message UpdateNotificationRequest { Notification notification = 1; }
+
+message UpdateNotificationResponse { string notificationID = 1; }
+
+message TriggerSendNotificationRequest {}
+
+message TriggerSendNotificationResponse {}
+
+message PushXLOCompletedNotificationRequest {
+  Notification n = 1;
+  string device_token = 2;
+}
+
+message PushXLOCompletedNotificationResponse { bool successful = 1; }
+
+service NotificationService {
+  rpc CreateNotification(CreateNotificationRequest)
+      returns (CreateNotificationResponse);
+  rpc UpdateNotification(UpdateNotificationRequest)
+      returns (UpdateNotificationResponse);
+  rpc TriggerPendingNotification(TriggerSendNotificationRequest)
+      returns (TriggerSendNotificationResponse);
+
+  rpc CreateSingleNotification(CreateNotificationRequest)
+      returns (CreateNotificationResponse);
+  rpc PushXLOCompletedNotification(PushXLOCompletedNotificationRequest)
+      returns (PushXLOCompletedNotificationResponse);
+}

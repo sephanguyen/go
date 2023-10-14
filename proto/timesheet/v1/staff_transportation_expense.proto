@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package timesheet.v1;
+import "timesheet/v1/enums.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/timesheet/v1;tpb";
+
+service StaffTransportationExpenseService{
+    rpc UpsertStaffTransportationExpense(UpsertStaffTransportationExpenseRequest) returns (UpsertStaffTransportationExpenseResponse);
+}
+
+message StaffTransportationExpenseRequest{
+    string id = 1;
+    string location_id = 2;
+    TransportationType type = 3;
+    string from = 4;
+    string to = 5;
+    int32 cost_amount = 6;
+    bool round_trip = 7;
+    string remarks = 8;
+}
+
+message UpsertStaffTransportationExpenseRequest{
+    string staff_id = 1;
+    repeated StaffTransportationExpenseRequest list_staff_transportation_expenses = 2;
+}
+
+message UpsertStaffTransportationExpenseResponse{
+    bool success = 1;
+}

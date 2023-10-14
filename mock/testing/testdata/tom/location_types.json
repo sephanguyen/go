@@ -1,0 +1,118 @@
+{
+	"schema": [
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "display_name",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "is_archived",
+			"data_type": "boolean",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "location_type_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "name",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "parent_location_type_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "parent_name",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "location_types",
+			"policyname": "rls_location_types",
+			"qual": "permission_check(resource_path, 'location_types'::text)",
+			"with_check": "permission_check(resource_path, 'location_types'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "location_types",
+			"policyname": "rls_location_types_restrictive",
+			"qual": "permission_check(resource_path, 'location_types'::text)",
+			"with_check": "permission_check(resource_path, 'location_types'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "location_types_pkey",
+			"column_name": "location_type_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "location_types",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

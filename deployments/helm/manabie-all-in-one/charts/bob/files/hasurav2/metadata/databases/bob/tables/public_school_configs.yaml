@@ -1,0 +1,37 @@
+table:
+  schema: public
+  name: school_configs
+object_relationships:
+  - name: school
+    using:
+      foreign_key_constraint_on: school_id
+select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+        - country
+        - created_at
+        - deleted_at
+        - plan_duration
+        - plan_expired_at
+        - plan_id
+        - privileges
+        - school_id
+        - updated_at
+      filter: {}
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+        - plan_duration
+        - school_id
+        - country
+        - plan_id
+        - privileges
+        - created_at
+        - plan_expired_at
+        - updated_at
+      filter:
+        school_id:
+          _in: X-Hasura-School-Ids
+      allow_aggregations: true

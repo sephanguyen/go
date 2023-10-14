@@ -1,0 +1,118 @@
+table:
+  schema: public
+  name: students
+object_relationships:
+  - name: school
+    using:
+      foreign_key_constraint_on: school_id
+  - name: user
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: users
+        insertion_order: null
+        column_mapping:
+          student_id: user_id
+array_relationships:
+  - name: class_members
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: class_members
+        insertion_order: null
+        column_mapping:
+          student_id: user_id
+  - name: hub_tours
+    using:
+      foreign_key_constraint_on:
+        column: student_id
+        table:
+          schema: public
+          name: hub_tours
+  - name: lesson_report_details
+    using:
+      foreign_key_constraint_on:
+        column: student_id
+        table:
+          schema: public
+          name: lesson_report_details
+  - name: student_subscriptions
+    using:
+      foreign_key_constraint_on:
+        column: student_id
+        table:
+          schema: public
+          name: student_subscriptions
+  - name: students_assigned_coaches
+    using:
+      foreign_key_constraint_on:
+        column: student_id
+        table:
+          schema: public
+          name: students_assigned_coaches
+select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+        - additional_data
+        - billing_date
+        - biography
+        - birthday
+        - created_at
+        - current_grade
+        - deleted_at
+        - enrollment_status
+        - on_trial
+        - school_id
+        - student_external_id
+        - student_id
+        - student_note
+        - target_university
+        - total_question_limit
+        - updated_at
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+        - additional_data
+        - billing_date
+        - biography
+        - birthday
+        - created_at
+        - current_grade
+        - deleted_at
+        - enrollment_status
+        - on_trial
+        - school_id
+        - student_external_id
+        - student_id
+        - student_note
+        - target_university
+        - total_question_limit
+        - updated_at
+      filter:
+        _and:
+          - resource_path:
+              _eq: X-Hasura-Resource-Path
+          - deleted_at:
+              _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+        - current_grade
+        - enrollment_status
+        - school_id
+        - student_id
+      filter:
+        _and:
+          - resource_path:
+              _eq: X-Hasura-Resource-Path
+          - deleted_at:
+              _is_null: true

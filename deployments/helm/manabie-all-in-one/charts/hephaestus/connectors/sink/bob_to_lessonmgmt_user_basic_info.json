@@ -1,0 +1,23 @@
+{
+  "name": "{{ .Values.global.environment }}_{{ .Values.global.vendor }}_bob_to_lessonmgmt_user_basic_info_sink_connector",
+  "config": {
+      "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+      "transforms.unwrap.delete.handling.mode": "drop",
+      "tasks.max": "1",
+      "topics": "{{ .Values.global.environment }}.{{ .Values.global.vendor }}.bob.public.user_basic_info",
+      "transforms": "unwrap,route",
+      "fields.whitelist": "created_at,current_grade,deleted_at,email,first_name,first_name_phonetic,full_name_phonetic,grade_id,last_name,last_name_phonetic,name,resource_path,updated_at,user_id,email,gender,user_role,user_external_id",
+      "transforms.route.type": "org.apache.kafka.connect.transforms.RegexRouter",
+      "transforms.route.regex": "([^.]+).([^.]+).([^.]+).([^.]+).([^.]+)",
+      "delete.enabled": "false",
+      "transforms.unwrap.drop.tombstones": "true",
+      "auto.create": "false",
+      "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+      "connection.url": "${file:/config/kafka-connect-config.properties:lessonmgmt_url}",
+      "insert.mode": "upsert",
+      "table.name.format": "public.user_basic_info",
+      "transforms.route.replacement": "$5",
+      "pk.mode": "record_value",
+      "pk.fields": "user_id"
+  }
+}

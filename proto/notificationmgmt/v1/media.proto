@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package notificationmgmt.v1;
+
+import "google/protobuf/duration.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/notificationmgmt/v1;npb";
+
+message ConvertedImage {
+    int32 width = 1;
+    int32 height = 2;
+    string image_url = 3;
+}
+
+message Comment {
+    string comment = 1;
+    google.protobuf.Duration duration = 2;
+}
+
+enum MediaType {
+    MEDIA_TYPE_NONE = 0;
+    MEDIA_TYPE_VIDEO = 1;
+    MEDIA_TYPE_IMAGE = 2;
+    MEDIA_TYPE_PDF = 3;
+    MEDIA_TYPE_AUDIO = 4;
+    MEDIA_TYPE_ZIP = 5;
+}
+
+message Media {
+    string media_id = 1;
+    string name = 2;
+    string resource = 3;
+    repeated Comment comments = 4;
+    MediaType type = 5;
+    google.protobuf.Timestamp created_at = 6;
+    google.protobuf.Timestamp updated_at = 7;
+    repeated ConvertedImage images = 8;
+    float file_size = 9;
+}
+
+message UpsertMediaRequest{ repeated Media media = 1; }
+
+message UpsertMediaResponse{ repeated string media_ids = 1; }
+
+service MediaModifierService {
+    rpc UpsertMedia(UpsertMediaRequest)
+        returns (UpsertMediaResponse);
+}

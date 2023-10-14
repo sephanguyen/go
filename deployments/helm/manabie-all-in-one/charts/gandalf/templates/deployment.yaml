@@ -1,0 +1,174 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "gandalf.fullname" . }}-stub
+  labels: {{ include "gandalf.stubLabels" . | nindent 4 }}
+spec:
+  replicas: {{ default .Values.global.replicaCount .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "gandalf.name" . }}-stub
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/role: stub
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "gandalf.name" . }}-stub
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/role: stub
+        sidecar.istio.io/inject: "false"
+      annotations:
+{{- if .Values.podAnnotations }}
+{{ toYaml .Values.podAnnotations | indent 8 }}
+{{- end }}
+    spec:
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets: {{ toYaml . | nindent 8 }}
+    {{- end }}
+      containers:
+        - name: {{ include "gandalf.fullname" . }}-stub
+        {{- if .Values.global.liveReloadEnabled }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              #!/bin/bash
+              set -eu
+              cat <<EOF > modd.conf
+              /stub {
+                daemon +sigterm: /stub
+              }
+              EOF
+
+              exec modd
+        {{- else }}
+          command: ["/stub"]
+        {{- end }}
+          image: "{{ include "util.image" . }}"
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 10m
+              memory: 10Mi
+      {{- with .Values.gandalfStub }}
+      {{- $context := (mustMerge (deepCopy .) $) }}
+      affinity: {{- include "util.affinityNew" $context | nindent 8 }}
+      tolerations: {{- include "util.tolerations" $context | nindent 8 }}
+      {{- end }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "gandalf.fullname" . }}-ci
+  labels: {{ include "gandalf.ciLabels" . | nindent 4 }}
+spec:
+  replicas: {{ default .Values.global.replicaCount .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "gandalf.name" . }}-ci
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/role: ci
+  template:
+    metadata:
+      annotations:
+        checksum/gandalf.common.config.yaml: {{ tpl ("configs/gandalf.common.config.yaml" | .Files.Get) . | sha256sum }}
+        checksum/gandalf.config.yaml: {{ tpl (printf "configs/%s/%s/gandalf.config.yaml" .Values.global.vendor .Values.global.environment | .Files.Get) . | sha256sum }}
+        checksum/gandalf.secrets.encrypted.yaml: {{ printf "secrets/%s/%s/gandalf.secrets.encrypted.yaml" .Values.global.vendor .Values.global.environment | .Files.Get | sha256sum }}
+        sidecar.istio.io/inject: "false"
+{{- if .Values.podAnnotations }}
+{{ toYaml .Values.podAnnotations | indent 8 }}
+{{- end }}
+{{- if .Values.metrics.podAnnotations }}
+{{ toYaml .Values.metrics.podAnnotations | indent 8 }}
+{{- end }}
+      labels:
+        app.kubernetes.io/name: {{ include "gandalf.name" . }}-ci
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/role: ci
+    spec:
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets: {{ toYaml . | nindent 8 }}
+    {{- end }}
+      serviceAccountName: {{ include "util.serviceAccountName" . }}
+      volumes:
+# Values of configuration files
+{{- if eq "local" .Values.global.environment }}
+      - name: service-credential
+        secret:
+          secretName: {{ include "gandalf.fullname" . }}
+          items:
+          - key: service_credential.json
+            path: service_credential.json
+{{- end }}
+      - name: gandalf-config
+        configMap:
+          name: {{ include "gandalf.fullname" . }}
+          items:
+          - key: gandalf.common.config.yaml
+            path: gandalf.common.config.yaml
+          - key: gandalf.config.yaml
+            path: gandalf.config.yaml
+        {{- if (lookup "v1" "ConfigMap" (printf "%s-%s-unleash" .Values.global.environment .Values.global.vendor) "unleash") }}
+          - key: unleash.import.yaml
+            path: unleash.import.yaml
+        {{- end }}
+      - name: gandalf-secrets
+        secret:
+          secretName: {{ include "gandalf.fullname" . }}
+          items:
+          - key: gandalf.secrets.encrypted.yaml
+            path: gandalf.secrets.encrypted.yaml
+      containers:
+        - name: {{ include "gandalf.fullname" . }}-ci
+          command: ["sh"]
+          args: ["-c", "sleep infinity"]
+          image: {{ include "util.image" . }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 6060
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 10m
+              memory: 2500Mi
+          volumeMounts:
+          - name: gandalf-config
+            mountPath: /configs/gandalf.common.config.yaml
+            subPath: gandalf.common.config.yaml
+            readOnly: true
+          - name: gandalf-config
+            mountPath: /configs/gandalf.config.yaml
+            subPath: gandalf.config.yaml
+            readOnly: true
+        {{- if (lookup "v1" "ConfigMap" (printf "%s-%s-unleash" .Values.global.environment .Values.global.vendor) "unleash") }}
+          - name: gandalf-config
+            mountPath: /configs/import.yaml
+            subPath: unleash.import.yaml
+            readOnly: true
+        {{- end }}
+          - name: gandalf-secrets
+            mountPath: /configs/gandalf.secrets.encrypted.yaml
+            subPath: gandalf.secrets.encrypted.yaml
+            readOnly: true
+{{- if eq "local" .Values.global.environment }}
+          - name: service-credential
+            mountPath: /configs/service_credential.json
+            subPath: service_credential.json
+            readOnly: true
+          env:
+          - name: GOOGLE_APPLICATION_CREDENTIALS
+            value: "/configs/service_credential.json"
+{{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.gandalfCI }}
+      {{- $context := (mustMerge (deepCopy .) $) }}
+      affinity: {{- include "util.affinityNew" $context | nindent 8 }}
+      tolerations: {{- include "util.tolerations" $context | nindent 8 }}
+      {{- end }}

@@ -1,0 +1,48 @@
+{
+	"schema": [
+		{
+			"column_name": "count",
+			"data_type": "bigint",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "location_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "location_timesheets_non_confirmed_count",
+			"policyname": null,
+			"qual": null,
+			"with_check": null,
+			"relrowsecurity": null,
+			"relforcerowsecurity": null,
+			"permissive": null,
+			"roles": {
+				"Elements": null,
+				"Dimensions": null,
+				"Status": 1
+			}
+		}
+	],
+	"constraint": [],
+	"table_name": "location_timesheets_non_confirmed_count",
+	"type": "VIEW",
+	"owner": "postgres"
+}

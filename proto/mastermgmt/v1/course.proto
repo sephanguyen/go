@@ -1,0 +1,77 @@
+syntax = "proto3";
+
+package mastermgmt.v1;
+import "common/v1/enums.proto";
+import "google/api/annotations.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/mastermgmt/v1;mpb";
+
+enum CourseTeachingMethod{
+  COURSE_TEACHING_METHOD_INDIVIDUAL = 0;
+  COURSE_TEACHING_METHOD_GROUP = 1;
+  COURSE_TEACHING_METHOD_NONE = 2;
+}
+
+message UpsertCoursesRequest {
+    message Course {
+      string id = 1;
+      string name = 2;
+      common.v1.Country country = 3 [deprecated = true];
+      common.v1.Subject subject = 4 [deprecated = true];
+      string grade = 5 [deprecated = true];
+      int32 display_order = 6;
+      int32 school_id = 7 [deprecated = true];
+      repeated string book_ids = 8 [deprecated = true];
+      string icon = 9;
+      repeated string location_ids = 10;
+      CourseTeachingMethod teaching_method = 11;
+      string course_type = 12;
+      repeated string  subject_ids = 13;
+    }
+    repeated Course courses = 1;
+}
+  
+message UpsertCoursesResponse { bool successful = 1; }
+
+message Course {
+  string id = 1;
+  string name = 2;
+  string course_type_id = 3;
+}
+
+message GetCoursesByIDsRequest { repeated string course_ids = 1; }
+
+message GetCoursesByIDsResponse { 
+  repeated Course courses = 1; 
+}
+
+message ImportCoursesRequest {
+  bytes payload = 1;
+}
+
+message ImportCoursesResponse {
+}
+
+message ExportCoursesRequest {
+}
+
+message ExportCoursesResponse {
+  bytes data = 1;
+}
+
+service MasterDataCourseService {
+  rpc UpsertCourses(UpsertCoursesRequest) returns (UpsertCoursesResponse);
+  rpc ExportCourses(ExportCoursesRequest) returns (ExportCoursesResponse) {
+    option (google.api.http) = {
+        get: "/mastermgmt/api/v1/proxy/courses/export"
+    };
+  };
+  rpc GetCoursesByIDs(GetCoursesByIDsRequest) returns (GetCoursesByIDsResponse);
+  rpc ImportCourses(ImportCoursesRequest) returns (ImportCoursesResponse)
+  {
+    option (google.api.http) = {
+      post: "/mastermgmt/api/v1/proxy/courses",
+      body: "*"
+    };
+  };
+}

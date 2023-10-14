@@ -1,0 +1,133 @@
+{
+	"schema": [
+		{
+			"column_name": "action_type",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "event_type",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "message",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "status",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "user_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "user_upsertion_event_id",
+			"data_type": "bigint",
+			"column_default": "user_upsertion_event__user_upsertion_event_id__next()",
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "user_upsertion_event",
+			"policyname": "rls_user_upsertion_event",
+			"qual": "permission_check(resource_path, 'user_upsertion_event'::text)",
+			"with_check": "permission_check(resource_path, 'user_upsertion_event'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "user_upsertion_event",
+			"policyname": "rls_user_upsertion_event_restrictive",
+			"qual": "permission_check(resource_path, 'user_upsertion_event'::text)",
+			"with_check": "permission_check(resource_path, 'user_upsertion_event'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "user_upsertion_event_pk",
+			"column_name": "user_upsertion_event_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "user_upsertion_event__user_id__event_type__action_type__unique",
+			"column_name": "action_type",
+			"constraint_type": "UNIQUE"
+		},
+		{
+			"constraint_name": "user_upsertion_event__user_id__event_type__action_type__unique",
+			"column_name": "event_type",
+			"constraint_type": "UNIQUE"
+		},
+		{
+			"constraint_name": "user_upsertion_event__user_id__event_type__action_type__unique",
+			"column_name": "user_id",
+			"constraint_type": "UNIQUE"
+		}
+	],
+	"table_name": "user_upsertion_event",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

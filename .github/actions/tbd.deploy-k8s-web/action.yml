@@ -1,0 +1,85 @@
+name: "Deploy k8s web"
+description: |
+  A composite action to deploy for k8s web.
+inputs:
+  environment:
+    description: "Target environment (staging/uat/production)"
+    required: true
+  organization:
+    description: "Target organization (manabie/jprep/synersia/...)"
+    required: true
+  release_tag:
+    description: "Input release tag"
+    required: true
+  service:
+    description: "Input service name (backoffice, backoffice-mfe, learner, teacher, learnosity-web-view)"
+    required: true
+  token:
+    description: "Github token"
+    required: true
+runs:
+  using: "composite"
+  steps:
+
+    - uses: manabie-com/workflow-telemetry-action@v2
+      continue-on-error: true
+      with:
+        github_token: ${{ inputs.token }}
+        comment_on_pr: false
+
+    - name: Setup Kubernetes for ${{ inputs.environment }}-${{ inputs.organization }}
+      uses: ./.github/actions/setup-k8s
+      with:
+        organization: ${{ inputs.organization }}
+        environment: ${{ inputs.environment }}
+
+    - name: Get deployment configuration
+      id: config
+      uses: ./.github/actions/get-deployment-config
+      with:
+        environment: ${{ inputs.environment }}
+        organization: ${{ inputs.organization }}
+
+    - name: Deploying FE/${{ inputs.service }} ${{ inputs.environment }}-${{ inputs.organization }}
+      if: inputs.service == 'backoffice-mfe' || inputs.service == 'backoffice'
+      shell: bash
+      env:
+        ORG: ${{ inputs.organization }}
+        ENV: ${{ inputs.environment }}
+        BACKOFFICE_TAG: ${{ inputs.release_tag }}-${{ inputs.organization }}-${{ inputs.environment }}
+      run: |
+        set -eu
+
+        if [[ "$ENV" == "production" ]]; then
+          export ENV="prod"
+        fi
+        if [[ "$ENV" == "preproduction" ]]; then
+          export ENV="dorp"
+        fi
+        if [[ "$ENV" == "staging" ]]; then
+          export ENV="stag"
+        fi
+        skaffold deploy -f skaffold.frontend.yaml -p ${{ inputs.service }}
+
+    - name: Deploying ME/${{ inputs.service }} ${{ inputs.environment }}-${{ inputs.organization }}
+      if: inputs.service == 'learner' || inputs.service == 'teacher' || inputs.service == 'learnosity-web-view'
+      shell: bash
+      env:
+        ORG: ${{ inputs.organization }}
+        ENV: ${{ inputs.environment }}
+        TEACHER_TAG: ${{ inputs.release_tag }}-${{ inputs.organization }}-teacher-${{ inputs.environment }}
+        LEARNER_TAG: ${{ inputs.release_tag }}-${{ inputs.organization }}-learner-${{ inputs.environment }}
+        LEARNOSITY_TAG: ${{ inputs.release_tag }}
+      run: |
+        set -eu
+
+        if [[ "$ENV" == "production" ]]; then
+          export ENV="prod"
+        fi
+        if [[ "$ENV" == "preproduction" ]]; then
+          export ENV="dorp"
+        fi
+        if [[ "$ENV" == "staging" ]]; then
+          export ENV="stag"
+        fi
+        skaffold deploy -f skaffold.mobile.yaml -p ${{ inputs.service }}

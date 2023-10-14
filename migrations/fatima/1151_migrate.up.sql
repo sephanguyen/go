@@ -1,0 +1,1 @@
+ALTER TABLE public.student_associated_product DROP CONSTRAINT IF EXISTS pk_student_associated_product;

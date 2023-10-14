@@ -1,0 +1,23 @@
+{
+  "name": "uat_jprep_bob_to_lessonmgmt_lesson_members_states_sink_connector",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+    "tasks.max": "1",
+    "topics": "uat.jprep.bob.public.lesson_members_states",
+    "connection.url": "${file:/config/kafka-connect-config.properties:lessonmgmt_url}",
+    "auto.create": "false",
+    "insert.mode": "upsert",
+    "table.name.format": "lesson_members_states",
+    "fields.whitelist": "bool_value,created_at,deleted_at,lesson_id,resource_path,state_type,string_array_value,updated_at,user_id",
+    "transforms": "unwrap,route",
+    "transforms.route.type": "org.apache.kafka.connect.transforms.RegexRouter",
+    "transforms.route.regex": "([^.]+).([^.]+).([^.]+).([^.]+).([^.]+)",
+    "transforms.route.replacement": "$5",
+    "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+    "delete.enabled": "false",
+    "pk.mode": "record_value",
+    "pk.fields": "lesson_id,state_type,user_id",
+    "transforms.unwrap.drop.tombstones": "true",
+    "transforms.unwrap.delete.handling.mode": "drop"
+  }
+}

@@ -1,0 +1,1 @@
+ALTER TABLE ONLY messages ADD COLUMN IF NOT EXISTS target_user TEXT;

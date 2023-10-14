@@ -1,0 +1,148 @@
+{
+	"schema": [
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "current_grade",
+			"data_type": "smallint",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "first_name",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "first_name_phonetic",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "full_name_phonetic",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "grade_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "last_name",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "last_name_phonetic",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "name",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "user_external_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "user_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "user_role",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "user_basic_info",
+			"policyname": "rls_user_basic_info",
+			"qual": "permission_check(resource_path, 'user_basic_info'::text)",
+			"with_check": "permission_check(resource_path, 'user_basic_info'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "user_basic_info",
+			"policyname": "rls_user_basic_info_restrictive",
+			"qual": "permission_check(resource_path, 'user_basic_info'::text)",
+			"with_check": "permission_check(resource_path, 'user_basic_info'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "pk__user_basic_info",
+			"column_name": "user_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "user_basic_info",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

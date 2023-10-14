@@ -1,0 +1,107 @@
+DROP POLICY IF EXISTS rls_students on "students";
+DROP POLICY IF EXISTS rls_students_insert_location on "students";
+DROP POLICY IF EXISTS rls_students_select_location on "students";
+DROP POLICY IF EXISTS rls_students_update_location on "students";
+DROP POLICY IF EXISTS rls_students_delete_location on "students";
+
+CREATE POLICY rls_students_insert_location ON "students" AS PERMISSIVE FOR INSERT TO PUBLIC
+with check (
+	1 = 1
+);
+CREATE POLICY rls_students_select_location ON "students" AS PERMISSIVE FOR select TO PUBLIC
+using (
+true <= (
+	select			
+		true
+	from
+					granted_permissions p
+	join user_access_paths usp on
+					usp.location_id = p.location_id
+	where
+		p.user_id = current_setting('app.user_id')
+		and p.permission_id = (
+			select
+				p2.permission_id
+			from
+				"permission" p2
+			where
+				p2.permission_name = 'user.student.read'
+				and p2.resource_path = current_setting('permission.resource_path'))
+		and usp."user_id" = students.student_id
+		and usp.deleted_at is null
+	limit 1
+	)
+)
+;
+CREATE POLICY rls_students_update_location ON "students" AS PERMISSIVE FOR update TO PUBLIC
+using (
+true <= (
+	select			
+		true
+	from
+					granted_permissions p
+	join user_access_paths usp on
+					usp.location_id = p.location_id
+	where
+		p.user_id = current_setting('app.user_id')
+		and p.permission_id = (
+			select
+				p2.permission_id
+			from
+				"permission" p2
+			where
+				p2.permission_name = 'user.student.write'
+				and p2.resource_path = current_setting('permission.resource_path'))
+		and usp."user_id" = students.student_id
+		and usp.deleted_at is null
+	limit 1
+	)
+)with check (
+true <= (
+	select			
+		true
+	from
+					granted_permissions p
+	join user_access_paths usp on
+					usp.location_id = p.location_id
+	where
+		p.user_id = current_setting('app.user_id')
+		and p.permission_id = (
+			select
+				p2.permission_id
+			from
+				"permission" p2
+			where
+				p2.permission_name = 'user.student.write'
+				and p2.resource_path = current_setting('permission.resource_path'))
+		and usp."user_id" = students.student_id
+		and usp.deleted_at is null
+	limit 1
+	)
+)
+;
+CREATE POLICY rls_students_delete_location ON "students" AS PERMISSIVE FOR delete TO PUBLIC
+using (
+true <= (
+	select			
+		true
+	from
+					granted_permissions p
+	join user_access_paths usp on
+					usp.location_id = p.location_id
+	where
+		p.user_id = current_setting('app.user_id')
+		and p.permission_id = (
+			select
+				p2.permission_id
+			from
+				"permission" p2
+			where
+				p2.permission_name = 'user.student.write'
+				and p2.resource_path = current_setting('permission.resource_path'))
+		and usp."user_id" = students.student_id
+		and usp.deleted_at is null
+	limit 1
+	)
+)
+;

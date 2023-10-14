@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package nats.v1;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/nats/v1;npb";
+
+enum ActionKind {
+  ACTION_KIND_NONE = 0;
+  ACTION_KIND_UPSERTED = 1;
+  ACTION_KIND_DELETED = 2;
+}

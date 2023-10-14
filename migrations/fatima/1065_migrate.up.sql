@@ -1,0 +1,1 @@
+ALTER TABLE public.bill_item ADD COLUMN billing_item_description JSONB;

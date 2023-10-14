@@ -1,0 +1,77 @@
+table:
+  schema: public
+  name: teacher_by_school_id
+object_relationships:
+  - name: schools
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: schools
+        insertion_order: null
+        column_mapping:
+          school_id: school_id
+  - name: teacher_by_school_id
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: teachers
+        insertion_order: null
+        column_mapping:
+          teacher_id: teacher_id
+  - name: users
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: users
+        insertion_order: null
+        column_mapping:
+          teacher_id: user_id
+select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+        - school_id
+        - teacher_id
+        - created_at
+        - updated_at
+      filter: {}
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+        - school_id
+        - teacher_id
+        - created_at
+        - updated_at
+        - deleted_at
+      filter:
+        school_id:
+          _in: X-Hasura-School-Ids
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+        - school_id
+        - teacher_id
+        - created_at
+        - updated_at
+        - deleted_at
+      filter:
+        school_id:
+          _in: X-Hasura-School-Ids
+      allow_aggregations: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+        - school_id
+        - teacher_id
+        - created_at
+        - updated_at
+        - deleted_at
+      filter:
+        school_id:
+          _in: X-Hasura-School-Ids
+      allow_aggregations: true

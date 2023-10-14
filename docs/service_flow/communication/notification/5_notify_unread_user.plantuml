@@ -1,0 +1,11 @@
+@startuml communication_simplified
+hide circle
+
+User   -> Yasuo:  Call "NotificationModifierService.NotifyUnreadUser"
+activate Yasuo
+Yasuo -> DB: find notification
+Yasuo -> DB: find all unread users by batches of 1000 users
+Yasuo -> DB: update user_notification_msg.updated_at
+Yasuo -> FCM: sendNotificationForUsers
+deactivate Yasuo
+@enduml

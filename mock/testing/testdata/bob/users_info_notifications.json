@@ -1,0 +1,212 @@
+{
+	"schema": [
+		{
+			"column_name": "course_ids",
+			"data_type": "ARRAY",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "current_grade",
+			"data_type": "smallint",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "grade_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "is_individual",
+			"data_type": "boolean",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "notification_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "parent_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "parent_name",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "qn_status",
+			"data_type": "text",
+			"column_default": "'USER_NOTIFICATION_QUESTIONNAIRE_STATUS_UNANSWERED'::text",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "qn_submitted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "status",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "student_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "student_name",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "user_group",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "user_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "user_notification_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "users_info_notifications",
+			"policyname": "rls_users_info_notifications",
+			"qual": "permission_check(resource_path, 'users_info_notifications'::text)",
+			"with_check": "permission_check(resource_path, 'users_info_notifications'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "users_info_notifications",
+			"policyname": "rls_users_info_notifications_restrictive",
+			"qual": "permission_check(resource_path, 'users_info_notifications'::text)",
+			"with_check": "permission_check(resource_path, 'users_info_notifications'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "fk__users_info_notifications__notification_id",
+			"column_name": "notification_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "users_info_notifications__parent_id_fk",
+			"column_name": "parent_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "users_info_notifications__student_id_fk",
+			"column_name": "student_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "fk__users_info_notifications__user_id",
+			"column_name": "user_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "pk__users_info_notifications",
+			"column_name": "user_notification_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "unique__user_id__notification_id",
+			"column_name": "notification_id",
+			"constraint_type": "UNIQUE"
+		},
+		{
+			"constraint_name": "unique__user_id__notification_id",
+			"column_name": "parent_id",
+			"constraint_type": "UNIQUE"
+		},
+		{
+			"constraint_name": "unique__user_id__notification_id",
+			"column_name": "student_id",
+			"constraint_type": "UNIQUE"
+		},
+		{
+			"constraint_name": "unique__user_id__notification_id",
+			"column_name": "user_id",
+			"constraint_type": "UNIQUE"
+		}
+	],
+	"table_name": "users_info_notifications",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

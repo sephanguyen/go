@@ -1,0 +1,120 @@
+syntax = "proto3";
+
+package draft.v1;
+
+import "google/protobuf/struct.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/draft/v1;dpb";
+
+message AddInstanceRequest {
+  string name = 1;
+  bytes stats = 2;
+  google.protobuf.Struct flavor = 3;
+  repeated string tags = 4;
+}
+
+message AddInstanceResponse {
+  string id = 1;
+}
+
+message MarkInstanceEndedRequest {
+  string id = 1;
+  string status = 2;
+  bytes stats = 3;
+}
+
+message MarkInstanceEndedResponse {}
+
+message AddFeatureRequest {
+  string instance_id = 1;
+  string name = 2;
+  string uri = 3;
+  string keyword = 4;
+  repeated string tags = 5;
+}
+
+message AddFeatureResponse {
+  string id = 1;
+}
+
+message MarkFeatureEndedRequest {
+  string id = 1;
+  string status = 2;
+}
+
+message MarkFeatureEndedResponse {}
+
+message SetFeatureStatusRequest {
+  string id = 1;
+  string status = 2;
+}
+
+message SetFeatureStatusResponse {}
+
+message AddScenarioRequest {
+  string feature_id = 1;
+  string name = 2;
+  bytes steps = 3;
+  string keyword = 4;
+  repeated string tags = 5;
+}
+
+message AddScenarioResponse {
+  string id = 1;
+}
+
+message MarkScenarioEndedRequest {
+  string id = 1;
+  string status = 2;
+}
+
+message MarkScenarioEndedResponse {}
+
+message AddStepRequest {
+  string scenario_id = 1;
+  string name = 2;
+  string uri = 3;
+}
+
+message AddStepResponse {
+  string id = 1;
+}
+
+message MarkStepEndedRequest {
+  string id = 1;
+  string status = 2;
+  string message = 3;
+}
+
+message MarkStepEndedResponse {}
+
+message RetrieveSkippedBDDTestsRequest {
+  string repository = 1;
+}
+
+message SkippedBDDTest {
+  string feature_path = 1;
+  string scenario_name = 2;
+  string created_by = 3;
+}
+
+message RetrieveSkippedBDDTestsResponse {
+  repeated SkippedBDDTest skipped_bdd_tests = 1;
+}
+
+service BDDSuiteService {
+  rpc AddInstance(AddInstanceRequest) returns (AddInstanceResponse);
+  rpc MarkInstanceEnded(MarkInstanceEndedRequest) returns (MarkInstanceEndedResponse);
+
+  rpc AddFeature(AddFeatureRequest) returns (AddFeatureResponse);
+  rpc MarkFeatureEnded(MarkFeatureEndedRequest) returns (MarkFeatureEndedResponse);
+  rpc SetFeatureStatus(SetFeatureStatusRequest) returns (SetFeatureStatusResponse);
+
+  rpc AddScenario(AddScenarioRequest) returns (AddScenarioResponse);
+  rpc MarkScenarioEnded(MarkScenarioEndedRequest) returns (MarkScenarioEndedResponse);
+
+  rpc AddStep(AddStepRequest) returns (AddStepResponse);
+  rpc MarkStepEnded(MarkStepEndedRequest) returns (MarkStepEndedResponse);
+
+  rpc RetrieveSkippedBDDTests(RetrieveSkippedBDDTestsRequest) returns (RetrieveSkippedBDDTestsResponse);
+}

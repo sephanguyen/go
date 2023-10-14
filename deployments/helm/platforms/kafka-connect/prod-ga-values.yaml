@@ -1,0 +1,16 @@
+
+connect:
+  resources:
+    requests:
+      cpu: 600m
+      memory: 3Gi
+    limits:
+      cpu: 2000m
+      memory: 6Gi
+sqlProxy:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 32Mi
+    limits:
+      memory: 64Mi

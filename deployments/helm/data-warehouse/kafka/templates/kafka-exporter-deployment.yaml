@@ -1,0 +1,182 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-exporter-{{ include "kafka.fullname" . }}
+  labels:
+    app.kubernetes.io/name: kafka-exporter-{{ include "kafka.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    {{- if .Values.kafkaExporter.labels -}}
+    {{ .Values.kafkaExporter.labels | toYaml | nindent 4 -}}
+    {{- end }}
+spec:
+
+  replicas: {{ .Values.kafkaExporter.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kafka-exporter-{{ include "kafka.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: kafka-exporter-{{ include "kafka.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+
+      annotations:
+        {{- if .Values.kafkaExporter.podAnnotations -}}
+        {{ .Values.kafkaExporter.podAnnotations | toYaml | nindent 8 -}}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ include "util.serviceAccountName" . }}
+{{- if .Values.enableAC }}
+      initContainers:
+      - name: decrypt-secret
+        image: "{{ .Values.decryptorImage.repository }}:{{ .Values.decryptorImage.tag }}"
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+        - name: decrypted-secret
+          mountPath: /decrypted
+        - name: kafka-expoter-crd
+          mountPath: /secrets/kafka_client_jaas.encrypted.conf
+          subPath: kafka_client_jaas.encrypted.conf
+          readOnly: true
+        {{- if eq "local" .Values.environment }}
+        - name: service-credential
+          mountPath: /configs/service_credential.json
+          subPath: service_credential.json
+          readOnly: true
+        {{- end }}
+        env:
+        {{- if eq "local" .Values.environment }}
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: "/configs/service_credential.json"
+        {{- end }}
+        - name: HOSTNAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        command:
+          - /bin/bash
+          - -c
+          - |
+
+            set -e
+            echo "====="
+            
+            sops -d --output /decrypted/kafka_client_jaas.conf /secrets/kafka_client_jaas.encrypted.conf
+{{- end }}
+      containers:
+        - name: kafka-exporter-{{ include "kafka.name" . }}
+          image: "{{ .Values.kafkaExporter.image.repository }}:{{ .Values.kafkaExporter.image.tag }}"
+          imagePullPolicy: {{ .Values.kafkaExporter.image.pullPolicy }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+{{- if .Values.enableAC }}
+              . /decrypted/kafka_client_jaas.conf
+{{- end }}
+              /bin/kafka_exporter \
+              {{- if .Values.kafkaExporter}}
+              {{- range .Values.kafkaExporter.kafka.servers }}
+              "--kafka.server={{ . }}" \  
+              {{- end }}
+              {{- if .Values.kafkaExporter.kafka.version }}
+              --kafka.version={{ .Values.kafkaExporter.kafka.version }} \
+              {{- end }}
+              {{- end}}
+              {{- if .Values.enableAC }}
+              --sasl.enabled \
+              {{- if not .Values.kafkaExporter.sasl.handshake }}
+              --sasl.handshake=false \
+              {{- end }}
+              --sasl.username=$SASL_USERNAME \
+              --sasl.password=$SASL_PASSWORD \
+              --sasl.mechanism={{ .Values.kafkaExporter.sasl.mechanism }} \
+              {{- end }}
+              {{- if .Values.kafkaExporter.tls.enabled}}
+              --tls.enabled \
+              {{- if .Values.kafkaExporter.tls.insecureSkipTlsVerify}}
+              --tls.insecure-skip-tls-verify \
+              {{- else }}
+              --tls.ca-file=/etc/tls-certs/ca-file \
+              --tls.cert-file=/etc/tls-certs/cert-file \
+              --tls.key-file=/etc/tls-certs/key-file \
+              {{- end }}
+              {{- end }}
+              {{- if .Values.kafkaExporter.log }}
+              --verbosity={{ .Values.kafkaExporter.log.verbosity }} \
+              {{- end }}
+              {{- if .Values.kafkaExporter.log.enableSarama }}
+              --log.enable-sarama \
+              {{- end }}
+              --web.listen-address=:9308 \
+              --web.telemetry-path=/metrics
+          ports:
+            - name: metrics
+              containerPort: 9308
+              protocol: TCP
+          livenessProbe:
+            failureThreshold: 1
+            httpGet:
+              path: /healthz
+              port: metrics
+              scheme: HTTP
+            initialDelaySeconds: 3
+            periodSeconds: 30
+            successThreshold: 1
+            timeoutSeconds: 9
+          readinessProbe:
+            failureThreshold: 1
+            httpGet:
+              path: /healthz
+              port: metrics
+              scheme: HTTP
+            initialDelaySeconds: 3
+            periodSeconds: 15
+            successThreshold: 1
+            timeoutSeconds: 9
+
+          volumeMounts:
+          - name: decrypted-secret
+            mountPath: /decrypted
+          {{- if and .Values.kafkaExporter.tls.enabled (not .Values.kafkaExporter.tls.insecureSkipTlsVerify) }}
+          - name: tls-certs
+            mountPath: "/etc/tls-certs/"
+            readOnly: true
+          {{- end }}
+          
+          resources:
+            {{- toYaml .Values.kafkaExporter.resources | nindent 12 }}
+      {{- with .Values.kafkaExporter.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.kafkaExporter.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.kafkaExporter }}
+      {{- $context := (mustMerge (deepCopy .) $) }}
+      affinity: {{- include "util.affinityNew" $context | nindent 8 }}
+      tolerations: {{- include "util.tolerations" $context | nindent 8 }}
+      {{- end }}
+      volumes:
+      - name: decrypted-secret
+        emptyDir: {}
+      - name: kafka-expoter-crd
+        secret:
+          secretName: kafka-expoter-crd
+{{- if eq "local" .Values.environment }}
+      - name: service-credential
+        secret:
+          secretName: kafka-expoter-crd
+          items:
+          - key: service_credential.json
+            path: service_credential.json
+{{- end }}
+    {{- if and .Values.kafkaExporter.tls.enabled (not .Values.kafkaExporter.tls.insecureSkipTlsVerify) }}
+      - name: tls-certs
+        secret:
+          secretName: kafka-exporter
+    {{- end }}

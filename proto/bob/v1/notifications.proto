@@ -1,0 +1,99 @@
+syntax = "proto3";
+
+package bob.v1;
+
+import "common/v1/notifications.proto";
+import "common/v1/requests.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/bob/v1;bpb";
+
+message RetrieveNotificationDetailRequest {
+  string notification_id = 1;
+  string target_id = 2;
+}
+
+message RetrieveNotificationDetailResponse {
+  common.v1.Notification item = 1;
+  common.v1.UserNotification user_notification = 2; 
+  common.v1.UserQuestionnaire user_questionnaire = 3;
+}
+
+message RetrieveNotificationsRequest {
+  common.v1.Paging paging = 1;
+  bool important_only = 2;
+}
+
+message RetrieveNotificationsResponse {
+  message NotificationInfo {
+    string title = 1;
+    string description= 2;
+    common.v1.UserNotification user_notification = 3;
+    google.protobuf.Timestamp sent_at = 4;
+    bool is_important = 5;
+    string questionnaire_id = 6;
+    string target_id = 7;
+  }
+  common.v1.Paging next_page = 1;
+  repeated NotificationInfo items = 2;
+}
+
+message CountUserNotificationRequest{
+  common.v1.UserNotificationStatus status = 1;
+} 
+
+message CountUserNotificationResponse{
+  int32 num_by_status = 1;
+  int32 total = 2;
+}
+
+message GetAnswersByFilterRequest {
+    string questionnaire_id = 1;
+    string keyword = 2;
+    common.v1.Paging paging = 3;
+}
+
+message GetAnswersByFilterResponse {
+    message UserAnswer {
+        string responder_name = 1;
+        string user_id = 2;
+        string target_id = 3;
+        string target_name = 4;
+        bool is_parent = 5;
+        google.protobuf.Timestamp submitted_at = 6;
+        repeated common.v1.Answer answers = 7;
+        string user_notification_id = 8;
+        bool is_individual = 9;
+    }
+    repeated UserAnswer user_answers = 1;
+    uint32 total_items = 2;
+    common.v1.Paging next_page = 3;
+    common.v1.Paging previous_page = 4;
+    repeated common.v1.Question questions = 5;
+}
+
+service NotificationReaderService {
+    rpc RetrieveNotificationDetail(RetrieveNotificationDetailRequest)
+        returns (RetrieveNotificationDetailResponse);
+
+    rpc RetrieveNotifications(RetrieveNotificationsRequest)
+        returns (RetrieveNotificationsResponse);
+
+    rpc CountUserNotification(CountUserNotificationRequest)
+        returns (CountUserNotificationResponse);
+
+    rpc GetAnswersByFilter(GetAnswersByFilterRequest)
+      returns (GetAnswersByFilterResponse);
+}
+
+message SetUserNotificationStatusRequest {
+  repeated string notification_ids = 1;
+  common.v1.UserNotificationStatus status = 2;
+}
+
+message SetUserNotificationStatusResponse {}
+
+service NotificationModifierService {
+  rpc SetUserNotificationStatus(SetUserNotificationStatusRequest)
+      returns (SetUserNotificationStatusResponse);
+}

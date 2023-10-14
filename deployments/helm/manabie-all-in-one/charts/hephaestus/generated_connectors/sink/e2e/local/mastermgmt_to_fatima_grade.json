@@ -1,0 +1,23 @@
+{
+  "name": "local_e2e_mastermgmt_to_fatima_grade_sink_connector",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+    "tasks.max": "1",
+    "topics": "local.e2e.mastermgmt.public.grade",
+    "connection.url": "${file:/config/kafka-connect-config.properties:fatima_url}",
+    "auto.create": "false",
+    "insert.mode": "upsert",
+    "table.name.format": "grade",
+    "fields.whitelist": "created_at,deleted_at,grade_id,is_archived,name,partner_internal_id,resource_path,sequence,updated_at",
+    "transforms": "unwrap,route",
+    "transforms.route.type": "org.apache.kafka.connect.transforms.RegexRouter",
+    "transforms.route.regex": "([^.]+).([^.]+).([^.]+).([^.]+).([^.]+)",
+    "transforms.route.replacement": "$5",
+    "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+    "delete.enabled": "false",
+    "pk.mode": "record_value",
+    "pk.fields": "grade_id",
+    "transforms.unwrap.drop.tombstones": "true",
+    "transforms.unwrap.delete.handling.mode": "drop"
+  }
+}

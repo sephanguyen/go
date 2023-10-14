@@ -1,0 +1,114 @@
+apiVersion: skaffold/v2beta29
+kind: Config
+metadata:
+  name: data-warehouse
+deploy:
+  helm:
+    releases:
+      # [0] kafka
+      - name: dwh-kafka
+        chartPath: deployments/helm/data-warehouse/kafka
+        namespace: '{{.ENV}}-{{.ORG}}-data-warehouse'
+        valuesFiles:
+          - 'deployments/helm/data-warehouse/kafka/{{.ENV}}-{{.ORG}}-values.yaml'
+        createNamespace: true
+        skipBuildDependencies: true
+        setValueTemplates:
+          vendor: '{{.ORG}}'
+          environment: '{{.ENV}}'
+          kafka.image.repository: '{{if eq "local" .ENV}}{{.ARTIFACT_REGISTRY_DOMAIN}}/{{end}}asia.gcr.io/student-coach-e1e95/customized_debezium_kafka'
+          sopsImage.repository: '{{if eq "local" .ENV}}{{.ARTIFACT_REGISTRY_DOMAIN}}/{{end}}mozilla/sops'
+          decryptorImage.repository: '{{if eq "local" .ENV}}{{.ARTIFACT_REGISTRY_DOMAIN}}/{{end}}asia.gcr.io/student-coach-e1e95/decrypt-secret'
+          serviceAccountEmailSuffix: '{{.SERVICE_ACCOUNT_EMAIL_SUFFIX}}'
+          aclImage.image.repository: '{{if eq "local" .ENV}}{{.ARTIFACT_REGISTRY_DOMAIN}}/{{end}}asia.gcr.io/student-coach-e1e95/customized_debezium_connect'
+
+      # [1] cp-schema-registry
+      - name: dwh-cp-schema-registry
+        chartPath: deployments/helm/data-warehouse/cp-schema-registry
+        namespace: '{{.ENV}}-{{.ORG}}-data-warehouse'
+        createNamespace: true
+        skipBuildDependencies: true
+        valuesFiles:
+          - 'deployments/helm/data-warehouse/cp-schema-registry/{{.ENV}}-{{.ORG}}-values.yaml'
+        setValueTemplates:
+          image: '{{if eq "local" .ENV}}{{.ARTIFACT_REGISTRY_DOMAIN}}/{{end}}asia.gcr.io/student-coach-e1e95/customized_cp_schema_registry'
+          sopsImage.repository: '{{if eq "local" .ENV}}{{.ARTIFACT_REGISTRY_DOMAIN}}/{{end}}mozilla/sops'
+          decryptorImage.repository: '{{if eq "local" .ENV}}{{.ARTIFACT_REGISTRY_DOMAIN}}/{{end}}asia.gcr.io/student-coach-e1e95/decrypt-secret'
+          serviceAccountEmailSuffix: '{{.SERVICE_ACCOUNT_EMAIL_SUFFIX}}'
+          vendor: '{{.ORG}}'
+          environment: '{{.ENV}}'
+
+      # [2] kafka-connect
+      - name: dwh-kafka-connect
+        chartPath: deployments/helm/data-warehouse/kafka-connect
+        namespace: '{{.ENV}}-{{.ORG}}-data-warehouse'
+        createNamespace: true
+        skipBuildDependencies: true
+        valuesFiles:
+          - deployments/helm/platforms/{{.ENV}}-{{.ORG}}-values.yaml
+          - 'deployments/helm/data-warehouse/kafka-connect/{{.ENV}}-{{.ORG}}-values.yaml'
+        setValueTemplates:
+          connect.image.repository: '{{if eq "local" .ENV}}{{.ARTIFACT_REGISTRY_DOMAIN}}/{{end}}asia.gcr.io/student-coach-e1e95/customized_debezium_connect'
+          initConnectorImage.repository: '{{if eq "local" .ENV}}{{.LOCAL_REGISTRY_DOMAIN}}/{{end}}asia.gcr.io/student-coach-e1e95/kafkatools'
+          sopsImage.repository: '{{if eq "local" .ENV}}{{.ARTIFACT_REGISTRY_DOMAIN}}/{{end}}mozilla/sops'
+          decryptorImage.repository: '{{if eq "local" .ENV}}{{.ARTIFACT_REGISTRY_DOMAIN}}/{{end}}asia.gcr.io/student-coach-e1e95/decrypt-secret'
+          global:
+            vendor: '{{.ORG}}'
+            environment: '{{.ENV}}'
+            serviceAccountEmailSuffix: '{{.SERVICE_ACCOUNT_EMAIL_SUFFIX}}'
+            sqlProxy:
+              enabled: '{{if ne "local" .ENV}}true{{else}}false{{end}}'
+              usePublicIP: '{{if or (eq "renseikai" .ORG) (eq "synersia" .ORG)}}true{{else}}false{{end}}'
+
+      # [3] ksql-server
+      - name: dwh-cp-ksql-server
+        chartPath: deployments/helm/data-warehouse/ksql-server
+        namespace: '{{.ENV}}-{{.ORG}}-data-warehouse'
+        createNamespace: true
+        skipBuildDependencies: true
+        valuesFiles:
+          - 'deployments/helm/data-warehouse/ksql-server/{{.ENV}}-{{.ORG}}-values.yaml'
+        setValueTemplates:
+          image: '{{if eq "local" .ENV}}{{.ARTIFACT_REGISTRY_DOMAIN}}/{{end}}confluentinc/ksqldb-server'
+          sopsImage.repository: '{{if eq "local" .ENV}}{{.ARTIFACT_REGISTRY_DOMAIN}}/{{end}}mozilla/sops'
+          decryptorImage.repository: '{{if eq "local" .ENV}}{{.ARTIFACT_REGISTRY_DOMAIN}}/{{end}}asia.gcr.io/student-coach-e1e95/decrypt-secret'
+          serviceAccountEmailSuffix: '{{.SERVICE_ACCOUNT_EMAIL_SUFFIX}}'
+          global:
+            vendor: '{{.ORG}}'
+            environment: '{{.ENV}}'
+
+profiles:
+  - name: enable-dwh
+    activation:
+      - env: DATA_WH=true
+    patches:
+      - op: add
+        path: /deploy/helm/releases/0/setValueTemplates/enableAC
+        value: '{{if .DATA_WH_AC }}true{{else}}false{{end}}'
+      - op: add
+        path: /deploy/helm/releases/1/setValueTemplates/enableAC
+        value: '{{if .DATA_WH_AC }}true{{else}}false{{end}}'
+      - op: add
+        path: /deploy/helm/releases/2/setValueTemplates/enableAC
+        value: '{{if .DATA_WH_AC }}true{{else}}false{{end}}'
+      - op: add
+        path: /deploy/helm/releases/3/setValueTemplates/enableAC
+        value: '{{if .DATA_WH_AC }}true{{else}}false{{end}}'
+
+  - name: local
+    activation:
+      - env: DATA_WH=false
+      - env: DATA_WH=
+    patches:
+      - op: add
+        path: /deploy/kubeContext
+        value: kind-kind
+      - op: remove
+        path: /deploy/helm/releases/3
+      - op: remove
+        path: /deploy/helm/releases/2
+      - op: remove
+        path: /deploy/helm/releases/1
+      - op: remove
+        path: /deploy/helm/releases/0
+

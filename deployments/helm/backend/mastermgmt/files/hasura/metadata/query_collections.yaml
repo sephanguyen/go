@@ -1,0 +1,89 @@
+- name: allowed-queries
+  definition:
+    queries:
+      - name: Architecture_GetExternalConfigsByKeys
+        query: |-
+          query Architecture_GetExternalConfigsByKeys($keys: [String!]!) {
+            external_configuration_value(where: {config_key: {_in: $keys}}) {
+              configuration_id
+              config_value
+              config_key
+              last_editor
+            }
+          }
+      - name: Architecture_UpdateExternalConfigByKey
+        query: |
+          mutation Architecture_UpdateExternalConfigByKey($configKey: String!, $configValue: String!, $lastEditor: String = "") {
+            update_external_configuration_value(where: {config_key: {_eq: $configKey}}, _set: {config_value: $configValue, updated_at: "now()", last_editor: $lastEditor}) {
+              affected_rows
+              returning {
+                configuration_id
+                config_key
+                config_value
+                updated_at
+              }
+            }
+          }
+      - name: Architecture_GetInternalConfigsByKeys
+        query: |-
+          query Architecture_GetInternalConfigsByKeys($keys: [String!]!) {
+            internal_configuration_value(where: {config_key: {_in: $keys}}) {
+              configuration_id
+              config_value
+              config_value_type
+              config_key
+              last_editor
+            }
+          }
+      - name: Architecture_GetAcademicYears
+        query: |-
+          query Architecture_GetAcademicYears {
+            academic_year {
+              academic_year_id
+              name
+            }
+          }
+      - name: Architecture_GetAcademicYearsWithDateRange
+        query: |-
+          query Architecture_GetAcademicYearsWithDateRange {
+            academic_year {
+              academic_year_id
+              name
+              start_date
+              end_date
+            }
+          }
+      - name: Calendar_WorkingHourByLocationId
+        query: |
+          query Calendar_WorkingHourByLocationId($location_id: String!) {
+            working_hour(where: {location_id: {_eq: $location_id}}) {
+              day
+              opening_time
+              closing_time
+            }
+          }
+      - name: Calendar_AcademicWeekByLocationId
+        query: |
+          query Calendar_AcademicWeekByLocationId($location_id: String!) {
+            academic_week(where: {location_id: {_eq: $location_id}}) {
+              academic_week_id
+              academic_year_id
+              location_id
+              name
+              period
+              week_order
+              start_date
+              end_date
+            }
+          }
+      - name: Calendar_TimeSlotByLocationId
+        query: |
+          query Calendar_TimeSlotByLocationId($location_id: String!) {
+            time_slot(where: {location_id: {_eq: $location_id}}) {
+              time_slot_id
+              time_slot_internal_id
+              location_id
+              start_time
+              end_time
+            }
+          }

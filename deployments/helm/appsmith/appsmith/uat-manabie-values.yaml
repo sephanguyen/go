@@ -1,0 +1,5 @@
+
+sqlProxy:
+  enabled: false
+  dbConnName: ""
+serviceAccountEmailSuffix: uat-manabie

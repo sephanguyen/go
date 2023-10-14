@@ -1,0 +1,116 @@
+- name: allowed-queries
+  definition:
+    queries:
+    - name: Calendar_CountDayType
+      query: |-
+        query Calendar_CountDayType($day_type_ids: [String!] = []) {
+            day_type_aggregate(where: {day_type_id: {_in: $day_type_ids}}) {
+              aggregate {
+                count
+              }
+            }
+        }
+    - name: Calendar_LocationListByIds
+      query: |-
+        query Calendar_LocationListByIds($location_ids: [String!] = []) {
+            locations(where: {location_id: {_in: $location_ids}}) {
+              name
+              location_id
+              is_archived
+            }
+        }
+    - name: Calendar_DayTypeByDayTypeIds
+      query: |
+        query Calendar_DayTypeByDayTypeIds($day_type_ids: [String!] = []) {
+          day_type(where: {day_type_id: {_in: $day_type_ids}}) {
+            day_type_id
+            is_archived
+          }
+        }
+    - name: Calendar_ImportDayType
+      query: |
+        mutation Calendar_ImportDayType($data: [day_type_insert_input!]!) {
+          insert_day_type(objects: $data, on_conflict: {constraint: day_type_pk, update_columns: [updated_at, display_name, is_archived]}) {
+            affected_rows
+          }
+        }
+    - name: Calendar_ImportDayInfo
+      query: |-
+        mutation Calendar_ImportDayInfo($data: [day_info_insert_input!]!) {
+          insert_day_info(
+              objects: $data
+              on_conflict: {
+                  constraint: day_info_pk
+                  update_columns: [updated_at, day_type_id, time_zone, opening_time]
+              }
+          ) {
+              affected_rows
+          }
+        }
+    - name: Calendar_InsertCenterOpeningSlot
+      query: |
+        mutation Calendar_InsertCenterOpeningSlot($data: [center_opening_slot_insert_input!]!) {
+          insert_center_opening_slot(objects: $data) {
+            affected_rows
+          }
+        }
+    - name: Calendar_InsertAppliedSlot
+      query: "mutation Calendar_InsertAppliedSlot ($data: [applied_slot_insert_input!]!)
+        {insert_applied_slot(objects: $data) {affected_rows}}"
+    - name: Calendar_InsertStudentAvailabelSlotMaster
+      query: |
+        mutation Calendar_InsertStudentAvailabelSlotMaster($data: [student_available_slot_master_insert_input!]!) {
+          insert_student_available_slot_master(objects: $data) {
+            affected_rows
+          }
+        }
+    - name: Calendar_InsertTeacherAvailabelSlotMaster
+      query: |
+        mutation Calendar_InsertTeacherAvailabelSlotMaster($data: [teacher_available_slot_master_insert_input!]!) {
+          insert_teacher_available_slot_master(objects: $data) {
+            affected_rows
+          }
+        }
+    - name: Calendar_InsertTeacherSubject
+      query: |
+        mutation Calendar_InsertTeacherSubject($data: [teacher_subject_insert_input!]!) {
+          insert_teacher_subject(objects: $data) {
+            affected_rows
+          }
+        }
+    - name: Calendar_InsertTimeSlot
+      query: |
+        mutation Calendar_InsertTimeSlot($data: [time_slot_insert_input!]!) {
+          insert_time_slot(objects: $data) {
+            affected_rows
+          }
+        }
+    - name: Calendar_JobScheduleStatus
+      query: >
+        query Calendar_JobScheduleStatus($search_text: String, $limit: Int =
+        10, $offset: Int = 0, $order_by: [job_schedule_status_order_by!] =
+        {job_date: desc, job_time: desc}) {
+          job_schedule_status(
+            limit: $limit
+            offset: $offset
+            where: {scheduling_name: {_ilike: $search_text}}
+            order_by: $order_by
+          ) {
+            id
+            run_time_id
+            scheduling_jobs_id
+            scheduling_name
+            location_id
+            start_week
+            end_week
+            job_date
+            job_time
+            job_status
+            created_at
+          }
+          job_schedule_status_aggregate {
+            aggregate {
+              count
+            }
+          }
+        }

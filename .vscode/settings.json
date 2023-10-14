@@ -1,0 +1,75 @@
+{
+    "go.toolsEnvVars": {
+        "GONOPROXY": "github.com/manabie-com/*",
+        "GOPRIVATE": "github.com/manabie-com/j4"
+    },
+    "go.lintTool": "golangci-lint",
+    "go.lintFlags": [
+        "--fast"
+    ],
+    "cSpell.words": [
+        "appsmith",
+        "Eibanam",
+        "errdetails",
+        "golibs",
+        "googleapis",
+        "idutil",
+        "manabie",
+        "mastermgmt",
+        "nolint",
+        "oklog",
+        "pgtype",
+        "sliceutils",
+        "testutil",
+        "Timestamptz",
+        "trackingfile",
+        "ulid",
+        "ULID",
+        "Upsert",
+        "Usecase",
+        "yasuo"
+    ],
+    "files.associations": {
+        "deployments/helm/manabie-all-in-one/templates/_*.yaml": "helm",
+        "deployments/helm/manabie-all-in-one/charts/*/templates/*.yaml": "helm",
+    },
+    "yaml.schemas": {
+        "https://raw.githubusercontent.com/GoogleContainerTools/skaffold/master/docs-v2/content/en/schemas/v2beta28.json": [
+            "**/skaffold.*.yaml",
+        ],
+        "https://raw.githubusercontent.com/GoogleContainerTools/skaffold/master/docs-v2/content/en/schemas/v4beta2.json": [
+            "**/skaffold2.*.yaml",
+        ],
+        "python.linting.flake8Enabled": true,
+        "python.linting.enabled": true,
+        "python.linting.pylintEnabled": false
+    },
+    "githubPullRequests.ignoredPullRequestBranches": [
+        "develop"
+    ],
+    "search.exclude": {
+        "camel/integrations/demo/templates/util/**": true,
+        "camel/integrations/quarkus/templates/util/**": true,
+        "deployments/helm/backend/*/configs/**": true,
+        "deployments/helm/backend/*/files/**": true,
+        "deployments/helm/backend/*/secrets/**": true,
+        "deployments/helm/backend/*/templates/**": true,
+        "deployments/helm/backend/*/templates/util/**": true,
+        "deployments/helm/integrations/templates/util/**": true,
+        "deployments/helm/platforms/camel-k/templates/util/**": true
+    },
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "java.compile.nullAnalysis.mode": "automatic",
+    "java.project.referencedLibraries": [
+        "lib/**/*.jar"
+    ],
+    "java.format.settings.url": "https://raw.githubusercontent.com/google/styleguide/gh-pages/eclipse-java-google-style.xml",
+    "java.project.resourceFilters": [
+        "node_modules",
+        "\\.git",
+        "quarkus/src/main/protobuf"
+    ],
+    "github-actions.workflows.pinned.workflows": [
+        ".github/workflows/tbd.generate_proto.yml"
+    ]
+}

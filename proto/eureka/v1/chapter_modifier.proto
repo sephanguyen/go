@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package eureka.v1;
+
+import "common/v1/contents.proto";
+
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/eureka/v1;epb";
+
+message UpsertChaptersRequest {
+  repeated common.v1.Chapter chapters = 1;
+  string book_id = 2;  // only for CMS
+}
+
+message UpsertChaptersResponse {
+  bool successful = 1;
+  repeated string chapter_ids = 2;
+}
+
+message DeleteChaptersRequest {
+  repeated string chapter_ids = 1;
+}
+
+message DeleteChaptersResponse {
+  bool successful = 1;
+}
+
+service ChapterModifierService {
+  rpc UpsertChapters(UpsertChaptersRequest) returns (UpsertChaptersResponse);// TODO: seprate insert and update.
+  rpc DeleteChapters(DeleteChaptersRequest) returns (DeleteChaptersResponse);
+}

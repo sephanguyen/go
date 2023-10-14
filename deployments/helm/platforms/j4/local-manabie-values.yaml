@@ -1,0 +1,5 @@
+global:
+  dbPrefix: ""
+  dbUserPrefix: ""
+  serviceAccountEmailSuffix: ""
+  cloudSQLCommonInstance: ""

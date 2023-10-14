@@ -1,0 +1,254 @@
+{
+    "databases": [
+        {
+            "name": "bob",
+            "tables": [
+                "configs",
+                "notification_messages",
+                "students_topics_completeness",
+                "cities",
+                "districts",
+                "topics",
+                "student_event_logs",
+                "preset_study_plans",
+                "questions_tagged_learning_objectives",
+                "student_submissions",
+                "students_learning_objectives_completeness",
+                "students_topics_overdue",
+                "groups",
+                "lesson_groups",
+                "conversion_tasks",
+                "info_notification_msgs",
+                "activity_logs",
+                "schools",
+                "ios_transactions",
+                "notification_targets",
+                "student_statistics",
+                "student_assignments",
+                "student_learning_time_by_daily",
+                "notifications",
+                "student_submission_scores",
+                "user_notifications",
+                "questions",
+                "apple_users",
+                "media",
+                "students_learning_objectives_records",
+                "info_notifications",
+                "users_info_notifications",
+                "flashcard_progressions",
+                "shuffled_quiz_sets",
+                "lessons",
+                "schema_migrations",
+                "organizations",
+                "organization_auths",
+                "flashcard_speeches",
+                "lesson_report_approval_records",
+                "e2e_features",
+                "e2e_scenarios",
+                "e2e_steps",
+                "e2e_instances",
+                "dbz_signals",
+                "prefecture",
+                "pg_catalog.pg_namespace",
+                "pg_catalog.pg_user",
+                "alloydb_dbz_signal",
+                "a",
+                "lesson_schedules",
+                "prac",
+                "preset_study_plans_weekly_format",
+                "teacher_by_school_id",
+                "student_course_purchased_slot",
+                "student_course_assigned_slot",
+                "student_course_purchased_recurring_slot",
+                "student_course_assigned_recurring_slot",
+                "student_course_recurring_slot_info",
+                "student_course_slot_info",
+                "granted_permissions",
+                "configuration_key",
+                "debezium_heartbeat"
+            ]
+        },
+        {
+            "name": "eureka",
+            "tables": [
+                "class_students",
+                "assignment_study_plan_items",
+                "course_study_plans",
+                "student_study_plans",
+                "class_study_plans",
+                "lo_study_plan_items",
+                "course_classes",
+                "course_students",
+                "study_plan_items",
+                "study_plans",
+                "student_submissions",
+                "assignments",
+                "assign_study_plan_tasks",
+                "student_submission_grades",
+                "student_latest_submissions",
+                "topics_assignments",
+                "schema_migrations",
+                "chapters",
+                "dbz_signals",
+                "flashcard_progressions",
+                "flashcard_speeches",
+                "learning_objectives",
+                "quiz_sets",
+                "quizzes",
+                "shuffled_quiz_sets",
+                "student_event_logs",
+                "student_learning_time_by_daily",
+                "students_learning_objectives_completeness",
+                "students_learning_objectives_records",
+                "students_topics_completeness",
+                "topics",
+                "topics_learning_objectives",
+                "book_tree",
+                "study_plan_tree",
+                "master_study_plan_view",
+                "student_study_plans_view",
+                "individual_study_plans_view",
+                "get_student_study_plans_by_filter_view",
+                "students",
+                "grade",
+                "grade_book_setting",
+                "allocate_marker",
+                "user_access_paths",
+                "course_access_paths",
+                "granted_permissions",
+                "import_study_plan_task",
+                "max_score_submission",
+                "alloydb_dbz_signal"
+            ]
+        },
+        {
+            "name": "tom",
+            "tables": [
+                "conversations",
+                "user_device_tokens",
+                "conversation_members",
+                "online_users",
+                "schema_migrations",
+                "conversation_lesson",
+                "messages",
+                "conversation_students",
+                "location_types",
+                "locations",
+                "organizations",
+                "alloydb_dbz_signal",
+                "granted_permissions"
+            ]
+        },
+        {
+            "name": "fatima",
+            "tables": [
+                "schema_migrations",
+                "student_packages",
+                "packages",
+                "dbz_signals",
+                "organizations",
+                "user_tag",
+                "tagged_user",
+                "alloydb_dbz_signal",
+                "granted_permissions",
+                "debezium_heartbeat"
+            ]
+        },
+        {
+            "name": "zeus",
+            "tables": [
+                "activity_logs",
+                "pg_catalog.pg_namespace",
+                "schema_migrations",
+                "alloydb_dbz_signal"
+            ]
+        },
+        {
+            "name": "mastermgmt",
+            "tables": [
+                "schema_migrations",
+                "dbz_signals",
+                "granted_permissions",
+                "alloydb_dbz_signal",
+                "debezium_heartbeat",
+                "configuration_key",
+                "organizations",
+                "configuration_group",
+                "configuration_group_map",
+                "user_basic_info",
+                "configuration_audit_internal_configuration_value",
+                "configuration_audit_external_configuration_value",
+                "debezium_heartbeat"
+            ]
+        },
+        {
+            "name": "invoicemgmt",
+            "tables": [
+                "schema_migrations",
+                "dbz_signals",
+                "organizations",
+                "prefecture",
+                "alloydb_dbz_signal",
+                "granted_permissions",
+                "debezium_heartbeat"
+            ]
+        },
+        {
+            "name": "timesheet",
+            "tables": [
+                "location_timesheets_non_confirmed_count",
+                "alloydb_dbz_signal",
+                "location_timesheets_non_confirmed_count",
+                "schema_migrations",
+                "granted_permissions",
+                "debezium_heartbeat"
+            ]
+        },
+        {
+            "name": "calendar",
+            "tables": [
+                "alloydb_dbz_signal",
+                "dbz_signals",
+                "debezium_heartbeat",
+                "schema_migrations"
+            ]
+        },
+        {
+            "name": "entryexitmgmt",
+            "tables": [
+                "alloydb_dbz_signal",
+                "schema_migrations",
+                "granted_permissions"
+            ]
+        },
+        {
+            "name": "lessonmgmt",
+            "tables": [
+                "alloydb_dbz_signal",
+                "dbz_signals",
+                "schema_migrations",
+                "granted_permissions",
+                "organizations",
+                "logged_actions",
+                "debezium_heartbeat"
+            ]
+        },
+        {
+            "name": "notificationmgmt",
+            "tables": [
+                "schema_migrations",
+                "organizations",
+                "granted_permissions"
+            ]
+        },
+        {
+            "name": "auth",
+            "tables": [
+                "schema_migrations",
+                "granted_permissions",
+                "organizations",
+                "organization_auths"
+            ]
+        }
+    ]
+}

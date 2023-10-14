@@ -1,0 +1,198 @@
+suite: tom deployment yaml file
+templates:
+  - charts/tom/templates/app.yaml
+values:
+  - ../charts/tom/values.yaml
+  - ../values.yaml
+  - ../../platforms/gateway/local-manabie-values.yaml
+tests:
+  - it: First template should be configmaps
+    set:
+      global.tom.enabled: true
+      global.tom.sops.enabled: true
+      global.environment: local
+      global.vendor: manabie
+      global.image.repository: local
+      tom.image.tag: v1
+      tom.service.port: 5150
+      global.sqlProxy.enabled: true
+    documentIndex: 0
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - isNotNull:
+          path: data.[tom.common.config.yaml]
+      - isNotNull:
+          path: data.[tom.config.yaml]
+
+  - it: Second template should be secrect
+    set:
+      global.tom.enabled: true
+      global.tom.sops.enabled: true
+      global.environment: local
+      global.vendor: manabie
+      global.image.repository: local
+      tom.image.tag: v1
+      tom.service.port: 5150
+      global.sqlProxy.enabled: true
+    documentIndex: 1
+    asserts:
+      - isKind:
+          of: Secret
+      - isNotNull:
+          path: data.[service_credential.json]
+      - isNotNull:
+          path: data.[tom.secrets.encrypted.yaml]
+      - isNull:
+          path: data.[hasura.secrets.encrypted.yaml]
+
+  - it: Third template should be PodDisruptionBudget
+    set:
+      global.tom.enabled: true
+      global.tom.sops.enabled: true
+      global.environment: local
+      global.vendor: manabie
+      global.image.repository: local
+      tom.image.tag: v1
+      tom.service.port: 5150
+      global.sqlProxy.enabled: true
+    documentIndex: 2
+    asserts:
+      - isKind:
+          of: PodDisruptionBudget
+      - equal:
+          path: spec.maxUnavailable
+          value: 1
+
+  - it: fourth template should be ServiceAccount
+    set:
+      global.tom.enabled: true
+      global.tom.sops.enabled: true
+      global.environment: local
+      global.vendor: manabie
+      global.image.repository: local
+      tom.image.tag: v1
+      tom.service.port: 5150
+      global.sqlProxy.enabled: true
+    documentIndex: 3
+    asserts:
+      - isKind:
+          of: ServiceAccount
+      - equal:
+          path: metadata.name
+          value: local-tom
+
+  - it: fifth template should be Service
+    set:
+      global.tom.enabled: true
+      global.tom.sops.enabled: true
+      global.environment: local
+      global.vendor: manabie
+      global.image.repository: local
+      tom.image.tag: v1
+      tom.service.port: 5150
+      global.sqlProxy.enabled: true
+    documentIndex: 5
+    asserts:
+      - isKind:
+          of: VirtualService
+---
+suite: tom statefulset yaml file
+templates:
+  - charts/tom/templates/statefulset.yaml
+values:
+  - ../charts/tom/values.yaml
+  - ../values.yaml
+  - ../../platforms/gateway/local-manabie-values.yaml
+tests:
+  - it: Kind must be stateful
+    set:
+      global.tom.enabled: true
+      global.tom.sops.enabled: true
+      global.environment: local
+      global.vendor: manabie
+      global.image.repository: local
+      tom.image.tag: v1
+      tom.service.port: 5150
+      global.sqlProxy.enabled: true
+    documentIndex: 0
+    asserts:
+      - isKind:
+          of: StatefulSet
+
+      # init containers
+      - equal:
+          path: spec.template.spec.initContainers[0].name
+          value: wait-for-shamir
+
+      # metadata
+      - equal:
+          path: spec.template.metadata.labels.[app.kubernetes.io/name]
+          value: "tom"
+      - equal:
+          path: spec.template.metadata.annotations.[sidecar.istio.io/proxyCPU]
+          value: "10m"
+      - isNotEmpty:
+          path: spec.template.metadata.annotations.[checksum/tom.config.yaml]
+      - isNotEmpty:
+          path: spec.template.metadata.annotations.[checksum/tom.secrets.encrypted.yaml]
+      - isNotEmpty:
+          path: spec.template.metadata.annotations.[checksum/tom_migrate.secrets.encrypted.yaml]
+
+      # containers
+      - equal:
+          path: spec.template.spec.containers[0].name
+          value: tom
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: local:v1
+      - equal:
+          path: spec.template.spec.containers[0].args[0]
+          value: tom
+      - equal:
+          path: spec.template.spec.containers[0].args[1]
+          value: --commonConfigPath=/configs/tom.common.config.yaml
+      - equal:
+          path: spec.template.spec.containers[0].args[2]
+          value: --configPath=/configs/tom.config.yaml
+      - equal:
+          path: spec.template.spec.containers[0].args[3]
+          value: --secretsPath=/configs/tom.secrets.encrypted.yaml
+      - isNotNull:
+          path: spec.template.spec.containers[0].readinessProbe
+      - matchRegex:
+          path: spec.template.spec.containers[0].readinessProbe.exec.command[2]
+          pattern: .*localhost:5150.*
+      - contains:
+          path: spec.template.spec.containers[0].ports
+          content:
+            name: grpc
+            containerPort: 5150
+            protocol: TCP
+
+      # volumes
+      - equal:
+          path: spec.template.spec.volumes[0].secret.secretName
+          value: tom
+      - equal:
+          path: spec.template.spec.volumes[0].secret.items[0].key
+          value: tom.secrets.encrypted.yaml
+      - equal:
+          path: spec.template.spec.volumes[1].secret.items[0].key
+          value: service_credential.json
+      - equal:
+          path: spec.template.spec.volumes[2].configMap.name
+          value: tom
+      - equal:
+          path: spec.template.spec.volumes[2].configMap.items[0].key
+          value: tom.common.config.yaml
+
+      - contains:
+          path: spec.template.spec.affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution
+          content:
+            weight: 100
+            podAffinityTerm:
+              labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: tom
+              topologyKey: kubernetes.io/hostname

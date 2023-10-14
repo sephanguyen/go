@@ -1,0 +1,531 @@
+syntax = "proto3";
+
+package lessonmgmt.v1;
+
+import "common/v1/enums.proto";
+import "common/v1/profiles.proto";
+import "lessonmgmt/v1/media.proto";
+import "lessonmgmt/v1/enums.proto";
+import "common/v1/requests.proto";
+import "common/v1/contents.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
+import "google/api/annotations.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/lessonmgmt/v1;lpb";
+
+message RetrieveLessonByIDRequest {
+  string lesson_id = 1;
+}
+
+enum StudentAttendStatus {
+  STUDENT_ATTEND_STATUS_EMPTY = 0;
+  STUDENT_ATTEND_STATUS_ATTEND = 1;
+  STUDENT_ATTEND_STATUS_ABSENT = 2;
+  STUDENT_ATTEND_STATUS_LATE = 3;
+  STUDENT_ATTEND_STATUS_LEAVE_EARLY = 4;
+  STUDENT_ATTEND_STATUS_INFORMED_ABSENT = 5;
+  STUDENT_ATTEND_STATUS_INFORMED_LATE = 6;
+  STUDENT_ATTEND_STATUS_REALLOCATE = 7;
+}
+
+message Lesson{
+  string lesson_id = 1;
+  string location_id = 2;
+  repeated string teacher_ids = 3;
+  repeated LessonMember learner_members = 4;
+  repeated string media_ids = 5;
+  common.v1.LessonTeachingMethod teaching_method = 6;
+  common.v1.LessonTeachingMedium teaching_medium = 7;
+  common.v1.LessonSchedulingStatus scheduling_status = 8;
+  google.protobuf.Timestamp start_time = 9;
+  google.protobuf.Timestamp end_time = 10;
+  google.protobuf.Timestamp created_at = 11;
+  google.protobuf.Timestamp updated_at = 12;
+  uint32 lesson_capacity = 13;
+  
+}
+
+message LessonMember {
+  string student_id = 1;
+  string course_id = 2;
+  StudentAttendStatus attendance_status = 3;
+  string location_id = 4;
+}
+
+message RetrieveLessonByIDResponse {
+  Lesson lesson = 1;
+}
+
+enum LessonTime {
+  LESSON_TIME_FUTURE = 0;
+  LESSON_TIME_PAST = 1;
+}
+
+message RetrieveLessonsFilter {
+  repeated string teacher_ids = 1;
+  repeated string student_ids = 2;
+  repeated string course_ids = 3;
+  repeated string location_ids = 4;
+  repeated int32 grades = 5;
+  google.protobuf.Timestamp from_date = 6; 
+  google.protobuf.Timestamp to_date = 7;
+  string time_zone = 8;
+  repeated common.v1.DateOfWeek date_of_weeks = 9;
+  google.protobuf.Duration from_time = 10; // time in day UTC
+  google.protobuf.Duration to_time = 11; // time in day UTC
+  repeated common.v1.LessonSchedulingStatus scheduling_status = 12;
+  repeated string class_ids = 13;
+  repeated string grades_v2 = 14;  
+  repeated string course_type_ids = 15;
+  enum LessonReportStatus {
+    LESSON_REPORT_STATUS_NONE = 0;
+    LESSON_REPORT_STATUS_DRAFT = 1;
+    LESSON_REPORT_STATUS_SUBMITTED = 2;
+  }
+  repeated LessonReportStatus lesson_report_status = 16;
+}
+
+message RetrieveLessonsRequest {
+  common.v1.Paging paging = 1; //required
+  string keyword = 2;
+  LessonTime lesson_time = 3;
+  google.protobuf.Timestamp current_time = 4; //required
+  RetrieveLessonsFilter filter = 5;
+  repeated string location_ids = 6;
+}
+
+message RetrieveLessonsResponse {
+  message Lesson{
+    string id = 1;
+    string name = 2;
+    google.protobuf.Timestamp start_time = 3;
+    google.protobuf.Timestamp end_time = 4;
+    string center_id = 5;
+    repeated string teacher_ids = 6;
+    common.v1.LessonTeachingMethod teaching_method = 7;
+    common.v1.LessonTeachingMedium teaching_medium = 8;
+    string course_id = 9;
+    string class_id = 10;
+    common.v1.LessonSchedulingStatus scheduling_status = 11;
+    uint32 lesson_capacity = 12;
+    google.protobuf.Timestamp end_at = 13;
+    string zoom_link = 14;
+    string class_do_link = 15;
+  }
+  repeated Lesson items = 1;
+  common.v1.Paging next_page = 2;
+  common.v1.Paging previous_page = 3;
+  uint32 total_lesson = 4;
+  uint32 total_items = 5;
+}
+
+message RetrieveLessonsOnCalendarRequest {
+  CalendarView calendar_view = 1;
+  string location_id = 2;
+  google.protobuf.Timestamp from_date = 3; 
+  google.protobuf.Timestamp to_date = 4;
+  string timezone = 5;
+  repeated string location_ids = 6;
+  message Filter {
+    repeated string student_ids = 1;
+    repeated string course_ids = 2;
+    repeated string teacher_ids = 3;
+    repeated string class_ids = 4;
+    bool none_assigned_teacher_lessons = 5;
+  }
+  Filter filter = 7;
+}
+
+message RetrieveLessonsOnCalendarResponse {
+  message Lesson {
+    common.v1.LessonTeachingMethod teaching_method = 1;
+    string lesson_id = 2;
+    string lesson_name = 3;
+    google.protobuf.Timestamp start_time = 4;
+    google.protobuf.Timestamp end_time = 5;
+    repeated string teacher_ids = 6 [deprecated = true];
+    string course_id = 7;
+    string class_id = 8;
+    message LessonMember {
+      string student_id = 1;
+      string course_id = 2;
+      string grade = 3;
+      string student_name = 4;
+      string course_name = 5;
+      StudentAttendStatus attendance_status = 6;
+    }
+    repeated LessonMember lesson_members = 9;
+    string group_grade = 10;
+    common.v1.LessonSchedulingStatus scheduling_status = 11;
+    string course_name = 12;
+    string class_name = 13;
+    message LessonTeacher {
+      string teacher_id = 1;
+      string teacher_name = 2;
+    }
+    repeated LessonTeacher lesson_teachers = 14;
+    string classroom = 15 [deprecated = true];
+    string classroom_id = 16 [deprecated = true];
+    string classroom_name = 17 [deprecated = true];
+    message LessonClassroom {
+      string classroom_id = 1;
+      string classroom_name = 2;
+      string room_area = 3;
+      uint32 seat_capacity = 4;
+    }
+    repeated LessonClassroom lesson_classrooms = 18;
+    string scheduler_id = 19;
+    uint32 lesson_capacity = 20;
+  }
+  repeated Lesson items = 1;
+}
+
+
+
+service LessonReaderService {
+  rpc RetrieveLessonByID(RetrieveLessonByIDRequest) returns (RetrieveLessonByIDResponse);
+  rpc RetrieveStudentsByLesson(ListStudentsByLessonRequest) returns (ListStudentsByLessonResponse);
+  rpc RetrieveLessonMedias(ListLessonMediasRequest) returns (ListLessonMediasResponse);
+  rpc RetrieveLessons (RetrieveLessonsRequest) returns (RetrieveLessonsResponse);
+  rpc RetrieveLessonsV2 (RetrieveLessonsRequest) returns (RetrieveLessonsResponse){
+    option (google.api.http) = {
+      post: "/lessonmgmt/api/v1/proxy/lessons",
+      body: "*"
+    };
+  };
+  rpc RetrieveLessonsOnCalendar (RetrieveLessonsOnCalendarRequest) returns (RetrieveLessonsOnCalendarResponse);
+}
+
+message ListStudentsByLessonRequest {
+  string lesson_id = 1;
+  common.v1.Paging paging = 2;
+}
+
+message ListStudentsByLessonResponse {
+  repeated common.v1.BasicProfile students = 1;
+  common.v1.Paging next_page = 2;
+}
+
+message ListLessonMediasRequest {
+  common.v1.Paging paging = 1;
+  string lesson_id = 2;
+}
+
+message ListLessonMediasResponse{
+  common.v1.Paging next_page = 1;
+  repeated lessonmgmt.v1.Media items = 2;
+}
+
+message UpdateLessonSchedulingStatusRequest {
+  string lesson_id = 1; //required
+  common.v1.LessonSchedulingStatus scheduling_status = 2; //required
+  SavingType saving_type = 3;
+}
+
+message UpdateLessonSchedulingStatusResponse {}
+
+message UpdateToRecurrenceRequest {
+  string lesson_id = 1; // required
+  google.protobuf.Timestamp start_time = 2; // required
+  google.protobuf.Timestamp end_time = 3; // required
+  common.v1.LessonTeachingMedium teaching_medium = 4;
+  common.v1.LessonTeachingMethod teaching_method = 5;
+  repeated string teacher_ids = 6;  // required
+  string location_id = 7; // required
+  message StudentInfo {
+    string student_id = 1; // required
+    string course_id = 2; // required
+    StudentAttendStatus attendance_status = 3;
+    string location_id = 4;
+    StudentAttendanceNotice attendance_notice = 5;
+    StudentAttendanceReason attendance_reason = 6;
+    string attendance_note = 7;
+    Reallocate reallocate = 8;
+  }
+  repeated StudentInfo student_info_list = 8; // required
+  repeated Material materials = 9;
+  message SavingOption {
+    lessonmgmt.v1.CreateLessonSavingMethod method = 1;
+    Recurrence recurrence = 2;
+  }
+  SavingOption saving_option = 10; // required
+  string class_id = 11;
+  string course_id = 12;
+  LessonStatus scheduling_status = 13; //required
+  string time_zone = 14;
+  repeated string classroom_ids = 15;
+  ZoomInfo zoom_info = 16;
+  uint32 lesson_capacity = 17;
+  ClassDoInfo class_do_info = 18;
+}
+
+message UpdateToRecurrenceResponse {}
+
+message MarkStudentAsReallocateRequest {
+  string lesson_id = 1;
+  string student_id = 2;
+}
+
+message MarkStudentAsReallocateResponse {}
+
+service LessonModifierService {
+  rpc UpdateLessonSchedulingStatus(UpdateLessonSchedulingStatusRequest) returns (UpdateLessonSchedulingStatusResponse);
+  rpc CreateLesson(CreateLessonRequest) returns (CreateLessonResponse);
+  rpc DeleteLesson(DeleteLessonRequest) returns (DeleteLessonResponse);
+  rpc UpdateLesson(UpdateLessonRequest) returns (UpdateLessonResponse);
+  rpc BulkUpdateLessonSchedulingStatus(BulkUpdateLessonSchedulingStatusRequest) returns (BulkUpdateLessonSchedulingStatusResponse);
+  rpc UpdateToRecurrence(UpdateToRecurrenceRequest) returns (UpdateToRecurrenceResponse);
+  rpc MarkStudentAsReallocate(MarkStudentAsReallocateRequest) returns (MarkStudentAsReallocateResponse);
+}
+
+message Material {
+  message BrightcoveVideo {
+    string name = 1;
+    string url = 2; // required
+  }
+  oneof resource {// required
+    BrightcoveVideo brightcove_video = 1;     // brightcove video (MEDIA_TYPE_VIDEO)
+    string media_id = 2;
+  };
+}
+
+message Recurrence {
+  google.protobuf.Timestamp end_date = 1;
+}
+
+message Reallocate {
+  string original_lesson_id = 1;
+}
+
+message ZoomInfo {
+  message OccurrenceZoom {
+    string occurrence_id = 1;
+    string start_time = 2;
+    int32 duration = 3;
+    string status = 4;
+  }
+  string zoom_link = 1;
+  string zoom_account_owner = 2;
+  string zoom_id = 3;
+  repeated OccurrenceZoom occurrences = 4;
+}
+
+message ClassDoInfo {
+  string class_do_owner_id = 1;
+  string class_do_link = 2;
+  string class_do_room_id = 3;
+}
+
+message CreateLessonRequest {
+  google.protobuf.Timestamp start_time = 1; // required
+  google.protobuf.Timestamp end_time = 2; // required
+  common.v1.LessonTeachingMedium teaching_medium = 3;
+  common.v1.LessonTeachingMethod teaching_method = 4;
+  repeated string teacher_ids = 5;  // required
+  string location_id = 6; // required
+  message StudentInfo {
+    string student_id = 1; // required
+    string course_id = 2; // required
+    StudentAttendStatus attendance_status = 3;
+    string location_id = 4;
+    StudentAttendanceNotice attendance_notice = 5;
+    StudentAttendanceReason attendance_reason = 6;
+    string attendance_note = 7;
+    Reallocate reallocate = 8;
+  }
+  repeated StudentInfo student_info_list = 7;
+  repeated Material materials = 8;
+  message SavingOption {
+    lessonmgmt.v1.CreateLessonSavingMethod method = 1;
+    Recurrence recurrence = 2;
+  }
+  SavingOption saving_option = 9; // required
+  string class_id = 10;
+  string course_id = 11;
+  LessonStatus scheduling_status = 12; //required
+  string time_zone = 13;
+  repeated string classroom_ids = 14;
+  ZoomInfo zoom_info = 15;
+  uint32 lesson_capacity = 16;
+  ClassDoInfo class_do_info = 17;
+}
+
+message CreateLessonResponse {
+  string id = 1;
+}
+
+
+message DeleteLessonRequest {
+  string lesson_id = 1;
+  message SavingOption {
+    lessonmgmt.v1.CreateLessonSavingMethod method = 1;
+  }
+  SavingOption saving_option = 2;
+}
+
+message DeleteLessonResponse {}
+
+message UpdateLessonRequest {
+  string lesson_id = 1; // required
+  google.protobuf.Timestamp start_time = 2; // required
+  google.protobuf.Timestamp end_time = 3; // required
+  common.v1.LessonTeachingMedium teaching_medium = 4;
+  common.v1.LessonTeachingMethod teaching_method = 5;
+  repeated string teacher_ids = 6;  // required
+  string location_id = 7; // required
+  message StudentInfo {
+    string student_id = 1; // required
+    string course_id = 2; // required
+    StudentAttendStatus attendance_status = 3;
+    string location_id = 4;
+    StudentAttendanceNotice attendance_notice = 5;
+    StudentAttendanceReason attendance_reason = 6;
+    string attendance_note = 7;
+    Reallocate reallocate = 8;
+  }
+  repeated StudentInfo student_info_list = 8; // required
+  repeated Material materials = 9;
+  message SavingOption {
+    lessonmgmt.v1.CreateLessonSavingMethod method = 1;
+    Recurrence recurrence = 2;
+  }
+  SavingOption saving_option = 10; // required
+  string class_id = 11;
+  string course_id = 12;
+  LessonStatus scheduling_status = 13; //required
+  string time_zone = 14;
+  repeated string classroom_ids = 15;
+  ZoomInfo zoom_info = 16;
+  uint32 lesson_capacity = 17;
+  ClassDoInfo class_do_info = 18;
+
+}
+
+message UpdateLessonResponse {}
+
+message RetrieveStudentSubscriptionFilter {
+  repeated string grade = 1;
+  repeated string course_id = 2;
+  repeated string class_id = 3;
+  repeated string location_id = 4;
+  repeated string grades_v2 = 5;
+
+}
+
+message RetrieveStudentSubscriptionRequest {
+  common.v1.Paging paging = 1;
+  string keyword = 2;
+  RetrieveStudentSubscriptionFilter filter = 3;
+  google.protobuf.Timestamp lesson_date = 4;
+}
+
+message RetrieveStudentSubscriptionResponse {
+  message StudentSubscription{
+    string id = 1;
+    string student_id = 2;
+    string course_id = 3;
+    string grade = 4;
+    repeated string location_ids = 5;
+    string class_id = 6;
+    google.protobuf.Timestamp start_date = 7;
+    google.protobuf.Timestamp end_date = 8;
+    string grade_v2 = 9;
+  }
+  repeated StudentSubscription items = 1;
+  common.v1.Paging next_page = 2;
+  common.v1.Paging previous_page = 3;
+  uint32 total_items = 4;
+}
+
+message GetStudentCourseSubscriptionsRequest {
+  message StudentCourseSubscription {
+    string student_id = 1;
+    string course_id = 2;
+  }
+  repeated StudentCourseSubscription subscriptions = 1;
+  string location_id = 4;
+}
+
+message GetStudentCourseSubscriptionsResponse {
+  message StudentSubscription{
+    string id = 1;
+    string student_id = 2;
+    string course_id = 3;
+    string grade = 4;
+    repeated string location_ids = 5;
+    google.protobuf.Timestamp start_date = 6;
+    google.protobuf.Timestamp end_date = 7;
+    string class_id = 8;
+    string grade_v2 = 9;
+  }
+  repeated StudentSubscription items = 1;
+}
+
+message RetrieveStudentPendingReallocateRequest {
+  string keyword = 1;
+  google.protobuf.Timestamp lesson_date = 2;
+  common.v1.Paging paging = 3;
+  message Filter {
+    repeated string grade_id = 1;
+    repeated string course_id = 2;
+    repeated string class_id = 3;
+    repeated string location_id = 4;
+    google.protobuf.Timestamp start_date = 5;
+    google.protobuf.Timestamp end_date = 6;
+
+  }
+  Filter filter = 4;
+  string timezone = 5;
+}
+
+message RetrieveStudentPendingReallocateResponse {
+  message ReallocateStudent{
+    string student_id = 1;
+    string original_lesson_id = 2;
+    string grade_id = 3;
+    string course_id = 4;
+    string class_id = 5;
+    string location_id = 6;
+    google.protobuf.Timestamp start_date = 7;
+    google.protobuf.Timestamp end_date = 8;
+  }
+  repeated ReallocateStudent items = 1;
+  common.v1.Paging next_page = 2;
+  common.v1.Paging previous_page = 3;
+  uint32 total_items = 4;
+}
+
+message GetStudentCoursesAndClassesRequest {
+  string student_id = 1;
+}
+
+message GetStudentCoursesAndClassesResponse {
+  message Class{
+    string class_id = 1;
+    string name = 2;
+    string course_id = 3;
+  }
+  string student_id = 1;
+  repeated common.v1.Course courses = 2;
+  repeated Class classes = 3;
+}
+
+service StudentSubscriptionService {
+  rpc RetrieveStudentSubscription (RetrieveStudentSubscriptionRequest) returns (RetrieveStudentSubscriptionResponse);
+  rpc GetStudentCourseSubscriptions(GetStudentCourseSubscriptionsRequest) returns (GetStudentCourseSubscriptionsResponse);
+  rpc RetrieveStudentPendingReallocate(RetrieveStudentPendingReallocateRequest) returns (RetrieveStudentPendingReallocateResponse);
+  rpc GetStudentCoursesAndClasses(GetStudentCoursesAndClassesRequest) returns (GetStudentCoursesAndClassesResponse);
+}
+
+enum LessonBulkAction {
+  LESSON_BULK_ACTION_PUBLISH = 0;
+  LESSON_BULK_ACTION_CANCEL = 1;
+}
+
+message BulkUpdateLessonSchedulingStatusRequest {
+   LessonBulkAction action = 1;
+   repeated string lesson_ids = 2; 
+}
+
+message BulkUpdateLessonSchedulingStatusResponse {}

@@ -1,0 +1,7 @@
+common:
+  sa_email: ""
+  google_cloud_project: production-renseikai
+issuers:
+  - issuer: manabie
+    audience: prod-renseikai
+    jwks_endpoint: http://shamir:5680/.well-known/jwks.json

@@ -1,0 +1,21 @@
+common:
+  google_cloud_project: staging-manabie-online
+issuers:
+  - issuer: manabie
+    audience: jprep-stag
+    jwks_endpoint: http://shamir:5680/.well-known/jwks.json
+brightcove:
+  account_id: 6064018595001
+  client_id: 3c6e5dd5-a7fc-4cc3-94a7-95bd0c553e31
+  profile: multi-platform-standard-static
+storage:
+  bucket: stag-manabie-backend
+jwt_applicant: jprep-stag
+question_bucket: stag-manabie-questions-content
+keycloak_auth:
+  path: https://d2020-ji-sso.jprep.jp
+  realm: manabie-test
+  client_id: manabie-app
+postgres_v2:
+  bob:
+    shard_id: 2

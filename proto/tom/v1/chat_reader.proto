@@ -1,0 +1,208 @@
+syntax = "proto3";
+
+package tom.v1;
+
+import "tom/v1/enums.proto";
+import "tom/v1/conversations.proto";
+import "common/v1/requests.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+import "google/protobuf/wrappers.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/tom/v1;tpb";
+
+message ListConversationsRequest {
+  common.v1.Paging paging = 1;
+  // optional
+  uint32 class_id = 2;
+}
+
+message ListConversationsResponse {
+  common.v1.Paging next_page = 1;
+  repeated Conversation items = 2;
+}
+
+message ConversationByStudentQuestionsRequest {
+  repeated string student_question_ids = 1;
+}
+
+message ConversationByStudentQuestionsResponse {
+  repeated Conversation conversations = 1;
+}
+
+message ConversationByClassRequest {
+  common.v1.Paging paging = 1;
+  uint32 class_id = 2;
+}
+
+message ConversationByClassResponse {
+  common.v1.Paging next_page = 1;
+  repeated Conversation items = 2;
+}
+
+message RetrieveConversationMessagesRequest {
+  common.v1.Paging paging = 1;
+  string conversation_id = 2;
+}
+
+message RetrieveConversationMessagesResponse {
+  common.v1.Paging next_page = 1;
+  repeated MessageResponse items = 2;
+}
+
+message PushedNotificationMessage {
+  string title = 1;
+  string body = 2;
+  google.protobuf.Struct data = 3;
+  google.protobuf.Timestamp pushed_at = 4;
+}
+
+message RetrievePushedNotificationMessagesRequest {
+  common.v1.Paging paging = 1;
+  string device_token = 2;
+}
+
+message RetrievePushedNotificationMessagesResponse {
+  common.v1.Paging next_page = 1;
+  repeated PushedNotificationMessage items = 2;
+}
+
+message AutoCoachCustomMessageRequest {
+  string message = 1;
+  string url_media = 2;
+}
+
+message AutoCoachCustomMessageResponse { bool successful = 1; }
+
+message TotalUserInConversationRequest {
+  string conversation_id = 1; // optional, if nil will use 2 field below
+  string lesson_id = 2;
+}
+
+message TotalUserInConversationResponse { uint32 total_user = 1; }
+
+message ConversationByLessonRequest {
+  common.v1.Paging paging = 1;
+  string lesson_id = 2;
+}
+
+message ConversationByLessonResponse {
+  common.v1.Paging next_page = 1;
+  repeated Conversation items = 2;
+}
+
+message ConversationEvent {
+  string conversation_event_id = 1;
+  string conversation_id = 2;
+  string user_id = 3;
+  ConversationEventType event_type = 4;
+  ConversationEventStatus status = 5;
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp updated_at = 7;
+}
+
+message RetrieveConversationEventsRequest {
+  common.v1.Paging paging = 1;
+  string conversation_id = 2;
+  ConversationEventType event_type = 3;
+  ConversationEventStatus status = 4;
+}
+
+message RetrieveConversationEventsResponse {
+  common.v1.Paging next_page = 1;
+  repeated ConversationEvent conversation_events = 2;
+}
+
+message RetrieveConversationMemberLatestEventRequest {
+  string conversation_id = 1;
+  string user_id = 2;
+  repeated ConversationEventType conversation_event_type = 3;
+}
+
+message RetrieveConversationMemberLatestEventResponse {
+  ConversationEvent last_event = 1;
+}
+
+message ListConversationsInSchoolRequest {
+  common.v1.Paging paging = 1;
+  repeated string course_ids = 2;
+  google.protobuf.StringValue name = 3;
+  repeated ConversationType type = 4;
+  TeacherConversationStatus teacher_status = 5;
+  ConversationJoinStatus join_status = 6;
+  repeated string location_ids = 7;
+}
+
+message ListConversationsInSchoolResponse {
+  common.v1.Paging next_page = 1;
+  repeated Conversation items = 2;
+}
+
+message RetrieveTotalUnreadMessageRequest { string user_id = 1; }
+
+message RetrieveTotalUnreadMessageResponse { int64 total_unread_messages = 1; }
+
+message RetrieveTotalUnreadConversationsWithLocationsRequest {
+  repeated string location_ids = 1;
+}
+
+message RetrieveTotalUnreadConversationsWithLocationsResponse {
+  int64 total_unread_conversations = 1;
+}
+
+message GetConversationV2Request {
+  string conversation_id = 1; 
+}
+
+message GetConversationV2Response {
+  Conversation conversation = 1;
+}
+
+service ChatReaderService {
+  rpc ListConversations(ListConversationsRequest)
+      returns (ListConversationsResponse);
+  rpc RetrieveConversationMessages(RetrieveConversationMessagesRequest)
+      returns (RetrieveConversationMessagesResponse);
+  rpc RetrieveConversationEvents(RetrieveConversationEventsRequest)
+      returns (RetrieveConversationEventsResponse);
+
+  rpc ConversationByStudentQuestions(ConversationByStudentQuestionsRequest)
+      returns (ConversationByStudentQuestionsResponse);
+  rpc ConversationByClass(ConversationByClassRequest)
+      returns (ConversationByClassResponse);
+  rpc ConversationByLesson(ConversationByLessonRequest)
+      returns (ConversationByLessonResponse);
+
+  rpc TotalUserInConversation(TotalUserInConversationRequest)
+      returns (TotalUserInConversationResponse);
+  rpc AutoCoachCustomMessage(AutoCoachCustomMessageRequest)
+      returns (AutoCoachCustomMessageResponse) {
+    option deprecated = true;
+  };
+
+  rpc RetrievePushedNotificationMessages(
+      RetrievePushedNotificationMessagesRequest)
+      returns (RetrievePushedNotificationMessagesResponse);
+
+  rpc RetrieveConversationMemberLatestEvent(
+      RetrieveConversationMemberLatestEventRequest)
+      returns (RetrieveConversationMemberLatestEventResponse);
+
+  rpc ListConversationsInSchool(ListConversationsInSchoolRequest)
+      returns (ListConversationsInSchoolResponse);
+
+  rpc ListConversationsInSchoolWithLocations(ListConversationsInSchoolRequest)
+      returns (ListConversationsInSchoolResponse);
+
+  rpc RetrieveTotalUnreadMessage(RetrieveTotalUnreadMessageRequest)
+      returns (RetrieveTotalUnreadMessageResponse);
+
+  rpc ListConversationsInSchoolV2(ListConversationsInSchoolRequest)
+      returns (ListConversationsInSchoolResponse);
+
+  rpc RetrieveTotalUnreadConversationsWithLocations(RetrieveTotalUnreadConversationsWithLocationsRequest)
+      returns (RetrieveTotalUnreadConversationsWithLocationsResponse);
+
+   rpc GetConversationV2(GetConversationV2Request) 
+      returns (GetConversationV2Response);
+}

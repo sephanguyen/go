@@ -1,0 +1,131 @@
+syntax = "proto3";
+
+package lessonmgmt.v1;
+
+import "common/v1/enums.proto";
+import "lessonmgmt/v1/lessons.proto";
+import "lessonmgmt/v1/enums.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/lessonmgmt/v1;lpb";
+
+// For Lesson Report
+service LessonReportModifierService {
+  // group lesson report
+  rpc SaveDraftGroupLessonReport (WriteGroupLessonReportRequest) returns (SaveDraftGroupLessonReportResponse);
+  rpc SubmitGroupLessonReport (WriteGroupLessonReportRequest) returns (SubmitGroupLessonReportResponse);
+
+  // individual lesson report
+  rpc SaveDraftIndividualLessonReport (WriteIndividualLessonReportRequest) returns (SaveDraftIndividualLessonReportResponse);
+  rpc SubmitIndividualLessonReport (WriteIndividualLessonReportRequest) returns (SubmitIndividualLessonReportResponse);
+
+}
+// Individual
+message WriteIndividualLessonReportRequest {
+  string lesson_report_id = 1;
+  string lesson_id = 2; // required
+  repeated IndividualLessonReportDetail details = 3;
+  string feature_name = 4;
+  bool is_save_per_student = 5;
+}
+
+
+message IndividualLessonReportDetail {
+  string student_id = 1;  // required
+  string course_id = 2;
+  StudentAttendStatus attendance_status = 3;
+  string attendance_remark = 4;
+  repeated DynamicFieldValue field_values = 5;
+  StudentAttendanceNotice attendance_notice = 6;
+  StudentAttendanceReason attendance_reason = 7;
+  string attendance_note = 8;
+  int32 report_version = 9;
+}
+
+message SubmitIndividualLessonReportResponse {
+  string lesson_report_id = 1;
+  string error = 2;
+}
+
+message SaveDraftIndividualLessonReportResponse  {
+  string lesson_report_id = 1;
+  string error = 2;
+
+}
+
+//Group
+message WriteGroupLessonReportRequest {
+  string lesson_report_id = 1;
+  string lesson_id = 2; // required
+  repeated GroupLessonReportDetails details = 3;
+}
+
+message GroupLessonReportDetails {
+  string student_id = 1; //required
+  repeated DynamicFieldValue field_values = 2;
+  StudentAttendStatus attendance_status = 3;
+  string attendance_remark = 4;
+  StudentAttendanceNotice attendance_notice = 5;
+  StudentAttendanceReason attendance_reason = 6;
+  string attendance_note = 7;
+  int32 report_version = 8;
+}
+
+message SaveDraftGroupLessonReportResponse  {
+  string lesson_report_id = 1;
+  string error = 2;
+}
+
+message SubmitGroupLessonReportResponse {
+  string lesson_report_id = 1;
+  string error = 2;
+}
+
+// For both types
+message DynamicFieldValue {
+  message IntSetValue{
+    repeated int32 array_value = 1;
+  }
+  message StringSetValue{
+    repeated string array_value = 1;
+  }
+  message IntArrayValue{
+    repeated int32 array_value = 1;
+  }
+  message StringArrayValue{
+    repeated string array_value = 1;
+  }
+  //required fields
+  string dynamic_field_id = 1;
+  bool is_required = 2; //default: true
+  bool is_internal = 3;
+  //data
+  common.v1.ValueType value_type = 4;
+  oneof value {
+    int32 int_value = 5;
+    string string_value = 6;
+    bool bool_value = 7;
+    IntArrayValue int_array_value = 8;
+    StringArrayValue string_array_value = 9;
+    IntSetValue int_set_value = 10;
+    StringSetValue string_set_value = 11;
+  }
+  bytes field_render_guide = 12;
+}
+
+enum DomainType {
+  DOMAIN_TYPE_BO = 0;
+  DOMAIN_TYPE_TEACHER = 1;
+  DOMAIN_TYPE_LEARNER = 2;
+}
+
+message GetPartnerDomainRequest {
+  DomainType type = 1; //required
+}
+
+message GetPartnerDomainResponse {
+  string domain = 1;
+}
+
+service LessonReportReaderService {
+  rpc RetrievePartnerDomain (GetPartnerDomainRequest) returns (GetPartnerDomainResponse);
+}

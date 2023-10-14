@@ -1,0 +1,59 @@
+{{- if not .Values.disabled }}
+
+# temporary checking dns exist before include virtualservice
+{{ if and (eq .Values.hostname "backoffice") (gt (len .Values.global.dnsNames.backoffice) 0) }}
+{{ include "virtualservice.backoffice.tpl" . }}
+{{ end }}
+
+{{ if and (eq .Values.hostname "backofficeMfe") (gt (len .Values.global.dnsNames.backofficeMfe) 0) }}
+{{ include "virtualservice.backoffice.tpl" . }}
+{{ end }}
+
+
+{{ if eq .Values.global.environment "prod" }}
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: prod-{{ .Values.global.vendor }}-back-office-front-end-manabie
+  labels:
+    {{- include "backoffice.labels" . | nindent 4 }}
+spec:
+  hosts:
+{{ if and (eq .Values.hostname "backoffice") (eq .Values.global.vendor "tokyo") }}
+  - administration.manabie.net
+{{ else }}
+    - {{ .Values.global.vendor }}.{{ .Values.hostname }}.manabie.net
+{{ end }}
+  gateways:
+    - istio-system/prod-{{ .Values.global.vendor }}-back-office-front-end
+  exportTo:
+    - istio-system
+{{- with .Values.httpRoute }}
+  http:
+{{ toYaml . | indent 4 }}
+{{- end }}
+
+{{ end }}
+
+{{ if eq .Values.global.environment "stag" "uat" }}
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: {{ .Values.global.environment }}-{{ .Values.global.vendor }}-back-office-front-end
+  labels:
+    {{- include "backoffice.labels" . | nindent 4 }}
+spec:
+  hosts:
+  - {{ .Values.global.vendor }}.{{ .Values.hostname }}.{{ .Values.global.environment }}.manabie.net
+  gateways:
+    - istio-system/{{ .Values.global.environment }}-{{ .Values.global.vendor }}-back-office-front-end
+  exportTo:
+    - istio-system
+{{- with .Values.httpRoute }}
+  http:
+{{ toYaml . | indent 4 }}
+{{- end -}}
+{{ end }}
+{{- end }}

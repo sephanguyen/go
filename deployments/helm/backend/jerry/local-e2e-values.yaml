@@ -1,0 +1,4 @@
+affinityOverride:
+    nodeAffinity: {}
+    podAntiAffinity: {}
+enabled: false

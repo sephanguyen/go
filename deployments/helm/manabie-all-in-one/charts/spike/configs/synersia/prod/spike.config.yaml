@@ -1,0 +1,4 @@
+common:
+  google_cloud_project: synersia
+email_webhook:
+  receive_from_all_tenant: false

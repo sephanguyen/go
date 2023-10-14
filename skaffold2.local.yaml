@@ -1,0 +1,22 @@
+apiVersion: skaffold/v4beta5
+kind: Config
+metadata:
+  name: local
+requires:
+  - path: skaffold2.emulator.yaml
+  - path: skaffold2.backbone.yaml
+  - path: skaffold2.cp-ksql-server.yaml
+  - path: skaffold2.data-warehouse.yaml
+  - path: skaffold2.backend.yaml
+  - path: skaffold2.ml-service.yaml
+  - path: skaffold2.machinelearning.yaml
+  - path: skaffold2.model.yaml
+  - path: skaffold2.gateway.yaml
+  - path: skaffold2.appsmith.yaml
+  - path: skaffold2.monitoring.yaml
+  - path: skaffold2.frontend.yaml
+  - path: skaffold2.mobile.yaml
+build:
+  local:
+    push: false
+    useDockerCLI: true

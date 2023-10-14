@@ -1,0 +1,23 @@
+connect:
+  affinityOverride:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: cloud.google.com/gke-spot
+            operator: In
+            values: ["true"]
+          - key: environment
+            operator: In
+            values: ["preproduction"]
+  tolerations:
+    - effect: NoSchedule
+      key: cloud.google.com/gke-spot
+      operator: Exists
+    - effect: NoSchedule
+      key: environment
+      operator: Equal
+      value: preproduction
+global:
+  sqlProxy:
+    multiConnName: "student-coach-e1e95:asia-northeast1:clone-prod-tokyo=tcp:5432,student-coach-e1e95:asia-northeast1:preprod-tokyo-data-warehouse=tcp:6432"

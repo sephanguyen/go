@@ -1,0 +1,2 @@
+ALTER TABLE ONLY study_plans
+	ADD COLUMN IF NOT EXISTS course_id TEXT;

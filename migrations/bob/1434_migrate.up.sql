@@ -1,0 +1,1 @@
+ALTER PUBLICATION debezium_publication ADD TABLE public.partner_dynamic_form_field_values, public.partner_form_configs, public.lesson_reports, public.lesson_report_details;

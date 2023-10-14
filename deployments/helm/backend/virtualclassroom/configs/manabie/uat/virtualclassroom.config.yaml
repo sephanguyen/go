@@ -1,0 +1,18 @@
+common:
+  google_cloud_project: staging-manabie-online
+  firebase_project: uat-manabie
+  identity_platform_project: uat-manabie
+jwt_applicant: manabie-stag
+issuers:
+  - issuer: manabie
+    audience: manabie-stag
+    jwks_endpoint: http://shamir:5680/.well-known/jwks.json
+agora:
+  app_id: 793d72fc36614e03aa90866c2bc2271c
+  customer_id: d2e84f547a4c463f9493195c6db363c3
+  endpoint: https://api.agora.io
+  bucket: staging-agora-2
+whiteboard:
+  app_id: V7mZoJt9Eeqxp_kxzbwYqQ/rtGV6Bj_XDpLcw
+zegocloud:
+  app_id: 999191739

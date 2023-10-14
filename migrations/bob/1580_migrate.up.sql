@@ -1,0 +1,2 @@
+ALTER PUBLICATION debezium_publication ADD TABLE public.academic_years;
+ALTER PUBLICATION debezium_publication ADD TABLE public.courses_academic_years;

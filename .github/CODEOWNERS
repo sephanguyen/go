@@ -1,0 +1,156 @@
+# All teams listed must approve changes before it can be merged. This is different from github's usual behavior.
+# We have a custom check that requires ALL owner teams to approve a change (not just one team).
+/.github/ @manabie-com/squad-platform
+/atlantis.yaml @manabie-com/squad-platform 
+/deployments/helm/manabie-all-in-one/charts/*/files/hasura/metadata/ @manabie-com/func-backend
+/scripts/restart_*.bash @manabie-com/squad-platform
+/.sops.yaml @manabie-com/squad-platform
+#
+/cmd/aphelios/  @manabie-com/squad-platform @hoanhvong
+/cmd/samena/ @anhpngt
+/cmd/server/fink/streams/bob.go @manabie-com/squad-platform @manabie-com/squad-architecture-be
+/cmd/server/fink/streams/eureka.go @manabie-com/squad-platform @manabie-com/squad-architecture-be @manabie-com/squad-syllabus-be
+/cmd/server/fink/streams/lessonmgmt.go @manabie-com/squad-platform @manabie-com/squad-architecture-be @manabie-com/squad-lesson-be
+/cmd/server/fink/streams/mastermgmt.go @manabie-com/squad-platform @manabie-com/squad-architecture-be
+/cmd/server/fink/streams/notificationmgmt.go @manabie-com/squad-platform @manabie-com/squad-architecture-be @manabie-com/squad-communication-be
+/cmd/server/fink/streams/payment.go @manabie-com/squad-platform @manabie-com/squad-architecture-be @manabie-com/squad-payment-be
+/cmd/server/fink/streams/timesheet.go @manabie-com/squad-platform @manabie-com/squad-architecture-be @manabie-com/squad-user-management-be
+/cmd/server/fink/streams/tom.go @manabie-com/squad-platform @manabie-com/squad-architecture-be @manabie-com/squad-communication-be
+/cmd/server/fink/streams/usermgmt.go @manabie-com/squad-platform @manabie-com/squad-architecture-be @manabie-com/squad-user-management-be @manabie-com/squad-auth-be
+/cmd/server/fink/streams/virtualclassroom.go @manabie-com/squad-platform @manabie-com/squad-architecture-be @manabie-com/squad-lesson-be @manabie-com/squad-calendar-be
+/cmd/server/fink/streams/yasuo.go @manabie-com/squad-platform @manabie-com/squad-architecture-be @manabie-com/squad-lesson-be @manabie-com/squad-syllabus-be
+/cmd/server/fink/streams/zeus.go @manabie-com/squad-platform @manabie-com/squad-architecture-be
+/cmd/utils/data_pipeline_parser @manabie-com/squad-platform
+/cmd/utils/rls @manabie-com/squad-architecture-be
+#
+/deployments/ @manabie-com/squad-platform
+/deployments/helm/manabie-all-in-one/charts/bob/ @manabie-com/squad-platform @manabie-com/squad-architecture-be @manabie-com/squad-lesson-be @manabie-com/squad-user-management-be @manabie-com/squad-auth-be
+/deployments/helm/manabie-all-in-one/charts/bob/files/ @manabie-com/squad-architecture-be @manabie-com/squad-lesson-be @manabie-com/squad-user-management-be @manabie-com/squad-auth-be
+/deployments/helm/manabie-all-in-one/charts/calendar/ @manabie-com/squad-platform @manabie-com/squad-calendar-be
+/deployments/helm/manabie-all-in-one/charts/enigma/ @manabie-com/squad-platform @manabie-com/squad-architecture-be
+/deployments/helm/manabie-all-in-one/charts/entryexitmgmt/ @manabie-com/squad-platform @manabie-com/squad-adobo-be
+/deployments/helm/manabie-all-in-one/charts/entryexitmgmt/files/ @manabie-com/squad-adobo-be
+/deployments/helm/manabie-all-in-one/charts/eureka/ @manabie-com/squad-platform @manabie-com/squad-syllabus-be
+/deployments/helm/manabie-all-in-one/charts/eureka/files/ @manabie-com/squad-syllabus-be
+/deployments/helm/manabie-all-in-one/charts/fatima/ @manabie-com/squad-platform @manabie-com/squad-architecture-be
+/deployments/helm/manabie-all-in-one/charts/fatima/files/ @manabie-com/squad-architecture-be @manabie-com/squad-payment-be
+/deployments/helm/manabie-all-in-one/charts/hephaestus/ @manabie-com/squad-platform @manabie-com/squad-platform
+/deployments/helm/manabie-all-in-one/charts/invoicemgmt/ @manabie-com/squad-platform @manabie-com/squad-adobo-be
+/deployments/helm/manabie-all-in-one/charts/invoicemgmt/files/ @manabie-com/squad-adobo-be
+/deployments/helm/manabie-all-in-one/charts/lessonmgmt/ @manabie-com/squad-platform @manabie-com/squad-lesson-be
+/deployments/helm/manabie-all-in-one/charts/mastermgmt/ @manabie-com/squad-platform @manabie-com/squad-architecture-be 
+/deployments/helm/manabie-all-in-one/charts/notificationmgmt/ @manabie-com/squad-platform @manabie-com/squad-communication-be
+/deployments/helm/manabie-all-in-one/charts/spike/ @manabie-com/squad-platform @manabie-com/squad-communication-be
+/deployments/helm/manabie-all-in-one/charts/payment/ @manabie-com/squad-platform @manabie-com/squad-payment-be
+/deployments/helm/manabie-all-in-one/charts/shamir/ @manabie-com/squad-platform @manabie-com/squad-auth-be
+/deployments/helm/manabie-all-in-one/charts/timesheet/ @manabie-com/squad-platform @manabie-com/squad-user-management-be
+/deployments/helm/manabie-all-in-one/charts/timesheet/files/ @manabie-com/squad-user-management-be
+/deployments/helm/manabie-all-in-one/charts/tom/ @manabie-com/squad-platform @manabie-com/squad-communication-be
+/deployments/helm/manabie-all-in-one/charts/usermgmt/ @manabie-com/squad-platform @manabie-com/squad-user-management-be @manabie-com/squad-auth-be
+/deployments/helm/manabie-all-in-one/charts/virtualclassroom/ @manabie-com/squad-platform @manabie-com/squad-lesson-be @manabie-com/squad-calendar-be
+/deployments/helm/manabie-all-in-one/charts/yasuo/ @manabie-com/squad-platform @manabie-com/squad-architecture-be @manabie-com/squad-lesson-be
+/deployments/helm/manabie-all-in-one/charts/mastermgmt/files/ @manabie-com/squad-platform @manabie-com/squad-architecture-be
+/deployments/helm/platforms/machinelearning/ @manabie-com/squad-platform @hoanhvong
+/deployments/helm/platforms/cp-schema-registry @manabie-com/squad-platform
+/deployments/helm/platforms/kafka @manabie-com/squad-platform
+/deployments/helm/platforms/kafka-connect @manabie-com/squad-platform
+/deployments/helm/**/*_migrate.secrets.encrypted.yaml @manabie-com/squad-platform
+/deployments/helm/libs/ @manabie-com/squad-platform
+/deployments/helm/manabie-all-in-one/templates/ @manabie-com/squad-platform
+/deployments/helm/manabie-all-in-one/charts/conversationmgmt/ @manabie-com/squad-platform @manabie-com/squad-communication-be
+/deployments/helm/manabie-all-in-one/charts/discount/ @manabie-com/squad-platform @manabie-com/squad-payment-be
+#
+/migrations/ @manabie-com/squad-ddd
+/migrations/bob/ @manabie-com/squad-ddd @manabie-com/squad-user-management-be @manabie-com/squad-calendar-be @manabie-com/squad-lesson-be @manabie-com/squad-auth-be
+/migrations/entryexitmgmt/ @manabie-com/squad-ddd @manabie-com/squad-adobo-be
+/migrations/eureka/ @manabie-com/squad-ddd @manabie-com/squad-syllabus-be
+/migrations/fatima/ @manabie-com/squad-ddd @manabie-com/squad-payment-be
+/migrations/invoicemgmt/ @manabie-com/squad-ddd @manabie-com/squad-adobo-be
+/migrations/timesheet/ @manabie-com/squad-ddd @manabie-com/squad-user-management-be
+/migrations/tom/ @manabie-com/squad-ddd @manabie-com/squad-communication-be
+/migrations/calendar/ @manabie-com/squad-ddd @manabie-com/squad-calendar-be
+/migrations/mastermgmt/ @manabie-com/squad-ddd @manabie-com/squad-architecture-be
+/migrations/notificationmgmt/ @manabie-com/squad-ddd @manabie-com/squad-communication-be
+#
+/internal/ @manabie-com/squad-architecture-be
+/internal/aphelios/ @manabie-com/squad-platform @hoanhvong
+/internal/bob/ @manabie-com/squad-architecture-be @manabie-com/squad-lesson-be
+/internal/calendar/ @manabie-com/squad-calendar-be
+/internal/enigma/ @manabie-com/squad-architecture-be
+/internal/entryexitmgmt/ @manabie-com/squad-adobo-be
+/internal/eureka/ @manabie-com/squad-syllabus-be
+/internal/fatima/ @manabie-com/squad-architecture-be
+/internal/hephaestus/ @manabie-com/squad-platform
+/internal/invoicemgmt/ @manabie-com/squad-adobo-be
+/internal/lessonmgmt/ @manabie-com/squad-lesson-be
+/internal/virtualclassroom/ @manabie-com/squad-lesson-be @manabie-com/squad-calendar-be
+/internal/mastermgmt/ @manabie-com/squad-architecture-be 
+/internal/notification @manabie-com/squad-communication-be
+/internal/spike @manabie-com/squad-communication-be
+/internal/payment/ @manabie-com/squad-payment-be
+/internal/shamir/ @manabie-com/squad-auth-be
+/internal/scheduling/ @manabie-com/squad-platform
+/internal/timesheet/ @manabie-com/squad-user-management-be
+/internal/tom/ @manabie-com/squad-communication-be
+/internal/usermgmt/ @manabie-com/squad-user-management-be @manabie-com/squad-auth-be
+/internal/yasuo/ @manabie-com/squad-architecture-be @manabie-com/squad-lesson-be
+/internal/draft/ @manabie-com/squad-platform
+/internal/j4/ @manabie-com/squad-platform
+/internal/conversationmgmt/ @manabie-com/squad-communication-be
+/internal/discount/ @manabie-com/squad-payment-be
+#
+/internal/golibs/ @manabie-com/squad-architecture-be
+/internal/golibs/bootstrap/ @manabie-com/squad-platform
+/internal/golibs/debezium @manabie-com/squad-platform
+/internal/golibs/kafkaconnect @manabie-com/squad-platform
+/internal/golibs/ci @manabie-com/squad-platform
+/internal/golibs/configs @manabie-com/squad-platform
+/internal/golibs/execwrapper @manabie-com/squad-platform
+/internal/golibs/logger @manabie-com/squad-platform
+/internal/golibs/variants @anhpngt
+/internal/golibs/interceptors @manabie-com/squad-auth-be
+#
+/deployments/decl/ @manabie-com/terraform-approvers
+/deployments/terraform/ @manabie-com/terraform-approvers
+#
+/accesscontrol/ @manabie-com/squad-architecture-be
+
+# Feature flags
+/feature_flags/adobo @manabie-com/squad-adobo
+/feature_flags/architecture @manabie-com/squad-architecture
+/feature_flags/calendar @manabie-com/squad-calendar
+/feature_flags/communication @manabie-com/squad-communication
+/feature_flags/lesson @manabie-com/squad-lesson
+/feature_flags/payment @manabie-com/squad-payment
+/feature_flags/platform @manabie-com/squad-platform
+/feature_flags/syllabus @manabie-com/squad-syllabus
+/feature_flags/timesheet @manabie-com/squad-user-management
+/feature_flags/user @manabie-com/squad-user-management
+/feature_flags/virtual-classroom @manabie-com/squad-virtual-classroom
+
+# Skaffold files should be controlled by platform squad
+/skaffold.*.yaml @manabie-com/squad-platform
+/skaffold2.*.yaml @manabie-com/squad-platform
+
+# Ad-hoc scripts
+# Scripts in parent directories belong to platform squad
+/scripts/ad-hoc/* @manabie-com/squad-platform
+/scripts/ad-hoc/sql/* @manabie-com/squad-platform
+# Scripts in nested directories belong to each respective squad
+/scripts/ad-hoc/sql/adobo @manabie-com/squad-adobo-be
+/scripts/ad-hoc/sql/architect @manabie-com/squad-architecture-be
+/scripts/ad-hoc/sql/chat @manabie-com/squad-communication-be
+/scripts/ad-hoc/sql/lesson @manabie-com/squad-lesson-be
+/scripts/ad-hoc/sql/notificationmgmt @manabie-com/squad-communication-be
+/scripts/ad-hoc/sql/payment @manabie-com/squad-payment-be
+/scripts/ad-hoc/sql/platform @manabie-com/squad-platform
+/scripts/ad-hoc/sql/syllabus @manabie-com/squad-syllabus-be
+/scripts/ad-hoc/sql/timesheet @manabie-com/squad-user-management-be
+/scripts/ad-hoc/sql/usermgmt @manabie-com/squad-user-management-be
+
+#
+proto/common/ @TQPhucManabie
+
+# Salesforce
+salesforce/usermgmt/ @manabie-com/squad-user-management-be
+

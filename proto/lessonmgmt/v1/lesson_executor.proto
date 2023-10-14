@@ -1,0 +1,86 @@
+syntax = "proto3";
+
+package lessonmgmt.v1;
+import "lessonmgmt/v1/zoom_account.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/lessonmgmt/v1;lpb";
+
+message ImportError {
+  int32 row_number = 1;
+  string error = 2;
+}
+
+message ExportClassroomsRequest {}
+
+message ExportClassroomsResponse {
+  bytes data = 1;
+}
+
+message GenerateLessonCSVTemplateRequest {}
+
+message GenerateLessonCSVTemplateResponse {
+  bytes data = 1;
+}
+
+message ImportLessonRequest {
+  bytes payload = 1;
+  string time_zone = 2;
+}
+
+message ImportLessonResponse {
+  message ImportLessonError {
+    int32 row_number = 1;
+    string error = 2;
+  }
+  repeated ImportLessonError errors = 1;
+}
+
+message ExportTeacherRequest {}
+
+message ExportTeacherResponse {
+  bytes data = 1;
+}
+
+message ExportEnrolledStudentRequest {
+  string timezone = 1;
+}
+
+message ExportEnrolledStudentResponse {
+  bytes data = 1;
+}
+
+message ImportClassroomRequest {
+  bytes payload = 1;
+}
+
+message ImportClassroomResponse {
+  repeated ImportError errors = 1;
+}
+
+message ExportCourseTeachingTimeRequest {}
+
+message ExportCourseTeachingTimeResponse {
+  bytes data = 1;
+}
+
+message ImportCourseTeachingTimeRequest {
+  bytes payload = 1;
+  string timezone = 2;
+}
+
+message ImportCourseTeachingTimeResponse {
+  repeated ImportError errors = 1;
+}
+
+service LessonExecutorService {
+  rpc GenerateLessonCSVTemplate(GenerateLessonCSVTemplateRequest) returns (GenerateLessonCSVTemplateResponse);
+  rpc ImportClassroom(ImportClassroomRequest) returns (ImportClassroomResponse);
+  rpc ImportLesson(ImportLessonRequest) returns (ImportLessonResponse);
+  rpc ImportZoomAccount(ImportZoomAccountRequest) returns (ImportZoomAccountResponse);
+  rpc ImportCourseTeachingTime(ImportCourseTeachingTimeRequest) returns (ImportCourseTeachingTimeResponse);
+  
+  rpc ExportClassrooms(ExportClassroomsRequest) returns (ExportClassroomsResponse);
+  rpc ExportTeacher(ExportTeacherRequest) returns (ExportTeacherResponse);
+  rpc ExportEnrolledStudent(ExportEnrolledStudentRequest) returns (ExportEnrolledStudentResponse);
+  rpc ExportCourseTeachingTime(ExportCourseTeachingTimeRequest) returns (ExportCourseTeachingTimeResponse);
+}

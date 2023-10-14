@@ -1,0 +1,10 @@
+table:
+  schema: public
+  name: e2e_instances_squad_tags
+select_permissions:
+  - role: user
+    permission:
+      columns:
+        - squad_tag
+      filter: {}
+      allow_aggregations: true

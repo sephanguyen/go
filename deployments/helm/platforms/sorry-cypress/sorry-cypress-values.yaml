@@ -1,0 +1,19 @@
+minio:
+  enabled: true
+  endpoint: minio.staging.manabie.io
+  url: https://minio.staging.manabie.io
+  persistence:
+    size: 30Gi
+
+dashboard:
+  environmentVariables:
+    graphQlSchemaUrl: https://cypress-api.staging.manabie.io:31600/
+
+director:
+  replicas: 3
+  environmentVariables:
+    executionDriver: "../execution/mongo/driver"
+    screenshotsDriver: "../screenshots/minio.driver"
+
+mongodb:
+  replicaCount: 1

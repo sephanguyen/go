@@ -1,0 +1,3 @@
+------ Renseikai Internal ------
+INSERT INTO organizations (organization_id, tenant_id, name, resource_path, domain_name, logo_url, country, created_at, updated_at, deleted_at)
+VALUES ('2147483645', 'renseikai-internal-e3pye', 'Renseikai Internal', '2147483645', 'renseikai-internal', 'https://storage.googleapis.com/prod-tokyo-backend/user-upload/tenant_logo/renseikai_logo.png', 'COUNTRY_JP', now(), now(), null) ON CONFLICT DO NOTHING;

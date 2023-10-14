@@ -1,0 +1,135 @@
+{
+	"schema": [
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "editor_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "grade",
+			"data_type": "numeric",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "grade_content",
+			"data_type": "jsonb",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "grader_comment",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "grader_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "status",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "student_submission_grade_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "student_submission_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "student_submission_grades",
+			"policyname": "rls_student_submission_grades",
+			"qual": "permission_check(resource_path, 'student_submission_grades'::text)",
+			"with_check": "permission_check(resource_path, 'student_submission_grades'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "student_submission_grades",
+			"policyname": "rls_student_submission_grades_restrictive",
+			"qual": "permission_check(resource_path, 'student_submission_grades'::text)",
+			"with_check": "permission_check(resource_path, 'student_submission_grades'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "student_submission_grades_fk",
+			"column_name": "student_submission_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "student_submission_grades_pk",
+			"column_name": "student_submission_grade_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "student_submission_grades",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

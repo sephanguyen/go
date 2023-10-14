@@ -1,0 +1,110 @@
+{
+	"schema": [
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "created_by",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "submission_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "feedback_session",
+			"policyname": "rls_feedback_session",
+			"qual": "permission_check(resource_path, 'feedback_session'::text)",
+			"with_check": "permission_check(resource_path, 'feedback_session'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "feedback_session",
+			"policyname": "rls_feedback_session_restrictive",
+			"qual": "permission_check(resource_path, 'feedback_session'::text)",
+			"with_check": "permission_check(resource_path, 'feedback_session'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "feedback_session_fk",
+			"column_name": "submission_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "feedback_session_pk",
+			"column_name": "id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "submission_id_un",
+			"column_name": "submission_id",
+			"constraint_type": "UNIQUE"
+		}
+	],
+	"table_name": "feedback_session",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

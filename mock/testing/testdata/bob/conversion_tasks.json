@@ -1,0 +1,79 @@
+{
+	"schema": [
+		{
+			"column_name": "conversion_response",
+			"data_type": "jsonb",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_url",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "status",
+			"data_type": "character varying",
+			"column_default": "'WAITING'::character varying",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "task_uuid",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "conversion_tasks",
+			"policyname": "rls_conversion_tasks",
+			"qual": "permission_check(resource_path, (conversion_tasks.*)::text)",
+			"with_check": "permission_check(resource_path, (conversion_tasks.*)::text)",
+			"relrowsecurity": false,
+			"relforcerowsecurity": false,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "conversion_tasks_pkey",
+			"column_name": "task_uuid",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "conversion_tasks",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

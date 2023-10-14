@@ -1,0 +1,40 @@
+common:
+  google_cloud_project: student-coach-e1e95
+  firebase_project: student-coach-e1e95
+  identity_platform_project: student-coach-e1e95
+jwt_applicant: prod-tokyo
+issuers:
+  - issuer: manabie
+    audience: prod-tokyo
+    jwks_endpoint: http://shamir:5680/.well-known/jwks.json
+postgres_v2:
+  bob:
+    max_conns: 12
+storage:
+  bucket: prod-tokyo-backend
+brightcove:
+  account_id: 6064018595001
+  client_id: ee2bed82-d231-4db7-85e5-169c7b5aa396
+  profile: Asia-PREMIUM (96-1500)
+fake_apple_server: --
+whiteboard:
+  app_id: V7mZoJt9Eeqxp_kxzbwYqQ/pKW8SEDalIkqxQ
+agora:
+  app_id: e45ba4e954ae47929338c9ce89ba5cc7
+check_client_versions:
+  - com.manabie.student_manabie_app:1.5.0
+  - com.manabie.studentManabieApp:1.5.0
+  - com.manabie.liz:1.0.0
+  - com.manabie.lms_manabie_app:1.0.0
+  - com.manabie.lmsManabieApp:1.0.0
+  - com.manabie.enigma:1.0.0
+  - tokyo.learner:1.0.0
+  - tokyo.teacher:1.0.0
+  - com.manabie.learner:2.0.20230509020728
+  - com.manabie.teacher:2.0.20230509020728
+  - jp.jprep.learner:2.0.20230509020728
+  - jp.jprep.teacher:2.0.20230509020728
+partner:
+  domain_bo: "https://administration.manabie.net/"
+  domain_teacher: "https://classroom.manabie.net/"
+  domain_learner: "https://learner.manabie.net/"

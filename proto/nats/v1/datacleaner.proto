@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package nats.v1;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/nats/v1;npb";
+
+message ExtraCond {
+    string table = 1;
+    string condition = 2;
+}
+
+message EventDataClean {
+    string service = 1;
+    string school_id = 2;
+    string tables = 3;
+    string before_at = 4;
+    string after_at = 5;
+    int32 per_batch = 6;
+    repeated ExtraCond extra_cond = 7;
+}

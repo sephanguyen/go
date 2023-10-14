@@ -1,0 +1,50 @@
+common:
+  google_cloud_project: student-coach-e1e95
+jwt_applicant: b5e72419a81ca9e1a5
+issuers:
+  - issuer: manabie
+    audience: b5e72419a81ca9e1a5
+    jwks_endpoint: http://shamir:5680/.well-known/jwks.json
+  - issuer: https://securetoken.google.com/student-coach-e1e95
+    audience: student-coach-e1e95
+    jwks_endpoint: https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com
+postgres_v2:
+  bob:
+    max_conns: 12
+  eureka:
+    max_conns: 12
+storage:
+  bucket: jprep-backend
+brightcove:
+  account_id: 6415622117001
+  client_id: 842a6c12-06ad-49c6-8920-14d07aed81b5
+  profile: multi-platform-standard-static
+whiteboard:
+  app_id: V7mZoJt9Eeqxp_kxzbwYqQ/eVI9bwOEhTqIOQ
+agora:
+  app_id: 03ff2af914d34718a6a8a087c3c802eb
+check_client_versions:
+  - com.manabie.student_manabie_app:1.5.0
+  - com.manabie.studentManabieApp:1.5.0
+  - com.manabie.liz:1.0.0
+  - com.manabie.lms_manabie_app:1.0.0
+  - com.manabie.lmsManabieApp:1.0.0
+  - jp.jprep.jprep_learner:1.0.0
+  - jp.jprep.jprepLearner:1.0.0
+  - jp.jprep.jprep_teacher:1.0.0
+  - jp.jprep.jprepTeacher:1.0.0
+  - com.manabie.enigma:1.0.0
+  - com.manabie.learner:2.0.20230509020728
+  - com.manabie.teacher:2.0.20230509020728
+  - jp.jprep.learner:2.0.20230509020728
+  - jp.jprep.teacher:2.0.20230509020728
+partner:
+  domain_bo: "https://backoffice.prod.jprep.manabie.io/"
+  domain_teacher: "https://teacher.prod.jprep.manabie.io/"
+  domain_learner: "https://learner.prod.jprep.manabie.io/"
+keycloak_auth:
+  path: https://ji-sso.jprep.jp
+  realm: jprep
+  client_id: manabie
+natsjs:
+  address: "nats://nats-jetstream.prod-jprep-nats-jetstream.svc.cluster.local:4223"

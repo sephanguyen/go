@@ -1,0 +1,135 @@
+{
+	"schema": [
+		{
+			"column_name": "cost_amount",
+			"data_type": "integer",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "remarks",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "round_trip",
+			"data_type": "boolean",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "timesheet_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "transportation_expense_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "transportation_from",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "transportation_to",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "transportation_type",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "transportation_expense",
+			"policyname": "rls_transportation_expense",
+			"qual": "permission_check(resource_path, 'transportation_expense'::text)",
+			"with_check": "permission_check(resource_path, 'transportation_expense'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "transportation_expense",
+			"policyname": "rls_transportation_expense_restrictive",
+			"qual": "permission_check(resource_path, 'transportation_expense'::text)",
+			"with_check": "permission_check(resource_path, 'transportation_expense'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "transportation_expense_timesheet_id__fk",
+			"column_name": "timesheet_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "transportation_expense__pk",
+			"column_name": "transportation_expense_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "transportation_expense",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

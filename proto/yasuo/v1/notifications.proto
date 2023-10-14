@@ -1,0 +1,129 @@
+syntax = "proto3";
+
+package yasuo.v1;
+
+import "common/v1/notifications.proto";
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/yasuo/v1;ypb";
+
+// Deprecated
+message CreateNotificationRequest { common.v1.Notification notification = 1; }
+
+// Deprecated
+message CreateNotificationResponse { string notification_id = 1; }
+
+message UpsertNotificationRequest {
+  common.v1.Notification notification = 1;
+  common.v1.Questionnaire questionnaire = 2;
+}
+
+message UpsertNotificationResponse { string notification_id = 1; }
+
+message SendNotificationRequest { string notification_id = 1; }
+
+message SendNotificationResponse {}
+
+message DiscardNotificationRequest { string notification_id = 1; }
+
+message DiscardNotificationResponse {}
+
+message NotifyUnreadUserRequest { string notification_id = 1; }
+
+message NotifyUnreadUserResponse {}
+
+message SendScheduledNotificationRequest {
+    string organization_id = 1;
+    google.protobuf.Timestamp from = 2;
+    google.protobuf.Timestamp to = 3;
+    bool is_running_for_all_tenants = 4;
+    repeated string tenant_ids = 5;
+}
+
+message SendScheduledNotificationResponse {}
+
+message SubmitQuestionnaireRequest {
+  string user_info_notification_id = 1;
+  string questionnaire_id = 2;
+  repeated common.v1.Answer answers = 3;
+}
+
+message SubmitQuestionnaireResponse {}
+
+service NotificationModifierService {
+  rpc CreateNotification(CreateNotificationRequest)
+      returns (CreateNotificationResponse) {
+    option deprecated = true;
+  };
+  rpc UpsertNotification(UpsertNotificationRequest)
+      returns (UpsertNotificationResponse);
+  rpc SendNotification(SendNotificationRequest)
+      returns (SendNotificationResponse);
+  rpc DiscardNotification(DiscardNotificationRequest)
+      returns (DiscardNotificationResponse);
+  rpc NotifyUnreadUser(NotifyUnreadUserRequest)
+      returns (NotifyUnreadUserResponse);
+  rpc SendScheduledNotification(SendScheduledNotificationRequest)
+      returns (SendScheduledNotificationResponse);
+  rpc SubmitQuestionnaire(SubmitQuestionnaireRequest)
+      returns (SubmitQuestionnaireResponse);
+}
+
+message RetrieveNotificationDetailRequest {
+  string notification_id = 1;
+  string target_id = 2;
+}
+
+message RetrieveNotificationDetailResponse {
+  message NotiDetail {
+    common.v1.Notification notification = 1;
+    repeated common.v1.UserNotification user_notification = 2;
+    common.v1.UserQuestionnaire user_questionnaire = 3;
+  }
+  NotiDetail item = 1;
+}
+
+service NotificationReaderService {
+  rpc RetrieveNotificationDetail(RetrieveNotificationDetailRequest)
+      returns (RetrieveNotificationDetailResponse);
+}
+
+message NatsNotificationTargetGroup {
+  message UserGroupFilter { repeated string user_groups = 1; }
+  UserGroupFilter user_group_filter = 1;
+}
+
+message NatsCreateNotificationRequest {
+  string client_id = 1;
+  repeated string sending_methods = 2;
+  NatsNotificationTarget target = 3;
+  NatsNotificationSendTime send_time = 4;
+  NatsPushNotificationConfig notification_config = 5;
+  string tracing_id = 6;
+  int32 school_id = 7;
+  NatsNotificationTargetGroup target_group = 8;
+}
+
+message NatsNotificationTarget { 
+  repeated string received_user_ids = 1; 
+  repeated string generic_user_ids = 2;
+}
+
+message NatsNotificationSendTime {
+  string type = 1;
+  string time = 2;
+}
+
+message NatsPushNotificationConfig {
+  bool permanent_storage = 1;
+  string mode = 2;
+  NatsNotification notification = 4;
+  map<string, string> data = 5;
+}
+
+message NatsNotification {
+  string title = 1;
+  string message = 2;
+  string content = 3;
+}

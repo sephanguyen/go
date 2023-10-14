@@ -1,0 +1,84 @@
+apiVersion: actions.summerwind.dev/v1alpha1
+kind: RunnerDeployment
+metadata:
+  name: 4-8-spot-persistent-runnerdeploy
+  namespace: actions-runner-system
+spec:
+  template:
+    metadata:
+      labels:
+        app: 4-8-spot-persistent-runnerdeploy
+      annotations:
+        cluster-autoscaler.kubernetes.io/safe-to-evict: 'true'
+    spec:
+      dockerMTU: 1400
+      dockerRegistryMirror: https://mirror.gcr.io/
+      dockerdWithinRunnerContainer: true
+      ephemeral: false
+      organization: manabie-com
+      image: asia-docker.pkg.dev/student-coach-e1e95/manaverse/actions-runner-dind:v2.307.1-ubuntu-20.04
+      labels:
+        - custom-runner
+        - 4-8-large-runner
+        - spot
+        - persistent
+        - 4-8-spot-persistent-runner
+      env:
+        - name: DISABLE_RUNNER_UPDATE
+          value: 'true'
+      nodeSelector:
+        cloud.google.com/gke-nodepool: 'c2d-highcpu-4-runners-spot'
+      tolerations:
+        - effect: NoSchedule
+          key: 'c2d-highcpu-4-runners-spot'
+          operator: Exists
+      resources:
+        requests:
+          cpu: 3000m
+          memory: 3Gi
+      imagePullPolicy: IfNotPresent
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: runner-deployment-name
+                    operator: In
+                    values:
+                      - 4-8-spot-persistent-runnerdeploy
+              topologyKey: kubernetes.io/hostname
+---
+apiVersion: actions.summerwind.dev/v1alpha1
+kind: HorizontalRunnerAutoscaler
+metadata:
+  name: 4-8-spot-runner-deployment-autoscaler
+  namespace: actions-runner-system
+spec:
+  maxReplicas: 20
+  minReplicas: 0
+  scaleTargetRef:
+    name: 4-8-spot-persistent-runnerdeploy
+    kind: RunnerDeployment
+  metrics:
+    - repositoryNames:
+      - backend
+      - school-portal-admin
+      - student-app
+      - eibanam
+      type: TotalNumberOfQueuedAndInProgressWorkflowRuns
+  scaleUpTriggers:
+    - amount: 1
+      duration: 30m0s
+      githubEvent:
+        workflowJob: {}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: 4-8-spot-persistent-runnerdeploy
+  namespace: actions-runner-system
+spec:
+  minAvailable: 0
+  selector:
+    matchLabels:
+      runner-deployment-name: 4-8-spot-persistent-runnerdeploy

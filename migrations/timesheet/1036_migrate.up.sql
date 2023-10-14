@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS flag_log_change_time ON public.auto_create_flag_activity_log (change_time);

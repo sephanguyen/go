@@ -1,0 +1,67 @@
+common:
+  name: entryexitmgmt
+  organization: {{ .Values.global.vendor }}
+  environment: '{{ include "util.runtimeEnvironment" . }}'
+  actual_environment: '{{ include "util.environment" . }}'
+  sa_email: {{ include "util.serviceAccountEmail" .}}
+  log:
+    app_level: debug
+    log_payload: true
+  stats_enabled: true
+  remote_trace:
+    enabled: true
+    otel_collector_receiver: http://opentelemetry-collector.monitoring.svc.cluster.local:14268/api/traces
+  grpc:
+    trace_enabled: true
+    handler_timeout_v2:
+      default: 5s
+    handler_timeout_v2_enabled: true
+    client_name: com.manabie.entryexitmgmt
+    client_version: {{ .Values.clientVersion }}
+  image_tag: {{ include "util.imageTag" . }}
+postgres_migrate:
+  source: file:///migrations/entryexitmgmt
+  database:
+    cloudsql_instance: '{{ .Values.global.cloudSQLCommonInstance }}'
+    cloudsql_use_public_ip: {{ .Values.global.cloudSQLUsePublicIP }}
+    cloudsql_auto_iam_authn: true
+    cloudsql_impersonate_service_account_email: '{{ include "util.databaseMigrationServiceAccountEmail" .}}'
+    user: '{{ include "util.databaseMigrationUser" . }}'
+    host: '{{ include "util.databaseHost" . }}'
+    port: '5432'
+    dbname: '{{ .Values.global.dbPrefix }}entryexitmgmt'
+    max_conns: 2
+    retry_attempts: 10
+    retry_wait_internal: 5s
+postgres_v2:
+  entryexitmgmt:
+    cloudsql_instance: '{{ .Values.global.cloudSQLCommonInstance }}'
+    cloudsql_use_public_ip: {{ .Values.global.cloudSQLUsePublicIP }}
+    cloudsql_auto_iam_authn: true
+    user: '{{ include "util.databaseUser" . }}'
+    host: '{{ include "util.databaseHost" . }}'
+    port: '5432'
+    dbname: '{{ .Values.global.dbPrefix }}entryexitmgmt'
+    max_conns: 8
+    retry_attempts: 10
+    retry_wait_interval: '5s'
+natsjs:
+  address: "nats://nats-jetstream.{{ .Values.global.environment }}-{{ .Values.global.vendor }}-nats-jetstream.svc.cluster.local:4223"
+  user: "EntryExitMgmt"
+  max_redelivery: 10
+  default_ack_wait: 10s
+  reconnect_wait: 10s
+  max_reconnect: -1
+  is_local: {{ include "util.natsIsLocal" . }}
+storage:
+  endpoint: https://storage.googleapis.com
+  region: asia
+  maximum_url_expiry_duration: 1800s
+  minimum_url_expiry_duration: 1s
+  default_url_expiry_duration: 60s
+  secure: true
+  file_upload_folder_path: entryexitmgmt-upload
+unleash_client:
+  url: '{{ include "util.unleashURL" . }}'
+  app_name: "manabie-backend-entryexitmgmt-unleash-client"
+  api_token: ce4ed2eba3a72d6b5be23c7aa9b71178753f5908cf2dcbbca29442b5b81d397f

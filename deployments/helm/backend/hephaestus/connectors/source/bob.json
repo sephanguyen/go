@@ -1,0 +1,56 @@
+{
+  "name": "{{ .Values.global.environment }}_{{ .Values.global.vendor }}_bob_source_connector",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "database.password": "${file:/config/kafka-connect-config.properties:password}",
+    "database.dbname": "${file:/config/kafka-connect-config.properties:bobdbname}",
+    "database.hostname": "${file:/config/kafka-connect-config.properties:hostname}",
+    "database.user": "${file:/config/kafka-connect-config.properties:user}",
+    "database.port": "5432",
+    "database.server.name": "bob",
+    "database.sslmode": "disable",
+    "plugin.name": "pgoutput",
+    "tasks.max": "1",
+    "key.converter":"io.confluent.connect.avro.AvroConverter",
+    "key.converter.schema.registry.url":"http://cp-schema-registry:8081",
+    "key.converter.schemas.enable": "false",
+    "value.converter":"io.confluent.connect.avro.AvroConverter",
+    "value.converter.schema.registry.url":"http://cp-schema-registry:8081",
+    "value.converter.schemas.enable": "false",
+    "slot.name": "{{ .Values.global.environment }}_{{ .Values.global.vendor }}_bob",
+    "slot.drop.on.stop": "false",
+    "publication.autocreate.mode": "disabled",
+    "publication.name": "debezium_publication",
+    "snapshot.mode": "never",
+    "tombstones.on.delete": "true",
+    "heartbeat.interval.ms": "20000",
+    "heartbeat.action.query": "INSERT INTO public.debezium_heartbeat (id, updated_at) VALUES (1, NOW()) ON CONFLICT(id) DO UPDATE SET updated_at=EXCLUDED.updated_at;",
+    "producer.max.request.size": "10485760",
+    "schema.include.list": "public",
+{{- if eq "prod" .Values.global.environment }}
+    "table.include.list": "public.dbz_signals,public.locations,public.debezium_heartbeat,public.location_types,public.organizations,public.grade,public.users,public.user_access_paths,public.students,public.courses,public.school_admins,public.student_parents,public.granted_role,public.role,public.user_group_member,public.user_group,public.users_groups,public.groups,public.granted_role_access_path,public.permission,public.permission_role,public.student_qr,public.student_entryexit_records,public.prefecture,public.user_basic_info,public.course_access_paths,public.lessons,public.lessons_courses,public.configs,public.lessons_teachers,public.staff,public.student_enrollment_status_history,public.class,public.user_tag,public.tagged_user,public.lesson_student_subscriptions,public.partner_form_configs,public.lesson_reports,public.lesson_report_details,public.media,public.lesson_student_subscription_access_path,public.reallocation,public.lesson_groups,public.lesson_classrooms,public.classroom,public.zoom_account,public.course_location_schedule,public.lesson_members_states,public.lesson_room_states,public.class_member,public.course_teaching_time,public.lesson_members,public.partner_dynamic_form_field_values,public.activity_logs,public.virtual_classroom_log,public.reserve_class,public.lesson_polls,public.lesson_recorded_videos,public.academic_years,public.courses_academic_years,public.classes,public.courses_classes,public.live_lesson_sent_notifications,public.class_members,public.course_type",
+{{- else }}
+    "table.include.list": "public.dbz_signals,public.locations,public.debezium_heartbeat,public.location_types,public.organizations,public.grade,public.users,public.user_access_paths,public.students,public.courses,public.school_admins,public.student_parents,public.staff,public.lessons_courses,public.lessons,public.lessons_teachers,public.lesson_members,public.course_access_paths,public.granted_role,public.role,public.user_group_member,public.user_group,public.groups,public.users_groups,public.permission,public.permission_role,public.granted_role_access_path,public.student_qr,public.student_entryexit_records,public.prefecture,public.user_tag,public.tagged_user,public.user_basic_info,public.lesson_student_subscriptions,public.lesson_report_details,public.lesson_reports,public.partner_dynamic_form_field_values,public.configs,public.partner_form_configs,public.media,public.lesson_student_subscription_access_path,public.student_enrollment_status_history,public.class,public.reallocation,public.lesson_groups,public.lesson_classrooms,public.classroom,public.class_member,public.zoom_account,public.organization_auths,public.api_keypair,public.course_teaching_time,public.course_location_schedule,public.lesson_members_states,public.lesson_room_states,public.activity_logs,public.virtual_classroom_log,public.reserve_class,public.lesson_polls,public.lesson_recorded_videos,public.academic_years,public.courses_academic_years,public.classes,public.courses_classes,public.live_lesson_sent_notifications,public.class_members,public.course_type",
+{{- end }}
+    "signal.data.collection": "public.dbz_signals",
+    "time.precision.mode": "connect",
+    "decimal.handling.mode": "double",
+    "incremental.snapshot.chunk.size": "512",
+    {{- if eq "local" .Values.global.environment }}
+    "topic.creation.default.replication.factor": "-1",
+    "snapshot.mode": "initial",
+    {{- else }}
+    "topic.creation.default.replication.factor": "3",
+    "snapshot.mode": "never",
+    {{- end }}
+    "topic.creation.default.partitions": "10",
+    "topic.creation.default.cleanup.policy": "compact",
+    "topic.creation.default.compression.type": "lz4",
+    "topic.creation.default.segment.bytes": "16777216",
+    "topic.creation.default.delete.retention.ms": "6000",
+    "transforms": "route",
+    "transforms.route.type": "org.apache.kafka.connect.transforms.RegexRouter",
+    "transforms.route.regex": "([^.]+).([^.]+).([^.]+)",
+    "transforms.route.replacement": "{{ .Values.global.environment }}.{{ .Values.global.vendor }}.$1.$2.$3"
+  }
+}

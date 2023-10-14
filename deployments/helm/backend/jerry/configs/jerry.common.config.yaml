@@ -1,0 +1,27 @@
+common:
+  name: jerry
+  organization: {{ .Values.global.vendor }}
+  environment: '{{ include "util.runtimeEnvironment" . }}'
+  actual_environment: '{{ include "util.environment" . }}'
+  sa_email: {{ include "util.serviceAccountEmail" . }}
+  log:
+    app_level: debug
+    log_payload: true
+  stats_enabled: true
+  remote_trace:
+    enabled: true
+    otel_collector_receiver: http://opentelemetry-collector.monitoring.svc.cluster.local:14268/api/traces
+  image_tag: {{ include "util.imageTag" . }}
+hasura_routing_rules:
+  - matched_prefixes:
+      - /v1
+      - /console
+      - //v1
+      - /v2
+    forward_port: 8080
+    forward_host: bob-hasura
+  - matched_prefixes:
+      - /eureka/
+    rewrite_uri: /
+    forward_port: 8080
+    forward_host: eureka-hasura

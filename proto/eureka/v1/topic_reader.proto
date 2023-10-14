@@ -1,0 +1,68 @@
+syntax = "proto3";
+
+package eureka.v1;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/eureka/v1;epb";
+
+import "eureka/v1/assignments.proto";
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/timestamp.proto";
+import "eureka/v1/enums.proto";
+
+enum StudyPlanItemFilter {
+  STUDY_PLAN_ITEM_FILTER_NONE = 0;
+  STUDY_PLAN_ITEM_FILTER_AVAILABLE = 1;
+}
+
+message ListToDoItemsByTopicsRequest {
+    google.protobuf.StringValue study_plan_id = 1;
+    repeated string topic_ids = 2;
+    StudyPlanItemFilter studyPlanItemFilter = 3;
+}
+
+message ListToDoItemsByTopicsResponse {
+    repeated ToDoItemsByTopic items = 1;
+    
+    message ToDoItemsByTopic {
+      string topic_id = 1;
+      repeated ToDoItem todo_items = 2;
+    }
+  }
+
+  message Attachment {
+    string name = 1;
+    string url = 2;
+  }
+
+  message Topic {
+    string id = 1;
+    string name = 2;
+    Country country = 3;
+    string grade = 4;
+    Subject subject = 5;
+    TopicType type = 6;
+    google.protobuf.Timestamp updated_at = 7;
+    google.protobuf.Timestamp created_at = 8;
+    TopicStatus status = 9;
+    int32 display_order = 10;
+    google.protobuf.Timestamp published_at = 11;
+    int32 total_los = 12;
+    string chapter_id = 13;
+    int32 school_id = 14;
+    string icon_url = 15;
+    string instruction = 16;
+    repeated Attachment attachments = 17;
+    google.protobuf.StringValue copied_topic_id = 18;
+    bool essay_required = 19;
+  }
+
+  message RetrieveTopicsRequest { repeated string topic_ids = 1; }
+
+  message RetrieveTopicsResponse { repeated Topic topics = 1; }
+
+  service TopicReaderService {
+    rpc ListToDoItemsByTopics (ListToDoItemsByTopicsRequest) //TODO: SP team
+        returns (ListToDoItemsByTopicsResponse);
+    rpc RetrieveTopics(RetrieveTopicsRequest) returns (RetrieveTopicsResponse);
+  }
+  

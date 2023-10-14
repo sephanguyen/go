@@ -1,0 +1,201 @@
+syntax = "proto3";
+
+package manabie.yasuo;
+
+import "ysenum.proto";
+import "bob/enum.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option (gogoproto.goproto_registration) = true;
+option go_package = "github.com/manabie-com/backend/pkg/genproto/yasuo;pb";
+
+message Plan {
+  string id = 1;
+  string description = 2;
+  string advertised_price = 3 [ deprecated = true ];
+  bool is_purchasable = 4;
+  repeated string upgradeable_to = 5 [ deprecated = true ];
+  repeated string benefits = 6;
+  int32 prioritize_level = 7;
+  bool is_hidden = 8 [ deprecated = true ];
+}
+
+message Package {
+  int32 id = 1;
+  string name = 2;
+  int32 price = 3;
+  int32 discounted_price = 4;
+  repeated string description = 5;
+  string notice = 6;
+  google.protobuf.Timestamp period = 7;
+  bool is_recommended = 8;
+  bool is_enabled = 9;
+  bool is_hidden = 10 [ deprecated = true ];
+  double carried_over_amount = 11 [ deprecated = true ];
+  string plan_id = 12 [ deprecated = true ];
+  manabie.bob.Country country = 13;
+  int32 prioritize_level = 14;
+  repeated PackageItem package_items = 15;
+  repeated int32 upgradable_from = 16;
+}
+
+message PackageItem {
+  string id = 1;
+  int32 package_id = 2;
+  string plan_id = 3;
+  google.protobuf.Timestamp expired_at = 4;
+  int32 duration = 5;
+  repeated manabie.bob.Subject subject = 6;
+  repeated int32 grades = 7;
+  int32 price = 8;
+  int32 discounted_price = 9;
+  manabie.bob.Country country = 10;
+}
+
+message Order {
+  int32 id = 1;
+  double amount = 2;
+  string plan_id = 3;
+  string plan_name = 4 [ deprecated = true ];
+  string manual_created_by = 5;
+  OrderStatus status = 6;
+  string coupon = 7;
+  double coupon_amount = 8;
+  double carried_over_amount = 9 [ deprecated = true ];
+  int32 carried_over_from = 10 [ deprecated = true ];
+  google.protobuf.Timestamp start = 11 [ deprecated = true ];
+  google.protobuf.Timestamp end = 12 [ deprecated = true ];
+  google.protobuf.Timestamp updated_at = 13;
+  google.protobuf.Timestamp created_at = 14;
+  string currency = 15;
+  string payment_method = 16;
+  string payment_link = 17;
+  int32 package_id = 18;
+  string package_name = 19;
+  manabie.bob.Country country = 20;
+  string student_id = 21;
+  string reference_number = 22;
+  CodOrderInfo cod_order_info = 23;
+  google.protobuf.Timestamp must_pay_before = 24;
+  repeated StudentSubscription subscriptions = 25;
+  string gateway_full_feedback = 26;
+  string gateway_link = 27;
+  PaymentGateway gateway_name = 28;
+  string gateway_response = 29;
+  string created_by_email = 30;
+  bool is_manual_created = 31;
+}
+
+message ManualOrder {
+  int32 student_order_id = 1;
+  double amount = 2;
+  google.protobuf.StringValue currency = 3;
+  google.protobuf.StringValue payment_method = 4;
+  google.protobuf.StringValue student_id = 5;
+  int32 package_id = 6;
+  google.protobuf.StringValue package_name = 7;
+  google.protobuf.StringValue plan_id = 8;
+  google.protobuf.StringValue coupon = 9;
+  double coupon_amount = 10;
+  manabie.bob.Country country = 11;
+  // bool is_manual_created = 10;
+  string created_by_email = 12;
+  google.protobuf.Timestamp start = 13;
+  google.protobuf.Timestamp end = 14;
+}
+
+message CodOrderInfo {
+  string customer_name = 1;
+  string customer_phone_number = 2;
+  string customer_address = 3;
+  google.protobuf.Timestamp expected_delivery_time = 4;
+  CodOrderStatus status = 5;
+}
+
+message StudentSubscription {
+  string plan_id = 1;
+  repeated int32 grades = 2;
+  repeated manabie.bob.Subject subjects = 3;
+  google.protobuf.Timestamp start = 4;
+  google.protobuf.Timestamp end = 5;
+  SubscriptionStatus status = 6;
+}
+
+message CreateManualOrderRequest { ManualOrder order = 1; }
+
+message CreateManualOrderResponse { bool successful = 1; }
+
+enum PromoType {
+  PROMOTION = 0;
+  PROMOTION_TEACHER = 1;
+  PROMOTION_REFERRAL = 2;
+  PROMOTION_LD = 3; // learner discovery
+  PROMOTION_SC = 4; // student club
+  PROMOTION_KOL = 5;
+  PROMOTION_ACTIVATION = 6;
+}
+
+enum PromoDiscountType {
+  PROMOTION_DISCOUNT_TYPE_FIXED_AMOUNT = 0;
+  PROMOTION_DISCOUNT_TYPE_PERCENTAGE = 1;
+}
+
+enum PromoStatus {
+  PROMOTION_STATUS_PUBLISHED = 0;
+  PROMOTION_STATUS_ARCHIVED = 1;
+}
+
+message CreatePackageRequest {
+  Package package = 1;
+  repeated PackageItem package_items = 2;
+}
+
+message CreatePackageResponse {
+  bool successful = 1;
+  int32 package_id = 2;
+}
+
+message Pagination {
+  uint32 limit = 1;
+  uint32 offset = 2;
+}
+message Sort {
+  string field = 1;
+  SortOrderType order = 2;
+}
+
+message DisableSubscriptionRequest {
+  repeated string student_subscription_ids = 1;
+}
+
+message DisableSubscriptionResponse { bool successful = 1; }
+
+message ToggleEnabledPackageRequest { int32 package_id = 1; }
+
+message ToggleEnabledPackageResponse { bool successful = 1; }
+
+message ExtendSubscriptionRequest {
+  string subscription_id = 1;
+  google.protobuf.Timestamp expired_date = 2;
+}
+
+message ExtendSubscriptionResponse {}
+
+message DisableOrdersRequest { repeated int32 order_ids = 1; }
+
+message DisableOrdersResponse { repeated int32 order_ids = 1; }
+
+service SubscriptionService {
+  rpc CreateManualOrder(CreateManualOrderRequest)
+      returns (CreateManualOrderResponse);
+  rpc CreatePackage(CreatePackageRequest) returns (CreatePackageResponse);
+  rpc DisableSubscription(DisableSubscriptionRequest)
+      returns (DisableSubscriptionResponse);
+  rpc ToggleEnabledPackage(ToggleEnabledPackageRequest)
+      returns (ToggleEnabledPackageResponse);
+  rpc ExtendSubscription(ExtendSubscriptionRequest)
+      returns (ExtendSubscriptionResponse);
+  rpc DisableOrders(DisableOrdersRequest) returns (DisableOrdersResponse);
+}

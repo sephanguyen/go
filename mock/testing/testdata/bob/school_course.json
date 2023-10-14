@@ -1,0 +1,133 @@
+{
+	"schema": [
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "is_archived",
+			"data_type": "boolean",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "school_course_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "school_course_name",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "school_course_name_phonetic",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "school_course_partner_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "school_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "school_course",
+			"policyname": "rls_school_course",
+			"qual": "permission_check(resource_path, 'school_course'::text)",
+			"with_check": "permission_check(resource_path, 'school_course'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "school_course",
+			"policyname": "rls_school_course_restrictive",
+			"qual": "permission_check(resource_path, 'school_course'::text)",
+			"with_check": "permission_check(resource_path, 'school_course'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "school_course__school_id__fk",
+			"column_name": "school_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "school_course__pk",
+			"column_name": "school_course_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "school_course__school_course_partner_id__unique",
+			"column_name": "resource_path",
+			"constraint_type": "UNIQUE"
+		},
+		{
+			"constraint_name": "school_course__school_course_partner_id__unique",
+			"column_name": "school_course_partner_id",
+			"constraint_type": "UNIQUE"
+		}
+	],
+	"table_name": "school_course",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

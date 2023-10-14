@@ -1,0 +1,60 @@
+syntax = "proto3";
+
+package payment.v1;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/payment/v1;pmpb";
+
+message ImportStudentCoursesRequest {
+  bytes payload = 1;
+}
+
+message ImportStudentCoursesResponse {
+  message ImportStudentCoursesError {
+    int32 row_number = 1;
+    string error = 2;
+  }
+  repeated ImportStudentCoursesError errors = 1;
+}
+
+message ImportStudentClassesRequest {
+  bytes payload = 1;
+  bool is_add_class = 2;
+}
+
+message ImportStudentClassesResponse {
+  message ImportStudentClassesError {
+    int32 row_number = 1;
+    string error = 2;
+  }
+  repeated ImportStudentClassesError errors = 1;
+}
+
+message StudentCourseData {
+  string course_id = 1;
+  string location_id = 2;
+  google.protobuf.Timestamp start_date = 3;
+  google.protobuf.Timestamp end_date = 4;
+  google.protobuf.StringValue student_package_id = 5;
+  bool is_changed = 6;
+}
+
+message ManualUpsertStudentCourseRequest {
+  string student_id = 1;
+  repeated StudentCourseData student_courses = 2;
+}
+
+message ManualUpsertStudentCourseResponse {
+  bool successful = 1;
+}
+
+service CourseService {
+  rpc ImportStudentCourses(ImportStudentCoursesRequest)
+      returns (ImportStudentCoursesResponse);
+  rpc ImportStudentClasses(ImportStudentClassesRequest)
+      returns (ImportStudentClassesResponse);
+  rpc ManualUpsertStudentCourse(ManualUpsertStudentCourseRequest)
+      returns (ManualUpsertStudentCourseResponse);
+}

@@ -1,0 +1,84 @@
+SET 'auto.offset.reset' = 'earliest';
+CREATE STREAM IF NOT EXISTS ROLE_STREAM_ORIGIN_V1 WITH (kafka_topic='{{ .Values.global.environment }}.kec.datalake.bob.role', value_format='AVRO');
+CREATE STREAM IF NOT EXISTS ROLE_STREAM_FORMATED_V1
+    AS SELECT
+        ROLE_STREAM_ORIGIN_V1.AFTER->ROLE_ID AS ROLE_ID,
+        ROLE_STREAM_ORIGIN_V1.AFTER->CREATED_AT AS CREATED_AT,
+        ROLE_STREAM_ORIGIN_V1.AFTER->UPDATED_AT AS UPDATED_AT,
+        ROLE_STREAM_ORIGIN_V1.AFTER->DELETED_AT AS DELETED_AT,
+        ROLE_STREAM_ORIGIN_V1.AFTER->IS_SYSTEM AS IS_SYSTEM,
+        ROLE_STREAM_ORIGIN_V1.AFTER->ROLE_NAME AS ROLE_NAME
+
+    FROM ROLE_STREAM_ORIGIN_V1
+    WHERE ROLE_STREAM_ORIGIN_V1.AFTER->RESOURCE_PATH = '{{ .Values.kecResourcePath }}';
+
+CREATE STREAM IF NOT EXISTS GRANTED_ROLE_STREAM_ORIGIN_V1 WITH (kafka_topic='{{ .Values.global.environment }}.kec.datalake.bob.granted_role', value_format='AVRO');
+CREATE STREAM IF NOT EXISTS GRANTED_ROLE_STREAM_FORMATED_V1
+    AS SELECT
+        GRANTED_ROLE_STREAM_ORIGIN_V1.AFTER->GRANTED_ROLE_ID AS GRANTED_ROLE_ID,
+        GRANTED_ROLE_STREAM_ORIGIN_V1.AFTER->ROLE_ID AS ROLE_ID,
+        GRANTED_ROLE_STREAM_ORIGIN_V1.AFTER->USER_GROUP_ID AS USER_GROUP_ID,
+        GRANTED_ROLE_STREAM_ORIGIN_V1.AFTER->CREATED_AT AS CREATED_AT,
+        GRANTED_ROLE_STREAM_ORIGIN_V1.AFTER->UPDATED_AT AS UPDATED_AT,
+        GRANTED_ROLE_STREAM_ORIGIN_V1.AFTER->DELETED_AT AS DELETED_AT
+
+    FROM GRANTED_ROLE_STREAM_ORIGIN_V1
+    WHERE GRANTED_ROLE_STREAM_ORIGIN_V1.AFTER->RESOURCE_PATH = '{{ .Values.kecResourcePath }}';
+
+CREATE STREAM IF NOT EXISTS GRANTED_ROLE_ACCESS_PATH_STREAM_ORIGIN_V1 WITH (kafka_topic='{{ .Values.global.environment }}.kec.datalake.bob.granted_role_access_path', value_format='AVRO');
+CREATE STREAM IF NOT EXISTS GRANTED_ROLE_ACCESS_PATH_STREAM_FORMATED_V1
+    AS SELECT
+        GRANTED_ROLE_ACCESS_PATH_STREAM_ORIGIN_V1.AFTER->GRANTED_ROLE_ID AS GRANTED_ROLE_ID,
+        GRANTED_ROLE_ACCESS_PATH_STREAM_ORIGIN_V1.AFTER->LOCATION_ID AS LOCATION_ID,
+        GRANTED_ROLE_ACCESS_PATH_STREAM_ORIGIN_V1.AFTER->CREATED_AT AS CREATED_AT,
+        GRANTED_ROLE_ACCESS_PATH_STREAM_ORIGIN_V1.AFTER->UPDATED_AT AS UPDATED_AT,
+        GRANTED_ROLE_ACCESS_PATH_STREAM_ORIGIN_V1.AFTER->DELETED_AT AS DELETED_AT
+
+    FROM GRANTED_ROLE_ACCESS_PATH_STREAM_ORIGIN_V1
+    WHERE GRANTED_ROLE_ACCESS_PATH_STREAM_ORIGIN_V1.AFTER->RESOURCE_PATH = '{{ .Values.kecResourcePath }}';
+
+CREATE STREAM IF NOT EXISTS ROLE_PUBLIC_INFO_V1 
+AS SELECT
+    GRANTED_ROLE_ACCESS_PATH_STREAM_FORMATED_V1.LOCATION_ID AS LOCATION_ID,
+    GRANTED_ROLE_ACCESS_PATH_STREAM_FORMATED_V1.CREATED_AT AS GRANTED_ROLE_ACCESS_PATH_CREATED_AT,
+    GRANTED_ROLE_ACCESS_PATH_STREAM_FORMATED_V1.UPDATED_AT AS GRANTED_ROLE_ACCESS_PATH_UPDATED_AT,
+    GRANTED_ROLE_ACCESS_PATH_STREAM_FORMATED_V1.DELETED_AT AS GRANTED_ROLE_ACCESS_PATH_DELETED_AT,
+
+    GRANTED_ROLE_STREAM_FORMATED_V1.GRANTED_ROLE_ID AS KEY,
+    AS_VALUE(GRANTED_ROLE_STREAM_FORMATED_V1.GRANTED_ROLE_ID) AS GRANTED_ROLE_ID,
+    GRANTED_ROLE_STREAM_FORMATED_V1.USER_GROUP_ID AS USER_GROUP_ID,
+    GRANTED_ROLE_STREAM_FORMATED_V1.CREATED_AT AS GRANTED_ROLE_CREATED_AT,
+    GRANTED_ROLE_STREAM_FORMATED_V1.UPDATED_AT AS GRANTED_ROLE_UPDATED_AT,
+    GRANTED_ROLE_STREAM_FORMATED_V1.DELETED_AT AS GRANTED_ROLE_DELETED_AT,
+
+    ROLE_STREAM_FORMATED_V1.ROLE_ID AS ROLE_ID,
+    ROLE_STREAM_FORMATED_V1.ROLE_NAME AS ROLE_NAME,
+    ROLE_STREAM_FORMATED_V1.CREATED_AT AS ROLE_CREATED_AT,
+    ROLE_STREAM_FORMATED_V1.UPDATED_AT AS ROLE_UPDATED_AT,
+    ROLE_STREAM_FORMATED_V1.DELETED_AT AS ROLE_DELETED_AT
+
+FROM ROLE_STREAM_FORMATED_V1 
+JOIN GRANTED_ROLE_STREAM_FORMATED_V1 WITHIN 2 HOURS ON ROLE_STREAM_FORMATED_V1.ROLE_ID = GRANTED_ROLE_STREAM_FORMATED_V1.ROLE_ID
+JOIN GRANTED_ROLE_ACCESS_PATH_STREAM_FORMATED_V1 WITHIN 2 HOURS ON GRANTED_ROLE_ACCESS_PATH_STREAM_FORMATED_V1.GRANTED_ROLE_ID = GRANTED_ROLE_STREAM_FORMATED_V1.GRANTED_ROLE_ID;
+
+CREATE SINK CONNECTOR IF NOT EXISTS ROLE_STREAM_FORMATED_V1 WITH (
+      'connector.class'='io.confluent.connect.jdbc.JdbcSinkConnector',
+      'transforms.unwrap.delete.handling.mode'='drop',
+      'tasks.max'='1',
+      'topics'='{{ .Values.topicPrefix }}ROLE_PUBLIC_INFO_V1',
+      'fields.whitelist'='role_id,role_name,role_created_at,role_updated_at,role_deleted_at,granted_role_id,user_group_id,granted_role_created_at,granted_role_updated_at,granted_role_deleted_at,location_id,granted_role_access_path_created_at,granted_role_access_path_updated_at,granted_role_access_path_deleted_at',
+      'key.converter'='org.apache.kafka.connect.storage.StringConverter',
+      'value.converter'='io.confluent.connect.avro.AvroConverter',
+      'value.converter.schema.registry.url'='{{ .Values.cpRegistryHost }}',
+      'delete.enabled'='false',
+      'transforms.unwrap.drop.tombstones'='true',
+      'auto.create'='true',
+      'connection.url'='${file:/decrypted/kafka-connect.secrets.properties:kec_url}',
+      'insert.mode'='upsert',
+      'table.name.format'='bob.role_public_info',
+      'pk.mode'='record_key',
+      'transforms'='RenameField',
+      'transforms.RenameField.type'= 'org.apache.kafka.connect.transforms.ReplaceField$Value',
+      'transforms.RenameField.renames'='ROLE_ID:role_id,ROLE_NAME:role_name,ROLE_CREATED_AT:role_created_at,ROLE_UPDATED_AT:role_updated_at,ROLE_DELETED_AT:role_deleted_at,GRANTED_ROLE_ID:granted_role_id,USER_GROUP_ID:user_group_id,GRANTED_ROLE_CREATED_AT:granted_role_created_at,GRANTED_ROLE_UPDATED_AT:granted_role_updated_at,GRANTED_ROLE_DELETED_AT:granted_role_deleted_at,LOCATION_ID:location_id,GRANTED_ROLE_ACCESS_PATH_CREATED_AT:granted_role_access_path_created_at,GRANTED_ROLE_ACCESS_PATH_UPDATED_AT:granted_role_access_path_updated_at,GRANTED_ROLE_ACCESS_PATH_DELETED_AT:granted_role_access_path_deleted_at',
+      'pk.fields'='role_id'
+);

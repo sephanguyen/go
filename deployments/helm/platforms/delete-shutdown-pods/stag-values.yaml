@@ -1,0 +1,25 @@
+namespaces:
+  - stag-manabie-services
+  - stag-manabie-backoffice-mfe
+  - stag-manabie-frontend
+  - stag-manabie-backend
+  - stag-manabie-unleash
+  - stag-manabie-nats-jetstream
+  - stag-jprep-services
+  - stag-jprep-backoffice-mfe
+  - stag-jprep-frontend
+  - stag-jprep-backend
+  - stag-jprep-unleash
+  - stag-jprep-nats-jetstream
+  - uat-manabie-services
+  - uat-manabie-backoffice-mfe
+  - uat-manabie-frontend
+  - uat-manabie-backend
+  - uat-manabie-unleash
+  - uat-manabie-nats-jetstream
+  - uat-jprep-services
+  - uat-jprep-backoffice-mfe
+  - uat-jprep-frontend
+  - uat-jprep-backend
+  - uat-jprep-unleash
+  - uat-jprep-nats-jetstream

@@ -1,0 +1,2374 @@
+- name: allowed-queries
+  definition:
+    queries:
+      - name: Invoice_BillItems
+        query: >
+          query Invoice_BillItems($student_id: String, $billing_statuses:
+          [String!] = [], $limit: Int = 10, $offset: Int = 0) {
+            bill_item(
+              where: {student_id: {_eq: $student_id}, billing_status: {_in: $billing_statuses}}
+              limit: $limit
+              offset: $offset
+              order_by: {bill_item_sequence_number: asc}
+            ) {
+              billing_item_description
+              final_price
+              student_id
+              billing_date
+              billing_status
+              bill_item_sequence_number
+            }
+            bill_item_aggregate(
+              where: {student_id: {_eq: $student_id}, billing_status: {_in: $billing_statuses}}
+            ) {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: Invoice_InvoiceOne
+        query: |
+          query Invoice_InvoiceOne($invoice_id: String) {
+            invoice(where: {invoice_id: {_eq: $invoice_id}}) {
+              invoice_id
+              invoice_sequence_number
+              status
+              sub_total
+              student_id
+              total
+              type
+              created_at
+            }
+          }
+      - name: Invoice_BillItemsList
+        query: >
+          query Invoice_BillItemsList($invoice_id: String, $limit: Int = 10,
+          $offset: Int = 0) {
+            invoice_bill_item(
+              where: {invoice_id: {_eq: $invoice_id}}
+              limit: $limit
+              offset: $offset
+              order_by: {bill_item_sequence_number: asc}
+            ) {
+              invoice_bill_item_id
+              invoice_id
+              bill_item_sequence_number
+            }
+            invoice_bill_item_aggregate(where: {invoice_id: {_eq: $invoice_id}}) {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: Invoice_BillItemMany
+        query: >
+          query Invoice_BillItemMany($bill_item_sequence_number: [Int!], $limit:
+          Int = 10, $offset: Int = 0) {
+            bill_item(
+              where: {bill_item_sequence_number: {_in: $bill_item_sequence_number}}
+              limit: $limit
+              offset: $offset
+            ) {
+              bill_item_sequence_number
+              billing_item_description
+              billing_date
+              discount_amount
+              discount_amount_type
+              discount_amount_value
+              tax_amount
+              tax_percentage
+              tax_id
+              tax_category
+              final_price
+            }
+          }
+      - name: Invoice_Invoices
+        query: |
+          query Invoice_Invoices($limit: Int = 10, $offset: Int = 0) {
+            invoice(limit: $limit, offset: $offset) {
+              invoice_id
+              invoice_sequence_number
+              status
+              student_id
+              sub_total
+              total
+              type
+            }
+            invoice_aggregate {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: Invoice_InvoicesByStatus
+        query: >
+          query Invoice_InvoicesByStatus($status: String, $limit: Int = 10,
+          $offset: Int = 0) {
+            invoice(where: {status: {_eq: $status}}, limit: $limit, offset: $offset) {
+              invoice_id
+              invoice_sequence_number
+              status
+              student_id
+              sub_total
+              total
+              type
+            }
+            invoice_aggregate(where: {status: {_eq: $status}}) {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: Invoice_InvoicesByStudentId
+        query: >
+          query Invoice_InvoicesByStudentId($studentId: String, $limit: Int =
+          10, $offset: Int = 0) {
+            invoice(where: {student_id: {_eq: $studentId}}, limit: $limit, offset: $offset) {
+              invoice_id
+              invoice_sequence_number
+              status
+              student_id
+              sub_total
+              total
+              type
+            }
+            invoice_aggregate(where: {student_id: {_eq: $studentId}}) {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: Invoice_PaymentHistory
+        query: >
+          query Invoice_PaymentHistory($invoice_id: String, $payment_status:
+          String, $limit: Int = 10, $offset: Int = 0, $payment_order_by:
+          payment_order_by! = {payment_sequence_number: asc}) {
+              payment(
+                where: {invoice_id: {_eq: $invoice_id}, payment_status: {_eq: $payment_status}}
+                limit: $limit
+                offset: $offset
+                order_by: [$payment_order_by]
+              ) {
+                ...PaymentAttrs
+              invoice_id
+              payment_id
+              payment_sequence_number
+              result
+              created_at
+              updated_at
+            }
+              payment_aggregate(
+                where: {invoice_id: {_eq: $invoice_id}, payment_status: {_eq: $payment_status}}
+              ) {
+              aggregate {
+                count
+              }
+            }
+          }
+
+
+            fragment PaymentAttrs on payment {
+              payment_date
+              payment_due_date
+              payment_expiry_date
+              payment_method
+              payment_status
+          }
+      - name: Invoice_Users
+        query: |
+          query Invoice_Users($user_ids: [String!] = []) {
+            users(where: {user_id: {_in: $user_ids}}) {
+              user_id
+              name
+            }
+          }
+      - name: Invoice_ActionLog
+        query: >
+          query Invoice_ActionLog($invoice_id: String, $limit: Int = 5, $offset:
+          Int = 0, $invoice_action_log_order_by: invoice_action_log_order_by! =
+          {updated_at: desc}) {
+            invoice_action_log(
+              where: {invoice_id: {_eq: $invoice_id}}
+              limit: $limit
+              offset: $offset
+              order_by: [$invoice_action_log_order_by]
+            ) {
+              ...ActionLogAttrs
+            }
+            invoice_action_log_aggregate(where: {invoice_id: {_eq: $invoice_id}}) {
+              aggregate {
+                count
+              }
+            }
+          }
+
+
+          fragment ActionLogAttrs on invoice_action_log {
+            user_id
+            action
+            action_detail
+            action_comment
+            invoice_action_id
+            created_at
+            updated_at
+          }
+      - name: Invoice_ScheduledInvoices
+        query: >
+          query Invoice_ScheduledInvoices($limit: Int = 5, $offset: Int = 0,
+          $scheduled_invoice_statuses: [String!] = [],
+          $invoice_schedule_order_by: invoice_schedule_order_by! =
+          {invoice_date: desc}) {
+            invoice_schedule(
+              where: {status: {_in: $scheduled_invoice_statuses}}
+              limit: $limit
+              offset: $offset
+              order_by: [$invoice_schedule_order_by]
+            ) {
+              invoice_date
+              invoice_schedule_id
+              status
+              invoice_schedule_history {
+                invoice_schedule_history_id
+                number_of_failed_invoices
+                total_students
+                execution_end_date
+              }
+            }
+            invoice_schedule_aggregate(where: {status: {_in: $scheduled_invoice_statuses}}) {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: Invoice_ScheduledInvoicesStudent
+        query: >
+          query Invoice_ScheduledInvoicesStudent($invoice_schedule_history_id:
+          String, $limit: Int = 10, $offset: Int = 0) {
+            invoice_schedule_student(
+              where: {invoice_schedule_history_id: {_eq: $invoice_schedule_history_id}}
+            ) {
+              student_id
+              error_details
+            }
+            invoice_schedule_student_aggregate(
+              where: {invoice_schedule_history_id: {_eq: $invoice_schedule_history_id}}
+            ) {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: Invoice_InvoicesV2
+        query: >
+          query Invoice_InvoicesV2($limit: Int = 10, $offset: Int = 0,
+          $invoice_order_by: invoice_order_by! = {created_at: desc}) {
+            invoice(limit: $limit, offset: $offset, order_by: [$invoice_order_by]) {
+              ...InvoiceAttrs
+              payments(order_by: { created_at: desc }) {
+                ...PaymentAttrs
+              }
+            }
+            invoice_aggregate {
+              aggregate {
+                count
+              }
+            }
+          }
+
+
+          fragment InvoiceAttrs on invoice {
+            invoice_id
+            invoice_sequence_number
+            status
+            student_id
+            sub_total
+            total
+            type
+            created_at
+          }
+
+
+          fragment PaymentAttrs on payment {
+            payment_date
+            payment_due_date
+            payment_expiry_date
+            payment_method
+            payment_status
+          }
+      - name: Invoice_InvoicesByStudentIdV2
+        query: >
+          query Invoice_InvoicesByStudentIdV2($studentId: String, $limit: Int =
+          10, $offset: Int = 0, $invoice_order_by: invoice_order_by! =
+          {created_at: desc}) {
+            invoice(
+              limit: $limit
+              offset: $offset
+              order_by: [$invoice_order_by]
+              where: {student_id: {_eq: $studentId}}
+            ) {
+              ...InvoiceAttrs
+              payments(order_by: { created_at: desc }) {
+                ...PaymentAttrs
+              }
+            }
+            invoice_aggregate(where: {student_id: {_eq: $studentId}}) {
+              aggregate {
+                count
+              }
+            }
+          }
+
+
+          fragment InvoiceAttrs on invoice {
+            invoice_id
+            invoice_sequence_number
+            status
+            student_id
+            sub_total
+            total
+            type
+            created_at
+          }
+
+
+          fragment PaymentAttrs on payment {
+            payment_date
+            payment_due_date
+            payment_expiry_date
+            payment_method
+            payment_status
+          }
+      - name: Invoice_InvoicesToBulkIssue
+        query: >
+          query Invoice_InvoicesToBulkIssue($statuses: [String!] = [],
+          $createdFrom: timestamptz, $createdUntil: timestamptz, $types:
+          [String!] = []) {
+            invoice(
+              where: {status: {_in: $statuses}, type: {_in: $types}, created_at: {_gte: $createdFrom, _lte: $createdUntil}, total: {_gte: 0}}
+            ) {
+              invoice_id
+              invoice_sequence_number
+              status
+              type
+              created_at
+            }
+            invoice_aggregate(
+              where: {status: {_in: $statuses}, type: {_in: $types}, created_at: {_gte: $createdFrom, _lte: $createdUntil}, total: {_gte: 0}}
+            ) {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: Invoice_ActionLogV2
+        query: >
+          query Invoice_ActionLogV2($invoice_id: String, $limit: Int = 5,
+          $offset: Int = 0, $invoice_action_log_order_by:
+          invoice_action_log_order_by! = {updated_at: desc}) {
+            invoice_action_log(
+              where: {invoice_id: {_eq: $invoice_id}}
+              limit: $limit
+              offset: $offset
+              order_by: [$invoice_action_log_order_by]
+            ) {
+              ...ActionLogAttrs
+              payment_sequence_number
+            }
+            invoice_action_log_aggregate(where: {invoice_id: {_eq: $invoice_id}}) {
+              aggregate {
+                count
+              }
+            }
+          }
+
+
+          fragment ActionLogAttrs on invoice_action_log {
+            user_id
+            action
+            action_detail
+            action_comment
+            invoice_action_id
+            created_at
+            updated_at
+          }
+      - name: Invoice_PaymentRequests
+        query: >
+          query Invoice_PaymentRequests($limit: Int = 10, $offset: Int = 0,
+          $bulk_payment_request_order_by: bulk_payment_request_order_by! =
+          {created_at: desc}) {
+            bulk_payment_request(
+              limit: $limit
+              offset: $offset
+              order_by: [$bulk_payment_request_order_by]
+            ) {
+              payment_due_date_from
+              payment_due_date_to
+              payment_method
+              created_at
+              bulk_payment_request_id
+              bulk_payment_request_files {
+                file_name
+                bulk_payment_request_file_id
+                file_sequence_number
+              }
+            }
+            bulk_payment_request_aggregate {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: Invoice_PaymentsToBulkRequest
+        query: >
+          query Invoice_PaymentsToBulkRequest($payment_method: String!,
+          $payment_due_date_to: timestamptz!, $payment_due_date_from:
+          timestamptz!) {
+            payment(
+              where: {payment_method: {_eq: $payment_method}, payment_due_date: {_gte: $payment_due_date_from, _lte: $payment_due_date_to}, payment_status: {_eq: "PAYMENT_PENDING"}, is_exported: {_eq: false}}
+            ) {
+              payment_method
+              payment_id
+              payment_sequence_number
+              payment_due_date
+              payment_status
+            }
+            payment_aggregate(
+              where: {payment_method: {_eq: $payment_method}, payment_due_date: {_gte: $payment_due_date_from, _lte: $payment_due_date_to}, payment_status: {_eq: "PAYMENT_PENDING"}, is_exported: {_eq: false}}
+            ) {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: Invoice_ImportBankBranches
+        query: >
+          mutation Invoice_ImportBankBranches($data:
+          [bank_branch_insert_input!]!) {
+            insert_bank_branch(
+              objects: $data
+              on_conflict: {constraint: bank_branch__pk, update_columns: [bank_branch_code, bank_branch_name, bank_branch_phonetic_name, bank_id, is_archived, updated_at]}
+            ) {
+              affected_rows
+            }
+          }
+      - name: Invoice_CountBankBranchByIds
+        query: |
+          query Invoice_CountBankBranchByIds($bankBranchIds: [String!]!) {
+            bank_branch_aggregate(where: {bank_branch_id: {_in: $bankBranchIds}}) {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: Invoice_ImportBanks
+        query: |
+          mutation Invoice_ImportBanks($data: [bank_insert_input!]!) {
+            insert_bank(
+              objects: $data
+              on_conflict: {constraint: bank__pk, update_columns: [bank_code, bank_name, bank_name_phonetic, is_archived, updated_at]}
+            ) {
+              affected_rows
+            }
+          }
+      - name: Invoice_CountBankByIds
+        query: |
+          query Invoice_CountBankByIds($bankIds: [String!]!) {
+            bank_aggregate(where: {bank_id: {_in: $bankIds}}) {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: Invoice_CountActiveBankByBankCodes
+        query: |
+          query Invoice_CountActiveBankByBankCodes($bankCodes: [String!]!) {
+            bank_aggregate(where: {bank_code: {_in: $bankCodes}, is_archived: {_eq: false}}) {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: Invoice_GetBanksByBankCodes
+        query: |
+          query Invoice_GetBanksByBankCodes($bankCodes: [String!]!) {
+            bank(where: {bank_code: {_in: $bankCodes}}) {
+              bank_id
+              bank_code
+            }
+          }
+      - name: Invoice_ImportBankMapping
+        query: >
+          mutation Invoice_ImportBankMapping($data:
+          [bank_mapping_insert_input!]!) {
+            insert_bank_mapping(
+              objects: $data
+              on_conflict: {constraint: bank_mapping__pk, update_columns: [bank_id, partner_bank_id, is_archived, remarks]}
+            ) {
+              affected_rows
+            }
+          }
+      - name: Invoice_ImportPartnerConvenienceStore
+        query: >
+          mutation Invoice_ImportPartnerConvenienceStore($data:
+          [partner_convenience_store_insert_input!]!) {
+            insert_partner_convenience_store(
+              objects: $data
+              on_conflict: {constraint: partner_convenience_store___pk, update_columns: [manufacturer_code, company_code, shop_code, company_name, company_tel_number, postal_code, address1, address2, remarks, message1, message2, message3, message4, message5, message6, message7, message8, message9, message10, message11, message12, message13, message14, message15, message16, message17, message18, message19, message20, message21, message22, message23, message24]}
+            ) {
+              affected_rows
+            }
+          }
+      - name: Invoice_PaymentValidations
+        query: |
+          query Invoice_PaymentValidations($limit: Int = 10, $offset: Int = 0) {
+            bulk_payment_validations(
+              limit: $limit
+              offset: $offset
+              order_by: {created_at: desc}
+            ) {
+              payment_method
+              validation_date
+            }
+            bulk_payment_validations_aggregate {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: Invoice_PaymentValidationsV2
+        query: >
+          query Invoice_PaymentValidationsV2($limit: Int = 10, $offset: Int = 0)
+          {
+            bulk_payment_validations(
+              limit: $limit
+              offset: $offset
+              order_by: {created_at: desc}
+            ) {
+              bulk_payment_validations_id
+              payment_method
+              validation_date
+            }
+            bulk_payment_validations_aggregate {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: Invoice_GetOneNextInvoiceSchedule
+        query: |
+          query Invoice_GetOneNextInvoiceSchedule {
+            invoice_schedule(order_by: {invoice_date: asc}, where: {status: {_eq: "INVOICE_SCHEDULE_SCHEDULED"}}, limit: 1) {
+              invoice_schedule_id
+              invoice_date
+            }
+          }
+      - name: Invoice_BulkPaymentRequestFiles
+        query: >
+          query Invoice_BulkPaymentRequestFiles($limit: Int = 10, $offset: Int =
+          0, $bulk_payment_request_file_order_by:
+          bulk_payment_request_file_order_by! = {created_at: desc}) {
+            bulk_payment_request_file(
+              limit: $limit
+              offset: $offset
+              order_by: [$bulk_payment_request_file_order_by]
+            ) {
+              bulk_payment_request_file_id
+              bulk_payment_request_id
+              created_at
+              file_name
+              file_url
+              is_downloaded
+              parent_payment_request_file_id
+            }
+            bulk_payment_request_file_aggregate {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: Invoice_PaymentRequestOne
+        query: |
+          query Invoice_PaymentRequestOne($bulkPaymentRequestId: String) {
+            bulk_payment_request(
+              where: {bulk_payment_request_id: {_eq: $bulkPaymentRequestId}}
+            ) {
+              bulk_payment_request_id
+              payment_due_date_from
+              payment_due_date_to
+              payment_method
+              created_at
+            }
+          }
+      - name: Invoice_PrefectureList
+        query: |
+          query Invoice_PrefectureList($country: String!) {
+            prefecture(where: {country: {_eq: $country}}, order_by: {prefecture_code: asc}) {
+              prefecture_id
+              name
+            }
+          }
+      - name: Invoice_PaymentRequestsWithPaymentMethod
+        query: >
+          query
+          Invoice_PaymentRequestsWithPaymentMethod($bulk_payment_request_ids:
+          [String!] = []) {
+            bulk_payment_request(
+              where: {bulk_payment_request_id: {_in: $bulk_payment_request_ids}}
+            ) {
+              payment_method
+              bulk_payment_request_id
+            }
+          }
+      - name: Invoice_InvoicesFilter
+        query: >
+          query Invoice_InvoicesFilter($statuses: [String!], $createdFrom:
+          timestamptz, $createdUntil: timestamptz, $types: [String!],
+          $studentIds: [String!], $amount: numeric, $paymentMethods: [String!],
+          $paymentDateFrom: timestamptz, $paymentDateTo: timestamptz,
+          $paymentDueDateFrom: timestamptz, $paymentDueDateTo: timestamptz,
+          $paymentExpiryDateFrom: timestamptz, $paymentExpiryDateTo:
+          timestamptz, $isExported: Boolean, $limit: Int = 10, $offset: Int = 0,
+          $invoice_order_by: invoice_order_by! = {created_at: desc},
+          $studentName: String, $maxAmount: numeric, $minAmount: numeric) {
+            invoice(
+              limit: $limit
+              offset: $offset
+              where: {status: {_in: $statuses}, type: {_in: $types}, student_id: {_in: $studentIds}, created_at: {_gte: $createdFrom, _lte: $createdUntil}, payments: {amount: {_gte: $minAmount, _lte: $maxAmount}, payment_method: {_in: $paymentMethods}, payment_date: {_gte: $paymentDateFrom, _lte: $paymentDateTo}, payment_due_date: {_gte: $paymentDueDateFrom, _lte: $paymentDueDateTo}, payment_expiry_date: {_gte: $paymentExpiryDateFrom, _lte: $paymentExpiryDateTo}}, is_exported: {_eq: $isExported}, student: {user: {name: {_ilike: $studentName}}}}
+              order_by: [$invoice_order_by]
+            ) {
+              ...InvoiceAttrs
+              is_exported
+              student {
+                user {
+                  name
+                }
+              }
+              payments(order_by: {created_at: desc}) {
+                ...PaymentAttrs
+                amount
+                is_exported
+              }
+            }
+            invoice_aggregate(
+              where: {status: {_in: $statuses}, type: {_in: $types}, student_id: {_in: $studentIds}, created_at: {_gte: $createdFrom, _lte: $createdUntil}, payments: {amount: {_gte: $minAmount, _lte: $maxAmount}, payment_method: {_in: $paymentMethods}, payment_date: {_gte: $paymentDateFrom, _lte: $paymentDateTo}, payment_due_date: {_gte: $paymentDueDateFrom, _lte: $paymentDueDateTo}, payment_expiry_date: {_gte: $paymentExpiryDateFrom, _lte: $paymentExpiryDateTo}}, is_exported: {_eq: $isExported}, student: {user: {name: {_ilike: $studentName}}}}
+              order_by: [$invoice_order_by]
+            ) {
+              aggregate {
+                count
+              }
+            }
+          }
+
+
+          fragment InvoiceAttrs on invoice {
+            invoice_id
+            invoice_sequence_number
+            status
+            student_id
+            sub_total
+            total
+            type
+            created_at
+          }
+
+
+          fragment PaymentAttrs on payment {
+            payment_date
+            payment_due_date
+            payment_expiry_date
+            payment_method
+            payment_status
+          }
+      - name: Invoice_InvoiceCountByStatus
+        query: |
+          query Invoice_InvoiceCountByStatus($whereInvoices: invoice_bool_exp) {
+            all_count: invoice_aggregate(where: $whereInvoices) {
+              aggregate {
+                count
+              }
+            }
+            paid_count: invoice_aggregate(
+              where: {_and: [$whereInvoices, {status: {_eq: "PAID"}}]}
+            ) {
+              aggregate {
+                count
+              }
+            }
+            void_count: invoice_aggregate(
+              where: {_and: [$whereInvoices, {status: {_eq: "VOID"}}]}
+            ) {
+              aggregate {
+                count
+              }
+            }
+            issued_count: invoice_aggregate(
+              where: {_and: [$whereInvoices, {status: {_eq: "ISSUED"}}]}
+            ) {
+              aggregate {
+                count
+              }
+            }
+            refunded_count: invoice_aggregate(
+              where: {_and: [$whereInvoices, {status: {_eq: "REFUNDED"}}]}
+            ) {
+              aggregate {
+                count
+              }
+            }
+            draft_count: invoice_aggregate(
+              where: {_and: [$whereInvoices, {status: {_eq: "DRAFT"}}]}
+            ) {
+              aggregate {
+                count
+              }
+            }
+            failed_count: invoice_aggregate(
+              where: {_and: [$whereInvoices, {status: {_eq: "FAILED"}}]}
+            ) {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: Invoice_InvoicesV3
+        query: >
+          query Invoice_InvoicesV3($limit: Int = 10, $offset: Int = 0,
+          $invoice_order_by: invoice_order_by! = {created_at: desc}) {
+            invoice(limit: $limit, offset: $offset, order_by: [$invoice_order_by]) {
+              ...InvoiceAttrs
+              payments(order_by: {created_at: desc}) {
+                ...PaymentAttrsV2
+              }
+            }
+            invoice_aggregate {
+              aggregate {
+                count
+              }
+            }
+          }
+
+
+          fragment InvoiceAttrs on invoice {
+            invoice_id
+            invoice_sequence_number
+            status
+            student_id
+            sub_total
+            total
+            type
+            created_at
+          }
+
+
+          fragment PaymentAttrsV2 on payment {
+            payment_date
+            payment_due_date
+            payment_expiry_date
+            payment_method
+            payment_status
+            is_exported
+          }
+      - name: Invoice_InvoicesByStudentIdV3
+        query: >
+          query Invoice_InvoicesByStudentIdV3($studentId: String, $limit: Int =
+          10, $offset: Int = 0, $invoice_order_by: invoice_order_by! =
+          {created_at: desc}) {
+            invoice(
+              limit: $limit
+              offset: $offset
+              order_by: [$invoice_order_by]
+              where: {student_id: {_eq: $studentId}}
+            ) {
+              ...InvoiceAttrs
+              payments(order_by: {created_at: desc}) {
+                ...PaymentAttrsV2
+              }
+            }
+            invoice_aggregate(where: {student_id: {_eq: $studentId}}) {
+              aggregate {
+                count
+              }
+            }
+          }
+
+
+          fragment InvoiceAttrs on invoice {
+            invoice_id
+            invoice_sequence_number
+            status
+            student_id
+            sub_total
+            total
+            outstanding_balance
+            amount_paid
+            type
+            created_at
+          }
+
+
+          fragment PaymentAttrsV2 on payment {
+            payment_date
+            payment_due_date
+            payment_expiry_date
+            payment_method
+            payment_status
+            is_exported
+          }
+      - name: Invoice_InvoiceOneV2
+        query: |
+          query Invoice_InvoiceOneV2($invoice_id: String) {
+            invoice(where: {invoice_id: {_eq: $invoice_id}}) {
+              ...InvoiceAttrs
+              payments(order_by: {created_at: desc}) {
+                ...PaymentAttrsV2
+              }
+            }
+          }
+
+          fragment InvoiceAttrs on invoice {
+            invoice_id
+            invoice_sequence_number
+            status
+            student_id
+            sub_total
+            total
+            outstanding_balance
+            amount_paid
+            type
+            created_at
+          }
+
+          fragment PaymentAttrsV2 on payment {
+            payment_date
+            payment_due_date
+            payment_expiry_date
+            payment_method
+            payment_status
+            is_exported
+          }
+      - name: Invoices_InvoiceCustomFilter
+        query: >
+          query Invoices_InvoiceCustomFilter($whereInvoices: invoice_bool_exp,
+          $limit: Int = 10, $offset: Int = 0, $invoice_order_by:
+          invoice_order_by! = {created_at: desc}) {
+            invoice_aggregate(order_by: [$invoice_order_by], where: $whereInvoices) {
+              aggregate {
+                count
+              }
+            }
+            invoice(
+              limit: $limit
+              offset: $offset
+              order_by: [$invoice_order_by]
+              where: $whereInvoices
+            ) {
+              ...InvoiceAttrs
+              is_exported
+              student {
+                user {
+                  name
+                }
+              }
+              payments(order_by: {created_at: desc}) {
+                ...PaymentAttrs
+                amount
+                is_exported
+              }
+            }
+          }
+
+
+          fragment InvoiceAttrs on invoice {
+            invoice_id
+            invoice_sequence_number
+            status
+            student_id
+            sub_total
+            total
+            type
+            created_at
+          }
+
+
+          fragment PaymentAttrs on payment {
+            payment_date
+            payment_due_date
+            payment_expiry_date
+            payment_method
+            payment_status
+          }
+      - name: Invoice_GetManyBankBranchesReference
+        query: >
+          query Invoice_GetManyBankBranchesReference($bank_id: String!, $name:
+          String) {
+            bank_branch(
+              where: {bank_id: {_eq: $bank_id}}
+              order_by: {bank_branch_code: asc}
+            ) {
+              bank_branch_id
+              bank_branch_name
+              bank_branch_code
+            }
+          }
+      - name: Invoice_GetManyBanksReference
+        query: |
+          query Invoice_GetManyBanksReference($name: String) {
+            bank(order_by: {bank_code: asc}) {
+              bank_id
+              bank_name
+              bank_code
+            }
+          }
+      - name: Invoice_BillItemsV2
+        query: >
+          query Invoice_BillItemsV2($student_id: String, $billing_statuses:
+          [String!] = [], $limit: Int = 10, $offset: Int = 0) {
+            bill_item(
+              where: {student_id: {_eq: $student_id}, billing_status: {_in: $billing_statuses}}
+              limit: $limit
+              offset: $offset
+              order_by: {bill_item_sequence_number: asc}
+            ) {
+              billing_item_description
+              final_price
+              student_id
+              billing_date
+              billing_status
+              bill_item_sequence_number
+              location_name
+            }
+            bill_item_aggregate(
+              where: {student_id: {_eq: $student_id}, billing_status: {_in: $billing_statuses}}
+            ) {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: Invoice_GetStudentPaymentDetailByStudentId
+        query: >
+          query Invoice_GetStudentPaymentDetailByStudentId($student_id: String!)
+          {
+            student_payment_detail(where: {student_id: {_eq: $student_id}}) {
+              student_payment_detail_id
+              student_id
+              payment_method
+              payer_name
+              payer_phone_number
+              billing_addresses {
+                billing_address_id
+                postal_code
+                prefecture {
+                  name
+                  prefecture_id
+                }
+                city
+                street1
+                street2
+              }
+              bank_accounts {
+                bank_account_id
+                is_verified
+                bank {
+                  bank_id
+                  bank_name
+                  bank_code
+                }
+                bank_branch {
+                  bank_branch_id
+                  bank_branch_name
+                  bank_branch_code
+                }
+                bank_account_holder
+                bank_account_number
+                bank_account_type
+              }
+            }
+          }
+      - name: Invoice_BillItemsV3
+        query: >
+          query Invoice_BillItemsV3($student_id: String, $billing_statuses:
+          [String!] = [], $limit: Int = 10, $offset: Int = 0) {
+            bill_item(
+              where: {student_id: {_eq: $student_id}, billing_status: {_in: $billing_statuses}}
+              limit: $limit
+              offset: $offset
+              order_by: {bill_item_sequence_number: asc}
+            ) {
+              billing_item_description
+              final_price
+              student_id
+              billing_date
+              billing_status
+              bill_item_sequence_number
+              location_name
+              bill_type
+              adjustment_price
+            }
+            bill_item_aggregate(
+              where: {student_id: {_eq: $student_id}, billing_status: {_in: $billing_statuses}}
+            ) {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: Invoice_BillItemManyV2
+        query: >
+          query Invoice_BillItemManyV2($bill_item_sequence_number: [Int!],
+          $limit: Int = 10, $offset: Int = 0) {
+            bill_item(
+              where: {bill_item_sequence_number: {_in: $bill_item_sequence_number}}
+              limit: $limit
+              offset: $offset
+            ) {
+              bill_item_sequence_number
+              billing_item_description
+              billing_date
+              discount_amount
+              discount_amount_type
+              discount_amount_value
+              tax_amount
+              tax_percentage
+              tax_id
+              tax_category
+              final_price
+              bill_type
+              adjustment_price
+            }
+          }
+      - name: Invoices_InvoiceCustomFilterV2
+        query: >
+          query Invoices_InvoiceCustomFilterV2($whereInvoices: invoice_bool_exp,
+          $limit: Int = 10, $offset: Int = 0, $invoice_order_by:
+          invoice_order_by! = {created_at: desc}) {
+            invoice_aggregate(order_by: [$invoice_order_by], where: $whereInvoices) {
+              aggregate {
+                count
+              }
+            }
+            invoice(
+              limit: $limit
+              offset: $offset
+              order_by: [$invoice_order_by]
+              where: $whereInvoices
+            ) {
+              ...InvoiceAttrs
+              is_exported
+              student {
+                user {
+                  name
+                }
+              }
+              payments(order_by: {created_at: desc}) {
+                ...PaymentAttrs
+                amount
+                is_exported
+                payment_id
+              }
+            }
+          }
+
+
+          fragment InvoiceAttrs on invoice {
+            invoice_id
+            invoice_sequence_number
+            status
+            student_id
+            sub_total
+            total
+            outstanding_balance
+            amount_paid
+            type
+            created_at
+          }
+
+
+          fragment PaymentAttrs on payment {
+            payment_date
+            payment_due_date
+            payment_expiry_date
+            payment_method
+            payment_status
+          }
+      - name: Invoice_BillItemsV4
+        query: >
+          query Invoice_BillItemsV4($student_id: String, $billing_statuses:
+          [String!] = [], $limit: Int = 10, $offset: Int = 0) {
+            bill_item(
+              where: {student_id: {_eq: $student_id}, billing_status: {_in: $billing_statuses}, is_reviewed: {_eq: true}}
+              limit: $limit
+              offset: $offset
+              order_by: {bill_item_sequence_number: asc}
+            ) {
+              billing_item_description
+              final_price
+              student_id
+              billing_date
+              billing_status
+              bill_item_sequence_number
+              location_name
+              bill_type
+              adjustment_price
+            }
+            bill_item_aggregate(
+              where: {student_id: {_eq: $student_id}, billing_status: {_in: $billing_statuses}}
+            ) {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: Invoice_Eibanam_GetListBankBranch
+        query: |
+          query Invoice_Eibanam_GetListBankBranch($limit: Int = 10) {
+            bank_branch(
+              order_by: {created_at: desc}
+              where: {is_archived: {_eq: false}}
+              limit: $limit
+            ) {
+              bank_branch_id
+              bank_branch_code
+              bank_branch_name
+            }
+          }
+      - name: Invoice_Eibanam_GetListBank
+        query: |
+          query Invoice_Eibanam_GetListBank($limit: Int = 10) {
+            bank(
+              order_by: {created_at: desc}
+              where: {is_archived: {_eq: false}}
+              limit: $limit
+            ) {
+              bank_id
+              bank_code
+              bank_name
+            }
+          }
+      - name: Invoice_ScheduledInvoicesV2
+        query: >
+          query Invoice_ScheduledInvoicesV2($limit: Int = 5, $offset: Int = 0,
+          $scheduled_invoice_statuses: [String!] = [],
+          $invoice_schedule_history: Boolean!, $invoice_schedule_order_by:
+          invoice_schedule_order_by! = {invoice_date: desc}) {
+            invoice_schedule(
+              where: {status: {_in: $scheduled_invoice_statuses}, invoice_schedule_history: {invoice_schedule_history_id: {_is_null: $invoice_schedule_history}}}
+              limit: $limit
+              offset: $offset
+              order_by: [$invoice_schedule_order_by]
+            ) {
+              invoice_date
+              invoice_schedule_id
+              status
+              invoice_schedule_history {
+                invoice_schedule_history_id
+                number_of_failed_invoices
+                total_students
+                execution_end_date
+              }
+            }
+            invoice_schedule_aggregate(
+              where: {status: {_in: $scheduled_invoice_statuses}, invoice_schedule_history: {invoice_schedule_history_id: {_is_null: $invoice_schedule_history}}}
+            ) {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: Invoice_PaymentHistoryV2
+        query: >
+          query Invoice_PaymentHistoryV2($invoice_id: String, $payment_status:
+          String, $limit: Int = 10, $offset: Int = 0, $payment_order_by:
+          payment_order_by! = {payment_sequence_number: asc}) {
+            payment(
+              where: {invoice_id: {_eq: $invoice_id}, payment_status: {_eq: $payment_status}}
+              limit: $limit
+              offset: $offset
+              order_by: [$payment_order_by]
+            ) {
+              ...PaymentAttrs
+              invoice_id
+              payment_id
+              payment_sequence_number
+              result
+              result_code
+              created_at
+              updated_at
+            }
+            payment_aggregate(
+              where: {invoice_id: {_eq: $invoice_id}, payment_status: {_eq: $payment_status}}
+            ) {
+              aggregate {
+                count
+              }
+            }
+          }
+
+
+          fragment PaymentAttrs on payment {
+            payment_date
+            payment_due_date
+            payment_expiry_date
+            payment_method
+            payment_status
+          }
+      - name: Invoice_PrefectureListWithPrefectureCode
+        query: |
+          query Invoice_PrefectureListWithPrefectureCode($country: String!) {
+            prefecture(where: {country: {_eq: $country}}, order_by: {prefecture_code: asc}) {
+              prefecture_id
+              name
+              prefecture_code
+            }
+          }
+      - name: Invoice_GetStudentPaymentDetailByStudentIdWithPrefectureCode
+        query: >
+          query
+          Invoice_GetStudentPaymentDetailByStudentIdWithPrefectureCode($student_id:
+          String!) {
+            student_payment_detail(where: {student_id: {_eq: $student_id}}) {
+              student_payment_detail_id
+              student_id
+              payment_method
+              payer_name
+              payer_phone_number
+              billing_addresses {
+                billing_address_id
+                postal_code
+                prefecture {
+                  name
+                  prefecture_code
+                }
+                city
+                street1
+                street2
+              }
+              bank_accounts {
+                bank_account_id
+                is_verified
+                bank {
+                  bank_id
+                  bank_name
+                  bank_code
+                }
+                bank_branch {
+                  bank_branch_id
+                  bank_branch_name
+                  bank_branch_code
+                }
+                bank_account_holder
+                bank_account_number
+                bank_account_type
+              }
+            }
+          }
+      - name: Invoice_AdjustmentsByInvoice
+        query: >
+          query Invoice_AdjustmentsByInvoice($invoice_id: String!,
+          $adjustment_order_by: [invoice_adjustment_order_by!] =
+          [{invoice_adjustment_sequence_number: asc}]) {
+            invoice_adjustment(
+              where: {invoice_id: {_eq: $invoice_id}, deleted_at: {_is_null: true}}
+              order_by: $adjustment_order_by
+            ) {
+              invoice_adjustment_id
+              invoice_adjustment_sequence_number
+              description
+              amount
+              created_at
+            }
+            invoice_adjustment_aggregate(
+              where: {invoice_id: {_eq: $invoice_id}, deleted_at: {_is_null: true}}
+            ) {
+              aggregate {
+                sum {
+                  amount
+                }
+              }
+            }
+          }
+      - name: Invoice_ActionLogV3
+        query: >
+          query Invoice_ActionLogV3($invoice_id: String, $limit: Int = 5,
+          $offset: Int = 0, $invoice_action_log_order_by:
+          invoice_action_log_order_by! = {updated_at: desc}) {
+            invoice_action_log(
+              where: {invoice_id: {_eq: $invoice_id}}
+              limit: $limit
+              offset: $offset
+              order_by: [$invoice_action_log_order_by]
+            ) {
+              ...ActionLogAttrs
+              payment_sequence_number
+              result_code {
+                previous_result_code
+                validated_result_code
+              }
+            }
+            invoice_action_log_aggregate(where: {invoice_id: {_eq: $invoice_id}}) {
+              aggregate {
+                count
+              }
+            }
+          }
+
+
+          fragment ActionLogAttrs on invoice_action_log {
+            user_id
+            action
+            action_detail
+            action_comment
+            invoice_action_id
+            created_at
+            updated_at
+          }
+      - name: Invoice_InvoiceOneV3
+        query: |
+          query Invoice_InvoiceOneV3($invoice_id: String) {
+            invoice(where: {invoice_id: {_eq: $invoice_id}}) {
+              ...InvoiceAttrs
+              payments(order_by: {created_at: desc}) {
+                ...PaymentAttrsV2
+              }
+            }
+          }
+
+          fragment InvoiceAttrs on invoice {
+            invoice_id
+            invoice_sequence_number
+            status
+            student_id
+            sub_total
+            total
+            outstanding_balance
+            amount_paid
+            type
+            created_at
+          }
+
+          fragment PaymentAttrsV2 on payment {
+            payment_date
+            payment_due_date
+            payment_expiry_date
+            payment_method
+            payment_status
+            is_exported
+          }
+      - name: Invoice_InvoicesToBulkIssueV2
+        query: >
+          query Invoice_InvoicesToBulkIssueV2($statuses: [String!] = [],
+          $createdFrom: timestamptz, $createdUntil: timestamptz, $types:
+          [String!] = []) {
+            invoice(
+              where: {status: {_in: $statuses}, type: {_in: $types}, created_at: {_gte: $createdFrom, _lte: $createdUntil}, total: {_gt: 0}}
+            ) {
+              invoice_id
+              invoice_sequence_number
+              status
+              type
+              created_at
+            }
+            invoice_aggregate(
+              where: {status: {_in: $statuses}, type: {_in: $types}, created_at: {_gte: $createdFrom, _lte: $createdUntil}, total: {_gt: 0}}
+            ) {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: Invoice_PaymentHistoryWithIsExported
+        query: >
+          query Invoice_PaymentHistoryWithIsExported($invoice_id: String, $payment_status: String, $limit: Int = 10, $offset: Int = 0, $payment_order_by: payment_order_by! = {payment_sequence_number: asc}) {
+            payment(
+              where: {invoice_id: {_eq: $invoice_id}, payment_status: {_eq: $payment_status}}
+              limit: $limit
+              offset: $offset
+              order_by: [$payment_order_by]
+            ) {
+              ...PaymentAttrsV2
+              invoice_id
+              payment_id
+              payment_sequence_number
+              result
+              result_code
+              created_at
+              updated_at
+            }
+            payment_aggregate(
+              where: {invoice_id: {_eq: $invoice_id}, payment_status: {_eq: $payment_status}}
+            ) {
+              aggregate {
+                count
+              }
+            }
+          }
+
+          fragment PaymentAttrsV2 on payment {
+            payment_date
+            payment_due_date
+            payment_expiry_date
+            payment_method
+            payment_status
+            is_exported
+          }
+      - name: Invoice_InvoiceOneWithAmountRefundedV3
+        query: >
+          query Invoice_InvoiceOneWithAmountRefundedV3($invoice_id: String) {
+            invoice(where: {invoice_id: {_eq: $invoice_id}}) {
+              ...InvoiceAttrs
+              amount_refunded
+              payments(order_by: {created_at: desc}) {
+                ...PaymentAttrsV2
+              }
+            }
+          }
+
+          fragment InvoiceAttrs on invoice {
+            invoice_id
+            invoice_sequence_number
+            status
+            student_id
+            sub_total
+            total
+            outstanding_balance
+            amount_paid
+            type
+            created_at
+          }
+
+          fragment PaymentAttrsV2 on payment {
+            payment_date
+            payment_due_date
+            payment_expiry_date
+            payment_method
+            payment_status
+            is_exported
+          }
+      - name: Invoices_InvoiceCustomFilterV3
+        query: >
+          query Invoices_InvoiceCustomFilterV3($whereInvoices: invoice_bool_exp,
+          $limit: Int = 10, $offset: Int = 0, $invoice_order_by:
+          invoice_order_by! = {created_at: desc}) {
+            invoice_aggregate(order_by: [$invoice_order_by], where: $whereInvoices) {
+              aggregate {
+                count
+              }
+            }
+            invoice(
+              limit: $limit
+              offset: $offset
+              order_by: [$invoice_order_by]
+              where: $whereInvoices
+            ) {
+              ...InvoiceAttrsV2
+              student {
+                user {
+                  name
+                }
+              }
+              payments(order_by: {created_at: desc}) {
+                ...PaymentAttrsV3
+              }
+            }
+          }
+
+
+          fragment InvoiceAttrsV2 on invoice {
+            invoice_id
+            invoice_sequence_number
+            is_exported
+            status
+            student_id
+            sub_total
+            total
+            outstanding_balance
+            amount_paid
+            type
+            created_at
+          }
+
+          fragment PaymentAttrsV3 on payment {
+            payment_date
+            payment_due_date
+            payment_expiry_date
+            payment_method
+            payment_status
+            amount
+            is_exported
+            payment_id
+            payment_sequence_number
+          }
+      - name: Invoice_InvoicesByStudentIdV4
+        query: >
+          query Invoice_InvoicesByStudentIdV4($studentId: String, $limit: Int =
+          10, $offset: Int = 0, $invoice_order_by: invoice_order_by! =
+          {created_at: desc}) {
+            invoice(
+              limit: $limit
+              offset: $offset
+              order_by: [$invoice_order_by]
+              where: {student_id: {_eq: $studentId}}
+            ) {
+              ...InvoiceAttrsV2
+              payments(order_by: {created_at: desc}) {
+                ...PaymentAttrsV3
+              }
+            }
+            invoice_aggregate(where: {student_id: {_eq: $studentId}}) {
+              aggregate {
+                count
+              }
+            }
+          }
+
+
+          fragment InvoiceAttrsV2 on invoice {
+            invoice_id
+            invoice_sequence_number
+            is_exported
+            status
+            student_id
+            sub_total
+            total
+            outstanding_balance
+            amount_paid
+            type
+            created_at
+          }
+
+
+          fragment PaymentAttrsV3 on payment {
+            payment_date
+            payment_due_date
+            payment_expiry_date
+            payment_method
+            payment_status
+            amount
+            is_exported
+            payment_id
+            payment_sequence_number
+          }
+      - name: Invoice_GetPaymentsList
+        query: >
+          query Invoice_GetPaymentsList($where_payments: payment_bool_exp,
+          $limit: Int = 10, $offset: Int = 0, $payment_order_by:
+          [payment_order_by!] = {payment_sequence_number: desc}) {
+            payment(
+              where: $where_payments
+              limit: $limit
+              offset: $offset
+              order_by: $payment_order_by
+            ) {
+              payment_sequence_number
+              payment_status
+              student_id
+              student {
+                name
+              }
+              amount
+              payment_method
+              created_at
+              payment_due_date
+              payment_expiry_date
+              payment_date
+              result
+              result_code
+              invoice_id
+              invoice {
+                invoice_sequence_number
+              }
+              is_exported
+            }
+            payment_aggregate(where: $where_payments) {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: Invoices_InvoiceCustomFilterPhase2V4
+        query: >
+          query Invoices_InvoiceCustomFilterPhase2V4($whereInvoices: invoice_bool_exp,
+          $limit: Int = 10, $offset: Int = 0, $invoice_order_by:
+          invoice_order_by! = {created_at: desc}) {
+            invoice_aggregate(order_by: [$invoice_order_by], where: $whereInvoices) {
+              aggregate {
+                count
+              }
+            }
+            invoice(
+              limit: $limit
+              offset: $offset
+              order_by: [$invoice_order_by]
+              where: $whereInvoices
+            ) {
+              ...InvoiceAttrsV2
+              user {
+                name
+              }
+              payments(order_by: {created_at: desc}) {
+                ...PaymentAttrsV3
+              }
+            }
+          }
+          fragment InvoiceAttrsV2 on invoice {
+            invoice_id
+            invoice_sequence_number
+            is_exported
+            status
+            student_id
+            sub_total
+            total
+            outstanding_balance
+            amount_paid
+            type
+            created_at
+          }
+          fragment PaymentAttrsV3 on payment {
+            payment_date
+            payment_due_date
+            payment_expiry_date
+            payment_method
+            payment_status
+            amount
+            is_exported
+            payment_id
+            payment_sequence_number
+          }
+      - name: Invoice_PaymentHistoryPhase2V1
+        query: >
+          query Invoice_PaymentHistoryPhase2V1($invoice_id: String,
+          $payment_status: String, $limit: Int = 10, $offset: Int = 0,
+          $payment_order_by: payment_order_by! = {payment_sequence_number: asc})
+          {
+            payment(
+              where: {invoice_id: {_eq: $invoice_id}, payment_status: {_eq: $payment_status}}
+              limit: $limit
+              offset: $offset
+              order_by: [$payment_order_by]
+            ) {
+              payment_date
+              payment_due_date
+              payment_expiry_date
+              payment_method
+              payment_status
+              is_exported
+              invoice_id
+              payment_id
+              payment_sequence_number
+              result
+              result_code
+              created_at
+              updated_at
+              amount
+            }
+            payment_aggregate(
+              where: {invoice_id: {_eq: $invoice_id}, payment_status: {_eq: $payment_status}}
+            ) {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: Invoice_InvoicesByStudentIdPhase2V2
+        query: >
+          query Invoice_InvoicesByStudentIdPhase2V2($studentId: String, $limit: Int =
+          10, $offset: Int = 0, $invoice_order_by: invoice_order_by! =
+          {created_at: desc}) {
+            invoice(
+              limit: $limit
+              offset: $offset
+              order_by: [$invoice_order_by]
+              where: {student_id: {_eq: $studentId}, status: {_neq: "FAILED"}}
+            ) {
+              ...InvoiceAttrsV2
+              payments(order_by: {created_at: desc}) {
+                ...PaymentAttrsV3
+              }
+            }
+            invoice_aggregate(where: {student_id: {_eq: $studentId}, status: {_neq: "FAILED"}}) {
+              aggregate {
+                count
+              }
+            }
+          }
+
+
+          fragment InvoiceAttrsV2 on invoice {
+            invoice_id
+            invoice_sequence_number
+            is_exported
+            status
+            student_id
+            sub_total
+            total
+            outstanding_balance
+            amount_paid
+            type
+            created_at
+          }
+
+
+          fragment PaymentAttrsV3 on payment {
+            payment_date
+            payment_due_date
+            payment_expiry_date
+            payment_method
+            payment_status
+            amount
+            is_exported
+            payment_id
+            payment_sequence_number
+          }
+      - name: Invoice_PaymentReceiptDetails
+        query: >
+          query Invoice_PaymentReceiptDetails($payment_id: String!) {
+            payment(where: { payment_id: { _eq: $payment_id } }) {
+              payment_sequence_number
+              payment_method
+              payment_date
+              created_at
+              validated_date
+              payment_due_date
+              amount
+              student {
+                  name
+              }
+              invoice {
+                  invoice_id
+                  invoice_sequence_number
+                  amount_paid
+                  outstanding_balance
+              }
+            }
+          }
+      - name: Invoice_BillItemsPhase1V3
+        query: >
+          query Invoice_BillItemsPhase1V3(
+            $bill_item_sequence_number: [Int!]
+            $limit: Int
+            $offset: Int = 0
+          ) {
+            bill_item(
+              where: { bill_item_sequence_number: { _in: $bill_item_sequence_number } }
+              limit: $limit
+              offset: $offset
+            ) {
+              bill_item_sequence_number
+              billing_item_description
+              billing_date
+              tax_amount
+              tax_percentage
+              tax_id
+              tax_category
+              final_price
+              bill_type
+              adjustment_price
+              discount {
+                name
+                discount_amount_type
+                discount_amount_value
+                discount_type
+              }
+            }
+          }
+      - name: Invoice_GetPaymentsListPhase2V2
+        query: >
+          query Invoice_GetPaymentsListPhase2V2($where_payments:
+          payment_bool_exp, $limit: Int = 10, $offset: Int = 0,
+          $payment_order_by: [payment_order_by!] = {payment_sequence_number:
+          desc}) {
+            payment(
+              where: $where_payments
+              limit: $limit
+              offset: $offset
+              order_by: $payment_order_by
+            ) {
+              payment_id
+              payment_sequence_number
+              payment_status
+              student_id
+              student {
+                name
+              }
+              amount
+              payment_method
+              created_at
+              payment_due_date
+              payment_expiry_date
+              payment_date
+              result
+              result_code
+              invoice_id
+              invoice {
+                invoice_sequence_number
+              }
+              is_exported
+            }
+            payment_aggregate(where: $where_payments) {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: Invoice_CompanyDetail
+        query: |
+          query Invoice_CompanyDetail {
+            company_detail {
+              company_address
+              company_detail_id
+              company_name
+              company_phone_number
+              company_logo_url
+            }
+          }
+      - name: Invoices_InvoiceCustomFilterV2NoAggregate
+        query: >
+          query Invoices_InvoiceCustomFilterV2NoAggregate($whereInvoices: invoice_bool_exp,
+          $limit: Int = 10, $offset: Int = 0, $invoice_order_by:
+          invoice_order_by! = {created_at: desc}) {
+            invoice(
+              limit: $limit
+              offset: $offset
+              order_by: [$invoice_order_by]
+              where: $whereInvoices
+            ) {
+              ...InvoiceAttrs
+              is_exported
+              student {
+                user {
+                  name
+                }
+              }
+              payments(order_by: {created_at: desc}) {
+                ...PaymentAttrs
+                amount
+                is_exported
+                payment_id
+              }
+            }
+          }
+
+
+          fragment InvoiceAttrs on invoice {
+            invoice_id
+            invoice_sequence_number
+            status
+            student_id
+            sub_total
+            total
+            outstanding_balance
+            amount_paid
+            type
+            created_at
+          }
+
+
+          fragment PaymentAttrs on payment {
+            payment_date
+            payment_due_date
+            payment_expiry_date
+            payment_method
+            payment_status
+          }
+      - name: Invoices_InvoiceCustomFilterPhase2V4NoAggregate
+        query: >
+          query Invoices_InvoiceCustomFilterPhase2V4NoAggregate($whereInvoices: invoice_bool_exp,
+          $limit: Int = 10, $offset: Int = 0, $invoice_order_by:
+          invoice_order_by! = {created_at: desc}) {
+            invoice(
+              limit: $limit
+              offset: $offset
+              order_by: [$invoice_order_by]
+              where: $whereInvoices
+            ) {
+              ...InvoiceAttrsV2
+              user {
+                name
+              }
+              payments(order_by: {created_at: desc}) {
+                ...PaymentAttrsV3
+              }
+            }
+          }
+          fragment InvoiceAttrsV2 on invoice {
+            invoice_id
+            invoice_sequence_number
+            is_exported
+            status
+            student_id
+            sub_total
+            total
+            outstanding_balance
+            amount_paid
+            type
+            created_at
+          }
+          fragment PaymentAttrsV3 on payment {
+            payment_date
+            payment_due_date
+            payment_expiry_date
+            payment_method
+            payment_status
+            amount
+            is_exported
+            payment_id
+            payment_sequence_number
+          }
+      - name: Invoice_InvoiceAggregateCount
+        query: |
+          query Invoice_InvoiceAggregateCount($whereInvoices: invoice_bool_exp) {
+            all_count: invoice_aggregate(where: $whereInvoices) {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: Invoice_PaymentsToBulkRequestPhase2V2
+        query: >
+          query Invoice_PaymentsToBulkRequestPhase2V2($payment_method: String!,
+          $payment_due_date_to: timestamptz, $payment_due_date_from:
+          timestamptz) {
+            payment(
+              where: {payment_method: {_eq: $payment_method}, payment_due_date: {_gte: $payment_due_date_from, _lte: $payment_due_date_to}, payment_status: {_eq: "PAYMENT_PENDING"}, is_exported: {_eq: false}}
+            ) {
+              payment_method
+              payment_id
+              payment_sequence_number
+              payment_due_date
+              payment_status
+            }
+            payment_aggregate(
+              where: {payment_method: {_eq: $payment_method}, payment_due_date: {_gte: $payment_due_date_from, _lte: $payment_due_date_to}, payment_status: {_eq: "PAYMENT_PENDING"}, is_exported: {_eq: false}}
+            ) {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: Invoice_ScheduledInvoicesPhase2
+        query: >
+          query Invoice_ScheduledInvoicesPhase2($limit: Int = 5, $offset: Int =
+          0, $scheduled_invoice_statuses: [String!] = [],
+          $invoice_schedule_history: Boolean!, $invoice_schedule_order_by:
+          invoice_schedule_order_by! = {invoice_date: desc}) {
+            invoice_schedule(
+              where: {status: {_in: $scheduled_invoice_statuses}, invoice_schedule_history: {invoice_schedule_history_id: {_is_null: $invoice_schedule_history}}}
+              limit: $limit
+              offset: $offset
+              order_by: [$invoice_schedule_order_by]
+            ) {
+              invoice_date
+              invoice_schedule_id
+              status
+              scheduled_date
+              invoice_schedule_history {
+                invoice_schedule_history_id
+                number_of_failed_invoices
+                total_students
+                execution_end_date
+              }
+            }
+            invoice_schedule_aggregate(
+              where: {status: {_in: $scheduled_invoice_statuses}, invoice_schedule_history: {invoice_schedule_history_id: {_is_null: $invoice_schedule_history}}}
+            ) {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: Invoice_GetPaymentsListPhase2V2NoAggregate
+        query: >
+          query Invoice_GetPaymentsListPhase2V2NoAggregate($where_payments:
+          payment_bool_exp, $limit: Int = 10, $offset: Int = 0,
+          $payment_order_by: [payment_order_by!] = {payment_sequence_number:
+          desc}) {
+            payment(
+              where: $where_payments
+              limit: $limit
+              offset: $offset
+              order_by: $payment_order_by
+            ) {
+              payment_id
+              payment_sequence_number
+              payment_status
+              student_id
+              student {
+                name
+              }
+              amount
+              payment_method
+              created_at
+              payment_due_date
+              payment_expiry_date
+              payment_date
+              result
+              result_code
+              invoice_id
+              invoice {
+                invoice_sequence_number
+              }
+              is_exported
+            }
+          }
+      - name: Invoice_PaymentAggregateCount
+        query: |
+          query Invoice_PaymentAggregateCount($where_payments: payment_bool_exp) {
+            all_count: payment_aggregate(where: $where_payments) {
+                aggregate {
+                    count
+                }
+            }
+          }
+      - name: Invoice_PaymentAggregateByStatusCount
+        query: |
+          query Invoice_PaymentAggregateByStatusCount($where_payments: payment_bool_exp) {
+            all_count: payment_aggregate(where: { _and: [$where_payments] }) {
+                aggregate {
+                    count
+                }
+            }
+            successful_count: payment_aggregate(
+                where: { _and: [$where_payments, { payment_status: { _eq: "PAYMENT_SUCCESSFUL" } }] }
+            ) {
+                aggregate {
+                    count
+                }
+            }
+            failed_count: payment_aggregate(
+                where: { _and: [$where_payments, { payment_status: { _eq: "PAYMENT_FAILED" } }] }
+            ) {
+                aggregate {
+                    count
+                }
+            }
+            pending_count: payment_aggregate(
+                where: { _and: [$where_payments, { payment_status: { _eq: "PAYMENT_PENDING" } }] }
+            ) {
+                aggregate {
+                    count
+                }
+            }
+          }
+      - name: Invoices_InvoiceCustomFilterV2UserBasicInfo
+        query: >
+          query Invoices_InvoiceCustomFilterV2UserBasicInfo($whereInvoices: invoice_bool_exp,
+          $limit: Int = 10, $offset: Int = 0, $invoice_order_by:
+          invoice_order_by! = {created_at: desc}) {
+            invoice(
+              limit: $limit
+              offset: $offset
+              order_by: [$invoice_order_by]
+              where: $whereInvoices
+            ) {
+              ...InvoiceAttrs
+              is_exported
+              user_basic_info {
+                name
+                user_id
+              }
+              payments(order_by: {created_at: desc}) {
+                ...PaymentAttrs
+                amount
+                is_exported
+                payment_id
+              }
+            }
+          }
+
+
+          fragment InvoiceAttrs on invoice {
+            invoice_id
+            invoice_sequence_number
+            status
+            student_id
+            sub_total
+            total
+            outstanding_balance
+            amount_paid
+            type
+            created_at
+          }
+
+
+          fragment PaymentAttrs on payment {
+            payment_date
+            payment_due_date
+            payment_expiry_date
+            payment_method
+            payment_status
+          }
+      - name: Invoices_InvoiceCustomFilterPhase2V4UserBasicInfo
+        query: >
+          query Invoices_InvoiceCustomFilterPhase2V4UserBasicInfo($whereInvoices: invoice_bool_exp,
+          $limit: Int = 10, $offset: Int = 0, $invoice_order_by:
+          invoice_order_by! = {created_at: desc}) {
+            invoice(
+              limit: $limit
+              offset: $offset
+              order_by: [$invoice_order_by]
+              where: $whereInvoices
+            ) {
+              ...InvoiceAttrsV2
+              user_basic_info {
+                name
+                user_id
+              }
+              payments(order_by: {created_at: desc}) {
+                ...PaymentAttrsV3
+              }
+            }
+          }
+          fragment InvoiceAttrsV2 on invoice {
+            invoice_id
+            invoice_sequence_number
+            is_exported
+            status
+            student_id
+            sub_total
+            total
+            outstanding_balance
+            amount_paid
+            type
+            created_at
+          }
+          fragment PaymentAttrsV3 on payment {
+            payment_date
+            payment_due_date
+            payment_expiry_date
+            payment_method
+            payment_status
+            amount
+            is_exported
+            payment_id
+            payment_sequence_number
+          }
+      - name: Invoice_BulkPaymentList
+        query: >
+          query Invoice_BulkPaymentList($limit: Int = 10, $offset: Int = 0,
+          $bulk_payment_order_by: bulk_payment_order_by! = {created_at: desc}) {
+            bulk_payment(limit: $limit, offset: $offset, order_by: [$bulk_payment_order_by]) {
+              bulk_payment_id
+              bulk_payment_status
+              payment_method
+              invoice_status
+              invoice_type
+              payment_status
+              created_at
+              payments {
+                is_exported
+              }
+            }
+            bulk_payment_aggregate {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: Invoice_InvoicesWithoutPayments
+        query: >
+          query Invoice_InvoicesWithoutPayments($createdFrom: timestamptz,
+          $createdUntil: timestamptz, $types: [String!] = [], $status: [String!]
+          = []) {
+            invoice(
+              where: {created_at: {_gte: $createdFrom, _lte: $createdUntil}, total: {_gt: 0}, _not: {payments: {}}, status: {_in: $status}, type: {_in: $types}}
+            ) {
+              invoice_id
+              invoice_sequence_number
+              status
+              type
+              created_at
+              total
+            }
+            invoice_aggregate(
+              where: {created_at: {_gte: $createdFrom, _lte: $createdUntil}, total: {_gt: 0}, _not: {payments: {}}, status: {_in: $status}, type: {_in: $types}}
+            ) {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: Invoice_GetPaymentsListPhase2V3NoAggregate
+        query: >
+          query Invoice_GetPaymentsListPhase2V3NoAggregate($where_payments:
+          payment_bool_exp, $limit: Int = 10, $offset: Int = 0,
+          $payment_order_by: [payment_order_by!] = {payment_sequence_number:
+          desc}) {
+            payment(
+              where: $where_payments
+              limit: $limit
+              offset: $offset
+              order_by: $payment_order_by
+            ) {
+              payment_id
+              payment_sequence_number
+              payment_status
+              student_id
+              student {
+                name
+              }
+              amount
+              payment_method
+              created_at
+              payment_due_date
+              payment_expiry_date
+              payment_date
+              result
+              result_code
+              invoice_id
+              invoice {
+                invoice_sequence_number
+              }
+              is_exported
+              bulk_payment {
+                bulk_payment_id
+                created_at
+              }
+            }
+          }
+      - name: Invoice_PaymentReceiptDetailsV2
+        query: >
+          query Invoice_PaymentReceiptDetailsV2($payment_id: String!) {
+            payment(where: { payment_id: { _eq: $payment_id } }) {
+              payment_sequence_number
+              payment_method
+              payment_date
+              created_at
+              validated_date
+              payment_due_date
+              amount
+              receipt_date
+              student {
+                  name
+              }
+              invoice {
+                invoice_id
+                invoice_sequence_number
+                amount_paid
+                outstanding_balance
+              }
+            }
+          }
+      - name: Invoice_GetPaymentsListPhase2V3UserBasicInfo
+        query: >
+          query Invoice_GetPaymentsListPhase2V3UserBasicInfo($where_payments:
+          payment_bool_exp, $limit: Int = 10, $offset: Int = 0,
+          $payment_order_by: [payment_order_by!] = {payment_sequence_number:
+          desc}) {
+            payment(
+              where: $where_payments
+              limit: $limit
+              offset: $offset
+              order_by: $payment_order_by
+            ) {
+              payment_id
+              payment_sequence_number
+              payment_status
+              student_id
+              users {
+                name
+              }
+              amount
+              payment_method
+              created_at
+              payment_due_date
+              payment_expiry_date
+              payment_date
+              result
+              result_code
+              invoice_id
+              invoice {
+                invoice_sequence_number
+              }
+              is_exported
+              bulk_payment {
+                bulk_payment_id
+                created_at
+              }
+            }
+          }
+      - name: Invoice_UserNameBasicInfo
+        query: |
+          query Invoice_UserNameBasicInfo($user_ids: [String!] = []) {
+            user_basic_info(where: { user_id: { _in: $user_ids } }) {
+                name
+                user_id
+            }
+          }
+      - name: Invoice_BillItemsV5
+        query: >
+          query Invoice_BillItemsV5($student_id: String, $is_reviewed: Boolean,
+          $billing_statuses: [String!] = [], $limit: Int = 10, $offset: Int = 0)
+          {
+            bill_item(
+              where: {student_id: {_eq: $student_id}, billing_status: {_in: $billing_statuses}, is_reviewed: {_eq: $is_reviewed}}
+              limit: $limit
+              offset: $offset
+              order_by: {bill_item_sequence_number: asc}
+            ) {
+              billing_item_description
+              final_price
+              student_id
+              billing_date
+              billing_status
+              bill_item_sequence_number
+              location_name
+              bill_type
+              adjustment_price
+            }
+            bill_item_aggregate(
+              where: {student_id: {_eq: $student_id}, billing_status: {_in: $billing_statuses}, is_reviewed: {_eq: $is_reviewed}}
+            ) {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: Invoice_ImportPartnerConvenienceStoreV2
+        query: >
+          mutation Invoice_ImportPartnerConvenienceStoreV2($data:
+          [partner_convenience_store_insert_input!]!) {
+            insert_partner_convenience_store(
+              objects: $data
+              on_conflict: {constraint: partner_convenience_store___pk, update_columns: [manufacturer_code, company_code, shop_code, company_name, company_tel_number, postal_code, address1, address2, remarks, message1, message2, message3, message4, message5, message6, message7, message8]}
+            ) {
+              affected_rows
+            }
+          }
+      - name: Invoice_GetUpcomingInvoiceDates
+        query: >
+          query Invoice_GetUpcomingInvoiceDates($limit: Int = 1, $offset: Int = 0, $invoice_schedule_order_by: invoice_schedule_order_by! = {invoice_date: asc}, $invoice_date: timestamptz!) {
+            invoice_schedule(
+              where: {is_archived: {_eq: false}, invoice_date: {_gt: $invoice_date}, status: {_eq: "INVOICE_SCHEDULE_SCHEDULED"}}
+              limit: $limit
+              offset: $offset
+              order_by: [$invoice_schedule_order_by]
+            ) {
+              invoice_date
+              invoice_schedule_id
+              status
+              scheduled_date
+            }
+          }
+      - name: Invoice_PaymentReceiptDetailsV3
+        query: >
+          query Invoice_PaymentReceiptDetailsV3($payment_id: String!) {
+            payment(where: { payment_id: { _eq: $payment_id } }) {
+              payment_sequence_number
+              payment_method
+              payment_date
+              created_at
+              validated_date
+              payment_due_date
+              amount
+              receipt_date
+              users {
+                  name
+              }
+              invoice {
+                invoice_id
+                invoice_sequence_number
+                amount_paid
+                outstanding_balance
+              }
+            }
+          }

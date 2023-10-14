@@ -1,0 +1,70 @@
+skipTLSVerify: &skipTLSVerify false
+
+acme: &acme
+  email: tech.support@manabie.com
+  server: https://acme-v02.api.letsencrypt.org/directory
+
+dnsNames: &dnsNames
+  webApi:
+    - web-api.staging.manabie.io
+    - web-api.staging-green.manabie.io
+    - web-api.staging-blue.manabie.io
+  api:
+    - api.staging.manabie.io
+    - api.staging-green.manabie.io
+    - api.staging-blue.manabie.io
+  admin:
+    - admin.staging.manabie.io
+    - admin.staging-green.manabie.io
+    - admin.staging-blue.manabie.io
+  backoffice: []
+  backofficeMfe:
+    - backoffice.staging.manabie.io
+    - backoffice-mfe.staging.manabie.io
+  teacher:
+    - teacher.staging.manabie.io
+  learner:
+    - learner.staging.manabie.io
+  redash:
+    - redash.staging.manabie.io
+  appsmith:
+    - appsmith.staging-green.manabie.io
+  learnosityWebView:
+    - learnosity-web-view.staging.manabie.io
+  internal:
+    - internal.staging.manabie.io
+    - internal.staging-green.manabie.io
+  uatInternal:  # we are using staging appsmith for UAT, so we customize it here also
+    - internal.uat.manabie.io
+
+backend: &backend
+  skipTLSVerify: *skipTLSVerify
+
+  acme: *acme
+
+  dnsNames: *dnsNames
+global: *backend
+
+bob: *backend
+enigma: *backend
+eureka: *backend
+fatima: *backend
+tom: *backend
+yasuo: *backend
+usermgmt: *backend
+payment: *backend
+entryexitmgmt: *backend
+backoffice: *backend
+learner-web: *backend
+teacher-web: *backend
+unleash: *backend
+mastermgmt: *backend
+lessonmgmt: *backend
+invoicemgmt: *backend
+import-map-deployer: *backend
+virtualclassroom: *backend
+notificationmgmt: *backend
+spike: *backend
+timesheet: *backend
+calendar: *backend
+discount: *backend

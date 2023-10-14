@@ -1,0 +1,15 @@
+@startuml communication_simplified
+hide circle
+
+User   -> Bob:  Call "UserService.UpdateUserDevideToken"
+activate Bob
+Bob  -> DB: update "users.device_token"
+Bob  -> NATS: publish "EvtUserInfo" in subject "UserDeviceToken.Updated"
+deactivate Bob
+NATS -> Tom: event "EvtUserInfo" in stream
+activate Tom 
+note right Tom
+1. Save "token", "allow_notification" to "user_device_tokens" table
+2. EvtUserInfo fields can be nil, we only upsert non nil fields
+end note
+@enduml

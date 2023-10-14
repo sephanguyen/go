@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS course_students_access_paths_course_id_student_id_idx ON public.course_students_access_paths(course_id, student_id);

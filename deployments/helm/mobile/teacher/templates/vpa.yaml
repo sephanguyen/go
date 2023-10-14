@@ -1,0 +1,5 @@
+{{- if not .Values.disabled }}
+{{- if .Values.vpa.enabled }}
+{{ include "util.vpa" . }}
+{{- end }}
+{{- end }}

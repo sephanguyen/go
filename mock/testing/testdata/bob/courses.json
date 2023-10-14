@@ -1,0 +1,218 @@
+{
+	"schema": [
+		{
+			"column_name": "country",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "course_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "course_partner_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "course_type",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "course_type_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "display_order",
+			"data_type": "smallint",
+			"column_default": "0",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "end_date",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "grade",
+			"data_type": "smallint",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "icon",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "is_adaptive",
+			"data_type": "boolean",
+			"column_default": "false",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "is_archived",
+			"data_type": "boolean",
+			"column_default": "false",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "name",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "preset_study_plan_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "remarks",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "school_id",
+			"data_type": "integer",
+			"column_default": "'-2147483648'::integer",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "start_date",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "status",
+			"data_type": "text",
+			"column_default": "'COURSE_STATUS_NONE'::text",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "subject",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "teacher_ids",
+			"data_type": "ARRAY",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "teaching_method",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "vendor_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "courses",
+			"policyname": "rls_courses_permission_v3",
+			"qual": "(true \u003c= ( SELECT true AS bool\n   FROM granted_permissions p\n  WHERE ((p.user_id = current_setting('app.user_id'::text)) AND (p.permission_id = ( SELECT p2.permission_id\n           FROM permission p2\n          WHERE ((p2.permission_name = 'master.course.read'::text) AND (p2.resource_path = current_setting('permission.resource_path'::text))))))\n LIMIT 1))",
+			"with_check": "(true \u003c= ( SELECT true AS bool\n   FROM granted_permissions p\n  WHERE ((p.user_id = current_setting('app.user_id'::text)) AND (p.permission_id = ( SELECT p2.permission_id\n           FROM permission p2\n          WHERE ((p2.permission_name = 'master.course.write'::text) AND (p2.resource_path = current_setting('permission.resource_path'::text))))))\n LIMIT 1))",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "courses",
+			"policyname": "rls_courses_restrictive",
+			"qual": "permission_check(resource_path, 'courses'::text)",
+			"with_check": "permission_check(resource_path, 'courses'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "fk__course__course_type_id",
+			"column_name": "course_type_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "courses_school_id_fk",
+			"column_name": "school_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "courses_pk",
+			"column_name": "course_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "courses",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

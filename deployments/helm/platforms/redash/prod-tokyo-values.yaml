@@ -1,0 +1,7 @@
+
+sqlProxy:
+  enabled: true
+  connName: "student-coach-e1e95:asia-northeast1:analytics=tcp:5432,student-coach-e1e95:asia-northeast1:prod-tokyo=tcp:5433,student-coach-e1e95:asia-northeast1:prod-tokyo-lms-b2dc4508=tcp:6433,student-coach-e1e95:asia-northeast1:prod-jprep-d995522c=tcp:5434,synersia:asia-northeast1:synersia-228d=tcp:5435,production-renseikai:asia-northeast1:renseikai-83fc=tcp:5436,student-coach-e1e95:asia-northeast1:jp-partners-b04fbb69=tcp:5437"
+alloydbProxy:
+  enabled: true
+  alloydbConnName: "projects/student-coach-e1e95/locations/asia-northeast1/clusters/prod-alloydb/instances/prod-alloydb-primary-01?port=6432"

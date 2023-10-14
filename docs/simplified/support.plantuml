@@ -1,0 +1,77 @@
+@startuml support_simplified
+namespace Support {
+    class Media <<entity>> {
+        media_id: string
+        name: string
+        resource: string
+        comments: jsonb
+        type: string
+        converted_images: jsonb
+        ' created_at: timestamp
+        ' updated_at: timestamp
+        ' deleted_at: timestamp
+    }
+    note right of Media::type
+    one of
+    * MEDIA_TYPE_NONE
+    * MEDIA_TYPE_VIDEO
+    * MEDIA_TYPE_IMAGE
+    * MEDIA_TYPE_PDF
+    end note
+
+    Class Video <<Media>> {
+        type: MEDIA_TYPE_VIDEO
+        __
+        Steps:
+        1. yasuo.CourseService.CreateBrightCoveUploadUrl()
+        2. Upload with URL
+        3. yasuo.CourseService.FinishUploadBrightcove()
+        4. bob.ClassService.UpsertMedia()
+    }
+    class Image <<Media>> {
+        type: MEDIA_TYPE_IMAGE
+        __
+        Steps:
+        1. bob.UploadReaderService.GenerateResumableUploadURL()
+        2. Upload with URL
+        3. bob.ClassService.UpsertMedia()
+    }
+    class PDF <<Media>> {
+        type: MEDIA_TYPE_PDF
+        __
+        Steps:
+        1. bob.UploadReaderService.GenerateResumableUploadURL()
+        2. Upload with URL
+        3. bob.ClassService.UpsertMedia()
+        4. bob.ClassModifierService.ConvertMedia() (for lessons only)
+    }
+    class Other <<Media>> {
+        type: MEDIA_TYPE_NONE
+        __
+        Steps: Same as images
+    }
+    Media *-- PDF
+    Media *-- Image
+    Media *-- Video
+    Media *-- Other
+
+    Class FileStore <<service>> #FFFFFF {
+        GenerateResumableObjectURL()
+    }
+
+    Class CloudConvert <<service>> #FFFFFF {
+        CreateConversionTasks()
+    }
+
+    Class Brightcove <<service>> #FFFFFF {
+        CreateBrightCoveUploadUrl()
+        SubmitDynamicIngress()
+    }
+    Brightcove .u. Video
+    FileStore .u. Image
+    FileStore .u. Other
+    FileStore .u. PDF
+    CloudConvert .u. PDF
+}
+note top of Support: handled by Platform Squad
+@enduml

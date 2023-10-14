@@ -1,0 +1,130 @@
+{
+	"schema": [
+		{
+			"column_name": "comments",
+			"data_type": "jsonb",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "converted_images",
+			"data_type": "jsonb",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "duration_seconds",
+			"data_type": "integer",
+			"column_default": "0",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "file_size_bytes",
+			"data_type": "bigint",
+			"column_default": "0",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "media_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "name",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "type",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "media",
+			"policyname": "rls_media",
+			"qual": "permission_check(resource_path, 'media'::text)",
+			"with_check": "permission_check(resource_path, 'media'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "media",
+			"policyname": "rls_media_restrictive",
+			"qual": "permission_check(resource_path, 'media'::text)",
+			"with_check": "permission_check(resource_path, 'media'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "media_pk",
+			"column_name": "media_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "media",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

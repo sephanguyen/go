@@ -1,0 +1,21 @@
+CREATE SINK CONNECTOR IF NOT EXISTS SINK_BILLING_RATIO_PUBLIC_INFO WITH (
+      'connector.class'='io.confluent.connect.jdbc.JdbcSinkConnector',
+      'transforms.unwrap.delete.handling.mode'='drop',
+      'tasks.max'='1',
+      'topics'='{{ .Values.topicPrefix }}BILLING_RATIO_PUBLIC_INFO_V1',
+      'fields.whitelist'='billing_ratio_id,billing_ratio_start_date,billing_ratio_end_date,billing_ratio_numerator,billing_ratio_denominator,billing_ratio_is_archived,billing_ratio_created_at,billing_ratio_updated_at,billing_ratio_deleted_at,billing_schedule_period_id,billing_schedule_period_name,billing_schedule_period_start_date,billing_schedule_period_end_date,billing_date,billing_schedule_period_remarks,billing_schedule_period_is_archived,billing_schedule_period_created_at,billing_schedule_period_updated_at,billing_schedule_period_deleted_at,billing_schedule_id,billing_schedule_name,billing_schedule_remarks,billing_schedule_is_archived,billing_schedule_created_at,billing_schedule_updated_at,billing_schedule_deleted_at',
+      'key.converter'='org.apache.kafka.connect.storage.StringConverter',
+      'value.converter'='io.confluent.connect.avro.AvroConverter',
+      'value.converter.schema.registry.url'='{{ .Values.cpRegistryHost }}',
+      'delete.enabled'='false',
+      'transforms.unwrap.drop.tombstones'='true',
+      'auto.create'='true',
+      'connection.url'='${file:/decrypted/kafka-connect.secrets.properties:kec_url}',
+      'insert.mode'='upsert',
+      'table.name.format'='public.billing_ratio',
+      'pk.mode'='record_value',
+      'transforms'='RenameField',
+      'transforms.RenameField.type'= 'org.apache.kafka.connect.transforms.ReplaceField$Value',
+      'transforms.RenameField.renames'='BILLING_RATIO_ID:billing_ratio_id,BILLING_RATIO_START_DATE:billing_ratio_start_date,BILLING_RATIO_END_DATE:billing_ratio_end_date,BILLING_RATIO_NUMERATOR:billing_ratio_numerator,BILLING_RATIO_DENOMINATOR:billing_ratio_denominator,BILLING_RATIO_IS_ARCHIVED:billing_ratio_is_archived,BILLING_RATIO_CREATED_AT:billing_ratio_created_at,BILLING_RATIO_UPDATED_AT:billing_ratio_updated_at,BILLING_RATIO_DELETED_AT:billing_ratio_deleted_at,BILLING_SCHEDULE_PERIOD_ID:billing_schedule_period_id,BILLING_SCHEDULE_PERIOD_NAME:billing_schedule_period_name,BILLING_SCHEDULE_PERIOD_START_DATE:billing_schedule_period_start_date,BILLING_SCHEDULE_PERIOD_END_DATE:billing_schedule_period_end_date,BILLING_DATE:billing_date,BILLING_SCHEDULE_PERIOD_REMARKS:billing_schedule_period_remarks,BILLING_SCHEDULE_PERIOD_IS_ARCHIVED:billing_schedule_period_is_archived,BILLING_SCHEDULE_PERIOD_CREATED_AT:billing_schedule_period_created_at,BILLING_SCHEDULE_PERIOD_UPDATED_AT:billing_schedule_period_updated_at,BILLING_SCHEDULE_PERIOD_DELETED_AT:billing_schedule_period_deleted_at,BILLING_SCHEDULE_ID:billing_schedule_id,BILLING_SCHEDULE_NAME:billing_schedule_name,BILLING_SCHEDULE_REMARKS:billing_schedule_remarks,BILLING_SCHEDULE_IS_ARCHIVED:billing_schedule_is_archived,BILLING_SCHEDULE_CREATED_AT:billing_schedule_created_at,BILLING_SCHEDULE_UPDATED_AT:billing_schedule_updated_at,BILLING_SCHEDULE_DELETED_AT:billing_schedule_deleted_at',
+      'pk.fields'='billing_ratio_id'
+);

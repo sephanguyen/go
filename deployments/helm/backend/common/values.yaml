@@ -1,0 +1,93 @@
+networkPolicy:
+  #
+  # Schema:
+  #   - namespace: the target namespace for this rule
+  #   - allowedIngressFromNamespaces: the list of namespaces that can access the targeted namespace
+  #   - environments: the list of environments to enable this rule for.
+  #                   Note that Calico plugin has been enabled on staging-2 cluster only. Thus only "local",
+  #                   "stag" and "uat" values can work.
+  #
+  # For namespaces, '<env>' and '<org>' will be replaced by the proper
+  # values of environment and organization.
+  #
+  # If a namespace has no rules to limit access to it, all other namespaces can access
+  # that namespace.
+  rules:
+    # Note that in local, this namespace is "backend", so this rule
+    # is not applied in local env.
+    - namespace: <env>-<org>-services
+      allowedIngressFromNamespaces:
+        - istio-system
+        - monitoring
+        - <env>-<org>-backend
+        - <env>-<org>-elastic
+        - camel-k # testing Camel project
+      environments:
+        - stag
+
+    - namespace: <env>-<org>-backend
+      allowedIngressFromNamespaces:
+        - istio-system
+        - monitoring
+        - backend # for local-only
+        - <env>-<org>-backend
+        - <env>-<org>-elastic
+        - camel-k # testing Camel project
+      environments:
+        - local
+        - stag
+
+    - namespace: <env>-<org>-elastic
+      allowedIngressFromNamespaces:
+        - monitoring
+        - backend
+        - <env>-<org>-backend
+        - <env>-<org>-services
+      environments:
+        - local
+        - stag
+
+    - namespace: <env>-<org>-nats-jetstream
+      allowedIngressFromNamespaces:
+        - monitoring
+        - backend
+        - <env>-<org>-backend
+        - <env>-<org>-services
+      environments:
+        - local
+        - stag
+
+    - namespace: <env>-<org>-kafka
+      allowedIngressFromNamespaces:
+        - monitoring
+        - backend
+        - <env>-<org>-backend
+        - <env>-<org>-services
+      environments:
+        - local
+        - stag
+
+    # TODO(@anhpngt): prod.tokyo unleash are shared; double-check its usage before
+    # enabling on prod.
+    - namespace: <env>-<org>-unleash
+      allowedIngressFromNamespaces:
+        - istio-system
+        - monitoring
+        - backend # for local-only
+        - <env>-<org>-backend
+        - <env>-<org>-services
+      environments:
+        - local
+        - stag
+
+    # Since local has "backend" instead of "<env>-<org>-services"
+    # we customize it here
+    - namespace: backend
+      allowedIngressFromNamespaces:
+        - istio-system
+        - monitoring
+        - <env>-<org>-backend
+        - <env>-<org>-elastic
+        - camel-k # testing Camel project
+      environments:
+        - local

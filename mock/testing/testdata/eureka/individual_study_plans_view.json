@@ -1,0 +1,126 @@
+{
+	"schema": [
+		{
+			"column_name": "available_from",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "available_to",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "book_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "chapter_display_order",
+			"data_type": "smallint",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "chapter_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "end_date",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "learning_material_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "lm_display_order",
+			"data_type": "smallint",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "school_date",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "start_date",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "status",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "student_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "study_plan_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "topic_display_order",
+			"data_type": "smallint",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "topic_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "individual_study_plans_view",
+			"policyname": null,
+			"qual": null,
+			"with_check": null,
+			"relrowsecurity": null,
+			"relforcerowsecurity": null,
+			"permissive": null,
+			"roles": {
+				"Elements": null,
+				"Dimensions": null,
+				"Status": 1
+			}
+		}
+	],
+	"constraint": [],
+	"table_name": "individual_study_plans_view",
+	"type": "VIEW",
+	"owner": "postgres"
+}

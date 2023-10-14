@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "firebase.fullname" . }}
+  labels:
+    {{- include "firebase.labels" . | nindent 4 }}
+data:
+{{ (.Files.Glob "jwt_templates/*").AsConfig | indent 2 }}

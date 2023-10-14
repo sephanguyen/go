@@ -1,0 +1,91 @@
+unleash:
+  featureFlags:
+    user:
+      - name: User_UI_DynamicMenu
+        description: "A feature flag to enable DynamicMenu (LT-10485)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_Authentication_Learner_RemoveRememberedAccount
+        description: "A feature flag to enable Removing of remembered accounts from auth (LT-17415)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_UserManagement_Learner_EnableSwitchLanguages
+        description: "A feature flag to enable switching of languages (LT-21661)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_UserManagement_Learner_EnableProfileEditItem
+        description: "A feature flag to enable editing of profile (LT-21661)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+      - name: User_Auth_ExchangeAPlus
+        description: "Exchange token has a_plus student division (LT-21600)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_StaffManagement_BackOffice_ValidationLoginForNewUserGroup
+        description: "A feature flag to enable check validation for adding User group into Staff (LT-11093)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_UserManagement_DecouplingUserAndAuthDB
+        description: "A feature flag to enable switch database connection between bob and auth"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: User_BackOffice_DecoupleRootAppConfig
+        description: "A feature flag to toggle use userAppConfig instead of root app config (LT-29999)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []

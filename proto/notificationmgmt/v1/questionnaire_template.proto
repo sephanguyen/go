@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package notificationmgmt.v1;
+import "google/protobuf/timestamp.proto";
+import "common/v1/notifications.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/notificationmgmt/v1;npb";
+
+message QuestionnaireTemplateQuestion {
+    string questionnaire_template_question_id = 1;
+    string title = 2;
+    common.v1.QuestionType type = 3;
+    repeated string choices = 4;
+    int64 order_index = 5;
+    bool required = 6;
+  }
+  
+message QuestionnaireTemplate {
+  string questionnaire_template_id = 1;
+  string name = 2;
+  bool resubmit_allowed = 3;
+  google.protobuf.Timestamp expiration_date = 5; 
+  repeated QuestionnaireTemplateQuestion questions = 4;
+}
+
+enum QuestionnaireTemplateType {
+  QUESTION_TEMPLATE_TYPE_DEFAULT = 0;
+}

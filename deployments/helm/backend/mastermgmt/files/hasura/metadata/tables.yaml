@@ -1,0 +1,652 @@
+- table:
+    schema: public
+    name: ac_hasura_test_template_1
+  object_relationships:
+  - name: ac_hasura_test_template_1_location_permission
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: granted_permissions
+        column_mapping:
+          location_id: location_id
+  insert_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      check:
+        _and:
+        - ac_hasura_test_template_1_location_permission:
+            _and:
+            - user_id:
+                _eq: X-Hasura-User-Id
+            - permission_name:
+                _eq: accesscontrol.b.write
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      set:
+        resource_path: x-hasura-Resource-Path
+      columns:
+      - ac_hasura_test_template_1_id
+      - created_at
+      - deleted_at
+      - location_id
+      - name
+      - updated_at
+  select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - ac_hasura_test_template_1_id
+      - created_at
+      - deleted_at
+      - location_id
+      - name
+      - updated_at
+      - resource_path
+      filter:
+        _and:
+        - ac_hasura_test_template_1_location_permission:
+            _and:
+            - user_id:
+                _eq: X-Hasura-User-Id
+            - permission_name:
+                _eq: accesscontrol.b.read
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: MANABIE
+    permission:
+      columns:
+      - ac_hasura_test_template_1_id
+      - created_at
+      - deleted_at
+      - location_id
+      - name
+      - updated_at
+      - resource_path
+      filter:
+        _and:
+        - ac_hasura_test_template_1_location_permission:
+            _and:
+            - user_id:
+                _eq: X-Hasura-User-Id
+            - permission_name:
+                _eq: accesscontrol.b.read
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  update_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      check:
+        _and:
+        - ac_hasura_test_template_1_location_permission:
+            _and:
+            - user_id:
+                _eq: X-Hasura-User-Id
+            - permission_name:
+                _eq: accesscontrol.b.write
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      columns:
+      - ac_hasura_test_template_1_id
+      - created_at
+      - deleted_at
+      - location_id
+      - name
+      - updated_at
+      filter:
+        _and:
+        - ac_hasura_test_template_1_location_permission:
+            _and:
+            - user_id:
+                _eq: X-Hasura-User-Id
+            - permission_name:
+                _eq: accesscontrol.b.write
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+  delete_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      check:
+        _and:
+        - ac_hasura_test_template_1_location_permission:
+            _and:
+            - user_id:
+                _eq: X-Hasura-User-Id
+            - permission_name:
+                _eq: accesscontrol.b.write
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      filter:
+        _and:
+        - ac_hasura_test_template_1_location_permission:
+            _and:
+            - user_id:
+                _eq: X-Hasura-User-Id
+            - permission_name:
+                _eq: accesscontrol.b.write
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+- table:
+    schema: public
+    name: granted_permissions
+  object_relationships:
+  - name: ac_hasura_test_template_1_location_permission
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: ac_hasura_test_template_1
+        column_mapping:
+          location_id: location_id
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - user_id
+      - permission_name
+      - location_id
+      filter:
+        _and:
+        - user_id:
+            _eq: X-Hasura-User-Id
+- table:
+    schema: public
+    name: ac_test_template_4
+  insert_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      check:
+        _and:
+        - owners:
+            _eq: X-Hasura-User-Id
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      set:
+        resource_path: x-hasura-Resource-Path
+      columns:
+      - ac_test_template_4_id
+      - created_at
+      - deleted_at
+      - owners
+      - name
+      - updated_at
+  select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - ac_test_template_4_id
+      - created_at
+      - deleted_at
+      - owners
+      - name
+      - updated_at
+      filter:
+        _and:
+        - owners:
+            _eq: X-Hasura-User-Id
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: MANABIE
+    permission:
+      columns:
+      - ac_test_template_4_id
+      - created_at
+      - deleted_at
+      - owners
+      - name
+      - updated_at
+      filter:
+        _and:
+        - owners:
+            _eq: X-Hasura-User-Id
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  update_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      check:
+        _and:
+        - owners:
+            _eq: X-Hasura-User-Id
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      columns:
+      - ac_test_template_4_id
+      - created_at
+      - deleted_at
+      - owners
+      - name
+      - updated_at
+      filter:
+        _and:
+        - owners:
+            _eq: X-Hasura-User-Id
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+  delete_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      check:
+        _and:
+        - owners:
+            _eq: X-Hasura-User-Id
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      filter:
+        _and:
+        - owners:
+            _eq: X-Hasura-User-Id
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+- table:
+    schema: public
+    name: academic_week
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - academic_week_id
+      - academic_year_id
+      - end_date
+      - location_id
+      - name
+      - period
+      - start_date
+      - week_order
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - academic_week_id
+      - academic_year_id
+      - end_date
+      - location_id
+      - name
+      - period
+      - start_date
+      - week_order
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+- table:
+    schema: public
+    name: configuration_group
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - configuration_group_id
+      - name
+      - value
+      - description
+      - created_at
+      - updated_at
+      - deleted_at
+      - partner_resource_path
+      filter: {}
+      allow_aggregations: true
+- table:
+    schema: public
+    name: configuration_group_map
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - configuration_group_id
+      - configuration_value_id
+      - created_at
+      - updated_at
+      - deleted_at
+      - partner_resource_path
+      filter: {}
+      allow_aggregations: true
+- table:
+    schema: public
+    name: organizations
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - domain_name
+      - logo_url
+      - name
+      - organization_id
+      - tenant_id
+      filter: {}
+      allow_aggregations: true
+- table:
+    schema: public
+    name: external_configuration_value
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - config_key
+      - config_value
+      - config_value_type
+      - configuration_id
+      - created_at
+      - last_editor
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - config_key
+      - config_value
+      - config_value_type
+      - configuration_id
+      - created_at
+      - last_editor
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+      - config_key
+      - config_value
+      - config_value_type
+      - configuration_id
+      - created_at
+      - last_editor
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - config_key
+      - config_value
+      - config_value_type
+      - configuration_id
+      - created_at
+      - last_editor
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  update_permissions:
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - config_key
+      - config_value
+      - config_value_type
+      - configuration_id
+      - created_at
+      - last_editor
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      check:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+- table:
+    schema: public
+    name: internal_configuration_value
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - config_key
+      - config_value
+      - config_value_type
+      - configuration_id
+      - created_at
+      - last_editor
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - config_key
+      - config_value
+      - config_value_type
+      - configuration_id
+      - created_at
+      - last_editor
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+      - config_key
+      - config_value
+      - config_value_type
+      - configuration_id
+      - created_at
+      - last_editor
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - config_key
+      - config_value
+      - config_value_type
+      - configuration_id
+      - created_at
+      - last_editor
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  update_permissions:
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - config_key
+      - config_value
+      - config_value_type
+      - configuration_id
+      - created_at
+      - last_editor
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      check:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+- table:
+    schema: public
+    name: academic_year
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - academic_year_id
+      - name
+      - start_date
+      - end_date
+      - created_at
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - academic_year_id
+      - name
+      - start_date
+      - end_date
+      - created_at
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+- table:
+    schema: public
+    name: time_slot
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - end_time
+      - location_id
+      - start_time
+      - time_slot_id
+      - time_slot_internal_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - end_time
+      - location_id
+      - start_time
+      - time_slot_id
+      - time_slot_internal_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+- table:
+    schema: public
+    name: working_hour
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - closing_time
+      - created_at
+      - day
+      - location_id
+      - opening_time
+      - updated_at
+      - working_hour_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - closing_time
+      - created_at
+      - day
+      - location_id
+      - opening_time
+      - updated_at
+      - working_hour_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - closing_time
+      - created_at
+      - day
+      - location_id
+      - opening_time
+      - updated_at
+      - working_hour_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+      - closing_time
+      - created_at
+      - day
+      - location_id
+      - opening_time
+      - updated_at
+      - working_hour_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - closing_time
+      - created_at
+      - day
+      - location_id
+      - opening_time
+      - updated_at
+      - working_hour_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true

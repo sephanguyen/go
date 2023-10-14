@@ -1,0 +1,1 @@
+ALTER TABLE ONLY study_plan_items ADD COLUMN IF NOT EXISTS display_order integer NOT NULL DEFAULT 0

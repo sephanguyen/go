@@ -1,0 +1,295 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "kafka-connect.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "kafka-connect.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: kafka-connect
+    {{- include "kafka-connect.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "kafka-connect.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: kafka-connect
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        checksum/kafka-connect.secrets.encrypted.properties: {{ printf "secrets/%s/%s/kafka-connect.secrets.encrypted.properties" .Values.global.vendor .Values.global.environment | .Files.Get | sha256sum }}
+        checksum/kafka-connect.secrets.env.encrypted.yaml: {{ printf "secrets/%s/%s/kafka-connect.secrets.env.encrypted.yaml" .Values.global.vendor .Values.global.environment | .Files.Get | sha256sum }}
+        checksum/kafka-connect_v2.secrets.encrypted.properties: {{ printf "secrets/%s/%s/kafka-connect_v2.secrets.encrypted.properties" .Values.global.vendor .Values.global.environment | .Files.Get | sha256sum }}
+        checksum/kafka-connect_v2.secrets.env.encrypted.yaml: {{ printf "secrets/%s/%s/kafka-connect_v2.secrets.env.encrypted.yaml" .Values.global.vendor .Values.global.environment | .Files.Get | sha256sum }}
+        checksum/kafka-connect-config.properties: {{ printf "configs/%s/%s/kafka-connect-config.properties" .Values.global.vendor .Values.global.environment | .Files.Get | sha256sum }}
+        prometheus.io/port: "8080"
+        prometheus.io/scrape: "true"
+      {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        app.kubernetes.io/name: {{ include "kafka-connect.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: kafka-connect
+    spec:
+      {{- with .Values.connect.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "util.serviceAccountName" . }}
+      volumes:
+      - name: config
+        configMap:
+          name: kafka-connect
+          defaultMode: 0777
+      - name: kafka-connect-secret
+        secret:
+          secretName: {{ include "kafka-connect.fullname" . }}
+          items:
+          - key: kafka-connect.secrets.encrypted.properties
+            path: kafka-connect.secrets.encrypted.properties
+          - key: kafka-connect_v2.secrets.encrypted.properties
+            path: kafka-connect_v2.secrets.encrypted.properties
+          - key: kafka_client_jaas.encrypted.conf
+            path: kafka_client_jaas.encrypted.conf
+          - key: consumer.encrypted.properties
+            path: consumer.encrypted.properties
+      - name: decrypted-secret
+        emptyDir: {}
+      - name: secrets-volume
+        secret:
+          secretName: {{ include "kafka-connect.fullname" . }}
+          items:
+{{- if eq "local" .Values.global.environment }}
+          - key: service_credential.json
+            path: service_credential.json
+{{- end }}
+          - key: root-ca.pem.encrypted.yaml
+            path: root-ca.pem.encrypted.yaml
+          - key: root-ca-key.pem.encrypted.yaml
+            path: root-ca-key.pem.encrypted.yaml
+          - key: root-ca_v2.pem.encrypted.yaml
+            path: root-ca_v2.pem.encrypted.yaml
+          - key: root-ca-key_v2.pem.encrypted.yaml
+            path: root-ca-key_v2.pem.encrypted.yaml
+      {{- if eq "local" .Values.global.environment }}
+      - name: service-credential
+        secret:
+          secretName: {{ include "kafka-connect.fullname" . }}
+          items:
+          - key: service_credential.json
+            path: service_credential.json
+      {{- end }}
+      initContainers:
+      - name: decrypt-secret
+        image: "{{ .Values.decryptorImage.repository }}:{{ .Values.decryptorImage.tag }}"
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+        - name: config
+          mountPath: /kafka-config
+        - name: decrypted-secret
+          mountPath: /decrypted
+        - name: kafka-connect-secret
+          mountPath: /secrets/kafka-connect.secrets.encrypted.properties
+          subPath: kafka-connect.secrets.encrypted.properties
+        - name: kafka-connect-secret
+          mountPath: /secrets/kafka_client_jaas.encrypted.conf
+          subPath: kafka_client_jaas.encrypted.conf
+        - name: kafka-connect-secret
+          mountPath: /secrets/consumer.encrypted.properties
+          subPath: consumer.encrypted.properties
+        - name: kafka-connect-secret
+          mountPath: /secrets/kafka-connect_v2.secrets.encrypted.properties
+          subPath: kafka-connect_v2.secrets.encrypted.properties
+        {{- if eq "local" .Values.global.environment }}
+        - name: service-credential
+          mountPath: /configs/service_credential.json
+          subPath: service_credential.json
+          readOnly: true
+        {{- end }}
+        env:
+        {{- if eq "local" .Values.global.environment }}
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: "/configs/service_credential.json"
+        {{- end }}
+        - name: HOSTNAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        command:
+          - /bin/bash
+          - -c
+          - |
+            set -e
+            code=0
+            sops -d --output /decrypted/kafka-connect.secrets.properties /secrets/kafka-connect_v2.secrets.encrypted.properties || code=$?
+            if [ "$code" -ne 0 ]; then
+              sops -d /secrets/kafka-connect.secrets.encrypted.properties > /decrypted/kafka-connect.secrets.properties
+              echo "============= decrypt old secret file: kafka-connect.secrets.encrypted.properties"
+            fi
+{{- if .Values.enableAC }}
+            sops -d --output /decrypted/kafka_client_jaas.conf /secrets/kafka_client_jaas.encrypted.conf
+
+            code=0
+            sops -d --output /decrypted/consumer.properties /secrets/consumer.encrypted.properties || code=$?
+            if [ "$code" -ne 0 ]; then
+              sops -d /secrets/consumer.encrypted.properties > /decrypted/consumer.properties
+              echo "============= decrypt old secret file: consumer.encrypted.properties"
+            fi
+{{- end }}
+      - name: wait-for-kafka
+        image: "{{ .Values.connect.image.repository }}:{{ .Values.connect.image.tag }}"
+        imagePullPolicy: {{ .Values.connect.image.pullPolicy }}
+{{- if .Values.enableAC }}
+        command:
+          - /bin/bash
+          - -c
+          - cp -a /kafka/config.orig/connect-log4j.properties /kafka/config/connect-log4j.properties
+          - cp -a /kafka/config.orig/tools-log4j.properties /kafka/config/tools-log4j.properties
+          - "/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server={{ .Values.connect.bootstrapServers.host }}:{{ .Values.connect.bootstrapServers.port }} --command-config /decrypted/consumer.properties"
+{{- else }}
+        command:
+          - /bin/bash
+          - -c
+          - "/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server={{ .Values.connect.bootstrapServers.host }}:{{ .Values.connect.bootstrapServers.port }}"
+{{- end }}
+        volumeMounts:
+        - name: decrypted-secret
+          mountPath: /decrypted
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.connect.image.repository }}:{{ .Values.connect.image.tag }}"
+        imagePullPolicy: {{ .Values.connect.image.pullPolicy }}
+        ports:
+          - name: http
+            containerPort: 8083
+            protocol: TCP
+        volumeMounts:
+        - name: config
+          mountPath: /kafka/etc/config.yml
+          subPath: exporter_config.yml
+        - name: config
+          mountPath: /config/kafka-connect-config.properties
+          subPath: kafka-connect-config.properties
+        - name: config
+          mountPath: /kafka/config/log4j.properties
+          subPath: log4j.properties
+        - name: decrypted-secret
+          mountPath: /decrypted
+        resources:
+          {{- toYaml .Values.connect.resources | nindent 10 }}
+{{- if .Values.enableAC }}
+        command:
+          - /bin/bash
+          - -c
+          - |
+            . /decrypted/kafka_client_jaas.conf
+            export CONNECT_SASL_JAAS_CONFIG=$SASL_JAAS_CONFIG
+            export CONNECT_CONSUMER_SASL_JAAS_CONFIG=$SASL_JAAS_CONFIG
+            export CONNECT_PRODUCER_SASL_JAAS_CONFIG=$SASL_JAAS_CONFIG
+            /docker-entrypoint.sh start
+{{- end }}
+        env:
+{{- if .Values.enableAC }}
+        - name: BOOTSTRAP_SERVERS
+          value: "SASL_PLAINTEXT://{{ .Values.connect.bootstrapServers.host }}:{{ .Values.connect.bootstrapServers.port }}"
+        - name: CONNECT_SECURITY_PROTOCOL
+          value: "SASL_PLAINTEXT"
+        - name: CONNECT_SASL_MECHANISM
+          value: "PLAIN"
+        - name: CONNECT_PRODUCER_SECURITY_PROTOCOL
+          value: "SASL_PLAINTEXT"
+        - name: CONNECT_PRODUCER_SASL_MECHANISM
+          value: "PLAIN"
+        - name: CONNECT_CONSUMER_SECURITY_PROTOCOL
+          value: "SASL_PLAINTEXT"
+        - name: CONNECT_CONSUMER_SASL_MECHANISM
+          value: "PLAIN"
+{{- else}}
+        - name: BOOTSTRAP_SERVERS
+          value: "PLAINTEXT://{{ .Values.connect.bootstrapServers.host }}:{{ .Values.connect.bootstrapServers.port }}"
+{{- end }}
+        - name: GROUP_ID
+          value: "{{ .Values.connect.groupID }}"
+        - name: CONFIG_STORAGE_TOPIC
+          value: "{{ .Values.connect.CONFIG_STORAGE_TOPIC }}"
+        - name: OFFSET_STORAGE_TOPIC
+          value: "{{ .Values.connect.OFFSET_STORAGE_TOPIC }}"
+        - name: STATUS_STORAGE_TOPIC
+          value: "{{ .Values.connect.STATUS_STORAGE_TOPIC }}"
+        - name: KEY_CONVERTER
+          value: "{{ .Values.connect.converter.key }}"
+        - name: VALUE_CONVERTER
+          value: "{{ .Values.connect.converter.value }}"
+        - name: INTERNAL_KEY_CONVERTER
+          value: "{{ .Values.connect.converter.key }}"
+        - name: INTERNAL_VALUE_CONVERTER
+          value: "{{ .Values.connect.converter.value }}"
+        - name: CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL
+          value: "{{ .Values.connect.schemaRegistry.key }}"
+        - name: CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL
+          value: "{{ .Values.connect.schemaRegistry.value }}"
+        - name: CONNECT_CONFIG_PROVIDERS
+          value: "file"
+        - name: CONNECT_CONFIG_PROVIDERS_FILE_CLASS
+          value: "org.apache.kafka.common.config.provider.FileConfigProvider"
+        - name: JMXHOST
+          value: "0.0.0.0"
+        - name: JMXPORT
+          value: "1976"
+        - name: EXTRA_ARGS
+          value: "-javaagent:/kafka/etc/jmx_prometheus_javaagent.jar=8080:/kafka/etc/config.yml"
+        - name: KAFKA_MAX_REQUEST_SIZE
+          value: "10485760"
+        - name: CONNECT_CONNECTOR_CLIENT_CONFIG_OVERRIDE_POLICY
+          value: "All"
+        - name: CONNECT_PRODUCER_MAX_REQUEST_SIZE
+          value: "10485760"
+        - name: KAFKA_HEAP_OPTS
+          value: "{{ .Values.connect.heapOptions }}"
+      {{- if .Values.global.sqlProxy.enabled }}
+      - name: cloud-sql-proxy
+        image: "{{ .Values.sqlProxy.image.repository }}:{{ .Values.sqlProxy.image.tag }}"
+        imagePullPolicy: IfNotPresent
+        command:
+          - "/cloud_sql_proxy"
+        {{- if .Values.global.sqlProxy.multiConnName }}  
+          - {{ printf "-instances=%s" .Values.global.sqlProxy.multiConnName }}
+        {{- else if .Values.global.sqlProxy.lmsConnName }}
+          - {{ include "kafka-connect.sqlProxyInstances" .Values.global.sqlProxy }}
+        {{- else }}
+          - {{ printf "-instances=%s=tcp:5432" .Values.global.sqlProxy.connName }}
+        {{- end }}
+          - "-structured_logs"
+          - "-enable_iam_login"
+      {{- if .Values.global.sqlProxy.usePublicIP }}
+          - "-ip_address_types=PUBLIC"
+      {{- else }}
+          - "-ip_address_types=PRIVATE"
+      {{- end }}
+      {{- if or (eq "stag" .Values.global.environment) (eq "uat" .Values.global.environment) }}
+          - "-quiet"
+      {{- end }}
+        securityContext:
+          runAsNonRoot: true
+        resources:
+          {{- toYaml .Values.sqlProxy.resources | nindent 10 }}
+      {{- end }}
+      {{- if .Values.alloydbProxy.enabled }}
+      - name: alloydb-auth-proxy
+        image: "{{ .Values.alloydbProxy.image.repository }}:{{ .Values.alloydbProxy.image.tag }}"
+        imagePullPolicy: IfNotPresent
+        command:
+          - "/alloydb-auth-proxy"
+          - {{ printf "%s" .Values.alloydbProxy.alloydbConnName }}
+          - "--structured-logs"
+        securityContext:
+          runAsNonRoot: true
+        resources:
+          {{- toYaml .Values.alloydbProxy.resources | nindent 10 }}
+      {{- end }}
+      {{- with .Values.connect }}
+      {{- $context := (mustMerge (deepCopy .) $) }}
+      affinity: {{- include "util.affinityNew" $context | nindent 8 }}
+      tolerations: {{- include "util.tolerations" $context | nindent 8 }}
+      {{- end }}

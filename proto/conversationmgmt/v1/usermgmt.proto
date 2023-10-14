@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package conversationmgmt.v1;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/conversationmgmt/v1;cpb";
+
+message GetAppInfoRequest{}
+
+message GetAppInfoResponse{
+    string app_key = 1;
+    string current_user_token = 2;
+    uint64 token_expired_at = 3;
+}
+
+service AgoraUserMgmtService {
+    rpc GetAppInfo(GetAppInfoRequest)
+        returns (GetAppInfoResponse);
+}

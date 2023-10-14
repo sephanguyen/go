@@ -1,0 +1,209 @@
+image:
+  repository: asia.gcr.io/student-coach-e1e95/atlantis
+  tag: v0.24.2
+  pullPolicy: IfNotPresent
+
+enableDiffMarkdownFormat: true
+
+# atlantis starts quite slow so give it 15 minutes
+# to be healthy before it gets restarted by kubernetes.
+livenessProbe:
+  initialDelaySeconds: 30
+  failureThreshold: 60
+  periodSeconds: 15
+
+atlantisUrl: https://atlantis.manabie.io
+
+orgAllowlist: github.com/manabie-com/*
+
+logLevel: "info"
+
+volumeClaim:
+  enabled: true
+  dataStorage: 50Gi
+  storageClassName: premium-rwo
+
+repoConfig: |
+  ---
+  repos:
+  - id: github.com/manabie-com/backend
+    workflow: terragrunt
+
+    apply_requirements: [approved]
+    allowed_overrides: [workflow]
+    allow_custom_workflows: false
+  workflows:
+    terragrunt:
+      plan:
+        steps:
+        - env:
+            name: TERRAGRUNT_TFPATH
+            command: 'echo "terraform${ATLANTIS_TERRAFORM_VERSION}"'
+        - env:
+            # Reduce Terraform suggestion output
+            name: TF_IN_AUTOMATION
+            value: 'true'
+        - run: terragrunt init -no-color 1> /dev/null
+        - run: terragrunt plan -no-color -out=$PLANFILE | sed -E 's/^ {2}\+/\+/;s/^ {2}\-/\-/;s/^ {2}\~/\~/;/Refreshing state/d' # See https://github.com/runatlantis/atlantis/blob/38cf7b014137637c065513b2077eca0c8ef43541/server/core/runtime/plan_step_runner.go#L225
+        - run: terragrunt show -no-color -json $PLANFILE > $SHOWFILE
+      apply:
+        steps:
+        - env:
+            name: TERRAGRUNT_TFPATH
+            command: 'echo "terraform${ATLANTIS_TERRAFORM_VERSION}"'
+        - env:
+            # Reduce Terraform suggestion output
+            name: TF_IN_AUTOMATION
+            value: 'true'
+        - run: terragrunt -v
+        - run: terragrunt apply -no-color $PLANFILE
+    access-control:
+      plan:
+        steps:
+        - env:
+            name: TERRAGRUNT_TFPATH
+            command: 'echo "terraform${ATLANTIS_TERRAFORM_VERSION}"'
+        - env:
+            # Reduce Terraform suggestion output
+            name: TF_IN_AUTOMATION
+            value: 'true'
+        - run: terragrunt init -no-color 1> /dev/null
+        - run: terragrunt plan -no-color -out=$PLANFILE | sed -E 's/^ {2}\+/\+/;s/^ {2}\-/\-/;s/^ {2}\~/\~/;/Refreshing state/d' # See https://github.com/runatlantis/atlantis/blob/38cf7b014137637c065513b2077eca0c8ef43541/server/core/runtime/plan_step_runner.go#L225
+        - run: terragrunt show -no-color -json $PLANFILE > $SHOWFILE
+      apply:
+        steps:
+        - env:
+            name: TERRAGRUNT_TFPATH
+            command: 'echo "terraform${ATLANTIS_TERRAFORM_VERSION}"'
+        - env:
+            # Reduce Terraform suggestion output
+            name: TF_IN_AUTOMATION
+            value: 'true'
+        - run: terragrunt -v
+        - run: |
+            has_outputs_changes="0"
+
+            case "$PROJECT_NAME" in
+              access-control)
+                has_outputs_changes=$(terragrunt show -no-color $PLANFILE | grep -cE "members_by_access_level|techleads")
+                ;;
+
+              *apps)
+                has_outputs_changes=$(terragrunt show -no-color $PLANFILE | grep -c "postgresql_databases")
+                ;;
+            esac
+
+            terragrunt apply -no-color $PLANFILE
+
+            echo "has_outputs_changes: $has_outputs_changes"
+            if [ "$has_outputs_changes" == "0" ]; then
+                exit 0;
+            fi
+
+            cd ../.. && ./access-control-workflow.sh
+
+service:
+  type: ClusterIP
+  port: 80
+  loadBalancerIP: null
+
+ingress:
+  enabled: false
+
+resources:
+  requests:
+    memory: 1Gi
+    cpu: 400m
+  limits:
+    memory: 3Gi
+    cpu: 1000m
+
+serviceAccount:
+  annotations:
+    iam.gke.io/gcp-service-account: atlantis@student-coach-e1e95.iam.gserviceaccount.com
+
+environmentRaw:
+  - name: ATLANTIS_GH_APP_ID
+    value: "148336"
+  - name: ATLANTIS_GH_APP_SLUG
+    value: "manabie-atlantis"
+  - name: ATLANTIS_GH_TEAM_ALLOWLIST
+    value: "dev:plan,func-platform:unlock,terraform-approvers:apply"
+  - name: ATLANTIS_WRITE_GIT_CREDS
+    value: "true"
+  - name: ATLANTIS_DEFAULT_TF_VERSION
+    value: "1.4.4"
+  - name: ATLANTIS_HIDE_PREV_PLAN_COMMENTS
+    value: "true"
+  - name: ATLANTIS_PARALLEL_POOL_SIZE
+    value: "5"
+  - name: ATLANTIS_LOG_LEVEL
+    value: "error"
+  - name: TERRAGRUNT_AUTO_INIT
+    value: "false"
+  - name: TERRAGRUNT_LOG_LEVEL
+    value: "error"
+
+initContainers:
+  - name: atlantis-decrypt-secret
+    image: google/cloud-sdk:323.0.0-alpine
+    imagePullPolicy: IfNotPresent
+    command:
+      - /bin/bash
+      - -c
+      - |
+        kmsPath=projects/student-coach-e1e95/locations/asia-southeast1/keyRings/manabie/cryptoKeys/prod-manabie
+        project=$(echo $kmsPath | cut -d'/' -f 2)
+        location=$(echo $kmsPath | cut -d'/' -f 4)
+        keyring=$(echo $kmsPath | cut -d'/' -f 6)
+        key=$(echo $kmsPath | cut -d'/' -f 8)
+
+        gcloud kms decrypt \
+          --project=$project \
+          --keyring=$keyring \
+          --key=$key \
+          --location=$location \
+          --ciphertext-file /etc/atlantis/config.yaml.encrypted \
+          --plaintext-file /var/atlantis-gh-app/config.yaml
+    volumeMounts:
+      - name: gh-app-encrypted-volume
+        mountPath: /etc/atlantis
+        readOnly: true
+      - name: gh-app-decrypted-volume
+        mountPath: /var/atlantis-gh-app
+
+extraVolumes:
+  - name: gh-app-encrypted-volume
+    secret:
+      secretName: atlantis-gh-app-encrypted
+  - name: gh-app-decrypted-volume
+    emptyDir: {}
+
+extraArgs:
+  - --config
+  - /var/atlantis-gh-app/config.yaml
+
+extraVolumeMounts:
+  - name: gh-app-decrypted-volume
+    mountPath: /var/atlantis-gh-app
+
+extraContainers:
+  - name: cloud-sql-proxy
+    command:
+    - /cloud_sql_proxy
+    - -instances=staging-manabie-online:asia-southeast1:jprep-uat=tcp:5433,production-renseikai:asia-northeast1:renseikai-83fc=tcp:5435,student-coach-e1e95:asia-northeast1:jp-partners-b04fbb69=tcp:5438,student-coach-e1e95:asia-northeast1:prod-tokyo=tcp:5439,student-coach-e1e95:asia-northeast1:analytics=tcp:5440,staging-manabie-online:asia-southeast1:manabie-lms-de12e08e=tcp:5441,staging-manabie-online:asia-southeast1:manabie-common-88e1ee71=tcp:5442,student-coach-e1e95:asia-northeast1:prod-tokyo-lms-b2dc4508=tcp:5443,student-coach-e1e95:asia-northeast1:prod-jprep-d995522c=tcp:5444,student-coach-e1e95:asia-northeast1:prod-tokyo-data-warehouse-251f01f8=tcp:5445,staging-manabie-online:asia-southeast1:manabie-auth-f2dc7988=tcp:5446,student-coach-e1e95:asia-northeast1:prod-tokyo-auth-42c5a298=tcp:5447
+    - -structured_logs
+    - -enable_iam_login
+    - -quiet
+    image: gcr.io/cloudsql-docker/gce-proxy:1.30.1
+    imagePullPolicy: IfNotPresent
+    resources:
+      requests:
+        cpu: 5m
+        memory: 16Mi
+    securityContext:
+      runAsNonRoot: true
+
+podTemplate:
+  annotations:
+    cluster-autoscaler.kubernetes.io/safe-to-evict: "true"

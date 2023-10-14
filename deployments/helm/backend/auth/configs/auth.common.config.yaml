@@ -1,0 +1,46 @@
+common:
+  name: auth
+  organization: {{ .Values.global.vendor }}
+  environment: '{{ include "util.runtimeEnvironment" . }}'
+  actual_environment: '{{ include "util.environment" . }}'
+  log:
+    app_level: debug
+    log_payload: true
+  stats_enabled: true
+  remote_trace:
+    enabled: true
+    otel_collector_receiver: http://opentelemetry-collector.monitoring.svc.cluster.local:14268/api/traces
+  grpc:
+    trace_enabled: true
+    handler_timeout_v2:
+      default: 30s
+    handler_timeout_v2_enabled: true
+    client_name: com.manabie.auth
+    client_version: {{ .Values.clientVersion }}
+  image_tag: {{ include "util.imageTag" . }}
+postgres_migrate:
+  source: file:///migrations/auth
+  database:
+    cloudsql_instance: '{{ .Values.global.cloudSQLAuthInstance }}'
+    cloudsql_use_public_ip: {{ .Values.global.cloudSQLUsePublicIP }}
+    cloudsql_auto_iam_authn: true
+    cloudsql_impersonate_service_account_email: '{{ include "util.databaseMigrationServiceAccountEmail" .}}'
+    user: '{{ include "util.databaseMigrationUser" . }}'
+    host: '{{ include "util.databaseHost" . }}'
+    port: '5432'
+    dbname: '{{ .Values.global.dbPrefix }}auth'
+    max_conns: 2
+    retry_attempts: 10
+    retry_wait_internal: '5s'
+postgres_v2:
+  auth:
+    cloudsql_instance: '{{ .Values.global.cloudSQLAuthInstance }}'
+    cloudsql_use_public_ip: {{ .Values.global.cloudSQLUsePublicIP }}
+    cloudsql_auto_iam_authn: true
+    user: '{{ include "util.databaseUser" . }}'
+    host: '{{ include "util.databaseHost" . }}'
+    port: '5432'
+    dbname: '{{ .Values.global.dbPrefix }}auth'
+    max_conns: 8
+    retry_attempts: 10
+    retry_wait_interval: '5s'

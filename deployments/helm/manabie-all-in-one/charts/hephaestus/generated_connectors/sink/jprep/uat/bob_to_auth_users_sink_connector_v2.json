@@ -1,0 +1,23 @@
+{
+  "name": "uat_jprep_bob_to_auth_users_sink_connector_v2",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+    "tasks.max": "1",
+    "topics": "uat.jprep.bob.public.users",
+    "connection.url": "${file:/config/kafka-connect-config.properties:auth_url}",
+    "auto.create": "false",
+    "insert.mode": "upsert",
+    "table.name.format": "users",
+    "fields.whitelist": "created_at,deactivated_at,deleted_at,email,login_email,resource_path,updated_at,user_group,user_id,username",
+    "transforms": "unwrap,route",
+    "transforms.route.type": "org.apache.kafka.connect.transforms.RegexRouter",
+    "transforms.route.regex": "([^.]+).([^.]+).([^.]+).([^.]+).([^.]+)",
+    "transforms.route.replacement": "$5",
+    "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+    "delete.enabled": "false",
+    "pk.mode": "record_value",
+    "pk.fields": "user_id",
+    "transforms.unwrap.drop.tombstones": "true",
+    "transforms.unwrap.delete.handling.mode": "drop"
+  }
+}

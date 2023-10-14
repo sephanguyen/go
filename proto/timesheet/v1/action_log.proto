@@ -1,0 +1,59 @@
+
+syntax = "proto3";
+
+package timesheet.v1;
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/timesheet/v1;tpb";
+
+service TimesheetActionLogService { 
+  rpc GetTimesheetActionLogList(GetTimesheetActionLogListRequest) returns (GetTimesheetActionLogListResponse); 
+}
+
+message GetTimesheetActionLogListRequest {
+  int32 limit = 1;
+  int32 offset = 2;
+  string timesheet_id = 3;
+}
+
+message GetTimesheetActionLogListResponse {
+  repeated ActionLog action_logs = 1;
+  ActionLogAggregate action_logs_aggregate = 2;
+}
+
+message ActionLog {
+  string action_log_id = 1;
+  string timesheet_id = 2;
+  ActionLogUser user = 3;
+  bool is_system = 4;
+  TimesheetAction action = 5;
+  google.protobuf.Timestamp executed_at = 6;
+}
+
+message ActionLogAggregate {
+  int32 count = 1;
+}
+
+message ActionLogUser {
+  string user_id = 1;
+  string email = 2;
+}
+
+enum TimesheetAction {
+  EDITED = 0;
+  UPDATED_LESSON = 1;
+  SUBMITTED = 2;
+  APPROVED = 3;
+  CONFIRMED = 4;
+  CANCEL_APPROVAL = 5;
+  CANCEL_SUBMISSION = 6;
+}
+
+// NATS action log request
+message TimesheetActionLogRequest {
+  TimesheetAction action = 1; // action type
+  string executed_by = 2; // user id of the actor
+  string timesheet_id = 3; // timesheet id for the action
+  bool is_system = 4; // if set to true, will ignore `executed_by`
+  google.protobuf.Timestamp executed_at = 5; // timestamp to when the action was executed
+}

@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package nats.v1;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/nats/v1;npb";
+
+import "google/protobuf/timestamp.proto";
+
+message EventSyncLocation {
+  message Location {
+    string location_id = 1;
+    string name = 2;
+    string location_type = 3;
+    string parent_location_id = 4;
+    string partner_internal_id = 5;
+    string partner_internal_parent_id = 6;
+    google.protobuf.Timestamp created_at = 7;
+    google.protobuf.Timestamp updated_at = 8;
+    google.protobuf.Timestamp deleted_at = 9;
+    bool is_archived = 10;
+    string access_path = 11;
+  }
+  repeated Location locations = 1;
+}
+
+message EventSyncLocationType {
+    message LocationType {
+      string location_type_id = 1;
+      string name = 2;
+      string display_name = 3;
+      string parent_name = 4;
+      string parent_location_type_id = 5;
+      google.protobuf.Timestamp created_at = 6;
+      google.protobuf.Timestamp updated_at = 7;
+      google.protobuf.Timestamp deleted_at = 8;
+      bool is_archived = 9;
+    }
+    repeated LocationType location_types = 1;
+}

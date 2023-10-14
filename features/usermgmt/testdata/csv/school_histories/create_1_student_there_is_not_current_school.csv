@@ -1,0 +1,2 @@
+user_id,external_user_id,username,last_name,first_name,last_name_phonetic,first_name_phonetic,email,grade,birthday,gender,remarks,student_tag,student_phone_number,home_phone_number,contact_preference,postal_code,prefecture,city,first_street,second_street,school,school_course,start_date,end_date,enrollment_status,location,status_start_date
+,,username,student+csv,firstname 1,,,student+csv+01@email.com,grade_01,,,,,,,,,,,,,school_partner_id_2,,,,1,location-id-2,

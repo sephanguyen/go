@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package lessonmgmt.v1;
+
+import "google/protobuf/timestamp.proto";
+import "lessonmgmt/v1/enums.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/lessonmgmt/v1;lpb";
+
+
+message GenerateZoomLinkRequest {
+  google.protobuf.Timestamp start_time = 1;
+  google.protobuf.Timestamp end_time = 2;
+  string time_zone = 3;
+  lessonmgmt.v1.CreateLessonSavingMethod method = 4;
+  google.protobuf.Timestamp end_date = 5;
+  string account_owner = 6;
+}
+
+message GenerateZoomLinkResponse {
+  message OccurrenceZoom {
+    string occurrence_id = 1;
+    string start_time = 2;
+    int32 duration = 3;
+    string status = 4;
+  }
+  string url = 1;
+  string id = 2;
+  repeated OccurrenceZoom occurrences = 3;
+}
+
+message DeleteZoomLinkRequest {
+  string zoom_id = 1;
+  string lesson_id = 2;
+}
+
+message DeleteZoomLinkResponse {
+}
+
+service LessonZoomService {
+  rpc GenerateZoomLink(GenerateZoomLinkRequest) returns (GenerateZoomLinkResponse);
+  rpc DeleteZoomLink(DeleteZoomLinkRequest) returns (DeleteZoomLinkResponse);
+
+}

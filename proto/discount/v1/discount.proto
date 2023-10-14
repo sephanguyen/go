@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package discount.v1;
+
+import "google/protobuf/timestamp.proto";
+import "discount/v1/enums.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/discount/v1;pmpb";
+
+message RetrieveActiveStudentDiscountTagRequest {
+    google.protobuf.Timestamp discount_date_request = 1;
+    string student_id = 2;
+}
+
+message RetrieveActiveStudentDiscountTagResponse {
+    string student_id = 1;
+    message DiscountTagDetail {
+        string discount_tag_name = 1;
+        string discount_tag_id = 2;
+        bool selectable = 3; 
+    }
+    repeated DiscountTagDetail discount_tag_details = 2;
+}
+
+
+message UpsertStudentDiscountTagRequest {
+    string student_id = 1;
+    repeated string discount_tag_ids = 2;
+}
+
+message UpsertStudentDiscountTagResponse {
+    bool successful = 1;
+}
+
+
+service DiscountService {
+    rpc RetrieveActiveStudentDiscountTag(RetrieveActiveStudentDiscountTagRequest) 
+        returns (RetrieveActiveStudentDiscountTagResponse);
+    rpc UpsertStudentDiscountTag(UpsertStudentDiscountTagRequest) 
+        returns (UpsertStudentDiscountTagResponse);
+}

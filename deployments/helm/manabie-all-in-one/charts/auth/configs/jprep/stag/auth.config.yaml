@@ -1,0 +1,7 @@
+common:
+  google_cloud_project: staging-manabie-online
+vendor: jprep
+issuers:
+  - issuer: https://d2020-ji-sso.jprep.jp/auth/realms/manabie-test
+    audience: manabie-app
+    jwks_endpoint: https://d2020-ji-sso.jprep.jp/auth/realms/manabie-test/protocol/openid-connect/certs

@@ -1,0 +1,217 @@
+{
+	"schema": [
+		{
+			"column_name": "amount",
+			"data_type": "numeric",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "country",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "coupon",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "coupon_amount",
+			"data_type": "numeric",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "created_by_email",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "currency",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "gateway_full_feedback",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "gateway_link",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "gateway_name",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "gateway_response",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "inapp_transaction_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "ios_transaction_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "is_manual_created",
+			"data_type": "boolean",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "package_id",
+			"data_type": "integer",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "package_name",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "payment_method",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "reference_number",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "status",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "student_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "student_order_id",
+			"data_type": "integer",
+			"column_default": "nextval('student_orders_student_order_id_seq'::regclass)",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "student_orders",
+			"policyname": "rls_student_orders",
+			"qual": "permission_check(resource_path, 'student_orders'::text)",
+			"with_check": "permission_check(resource_path, 'student_orders'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "student_orders",
+			"policyname": "rls_student_orders_restrictive",
+			"qual": "permission_check(resource_path, 'student_orders'::text)",
+			"with_check": "permission_check(resource_path, 'student_orders'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "student_orders__ios_transaction_id_fk",
+			"column_name": "ios_transaction_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "student_orders_students_fk",
+			"column_name": "student_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "student_orders_pk",
+			"column_name": "student_order_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "inapp_transaction_id_un",
+			"column_name": "inapp_transaction_id",
+			"constraint_type": "UNIQUE"
+		}
+	],
+	"table_name": "student_orders",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

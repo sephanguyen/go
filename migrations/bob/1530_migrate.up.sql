@@ -1,0 +1,1 @@
+CREATE INDEX lesson_reports_lesson_id_idx ON public.lesson_reports USING btree (lesson_id);

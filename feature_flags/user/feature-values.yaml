@@ -1,0 +1,781 @@
+unleash:
+  featureFlags:
+    user:
+      - name: User_Authentication_MultiTenantAuthentication
+        description: "A feature flag to enable Multi-tenant Authentication (LT-3855)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_organization
+            parameters:
+              # organizations: "-2147483648"
+              organizations: "none"
+            constraints: []
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+              # environments: "none"
+            constraints: []
+          - name: strategy_variant
+            parameters:
+              variants: "manabie,tokyo"
+              # variants: "none"
+            constraints: []
+      - name: User_Authentication_MultiTenantRememberOrgId
+        description: "A feature flag to enable Multi-tenant Authentication improvement (LT-14172)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_organization
+            parameters:
+              organizations: "none"
+            constraints: []
+          - name: strategy_environment
+            parameters:
+              environments: "none"
+            constraints: []
+          - name: strategy_variant
+            parameters:
+              variants: "manabie,tokyo"
+            constraints: []
+      - name: User_AccessControl_Teacher_FilterStudentsByLocation
+        description: "A feature flag to enable Filter Location for Student List in Teacher Web (LT-10308)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_TeacherManagement_BackOffice_TeacherDetailsNewUI
+        description: "A feature flag to enable Teacher Detail New UI (LT-11596)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_StudentManagement_BackOffice_StudentManagement
+        description: "A feature flag to enable Student Management (LT-11901)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_StaffManagement_BackOffice_StaffManagement
+        description: "A feature flag to enable Staff Management (LT-12448)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_UserGroupManagement_BackOffice_UserGroupManagement
+        description: "A feature flag to enable User Group Management (LT-12361)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: BACKEND_User_StudentManagement_BackOffice_HandleUpdateStudentCourseLocation
+        description: "A feature flag to enable handle Update Student-Course Location Field (LT-12972)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_Authentication_Learner_RemoveRememberedAccount
+        description: "A feature flag to enable Remove remembered account screen from auth (LT-14791)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_StaffManagement_BackOffice_ValidationLoginForNewUserGroup
+        description: "A feature flag to enable check validation for adding User group into Staff (LT-11093)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_Authentication_BackOffice_LoginNormal_NewForm
+        description: "A feature flag to check if will update login form to v2 (LT-14054)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+      - name: User_UserGroupManagement_BackOffice_UserGroupShowAllRole
+        description: "A feature flag to show all role for User Group (LT-19893)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_MasterManagement_BackOffice_School_Group
+        description: "A feature flag to enable School group options in the Master Management (LT-17026)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_MasterManagement_BackOffice_Tag_Group
+        description: "A feature flag to enable Tag group options in the Master Management (LT-17026)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_Authentication_BackOffice_ApplyNewGetBasicProfileAPI
+        description: "A feature flag to apply new getBasicProfile API (LT-16216)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_UserManagement_Learner_CentralizeSwitchStudent
+        description: "A feature flag to enable new switch student implementation (LT-21750)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_Authentication_Learner_AllowParentUserLogin
+        description: "A feature flag to allow parents to login (LT-21661)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_UserManagement_Learner_EnableSwitchLanguages
+        description: "A feature flag to enable switching of languages (LT-21661)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_UserManagement_Learner_EnableSwitchChildrenFeature
+        description: "A feature flag to enable switching of student (LT-21661)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_Auth_ManabieRole
+        description: "A feature toggle to return manabie role in hasura claims when exchange token (LT-21148)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "none"
+            constraints: []
+      - name: User_StudentManagement_BackOffice_ExternalUserID_For_Parent
+        description: "A feature flag to enable External User ID For Parent(LT-34686)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_Authentication_BackOffice_ExpiredTokenMechanism
+        description: "A feature flag to enable checking expired tokens before sending requests (LT-22708)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: User_StaffManagement_BackOffice_SearchFilterByUserGroups
+        description: "A feature flag to enable search filter staff by user groups (LT-29114)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_Auth_AllowAllRolesToLoginTeacherWeb
+        description: "A feature flag to allow all roles to login on Teacher web (LT-24495)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_Auth_NewBOAccessForTeacherRole
+        description: "A feature flag to allow new Back-office access for teacher role (LT-31846)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_StudentManagement_BackOffice_ParentLocationValidation
+        description: "A feature flag to enabled parent location validation (LT-32604)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_StudentManagement_BulkUpdateStudentCSV
+        description: "A feature flag to enable bulk update student via csv (LT-30100)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_StudentManagement_BackOffice_SearchFilterByBank
+        description: "A feature flag to enable search filter student by Bank (LT-32936)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_MicroFrontend_TaskRunner
+        description: "A feature flag to enable Implement import user stuff by task runner instead redux(LT-35377)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_StaffManagement_BackOffice_AutoNavigate_TimesheetSettingTab
+        description: "A feature flag to enable Implement Auto navigate to Timesheet tab(LT-37954)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_StudentManagement_BackOffice_DisplayGenderAndEnrollmentStartDate
+        description: "A feature flag to enable Implement add new columns gender and enrollment date for student list(LT-38522)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_UserGroupManagement_BackOffice_UserGroupShowSearchBar
+        description: "A feature flag to enable Implement add search bar for user group list(LT-39039)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_StudentManagement_BackOffice_PersistentFilterForStudentList
+        description: "A feature flag to enable persistent filter for student list(LT-39894)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_MicroFrontend_TaskRunner_For_Parent
+        description: "A feature flag to enable Implement import parent stuff by task runner instead redux(LT-37414)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_StudentManagement_BackOffice_SelectStudentsByCheckbox
+        description: "A feature flag to enable selecting of students by checkbox(LT-35551)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_Auth_AllowCombinationMultipleRoles
+        description: "A feature flag to enable combination multiple roles(LT-34918)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_StudentManagement_IgnoreStudentEmailValidation
+        description: "Ignore update user email in Open API/Bulk Update CSV (LT-37906)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_StudentManagement_DeactivateStudent
+        description: "A feature flag to allow admin to deactivate student (LT-33403)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_StudentManagement_SortStudentList
+        description: "A feature flag to enable sorting on student list (LT-39044)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_organization
+            parameters:
+              organizations: "-2147483635,-2147483642,-2147483628,-2147483623"
+            constraints: []
+      - name: User_StudentManagement_NewQueryGetStudentList
+        description: "A feature flag to enable new query to get student list (LT-39900)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_StudentManagement_CustomizeColumnsStudentList
+        description: "A feature flag to enable Customize Columns on student list (LT-36799)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_StaffManagement_StaffTag
+        description: "A feature flag to enable Staff Tag (LT-39058)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_StudentManagement_BackOffice_FilterByProductTag
+        description: "A feature flag to enable Implement Product Tag Filter (LT-41414)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_Authentication_UpdatePasswordOnLearnerApp
+        description: "A feature flag to Allow student/parent to change their password (LT-38003)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_StudentManagement_IgnoreInvalidRecordsCSVAndOpenAPI
+        description: "A feature flag to enable ignore records have validation error only CSV (LT-39239)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_StudentManagement_BackOffice_SearchStudentWithNoSpace
+        description: "A feature flag to enable search student with no space (LT-40485)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_StudentManagement_BackOffice_IPRestriction
+        description: "A feature flag to enable IP restriction (LT-31781)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_StudentManagement_UsingMasterReplicatedTable
+        description: "A flag to use replicated table on bob instead of calling mastermgmt API (LT-38497)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: User_UserManagement_DecouplingUserAndAuthDB
+        description: "A feature flag to enable switch database connection between bob and auth"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+      - name: User_BackOffice_Using_Latest_Version_DatePicker
+        description: "A flag to enable using latest version DatePicker for User (LT-41720)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_StudentManagement_StudentParentUsername
+        description: "A feature flag to enable username for student and parent (LT-30603)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "none"
+            constraints: []
+      - name: User_Authorization_QueryOrganizationInAuthDatabase
+        description: "A feature flag to allow using new query to get organization in Auth database (LT-42811)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "none"
+            constraints: []
+      - name: User_StaffManagement_ExternalUserId
+        description: "A feature flag enable field external_user_id for staff (LT-42597)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_StudentManagement_IgnoreInvalidRecordsOpenAPI
+        description: "A feature flag enable ignoring invalid records in Open API (LT-40418)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_StudentManagement_DeactivateParent
+        description: "A feature flag enable auto update parent activation (LT-44040)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_StudentManagement_DeactivateStudent_V2
+        description: "A feature flag to allow admin to deactivate student V2 (LT-42489)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_StudentManagement_Experimental_BulkInsert_Enrollment_Status_Histories
+        description: "An experimental feature flag to enable bulk insert enrollment status history"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "none"
+            constraints: []
+      - name: User_BackOffice_DecoupleRootAppConfig
+        description: "A feature flag to toggle use userAppConfig instead of root app config (LT-29999)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_StudentManagement_BackOffice_SchoolFilterDropdownEnhancement
+        description: "A feature flag for School Filter dropdown UI Enhancement (LT-44444)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_StaffManagement_StaffUsername
+        description: "A feature flag to enable username for staff (LT-42586)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "none"
+            constraints: []
+      - name: Test_User_Feature_A
+        description: "A feature flag to test feature flag manager"
+        type: release
+        enabled: true
+        stale: false
+        variants: [ ]
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: [ ]
+      - name: Test_User_Feature_B
+        description: "A feature flag to test feature flag manager"
+        type: release
+        enabled: true
+        stale: false
+        variants: [ ]
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: [ ]
+      - name: User_StudentManagement_DisableDeactivateStudent
+        description: "A feature flag to disable auto update student activation (LT-44661)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_organization
+            parameters:
+              organizations: "none"
+            constraints: []
+      - name: User_Appsmith_Dashboard_Enrolled_Students_Widget
+        description: "A feature flag to enable count of Enrolled Students widget (LT-45099)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: Communication_Appsmith_Dashboard_Page_V2
+        description: "A feature flag to enable the new version 2 of the Dashboard page (LT-46369)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: User_UserManagement_ApplyNewGetStudentListAPI
+        description: "A feature flag to apply new getStudentList API (LT-45350)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "none"
+            constraints: []
+      - name: User_Authorization_UseAuthAPI
+        description: "A feature flag to allow to use auth API (LT-46297)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "none"
+            constraints: []
+      - name: User_StudentManagement_EnhanceBulkInsertStudentErrorCSV
+        description: "A feature flag to enhance bulk insert student error csv (LT-45252)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: User_StudentManagement_EnhanceBankAccountFilter
+        description: "A feature flag to enhance bank account filter (LT-46895)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []

@@ -1,0 +1,12 @@
+enableAC: false
+enabled: true
+migrationEnabled: false
+postHookMigrateDataLake: true
+postHookMigrateDatawarehouses: true
+postHookSyncDataLake: true
+postHookSyncDataWarehouse: true
+postHookUpsertKsqlMigration: true
+topicPrefix: ""
+waitForServices:
+    - name: bob
+      port: 5050

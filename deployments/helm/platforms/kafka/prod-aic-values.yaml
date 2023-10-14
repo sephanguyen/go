@@ -1,0 +1,9 @@
+kafka:
+  heapOptions: "-Xms768M -Xmx768M"
+
+  resources:
+    requests:
+      cpu: 200m
+      memory: 1Gi
+    limits:
+      memory: 1536Mi

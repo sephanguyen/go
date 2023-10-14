@@ -1,0 +1,237 @@
+suite: draft deployment yaml file
+templates:
+  - charts/draft/templates/app.yaml
+  - charts/draft/templates/pdb.yaml
+values:
+  - ../charts/draft/values.yaml
+  - ../values.yaml
+  - ../../platforms/gateway/local-manabie-values.yaml
+  - ../local-manabie-values.yaml
+tests:
+
+  - it: First template should be ConfigMap
+    set:
+      global.draft.enabled: true
+      global.environment: local
+      global.vendor: manabie
+    documentIndex: 0
+    template: charts/draft/templates/app.yaml
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - isNotNull:
+          path: data.[draft.common.config.yaml]
+      - isNotNull:
+          path: data.[draft.config.yaml]
+
+  - it: Second template should be secret
+    set:
+      global.draft.enabled: true
+      global.environment: local
+      global.vendor: manabie
+    documentIndex: 1
+    template: charts/draft/templates/app.yaml
+    asserts:
+      - isKind:
+          of: Secret
+      - isNotNull:
+          path: data.[service_credential.json]
+      - isNotNull:
+          path: data.[draft.secrets.encrypted.yaml]
+
+  - it: Third template should be PodDisruptionBudget
+    set:
+      global.draft.enabled: true
+      global.environment: local
+      global.vendor: manabie
+    documentIndex: 2
+    template: charts/draft/templates/app.yaml
+    asserts:
+      - isKind:
+          of: PodDisruptionBudget
+      - equal:
+          path: spec.maxUnavailable
+          value: 1
+
+  - it: Fourth template should be ServiceAccount
+    set:
+      global.draft.enabled: true
+      global.environment: local
+      global.vendor: manabie
+    documentIndex: 3
+    template: charts/draft/templates/app.yaml
+    asserts:
+      - isKind:
+          of: ServiceAccount
+      - equal:
+          path: metadata.name
+          value: local-draft
+
+  - it: Fifth template should be Deployment
+    set:
+      global.draft.enabled: true
+      global.draft.sops.enabled: true
+      global.environment: local
+      global.vendor: manabie
+      global.image.repository: local
+      draft.image.tag: v1
+      global.sqlProxy.enabled: true
+    documentIndex: 4
+    template: charts/draft/templates/app.yaml
+    asserts:
+      - isKind:
+          of: Deployment
+
+      # metadata
+      - equal:
+          path: spec.template.metadata.labels.[app.kubernetes.io/name]
+          value: "draft"
+      - equal:
+          path: spec.template.metadata.annotations.[sidecar.istio.io/proxyCPU]
+          value: "10m"
+      - isNotEmpty:
+          path: spec.template.metadata.annotations.[checksum/draft.config.yaml]
+      - isNotEmpty:
+          path: spec.template.metadata.annotations.[checksum/draft.secrets.encrypted.yaml]
+      - isNotEmpty:
+          path: spec.template.metadata.annotations.[checksum/draft_migrate.secrets.encrypted.yaml]
+
+      # containers
+      - equal:
+          path: spec.template.spec.containers[0].name
+          value: draft
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: local:v1
+      - equal:
+          path: spec.template.spec.containers[0].command
+          value:
+            - /bin/sh
+            - -c
+            - |
+              #!/bin/bash
+              set -eu
+              cat <<EOF > modd.conf
+              /server {
+                daemon +sigterm: /server \\
+                  gserver \\
+                  draft \\
+                  --commonConfigPath=/configs/draft.common.config.yaml \\
+                  --configPath=/configs/draft.config.yaml \\
+                  --secretsPath=/configs/draft.secrets.encrypted.yaml
+              }
+              EOF
+              exec modd
+      - contains:
+          path: spec.template.spec.containers[0].ports
+          content:
+            name: grpc
+            containerPort: 6050
+            protocol: TCP
+      - isNotNull:
+          path: spec.template.spec.containers[0].readinessProbe
+      - matchRegex:
+          path: spec.template.spec.containers[0].readinessProbe.exec.command[2]
+          pattern: .*localhost:6050.*
+
+      # volumes
+      - equal:
+          path: spec.template.spec.volumes[0].secret.secretName
+          value: draft
+      - equal:
+          path: spec.template.spec.volumes[0].secret.items[0].key
+          value: draft.secrets.encrypted.yaml
+      - equal:
+          path: spec.template.spec.volumes[1].secret.items[0].key
+          value: service_credential.json
+      - equal:
+          path: spec.template.spec.volumes[2].configMap.name
+          value: draft
+      - equal:
+          path: spec.template.spec.volumes[2].configMap.items[0].key
+          value: draft.common.config.yaml
+
+      #affinity
+      - contains:
+          path: spec.template.spec.affinity.nodeAffinity.preferredDuringSchedulingIgnoredDuringExecution
+          content:
+            weight: 10
+            preference:
+              matchExpressions:
+              - key: cloud.google.com/gke-spot
+                operator: In
+                values:
+                - "true"
+      - contains:
+          path: spec.template.spec.affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution
+          content:
+            weight: 100
+            podAffinityTerm:
+              labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: draft
+              topologyKey: kubernetes.io/hostname
+      - contains:
+          path: spec.template.spec.tolerations
+          content:
+            effect: NoSchedule
+            key: "cloud.google.com/gke-spot"
+            operator: Exists
+
+  - it: Test Case 1 with volume
+    set:
+      global.draft.enabled: true
+      global.draft.sops.enabled: true
+      global.environment: local
+      global.vendor: manabie
+      global.image.repository: local
+      draft.image.tag: v1
+      global.sqlProxy.enabled: true
+    documentIndex: 4
+    template: charts/draft/templates/app.yaml
+    asserts:
+      - equal:
+          path: spec.template.spec.volumes[0].secret.secretName
+          value: draft
+      - equal:
+          path: spec.template.spec.volumes[0].secret.items[0].key
+          value: draft.secrets.encrypted.yaml
+      - equal:
+          path: spec.template.spec.volumes[1].secret.items[0].key
+          value: service_credential.json
+      - equal:
+          path: spec.template.spec.volumes[2].configMap.name
+          value: draft
+
+  - it: Test Case 2 with Init Containers and MetaData
+    set:
+      global.draft.enabled: true
+      global.draft.sops.enabled: true
+      global.environment: local
+      global.vendor: manabie
+      global.image.repository: local
+      draft.image.tag: v1
+      draft.service.port: 6050
+      global.sqlProxy.enabled: true
+    documentIndex: 4
+    template: charts/draft/templates/app.yaml
+    asserts:
+      - equal:
+          path: spec.template.spec.initContainers[0].imagePullPolicy
+          value: IfNotPresent
+      - equal:
+          path: spec.template.spec.initContainers[0].name
+          value: draft-migrate
+      - equal:
+          path: spec.template.spec.initContainers[0].volumeMounts[2].subPath
+          value: draft_migrate.secrets.encrypted.yaml
+      - equal:
+          path: spec.template.metadata.labels.[app.kubernetes.io/name]
+          value: "draft"
+      - equal:
+          path: spec.template.metadata.annotations.[sidecar.istio.io/proxyCPU]
+          value: "10m"
+      - isNotEmpty:
+          path: spec.template.metadata.annotations.[checksum/draft.config.yaml]
+      - isNotEmpty:
+          path: spec.template.metadata.annotations.[checksum/draft.secrets.encrypted.yaml]

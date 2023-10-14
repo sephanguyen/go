@@ -1,0 +1,285 @@
+- table:
+    schema: public
+    name: students
+  object_relationships:
+  - name: school
+    using:
+      foreign_key_constraint_on: school_id
+  - name: user
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: users
+        column_mapping:
+          student_id: user_id
+  array_relationships:
+  - name: class_members
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: class_members
+        column_mapping:
+          student_id: user_id
+  - name: hub_tours
+    using:
+      foreign_key_constraint_on:
+        column: student_id
+        table:
+          schema: public
+          name: hub_tours
+  - name: lesson_report_details
+    using:
+      foreign_key_constraint_on:
+        column: student_id
+        table:
+          schema: public
+          name: lesson_report_details
+  select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - additional_data
+      - billing_date
+      - biography
+      - birthday
+      - created_at
+      - current_grade
+      - deleted_at
+      - enrollment_status
+      - on_trial
+      - school_id
+      - student_external_id
+      - student_id
+      - student_note
+      - target_university
+      - total_question_limit
+      - updated_at
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: MANABIE
+    permission:
+      columns:
+      - additional_data
+      - billing_date
+      - biography
+      - birthday
+      - created_at
+      - current_grade
+      - deleted_at
+      - enrollment_status
+      - on_trial
+      - school_id
+      - student_external_id
+      - student_id
+      - student_note
+      - target_university
+      - total_question_limit
+      - updated_at
+      filter:
+        _and:
+        - user:
+            user_access_paths:
+              _and:
+              - students_location_permission:
+                  _and:
+                  - user_id:
+                      _eq: X-Hasura-User-Id
+                  - permission_name:
+                      _eq: user.student.read
+              - deleted_at:
+                  _is_null: true
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+- table:
+    schema: public
+    name: users
+  object_relationships:
+  - name: parent
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: parents
+        column_mapping:
+          user_id: parent_id
+  - name: school_admin
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: school_admins
+        column_mapping:
+          user_id: school_admin_id
+  - name: student
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: students
+        column_mapping:
+          user_id: student_id
+  - name: student_parent
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: student_parents
+        column_mapping:
+          user_id: student_id
+  - name: teacher_by_school_id
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: teacher_by_school_id
+        column_mapping:
+          user_id: teacher_id
+  array_relationships:
+  - name: apple_users
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: apple_users
+  - name: class_members
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: class_members
+  - name: info_notifications
+    using:
+      foreign_key_constraint_on:
+        column: editor_id
+        table:
+          schema: public
+          name: info_notifications
+  - name: lesson_members
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: lesson_members
+  - name: teachers
+    using:
+      foreign_key_constraint_on:
+        column: teacher_id
+        table:
+          schema: public
+          name: teachers
+  - name: user_access_paths
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: user_access_paths
+  - name: user_group_members
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: user_group_member
+  - name: users_info_notifications
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: users_info_notifications
+  select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - allow_notification
+      - avatar
+      - country
+      - created_at
+      - deleted_at
+      - device_token
+      - email
+      - email_verified
+      - facebook_id
+      - given_name
+      - is_tester
+      - name
+      - phone_number
+      - phone_verified
+      - platform
+      - updated_at
+      - user_group
+      - user_id
+      - last_login_date
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+- table:
+    schema: public
+    name: user_access_paths
+  object_relationships:
+  - name: location
+    using:
+      foreign_key_constraint_on: location_id
+  - name: user
+    using:
+      foreign_key_constraint_on: user_id
+  - name: students_location_permission
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: granted_permissions
+        column_mapping:
+          location_id: location_id
+  select_permissions:
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - access_path
+      - created_at
+      - location_id
+      - user_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+- table:
+    schema: public
+    name: granted_permissions
+  object_relationships:
+  - name: students_location_permission
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: user_access_paths
+        column_mapping:
+          location_id: location_id
+  select_permissions:
+  - role: anonymous
+    permission:
+      columns:
+      - user_id
+      - permission_name
+      - location_id
+      - resource_path
+      filter:
+        _and:
+        - user_id:
+            _eq: X-Hasura-User-Id
+        - resource_path:
+            _eq: X-Hasura-Resource-Path

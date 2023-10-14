@@ -1,0 +1,14 @@
+global:
+  dbPrefix: "tokyo_"
+  dbUserPrefix: "prod-"
+  serviceAccountEmailSuffix: "student-coach-e1e95"
+  cloudSQLCommonInstance: "student-coach-e1e95:asia-northeast1:clone-prod-tokyo"
+  sqlProxy:
+    enabled: true
+    connName: ""
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+image:
+  repository: asia.gcr.io/student-coach-e1e95/backend-j4
+  pullPolicy: IfNotPresent

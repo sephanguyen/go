@@ -1,0 +1,51 @@
+suite: shamir app
+templates:
+  - charts/shamir/templates/deployment.yaml
+values:
+  - ../charts/shamir/values.yaml
+  - ../values.yaml
+  - ../local-manabie-values.yaml
+  - ../../platforms/gateway/local-manabie-values.yaml
+tests:
+  - it: should have a proper deployment
+    set:
+      global.shamir.enabled: true
+      global.shamir.sops.enabled: true
+      global.environment: local
+      global.vendor: manabie
+      global.image.repository: local
+      shamir.image.tag: v1
+      shamir.service.port: 1234
+      global.sqlProxy.enabled: true
+    asserts:
+      - isKind:
+          of: Deployment
+      - equal:
+          path: spec.template.metadata.annotations.[cluster-autoscaler.kubernetes.io/safe-to-evict]
+          value: 'true'
+      #affinity
+      - contains:
+          path: spec.template.spec.affinity.nodeAffinity.preferredDuringSchedulingIgnoredDuringExecution
+          content:
+            weight: 10
+            preference:
+              matchExpressions:
+              - key: cloud.google.com/gke-spot
+                operator: In
+                values:
+                - "true"
+      - contains:
+          path: spec.template.spec.affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution
+          content:
+            weight: 100
+            podAffinityTerm:
+              labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: shamir
+              topologyKey: kubernetes.io/hostname
+      - contains:
+          path: spec.template.spec.tolerations
+          content:
+            effect: NoSchedule
+            key: "cloud.google.com/gke-spot"
+            operator: Exists

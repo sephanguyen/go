@@ -1,0 +1,11 @@
+- template: 1.1
+  tableName: parents
+  locationCol: location_id
+  accessPathTable:
+    name: user_access_paths
+    columnMapping:
+      parent_id: user_id
+  permissionPrefix: user.parent
+  permissions:
+    postgres: []
+    hasura: []

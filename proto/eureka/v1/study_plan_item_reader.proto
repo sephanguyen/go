@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package eureka.v1;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/eureka/v1;epb";
+
+message RetrieveMappingLmIDToStudyPlanItemIDRequest { 
+    string study_plan_id = 1;
+}
+
+message RetrieveMappingLmIDToStudyPlanItemIDResponse {
+    // learning_material_id: study_plan_id pairs 
+    map<string, string> pairs = 1;
+}
+
+service StudyPlanItemReaderService {
+    rpc RetrieveMappingLmIDToStudyPlanItemID(RetrieveMappingLmIDToStudyPlanItemIDRequest) 
+      returns (RetrieveMappingLmIDToStudyPlanItemIDResponse);
+}

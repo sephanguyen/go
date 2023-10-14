@@ -1,0 +1,11 @@
+- template: 1.1
+  tableName: staff
+  locationCol: location_id
+  accessPathTable:
+    name: user_access_paths
+    columnMapping:
+      staff_id: user_id
+  permissionPrefix: user.staff
+  permissions:
+    postgres: []
+    hasura: []

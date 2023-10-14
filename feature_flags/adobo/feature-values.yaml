@@ -1,0 +1,751 @@
+unleash:
+  featureFlags:
+    adobo:
+      - name: EntryExit_EntryExitManagement_BackOffice_EntryExitRecords
+        description: "A feature flag to show Entry & Exit features"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: EntryExit_EntryExitManagement_Learner_EntryExitRecords
+        description: "A feature flag to enable viewing of entry exit records"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Invoice_InvoiceManagement_BackOffice_ManualInvoice
+        description: "A feature flag to show Manual Invoice features (LT-13356)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: EntryExit_EntryExitManagement_BackOffice_DownloadStudentQrUrls
+        description: "A feature flag to show download student QR URLs (LT-14259)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: EntryExit_EntryExitManagement_BackOffice_UpdateQrsToV2
+        description: "A feature flag to check if will update qrs to v2 (LT-15783)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: BACKEND_EntryExit_EntryExitManagement_SDK_Upload
+        description: "A feature flag to enable the uploading of student QR using the library SDK (LT-17199)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: BACKEND_EntryExit_EntryExitManagement_ConnectToEntryExitMgmtDB
+        description: "A feature flag to change the DB connection of E&E service. If enabled, the E&E service will connect to entryexitmgmt DB. If disabled, it will connect to bob (LT-15528)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Invoice_InvoiceManagement_BackOffice_ManageInvoice
+        description: "A feature flag to show Manage Invoice features (LT-13357)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: EntryExit_EntryExitManagement_BackOffice_EntryExitRecordsDateFilter
+        description: "A feature flag to show Date Filter feature for Entry & Exit history records (LT-19428)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: EntryExit_EntryExitManagement_BackOffice_ConnectToEntryExitMgmtDBQueries
+        description: "A feature flag to change the queries to query from entryexitmgmt. If disabled, it will query to bob. (LT-15528)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Invoice_InvoiceManagement_BackOffice_ManagePaymentValidation
+        description: "A feature flag to show Manage Payment Validation features (LT-14103)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Invoice_InvoiceManagement_BackOffice_ScheduledInvoices
+        description: "A feature flag to show Scheduled Invoices features (LT-13358)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Invoice_InvoiceManagement_BackOffice_BulkIssueInvoice
+        description: "A feature flag to show Bulk Issue Invoice features (LT-13359)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Invoice_InvoiceManagement_BackOffice_BulkPaymentValidation
+        description: "A feature flag to show Bulk Payment Validation features (LT-14713)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Invoice_InvoiceManagement_BackOffice_CreatePaymentRequest
+        description: "A feature flag to show Create Payment Request features (LT-18647)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Invoice_InvoiceManagement_BackOffice_SearchAndFilterInvoices
+        description: "A feature flag to show Search and Filter Invoices features (LT-14723)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_MasterManagement_BackOffice_Bank_Group
+        description: "A feature flag to enable Bank group options in the Master Management (LT-17026)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Invoice_StudentManagement_BackOffice_ManagePaymentInformation
+        description: "A feature flag to show Payment tab in the Student Detail page (LT-25682)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Invoice_InvoiceManagement_BackOffice_ExpiredPaymentsLabeling
+        description: "A feature flag to show Expired Label in Invoice Management and Invoice Detail page (LT-24232)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Invoice_InvoiceManagement_BackOffice_ExpiredPaymentsFiltering
+        description: "A feature flag to show Expired payments checkbox in Search and Filter for Invoice Management (LT-24234)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Invoice_InvoiceManagement_BackOffice_BulkIssueInvoiceDefaultPayment
+        description: "A feature flag to support Default Payment in Bulk Issue Invoice (LT-15240)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Invoice_InvoiceManagement_BackOffice_OrderToInvoice
+        description: "A feature flag to show Order to Invoice features (LT-24354)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Invoice_InvoiceManagement_BackOffice_AdjustmentTypeBillingItems
+        description: "A feature flag to show billing items with adjustment type in create invoice billing item list and invoice detail page (LT-24454)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Invoice_InvoiceManagement_BackOffice_SecurityFilter
+        description: "A feature flag to add Security Filter for Invoice Management (LT-16221)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Invoice_InvoiceManagement_BackOffice_InvoiceAdjustments
+        description: "A feature flag to enable Invoice Adjustment for Invoice Management (LT-14104)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Invoice_InvoiceManagement_BackOffice_FeatureSettingConfiguration
+        description: "A feature flag to enable Feature Config Settings in Invoice Management (LT-19835)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: EntryExit_EntryExitManagement_BackOffice_FeatureSettingConfiguration
+        description: "A feature flag to enable Feature Config Settings in Entry & Exit Management (LT-19835)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: BACKEND_Invoice_InvoiceManagement_CreatePaymentRequest_GCloud_File_Upload
+        description: "A feature flag to support enable gcloud file upload and support Create Payment Request Edge Case scenarios (LT-33372)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: EntryExit_EntryExitManagement_BackOffice_EntryExitRecordsPage
+        description: "A feature flag to enable Entry & Exit Records Page (LT-34499)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: EntryExit_EntryExitManagement_BackOffice_QrScannerSoundEffects
+        description: "A feature flag to enable Sound effects in Entry & Exit QR Scanner page (LT-34501)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: EntryExit_EntryExitManagement_BackOffice_UpdateTeacherAccess
+        description: "A feature flag to enable new Teacher access for Entry & Exit features (LT-34500)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: EntryExit_EntryExitManagement_BackOffice_StudentQrsWithEmail
+        description: "A feature flag to enable downloading of QR URLs with email and student id columns (LT-35199)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: EntryExit_EntryExitManagement_Backoffice_QrCodeScannerEnhancement
+        description: "A feature flag to enable QR code scanner enhancement (LT-37519)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: EntryExit_EntryExitManagement_Backoffice_QrBoxFlicker
+        description: "A feature flag to enable QR box flicker (LT-39034)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: EntryExit_EntryExitManagement_BackOffice_QrScannerZoomScaling
+        description: "A feature flag to enable zoom scaling slider in QR Scanner page (LT-38254)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+      - name: EntryExit_EntryExitManagement_BackOffice_QrScannerCameraSelection
+        description: "A feature flag to enable camera selection dropdown in QR Scanner page (LT-38254)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: EntryExit_EntryExitManagement_BackOffice_QrSizeSelection
+        description: "A feature flag to enable modal with options in QR Scanner page (LT-39144)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: EntryExit_EntryExitManagement_BackOffice_AltBehaviorSoundAutoplayIos
+        description: "A feature flag to enable updated UX for scanner page for iOS devices to accommodate sound (LT-41289)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Invoice_InvoiceManagement_BackOffice_AppendRecurringDetailsBillingItems
+        description: "A feature flag to enable appending of recurring details in billing items tables (LT-34423)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Invoice_InvoiceManagement_BackOffice_IssueInvoiceWithoutPayments
+        description: "A feature flag to enable issue invoice without payments (LT-25785)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Invoice_InvoiceManagement_BackOffice_ManagePayment
+        description: "A feature flag to enable manage payment (LT-34769)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Invoice_InvoiceManagement_BackOffice_BulkAddAndValidatePayments
+        description: "A feature flag to enable bulk add and validate payments (LT-25684)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Invoice_InvoiceManagement_BackOffice_InvoicePageRestructure
+        description: "A feature flag to enable invoice page restructure (LT-25685)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Invoice_InvoiceManagement_BackOffice_PaymentPageStructure
+        description: "A feature flag to enable payment page structure (LT-24174)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Invoice_MasterManagement_BackOffice_InvoiceDataMigration
+        description: "A feature flag to enable Invoice and Payment entity options in Master Management (LT-35325)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: Invoice_InvoiceManagement_BackOffice_Phase2QueryEnhancement
+        description: "A feature flag to enable phase 2 query enhancement (LT-37410)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: BACKEND_Invoice_InvoiceManagement_AutoSetConvenienceStore
+        description: "A feature flag to support auto setting of default payment method to convenience store (LT-33855)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Invoice_InvoiceManagement_BackOffice_NoAggregateInvoiceListQuery
+        description: "A feature flag to separate aggregate count query in invoice list page (LT-39854)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: BACKEND_Invoice_InvoiceManagement_SetDirectDebit
+        description: "A feature flag to support setting of default payment method to direct debit (LT-33855)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Invoice_InvoiceManagement_BackOffice_KecFeedback
+        description: "A feature flag to enable kec feedback changes (LT-37585)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Invoice_InvoiceManagement_BackOffice_UserBasicInfoInvoiceFilterQuery
+        description: "A feature flag to enable invoice filter query with user_basic_info (LT-41715)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Invoice_InvoiceManagement_BackOffice_UpdateDatePicker
+        description: "A feature flag to enable new date picker integration (LT-41098)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Invoice_InvoiceManagement_BackOffice_ViewAndCancelBulkPayment
+        description: "A feature flag to enable view and cancel bulk payment (LT-31328)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: BACKEND_Invoice_InvoiceManagement_ImproveImportInvoiceChecker
+        description: "A feature flag to support improving cron job for import invoice checker(LT-39853)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: BACKEND_Invoice_InvoiceManagement_InvoiceScheduleCronJobAlert
+        description: "A feature flag to control alerts for invoice schedule cron job (LT-42763)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: Invoice_InvoiceManagement_BackOffice_MfeCrossImportAdoboUser
+        description: "A feature flag to support cross import MFE for adobo components under user (LT-41117)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: BACKEND_Invoice_InvoiceManagement_ImproveBulkIssueInvoice
+        description: "A feature flag to support improving of bulk issue invoice feature (LT-43515)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+      - name: BACKEND_Invoice_InvoiceManagement_PaymentSequenceNumberManualSetting
+        description: "A feature flag to support the logic of setting the payment sequence number manually (LT-44011)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+      - name: Invoice_InvoiceManagement_BillingInfoOptionalStreet1
+        description: "A feature flag to that makes the street 1 form field for billing information form optional (LT-44162)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: BACKEND_Invoice_InvoiceManagement_OptionalValidationInPaymentRequest
+        description: "A feature flag to support optional validations in payment request features (LT-44251)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: BACKEND_Invoice_InvoiceManagement_ImproveBulkPaymentValidation
+        description: "A feature flag to support improving of bulk payment validation feature (LT-41910)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+      - name: BACKEND_Invoice_InvoiceManagement_RetryFailedInvoiceSchedule
+        description: "A feature flag for enabling auto retry of failed invoices with known errors (LT-41911)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+      - name: Invoice_InvoiceManagement_ConvenienceStoreCsvMessageFields
+        description: "A feature flag to support changes in create payment request - convenience store csv message fields (LT-44782)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+      - name: Invoice_OrderManagement_BackOffice_OrderToInvoiceTooltipMessages
+        description: "A feature flag for enabling tooltip messages when create invoice from order is disabled due to validation (LT-35508)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: Invoice_InvoiceManagement_BackOffice_SingleIssueInvoiceWithPayment
+        description: "A feature flag for enabling single issue of invoice with payment (LT-44821)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Invoice_InvoiceManagement_SearchAndFilterEnhancements
+        description: "A feature flag for switching from hasura integration to grpc search and filter (LT-46312)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: BACKEND_Invoice_InvoiceManagement_FormatPaymentRequestFileFields
+        description: "A feature flag for enabling the formatting of payment request file fields (LT-46310)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+      - name: BACKEND_Invoice_InvoiceManagement_EncodePaymentRequestFiles
+        description: "A feature flag for enabling the encoding and decoding of payment request files (LT-46308)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []

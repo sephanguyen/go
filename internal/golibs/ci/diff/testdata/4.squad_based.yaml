@@ -1,0 +1,9 @@
+rules:
+  - name: r1
+    paths: ['helloworld.go']
+  - name: r2
+    paths: ['helloworld.go']
+    enabled_squads: ['squad-a', 'squad-b']
+  - name: r3
+    paths: ['helloworld.go']
+    disabled_squads: ['squad-a', 'squad-b']

@@ -1,0 +1,1 @@
+ALTER TABLE public.students ADD COLUMN enrollment_status text;

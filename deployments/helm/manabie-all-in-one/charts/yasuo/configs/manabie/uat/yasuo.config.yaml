@@ -1,0 +1,20 @@
+common:
+  google_cloud_project: staging-manabie-online
+  firebase_project: uat-manabie
+  identity_platform_project: uat-manabie
+postgres_v2:
+  bob:
+    max_conns: 16
+    shard_id: 1
+issuers:
+  - issuer: manabie
+    audience: manabie-stag
+    jwks_endpoint: http://shamir:5680/.well-known/jwks.json
+brightcove:
+  account_id: 6064018595001
+  client_id: 3c6e5dd5-a7fc-4cc3-94a7-95bd0c553e31
+  profile: Asia-PREMIUM (96-1500)
+storage:
+  bucket: stag-manabie-backend
+jwt_applicant: manabie-stag
+question_bucket: stag-manabie-questions-content

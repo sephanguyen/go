@@ -1,0 +1,157 @@
+{
+	"schema": [
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "parent_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "school_id",
+			"data_type": "integer",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "parents",
+			"policyname": "rls_parents_delete_location",
+			"qual": "(true \u003c= ( SELECT true AS bool\n   FROM (granted_permissions p\n     JOIN user_access_paths usp ON ((usp.location_id = p.location_id)))\n  WHERE ((p.user_id = current_setting('app.user_id'::text)) AND (p.permission_id = ( SELECT p2.permission_id\n           FROM permission p2\n          WHERE ((p2.permission_name = 'user.parent.write'::text) AND (p2.resource_path = current_setting('permission.resource_path'::text))))) AND (usp.user_id = parents.parent_id) AND (usp.deleted_at IS NULL))\n LIMIT 1))",
+			"with_check": null,
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "parents",
+			"policyname": "rls_parents_insert_location",
+			"qual": null,
+			"with_check": "(1 = 1)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "parents",
+			"policyname": "rls_parents_restrictive",
+			"qual": "permission_check(resource_path, 'parents'::text)",
+			"with_check": "permission_check(resource_path, 'parents'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "parents",
+			"policyname": "rls_parents_select_location",
+			"qual": "(true \u003c= ( SELECT true AS bool\n   FROM (granted_permissions p\n     JOIN user_access_paths usp ON ((usp.location_id = p.location_id)))\n  WHERE ((p.user_id = current_setting('app.user_id'::text)) AND (p.permission_id = ( SELECT p2.permission_id\n           FROM permission p2\n          WHERE ((p2.permission_name = 'user.parent.read'::text) AND (p2.resource_path = current_setting('permission.resource_path'::text))))) AND (usp.user_id = parents.parent_id) AND (usp.deleted_at IS NULL))\n LIMIT 1))",
+			"with_check": null,
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "parents",
+			"policyname": "rls_parents_update_location",
+			"qual": "(true \u003c= ( SELECT true AS bool\n   FROM (granted_permissions p\n     JOIN user_access_paths usp ON ((usp.location_id = p.location_id)))\n  WHERE ((p.user_id = current_setting('app.user_id'::text)) AND (p.permission_id = ( SELECT p2.permission_id\n           FROM permission p2\n          WHERE ((p2.permission_name = 'user.parent.write'::text) AND (p2.resource_path = current_setting('permission.resource_path'::text))))) AND (usp.user_id = parents.parent_id) AND (usp.deleted_at IS NULL))\n LIMIT 1))",
+			"with_check": "(true \u003c= ( SELECT true AS bool\n   FROM (granted_permissions p\n     JOIN user_access_paths usp ON ((usp.location_id = p.location_id)))\n  WHERE ((p.user_id = current_setting('app.user_id'::text)) AND (p.permission_id = ( SELECT p2.permission_id\n           FROM permission p2\n          WHERE ((p2.permission_name = 'user.parent.write'::text) AND (p2.resource_path = current_setting('permission.resource_path'::text))))) AND (usp.user_id = parents.parent_id) AND (usp.deleted_at IS NULL))\n LIMIT 1))",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "parents__parent_id_pk",
+			"column_name": "parent_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "parents",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

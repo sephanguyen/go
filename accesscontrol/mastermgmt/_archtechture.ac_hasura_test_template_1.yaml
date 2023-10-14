@@ -1,0 +1,5 @@
+- template: 1
+  tableName: ac_hasura_test_template_1
+  permissionPrefix: archtechture.ac_hasura_test_template_1
+  permissions:
+    hasura: []

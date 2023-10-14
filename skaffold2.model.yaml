@@ -1,0 +1,39 @@
+apiVersion: skaffold/v4beta5
+kind: Config
+metadata:
+  name: mlmodel
+
+profiles:
+  - name: model-local
+    activation:
+      - env: APHELIOS_DEPLOYMENT_ENABLED=true
+    manifests:
+      rawYaml:
+        - deployments/helm/platforms/machinelearning/kserve/model/modelconfigure/manabie/local/example_manabie.yaml
+    deploy:
+      kubectl:
+        hooks:
+          before:
+            - host:
+                command: ["sh", "-c", "sleep 10s"]
+                os: [darwin, linux]
+        defaultNamespace: '{{.ENV}}-{{.ORG}}-machine-learning'
+
+  - name: ci-staging
+    activation:
+      - kubeContext: gke_staging-manabie-online_asia-southeast1-b_staging-2
+        env: MLMODEL=true
+    manifests:
+      rawYaml:
+        - deployments/helm/platforms/machinelearning/kserve/model/modelconfigure/manabie/stag/question_field.yaml
+        - deployments/helm/platforms/machinelearning/kserve/model/modelconfigure/manabie/stag/ocr_model.yaml
+        - deployments/helm/platforms/machinelearning/kserve/model/modelconfigure/manabie/stag/bubble_detection.yaml
+        - deployments/helm/platforms/machinelearning/kserve/model/modelconfigure/manabie/stag/answer_sheet.yaml
+    deploy:
+      kubectl:
+        hooks:
+          before:
+            - host:
+                command: ["sh", "-c", "sleep 10s"]
+                os: [darwin, linux]
+        defaultNamespace: '{{.ENV}}-{{.ORG}}-machine-learning'

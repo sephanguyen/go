@@ -1,0 +1,4 @@
+common:
+  sa_email: ""
+  google_cloud_project: production-renseikai
+jprep_payload_expired_sec: 0

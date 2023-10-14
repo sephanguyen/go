@@ -1,0 +1,1 @@
+ALTER TABLE public.e2e_steps REPLICA IDENTITY FULL;

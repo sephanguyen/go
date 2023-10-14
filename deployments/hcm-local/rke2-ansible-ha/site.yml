@@ -1,0 +1,31 @@
+- name: Prepare common configuration
+  hosts: all
+  any_errors_fatal: true
+  become: yes
+  serial: 5
+  roles:
+     - role: common
+
+- name: Prepare haproxy
+  hosts: rke2_servers
+  any_errors_fatal: true
+  become: yes
+  serial: 5
+  roles:
+     - role: haproxy
+
+- name: Server play
+  hosts: rke2_servers
+  any_errors_fatal: true
+  become: true
+  roles:
+    - role: rke2_server
+  serial: 1
+
+- name: Agent play
+  hosts: rke2_agents
+  any_errors_fatal: true
+  become: true
+  roles:
+    - role: rke2_agent
+  serial: 3

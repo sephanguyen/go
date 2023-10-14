@@ -1,0 +1,4 @@
+ALTER TABLE public.granted_role_access_path DROP CONSTRAINT IF EXISTS fk__granted_role_access_path__granted_role_id;
+ALTER TABLE public.granted_role_access_path DROP CONSTRAINT IF EXISTS fk__granted_role_access_path__location_id;
+ALTER TABLE public.granted_role DROP CONSTRAINT IF EXISTS fk__granted_role__user_group_id;
+ALTER TABLE public.granted_role DROP CONSTRAINT IF EXISTS fk__granted_role__role_id;

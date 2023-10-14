@@ -1,0 +1,139 @@
+{
+	"schema": [
+		{
+			"column_name": "address",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "is_archived",
+			"data_type": "boolean",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "school_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "school_level_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "school_name",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "school_name_phonetic",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "school_partner_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "school_info",
+			"policyname": "rls_school_info",
+			"qual": "permission_check(resource_path, 'school_info'::text)",
+			"with_check": "permission_check(resource_path, 'school_info'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "school_info",
+			"policyname": "rls_school_info_restrictive",
+			"qual": "permission_check(resource_path, 'school_info'::text)",
+			"with_check": "permission_check(resource_path, 'school_info'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "school_info__school_level_id__fk",
+			"column_name": "school_level_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "school_info_pk",
+			"column_name": "school_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "school_info__school_partner_id__unique",
+			"column_name": "resource_path",
+			"constraint_type": "UNIQUE"
+		},
+		{
+			"constraint_name": "school_info__school_partner_id__unique",
+			"column_name": "school_partner_id",
+			"constraint_type": "UNIQUE"
+		}
+	],
+	"table_name": "school_info",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

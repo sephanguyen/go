@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package syllabus.v1;
+
+import "common/v1/requests.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/syllabus/v1;sspb";
+
+message RetrieveClassMembersWithFiltersRequest {
+    common.v1.Paging paging = 1;
+    repeated string class_ids = 2;
+    oneof school {
+        bool all_school = 4;
+        bool unassigned = 5;
+        string school_id = 6;
+    }
+    repeated string student_tag_ids = 3;
+    string course_id = 7;
+}
+
+message RetrieveClassMembersWithFiltersResponse {
+    common.v1.Paging paging = 1;
+    repeated string user_ids = 2;
+}
+
+service Class {
+    rpc RetrieveClassMembersWithFilters(RetrieveClassMembersWithFiltersRequest) 
+        returns (RetrieveClassMembersWithFiltersResponse);
+}

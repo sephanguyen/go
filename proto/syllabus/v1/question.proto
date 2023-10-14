@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+package syllabus.v1;
+import "common/v1/contents.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/syllabus/v1;sspb";
+
+message UpsertQuestionGroupRequest {
+  string question_group_id = 1; // if id is empty, it's insert action, otherwise it's update.
+  string learning_material_id = 2;             // required
+  string name = 3;
+  string description = 4 [deprecated = true];
+  common.v1.RichText rich_description = 5;
+}
+
+message UpsertQuestionGroupResponse {
+  string question_group_id = 1;
+}
+
+message DeleteQuestionGroupRequest {
+  string question_group_id = 1;
+}
+
+message DeleteQuestionGroupResponse {
+}
+
+service QuestionService {
+  rpc UpsertQuestionGroup(UpsertQuestionGroupRequest)
+      returns (UpsertQuestionGroupResponse);
+  rpc UpdateDisplayOrderOfQuizSetV2(UpdateDisplayOrderOfQuizSetV2Request)
+      returns (UpdateDisplayOrderOfQuizSetV2Response);
+  rpc DeleteQuestionGroup(DeleteQuestionGroupRequest)
+      returns (DeleteQuestionGroupResponse);
+}
+
+enum QuestionHierarchyType {
+  QUESTION = 0;
+  QUESTION_GROUP = 1;
+}
+
+message QuestionHierarchy {
+  string id = 1;
+  QuestionHierarchyType type = 2;
+  repeated string children_ids = 3;
+}
+
+message UpdateDisplayOrderOfQuizSetV2Request {
+  string learning_material_id = 1;
+  repeated QuestionHierarchy question_hierarchy = 2;
+}
+
+message UpdateDisplayOrderOfQuizSetV2Response{
+}

@@ -1,0 +1,81 @@
+table:
+  schema: public
+  name: lesson_members
+object_relationships:
+  - name: course
+    using:
+      foreign_key_constraint_on: course_id
+  - name: lesson
+    using:
+      foreign_key_constraint_on: lesson_id
+  - name: user
+    using:
+      foreign_key_constraint_on: user_id
+select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+        - lesson_id
+        - user_id
+        - updated_at
+        - created_at
+        - deleted_at
+        - resource_path
+        - attendance_status
+        - attendance_remark
+        - course_id
+      filter:
+        deleted_at:
+          _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+        - attendance_remark
+        - attendance_status
+        - course_id
+        - lesson_id
+        - resource_path
+        - user_id
+        - created_at
+        - deleted_at
+        - updated_at
+      filter:
+        deleted_at:
+          _is_null: true
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+        - attendance_remark
+        - attendance_status
+        - course_id
+        - lesson_id
+        - resource_path
+        - user_id
+        - created_at
+        - deleted_at
+        - updated_at
+      filter:
+        _and:
+          - resource_path:
+              _eq: X-Hasura-Resource-Path
+          - deleted_at:
+              _is_null: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+        - lesson_id
+        - user_id
+        - updated_at
+        - created_at
+        - deleted_at
+        - resource_path
+        - attendance_status
+        - attendance_remark
+        - course_id
+      filter:
+        _and:
+          - resource_path:
+              _eq: X-Hasura-Resource-Path
+          - deleted_at:
+              _is_null: true

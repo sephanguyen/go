@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package payment.v1;
+
+import "payment/v1/enums.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/payment/v1;pmpb";
+
+message UploadFileRequest {
+    FileName file_name = 1;
+    FileType file_type =2;
+    bytes content = 3;
+}
+
+message UploadFileResponse {
+    string download_url = 1;
+}
+
+message GetEnrollmentFileRequest {
+}
+
+message GetEnrollmentFileResponse {
+    string download_url = 1;
+}
+
+service FileService {
+    rpc UploadFile(UploadFileRequest)
+        returns (UploadFileResponse);
+    rpc GetEnrollmentFile(GetEnrollmentFileRequest)
+        returns(GetEnrollmentFileResponse);
+}

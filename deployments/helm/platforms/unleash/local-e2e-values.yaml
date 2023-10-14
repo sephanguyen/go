@@ -1,0 +1,40 @@
+# This file should be identical to local-jprep-values.yaml.
+# When edit one, remember to edit for the other, too.
+global:
+  sqlProxy:
+    enabled: false
+  waitForImage:
+    repository: asia-southeast1-docker.pkg.dev/student-coach-e1e95/ci/asia.gcr.io/student-coach-e1e95/wait-for
+
+unleash:
+  replicaCount: 1
+  image:
+    repository: kind-reg.actions-runner-system.svc/unleashorg/unleash-server
+    tag: 4.19.1
+  keepExisting: false
+  dropBeforeImport: true
+  forceImport: true
+  imagePullSecrets:
+    - name: regcred
+
+unleashProxy:
+  replicaCount: 1
+  image:
+    repository: kind-reg.actions-runner-system.svc/unleashorg/unleash-proxy
+    tag: 0.13.1
+  nodeImage:
+    repository: kind-reg.actions-runner-system.svc/node
+  affinityOverride:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - preference:
+            matchExpressions:
+            - key: cloud.google.com/gke-spot
+              operator: In
+              values: ["true"]
+          weight: 10
+  imagePullSecrets:
+    - name: regcred
+
+sopsImage:
+  repository: asia-southeast1-docker.pkg.dev/student-coach-e1e95/ci/mozilla/sops

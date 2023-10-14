@@ -1,0 +1,1 @@
+ALTER TABLE ONLY public.school_history ADD COLUMN IF NOT EXISTS "is_current" BOOLEAN DEFAULT FALSE;

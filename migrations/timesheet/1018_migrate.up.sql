@@ -1,0 +1,2 @@
+ALTER TABLE IF EXISTS timesheet_config
+ADD COLUMN is_archived BOOLEAN NOT NULL DEFAULT false;

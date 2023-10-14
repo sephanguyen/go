@@ -1,0 +1,1318 @@
+pushgateway:
+  enabled: true
+  tolerations:
+    - effect: NoSchedule
+      key: monitoring
+      operator: Exists
+
+prometheus-pushgateway:
+  enabled: true
+
+prometheus-node-exporter:
+  enabled: false
+
+extraManifests:
+  - |
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: {{ template "prometheus.server.fullname" . }}-thanos
+      labels:
+    {{- include "prometheus.server.labels" . | nindent 4 }}
+    data:
+      bucket.yaml: |
+        type: GCS
+        config:
+          bucket: manabie-thanos
+      prometheus_http_auth.yaml: |
+        basic_auth:
+          username: admin
+          password: 30e7d92a4a20c5cebe38124b
+  - |
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: {{ template "prometheus.server.fullname" . }}-thanos
+      labels:
+    {{- include "prometheus.server.labels" . | nindent 4 }}
+    spec:
+      type: ClusterIP
+      ports:
+        - name: grpc
+          port: 10901
+          targetPort: grpc
+          protocol: TCP
+      selector:
+      {{- include "prometheus.server.matchLabels" . | nindent 4 }}
+
+server:
+  image:
+    tag: v2.43.1-stringlabels
+  persistentVolume:
+    size: 12Gi
+    storageClass: premium-rwo
+  extraArgs:
+    web.config.file: /etc/config/web_config.yml
+  probeHeaders:
+    - name: Authorization
+      value: Basic YWRtaW46MzBlN2Q5MmE0YTIwYzVjZWJlMzgxMjRi
+  global:
+    external_labels:
+      gke_cluster: staging-2
+      project: staging-manabie-online
+  alertmanagers:
+    - static_configs:
+      - targets:
+        - prometheus-alertmanager
+      basic_auth:
+        username: admin
+        password: 9e674f24870e6c2bd31030fa
+  baseURL: https://prometheus.staging.manabie.io
+  retention: "2h"
+  tolerations:
+    - key: monitoring
+      operator: Equal
+      value: "true"
+      effect: NoSchedule
+  resources:
+    requests:
+      cpu: 200m
+      memory: 5Gi
+  nodeSelector:
+    cloud.google.com/gke-nodepool: n2d-custom-2-24
+  startupProbe:
+    enabled: true
+    periodSeconds: 30
+    failureThreshold: 120
+
+default_slack_config: &default_slack_config
+  api_url: https://hooks.slack.com/services/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
+  send_resolved: true
+  title: |-
+    [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }} for {{ .CommonLabels.job }}
+  text: >-
+    {{ with index .Alerts 0 -}}
+      {{- if .Annotations.runbook }}   :notebook: *<{{ .Annotations.runbook }}|Runbook>*{{ end }}
+    {{ end }}
+
+    *Alert details*:
+
+    {{ range .Alerts -}}
+      *Alert:* {{ .Annotations.summary }}
+      {{ if .Labels.severity }}`Severity: {{ .Labels.severity }}` {{ end }}{{ if .Labels.namespace }}`Namespace: {{ .Labels.namespace }}` {{ end }}{{ if .Labels.namespace }} `Namespace: {{ .Labels.namespace }}` {{ end }}
+    *Description:* {{ .Annotations.description }}
+    *Details:*
+      {{ range .Labels.SortedPairs }} • *{{ .Name }}:* `{{ .Value }}`
+      {{ end }}
+    {{ end }}
+
+default_opsgenie_config: &default_opsgenie_config
+  send_resolved: true
+  message: '{{ .CommonLabels.alertname }} for {{ .CommonLabels.job }}'
+  description: '{{ template "opsgenie.default.description" . }}'
+  source: '{{ template "opsgenie.default.source" . }}'
+
+alertmanager:
+  enabled: true
+  extraArgs:
+    web.config.file: /etc/alertmanager/web_config.yml
+  probeHeaders:
+    - name: Authorization
+      value: Basic YWRtaW46OWU2NzRmMjQ4NzBlNmMyYmQzMTAzMGZh
+  baseURL: https://alertmanager.staging.manabie.io
+  persistentVolume:
+    size: 2Gi
+
+  # ========= New configs in Prometheus Helm >= v21.0.0 =========
+  service:
+    port: 80
+
+  livenessProbe:
+    httpGet:
+      path: /
+      port: http
+      httpHeaders:
+        - name: Authorization
+          value: Basic YWRtaW46OWU2NzRmMjQ4NzBlNmMyYmQzMTAzMGZh
+
+  readinessProbe:
+    httpGet:
+      path: /
+      port: http
+      httpHeaders:
+        - name: Authorization
+          value: Basic YWRtaW46OWU2NzRmMjQ4NzBlNmMyYmQzMTAzMGZh
+
+  templates:
+    web_config.yml: |
+      basic_auth_users:
+        admin: $2y$12$.r6I4CjlNMd9s9U7YopJDeOWWwDTS9uB1S/zDpOej18tSKJ8eWmee
+
+  configmapReload:
+    enabled: false
+
+  config:
+    route:
+      group_by: [alertname, job]
+      receiver: uat-monitoring-slack
+      routes:
+        - matchers:
+          - app=~"(nats|nats-jetstream)"
+          receiver: grafana-oncall-platform
+          mute_time_intervals: &mute_time
+          - outside_working_hour_1
+          - outside_working_hour_2
+          - weekend_1
+          - weekend_2
+          - lunch_break
+          continue: true
+          routes:
+            # NATSJetStreamTooManyPendingAckMessages, NATSJetStreamTooManyPendingMessages, NATSJetStreamNewRedeliveredMessages
+            - matchers:
+              - consumer_name=~"(durable-assign-study-plan|durable-assignments-created|durable-eureka-student-event-created|durable-learning-objectives-created|durable-student-event-logs-created)"
+              receiver: grafana-oncall-syllabus
+              mute_time_intervals: *mute_time
+
+            - matchers:
+              - consumer_name=~"(durable-class-upserted|durable-sync-live-lesson|durable-sync-user-course|durable-synclocationtype|durable-synclocation|durable-sync-student-subscription|durable-student-subscription-lesson-member|durable-create-live-lesson-room)"
+              receiver: grafana-oncall-lesson
+              mute_time_intervals: *mute_time
+
+            - matchers:
+              - consumer_name=~"(durable-sync-staff|durable-sync-student|durable-synclocation)"
+              receiver: grafana-oncall-user
+              mute_time_intervals: *mute_time
+
+            - matchers:
+              - consumer_name=~"(durable-notification|durable_chat_chat_message_created_elastic|durable_chat_chat_members_updated_elastic|durable_chat_chat_created_elastic|durable_chat_chat_updated_elastic|durable-esconversation-course-student-elastic|durable-chat-message-created|durable-sync-lesson-chat|durable-lesson|durable_chat_migrate_tom|durable-sync-student-lessons-conversations|durable-user-device-token-updated|durable-user-updated-tom|durable-user-created)"
+              receiver: grafana-oncall-communication
+              mute_time_intervals: *mute_time
+
+            - matchers:
+              - consumer_name=~"(durable-student-package|durable-sync-academic-year|durable-sync-class|durable-sync-class-member|durable-sync-course|durable-sync-course-academic|durable-sync-course-class|durable-sync-staff|durable-sync-student|durable-sync-student-package|durable-sync-student-package-fatima|durable-sync-student-package-eureka)"
+              receiver: grafana-oncall-payment-nats
+              mute_time_intervals: *mute_time
+
+            - matchers:
+              - consumer_name=~"(durable-entryexit-user-created)"
+              receiver: grafana-oncall-adobo
+              mute_time_intervals: *mute_time
+
+            # NATSJetStreamConsumerFailToProcessMessages
+            - matchers:
+              - jetstream_queue_name=~"(queue-assign-study-plan|queue-assignments-created|queue-eureka-student-event-created|queue-learning-objectives-created|queue-student-event-logs-created)"
+              receiver: grafana-oncall-syllabus
+              mute_time_intervals: *mute_time
+
+            - matchers:
+              - jetstream_queue_name=~"(queue-class-upserted|queue-internal-lesson-created|queue-sync-live-lesson|queue-sync-user-course|queue-synclocationtype|queue-synclocation|queue-sync-student-subscription|queue-student-subscription-lesson|queue-student-subscription-lesson-member)"
+              receiver: grafana-oncall-lesson
+              mute_time_intervals: *mute_time
+
+            - matchers:
+              - jetstream_queue_name=~"(queue-sync-staff|queue-sync-student|queue-synclocation)"
+              receiver: grafana-oncall-user
+              mute_time_intervals: *mute_time
+
+            - matchers:
+              - jetstream_queue_name=~"(queue-notification|group.chat.chat.message.created.elastic|group.chat.chat.members.updated.elastic|group.chat.chat.created.elastic|group.chat.chat.updated.elastic|queue-esconversation-course-student-elastic|queue-chat-message-created|queue-sync-lesson-chat|queue-lesson|queue.chat_migrate.tom|queue-sync-student-lessons-conversations|queue-user-device-token-updated|queue-user-updated-tom|queue-user-created|queue-notification-sync-student-package-v2)"
+              receiver: grafana-oncall-communication
+              mute_time_intervals: *mute_time
+
+            - matchers:
+              - jetstream_queue_name=~"(queue-student-package|queue-sync-academic-year|queue-sync-class|queue-sync-class-member|queue-sync-course|queue-sync-course-academic|queue-sync-course-class|queue-sync-staff|queue-sync-student|queue-sync-student-package|queue-sync-student-package-eureka|queue-sync-student-package-fatima|queue-order-event-log-created)"
+              receiver: grafana-oncall-payment-nats
+              mute_time_intervals: *mute_time
+
+            - matchers:
+              - jetstream_queue_name=~"(queue-entryexit-user-created)"
+              receiver: grafana-oncall-adobo
+              mute_time_intervals: *mute_time
+
+            - matchers:
+              - jetstream_queue_name=~"(queue-timesheet-lesson)"
+              receiver: grafana-oncall-timesheet
+              mute_time_intervals: *mute_time
+
+        - matchers:
+          - app="elastic-cluster"
+          receiver: 'null'
+
+        - matchers:
+          - app=~"(notification|spike)"
+          receiver: grafana-oncall-communication
+          mute_time_intervals:
+          - outside_working_hour_1
+          - outside_working_hour_2
+          - weekend_1
+          - weekend_2
+          - lunch_break
+          continue: true
+
+        - matchers:
+          - app=~"(istio|backend)"
+          receiver: grafana-oncall-tse
+          mute_time_intervals: &mute_time
+          - outside_working_hour_1
+          - outside_working_hour_2
+          - weekend_1
+          - weekend_2
+          - lunch_break
+          continue: true
+          routes:
+            #HighNumberOfUnimplementedGrpcRequests, HighNumberOfUnavailableGrpcRequests, HighNumberOfFailedHttpRequests, HighNumberOfSlowHasuraRequests
+            - matchers:
+              - destination_service_name=~"(jaeger.+|jerry|opentelemetry.+|prometheus.+|redash)"
+              receiver: grafana-oncall-platform
+              mute_time_intervals: *mute_time
+
+            - matchers:
+              - destination_service_name=~"(draft|draft.+|graphql.+|import-map.+|unleash|unleash.+)"
+              receiver: grafana-oncall-automation
+              mute_time_intervals: *mute_time
+
+            - matchers:
+              - destination_service_name=~"(invoicemgmt|invoicemgmt.+|entryexitmgmt|entryexitmgmt.+)"
+              receiver: grafana-oncall-adobo
+              mute_time_intervals: *mute_time
+
+            - matchers:
+              - destination_service_name=~"(appsmith|bob|bob.+|mastermgmt|mastermgmt.+|yasuo)"
+              receiver: grafana-oncall-architecture
+              mute_time_intervals: *mute_time
+
+            - matchers:
+              - destination_service_name=~"(notificationmgmt|tom|yasuo)"
+              receiver: grafana-oncall-communication
+              mute_time_intervals: *mute_time
+
+            - matchers:
+              - destination_service_name=~"(calendar|calendar.+|lessonmgmt|virtualclassroom)"
+              receiver: grafana-oncall-lesson
+              mute_time_intervals: *mute_time
+
+            - matchers:
+              - destination_service_name=~"(fatima|fatima.+|payment)"
+              receiver: grafana-oncall-payment
+              mute_time_intervals: *mute_time
+
+            - matchers:
+              - destination_service_name=~"(eureka|eureka.+)"
+              receiver: grafana-oncall-syllabus
+              mute_time_intervals: *mute_time
+
+            - matchers:
+              - destination_service_name=~"(timesheet|timesheet.+)"
+              receiver: grafana-oncall-timesheet
+              mute_time_intervals: *mute_time
+
+            - matchers:
+              - destination_service_name=~"(fatima|fatima.+|shamir|usermgmt)"
+              receiver: grafana-oncall-user
+              mute_time_intervals: *mute_time
+
+            #HighNumberOfFailedGrpcRequests, HighNumberOfSlowGrpcRequests
+            - matchers:
+              - grpc_server_method=~"(invoicemgmt.+)"
+              receiver: grafana-oncall-adobo
+              mute_time_intervals: *mute_time
+
+            - matchers:
+              - grpc_server_method=~"(bob.v1.Class.+|bob.v1.Course.+|bob.v1.Master.+|bob.v1.UploadService.+|manabie.bob.Class.+|manabie.bob.Course.+|mastermgmt.+|manabie.yasuo.Course.+|yasuo.v1.Brightcove.+|yasuo.v1.Course.+)"
+              receiver: grafana-oncall-architecture
+              mute_time_intervals: *mute_time
+
+            - matchers:
+              - grpc_server_method=~"(bob.v1.Notification.+|notificationmgmt.+|tom.+|manabie.tom.+|yasuo.v1.Notification.+)"
+              receiver: grafana-oncall-communication
+              mute_time_intervals: *mute_time
+
+            - matchers:
+              - grpc_server_method=~"(bob.v1.Lesson.+|calendar.+|lessonmgmt.+|virtualclassroom.+)"
+              receiver: grafana-oncall-lesson
+              mute_time_intervals: *mute_time
+
+            - matchers:
+              - grpc_server_method=~"(payment.+)"
+              receiver: grafana-oncall-payment
+              mute_time_intervals: *mute_time
+
+            - matchers:
+              - grpc_server_method=~"(eureka.+|syllabus.+)"
+              receiver: grafana-oncall-syllabus
+              mute_time_intervals: *mute_time
+
+            - matchers:
+              - grpc_server_method=~"(timesheet.+)"
+              receiver: grafana-oncall-timesheet
+              mute_time_intervals: *mute_time
+
+            - matchers:
+              - grpc_server_method=~"(bob.v1.User.+|manabie.bob.User.+|fatima.+|shamir.+|usermgmt.+|manabie.yasuo.User.+)"
+              receiver: grafana-oncall-user
+              mute_time_intervals: *mute_time
+
+        - matchers:
+          - app=~"(kubernetes)"
+          receiver: grafana-oncall-platform
+          mute_time_intervals: &mute_time
+          - outside_working_hour_1
+          - outside_working_hour_2
+          - weekend_1
+          - weekend_2
+          - lunch_break
+          continue: true
+          routes:
+            #KubernetesPodCrashLooping, KubernetesPodNotReady, HighMemoryUsageContainer
+            - matchers:
+              - pod=~"(draft.+|graphql.+|import-map.+|unleash.+)"
+              receiver: grafana-oncall-automation
+              mute_time_intervals: *mute_time
+
+            - matchers:
+              - pod=~"(invoicemgmt.+|entryexitmgmt.+)"
+              receiver: grafana-oncall-adobo
+              mute_time_intervals: *mute_time
+
+            - matchers:
+              - pod=~"(appsmith.+|bob.+|mastermgmt.+|yasuo.+)"
+              receiver: grafana-oncall-architecture
+              mute_time_intervals: *mute_time
+
+            - matchers:
+              - pod=~"(notificationmgmt.+|tom.+|yasuo.+)"
+              receiver: grafana-oncall-communication
+              mute_time_intervals: *mute_time
+
+            - matchers:
+              - pod=~"(calendar.+|lessonmgmt.+|virtualclassroom.+)"
+              receiver: grafana-oncall-lesson
+              mute_time_intervals: *mute_time
+
+            - matchers:
+              - pod=~"(fatima.+|payment.+)"
+              receiver: grafana-oncall-payment
+              mute_time_intervals: *mute_time
+
+            - matchers:
+              - pod=~"(eureka.+)"
+              receiver: grafana-oncall-syllabus
+              mute_time_intervals: *mute_time
+
+            - matchers:
+              - pod=~"(timesheet.+)"
+              receiver: grafana-oncall-timesheet
+              mute_time_intervals: *mute_time
+
+            - matchers:
+              - pod=~"(fatima.+|shamir.+|usermgmt.+)"
+              receiver: grafana-oncall-user
+              mute_time_intervals: *mute_time
+
+            #KubernetesDeploymentReplicasMismatch
+            - matchers:
+              - deployment=~"(draft|draft.+|graphql.+|import-map.+|unleash|unleash.+)"
+              receiver: grafana-oncall-automation
+              mute_time_intervals: *mute_time
+
+            - matchers:
+              - deployment=~"(invoicemgmt|invoicemgmt.+|entryexitmgmt|entryexitmgmt.+)"
+              receiver: grafana-oncall-adobo
+              mute_time_intervals: *mute_time
+
+            - matchers:
+              - deployment=~"(bob|bob.+|mastermgmt|mastermgmt.+|yasuo)"
+              receiver: grafana-oncall-architecture
+              mute_time_intervals: *mute_time
+
+            - matchers:
+              - deployment=~"(notificationmgmt|yasuo)"
+              receiver: grafana-oncall-communication
+              mute_time_intervals: *mute_time
+
+            - matchers:
+              - deployment=~"(calendar|calendar.+|lessonmgmt|lessonmgmt.+|virtualclassroom)"
+              receiver: grafana-oncall-lesson
+              mute_time_intervals: *mute_time
+
+            - matchers:
+              - deployment=~"(fatima|fatima.+|payment)"
+              receiver: grafana-oncall-payment
+              mute_time_intervals: *mute_time
+
+            - matchers:
+              - deployment=~"(eureka|eureka.+)"
+              receiver: grafana-oncall-syllabus
+              mute_time_intervals: *mute_time
+
+            - matchers:
+              - deployment=~"(timesheet|timesheet.+)"
+              receiver: grafana-oncall-timesheet
+              mute_time_intervals: *mute_time
+
+            - matchers:
+              - deployment=~"(fatima|fatima.+|shamir|usermgmt)"
+              receiver: grafana-oncall-user
+              mute_time_intervals: *mute_time
+
+            #KubernetesStatefulSetReplicasMismatch
+            - matchers:
+              - statefulset=~"(appsmith|appsmith.+)"
+              receiver: grafana-oncall-architecture
+              mute_time_intervals: *mute_time
+
+            - matchers:
+              - statefulset=~"(tom)"
+              receiver: grafana-oncall-communication
+              mute_time_intervals: *mute_time
+
+            - matchers:
+              - job_name=~"(fatima|fatima.+|payment.+)"
+              receiver: grafana-oncall-payment
+              mute_time_intervals: *mute_time
+
+            - matchers:
+              - job_name=~"(mastermgmt.+)"
+              receiver: grafana-oncall-architecture
+              mute_time_intervals: *mute_time
+
+        - matchers:
+          - app=~"(github-actions-exporter)"
+          receiver: grafana-oncall-automation
+          mute_time_intervals:
+          - outside_working_hour_1
+          - outside_working_hour_2
+          - weekend_1
+          - weekend_2
+          - lunch_break
+          continue: true
+
+        - matchers:
+          - app=~"(elastic|kafka)"
+          receiver: grafana-oncall-platform
+          mute_time_intervals:
+          - outside_working_hour_1
+          - outside_working_hour_2
+          - weekend_1
+          - weekend_2
+          - lunch_break
+          continue: true
+
+        - matchers:
+          - app=~"(kafka-connect)"
+          receiver: grafana-oncall-platform
+          mute_time_intervals:
+          - outside_working_hour_1
+          - outside_working_hour_2
+          - weekend_1
+          - weekend_2
+          - lunch_break
+          continue: true
+          routes:
+            - matchers:
+              - connector=~"(.+bob.+)"
+              receiver: grafana-oncall-kafka
+              mute_time_intervals: *mute_time
+
+    mute_time_intervals:
+    - name: outside_working_hour_1
+      time_intervals:
+      - times:
+        - start_time: "11:00" # 18:00 +07
+          end_time: "24:00"   # 07:00 +07
+
+    - name: outside_working_hour_2
+      time_intervals:
+      - times:
+        - start_time: "00:00" # 07:00 +07
+          end_time: "02:00"   # 09:00 +07
+
+    - name: weekend_1
+      time_intervals:
+      - weekdays: ['saturday','sunday']
+        times:
+        - start_time: "17:00" # 00:00 +07
+          end_time: "24:00"   # 07:00 +07
+
+    - name: weekend_2
+      time_intervals:
+      - weekdays: ['saturday','sunday']
+        times:
+        - start_time: "00:00" # 07:00 +07
+          end_time: "17:00"   # 00:00 +07
+
+    - name: lunch_break
+      time_intervals:
+      - times:
+        - start_time: "05:00" # 12:00 +07
+          end_time: "06:00"   # 13:00 +07
+
+    - name: new_year_1
+      time_intervals:
+      - months: ['january']
+        days_of_month: ['1', '2']
+        times:
+        - start_time: "17:00" # 00:00 +07
+          end_time: "24:00" # 07:00 +07
+
+    - name: new_year_2
+      time_intervals:
+      - months: ['january']
+        days_of_month: ['1', '2']
+        times:
+        - start_time: "00:00" # 07:00 +07
+          end_time: "17:00"   # 00:00 +07
+
+    global:
+      slack_api_url: https://hooks.slack.com/services/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
+      opsgenie_api_key: 7fbeb3bf-46ef-46d8-b2b6-70fe59e6663d # platform team
+
+    receivers:
+    - name: 'null'
+    - name: uat-monitoring-slack
+      slack_configs:
+      - channel: '#squad-platform-alerts'
+        <<: *default_slack_config
+
+    - name: adobo-slack
+      slack_configs:
+      - channel: '#squad-adobo'
+        <<: *default_slack_config
+
+    - name: lesson-slack
+      slack_configs:
+      - channel: 'squad-lesson-feature'
+        <<: *default_slack_config
+
+    - name: lesson-alert-slack
+      slack_configs:
+      - channel: '#lesson-alert'
+        <<: *default_slack_config
+
+    - name: platform-slack
+      slack_configs:
+      - channel: '#squad-platform-alerts'
+        <<: *default_slack_config
+
+    - name: syllabus-slack
+      slack_configs:
+      - channel: '#squad-syllabus'
+        <<: *default_slack_config
+
+    - name: user-management-slack
+      slack_configs:
+      - channel: '#squad-user_management-feature'
+        <<: *default_slack_config
+
+    - name: payment-nats-alert-slack
+      slack_configs:
+      - channel: '#squad-payment-nats-alert'
+        <<: *default_slack_config
+
+    - name: payment-alert-slack
+      slack_configs:
+      - channel: '#squad-payment-alerts'
+        <<: *default_slack_config
+
+    - name: communication-alert-slack
+      slack_configs:
+      - channel: '#squad-communication-alerts'
+        <<: *default_slack_config
+
+    - name: syllabus-alert-slack
+      slack_configs:
+      - channel: '#squad-syllabus-alerts'
+        <<: *default_slack_config
+
+    - name: user-alert-slack
+      slack_configs:
+      - channel: '#squad-user-alerts'
+        <<: *default_slack_config
+
+    - name: adobo-alert-slack
+      slack_configs:
+      - channel: '#squad-adobo-alerts'
+        <<: *default_slack_config
+
+    - name: timesheet-alert-slack
+      slack_configs:
+      - channel: '#squad-timesheet-alerts'
+        <<: *default_slack_config
+
+    - name: architecture-alert-slack
+      slack_configs:
+      - channel: '#squad-architecture-alerts'
+        <<: *default_slack_config
+
+    - name: func-automation-pager
+      opsgenie_configs:
+      - <<: *default_opsgenie_config
+        responders:
+          - name: "func-automation"
+            type: team
+
+    - name: func-backend-pager
+      opsgenie_configs:
+      - <<: *default_opsgenie_config
+        responders:
+          - name: "func-backend"
+            type: team
+
+    - name: func-mobile-pager
+      opsgenie_configs:
+      - <<: *default_opsgenie_config
+        responders:
+          - name: "func-mobile"
+            type: team
+
+    - name: func-pdm-pager
+      opsgenie_configs:
+      - <<: *default_opsgenie_config
+        responders:
+          - name: "func-pdm"
+            type: team
+
+    - name: func-qa-pager
+      opsgenie_configs:
+      - <<: *default_opsgenie_config
+        responders:
+          - name: "func-qa"
+            type: team
+
+    - name: func-web-pager
+      opsgenie_configs:
+      - <<: *default_opsgenie_config
+        responders:
+          - name: "func-web"
+            type: team
+
+    - name: squad-admin-pager
+      opsgenie_configs:
+      - <<: *default_opsgenie_config
+        responders:
+          - name: "squad-admin"
+            type: team
+
+    - name: squad-communication-pager
+      opsgenie_configs:
+      - <<: *default_opsgenie_config
+        responders:
+          - name: "squad-communication"
+            type: team
+
+    - name: squad-ddd-pager
+      opsgenie_configs:
+      - <<: *default_opsgenie_config
+        responders:
+          - name: "squad-ddd"
+            type: team
+
+    - name: squad-adobo-pager
+      opsgenie_configs:
+      - <<: *default_opsgenie_config
+        responders:
+          - name: "squad-adobo"
+            type: team
+
+    - name: squad-lesson-pager
+      opsgenie_configs:
+      - <<: *default_opsgenie_config
+        responders:
+          - name: "squad-lesson"
+            type: team
+        api_key: 6307e108-bc53-4c55-b99e-749e210b4312
+
+    - name: squad-platform-pager
+      opsgenie_configs:
+      - <<: *default_opsgenie_config
+        responders:
+          - name: "squad-platform"
+            type: team
+        api_key: 7fbeb3bf-46ef-46d8-b2b6-70fe59e6663d
+
+    - name: squad-release-pager
+      opsgenie_configs:
+      - <<: *default_opsgenie_config
+        responders:
+          - name: "squad-release"
+            type: team
+
+    - name: squad-syllabus-pager
+      opsgenie_configs:
+      - <<: *default_opsgenie_config
+        responders:
+          - name: "squad-syllabus"
+            type: team
+
+    - name: squad-user-management-pager
+      opsgenie_configs:
+      - <<: *default_opsgenie_config
+        responders:
+          - name: "squad-user-management"
+            type: team
+
+    - name: grafana-oncall-platform
+      webhook_configs:
+      - url: https://oncall.manabie.io/integrations/v1/alertmanager/QKfYpqigD0iHr5JvRtFa40RxC/
+        send_resolved: true
+
+    - name: grafana-oncall-automation
+      webhook_configs:
+      - url: https://oncall.manabie.io/integrations/v1/alertmanager/uVprGQD0F97bLsXdPjXgSiaoC/
+        send_resolved: true
+
+    - name: grafana-oncall-tse
+      webhook_configs:
+      - url: https://oncall.manabie.io/integrations/v1/alertmanager/4lj6VUVG9pgvAHYAuJvhRXTVz/
+        send_resolved: true
+
+    - name: grafana-oncall-adobo
+      webhook_configs:
+      - url: https://oncall.manabie.io/integrations/v1/alertmanager/ccFaESPAR9R1e4J8HoFk46Ng2/
+        send_resolved: true
+
+    - name: grafana-oncall-architecture
+      webhook_configs:
+      - url: https://oncall.manabie.io/integrations/v1/alertmanager/5ndCl7whOPG9pd4Ms8OIybZCn/
+        send_resolved: true
+
+    - name: grafana-oncall-communication
+      webhook_configs:
+      - url: https://oncall.manabie.io/integrations/v1/alertmanager/pUnSPQKCe0fJDq4J4KCqEGFco/
+        send_resolved: true
+
+    - name: grafana-oncall-lesson
+      webhook_configs:
+      - url: https://oncall.manabie.io/integrations/v1/alertmanager/UAVWtejiTqkjhqvNNcG0UyeA8/
+        send_resolved: true
+
+    - name: grafana-oncall-payment
+      webhook_configs:
+      - url: https://oncall.manabie.io/integrations/v1/alertmanager/rjqzlJ2pkMIi398gK1LjittXc/
+        send_resolved: true
+
+    - name: grafana-oncall-payment-nats
+      webhook_configs:
+      - url: https://oncall.manabie.io/integrations/v1/alertmanager/SGJxJzz6BUmWyRTJzSz2LFVj0/
+        send_resolved: true
+
+    - name: grafana-oncall-syllabus
+      webhook_configs:
+      - url: https://oncall.manabie.io/integrations/v1/alertmanager/0L7yAhplZEgmWcLCVCfwqy9Sj/
+        send_resolved: true
+
+    - name: grafana-oncall-timesheet
+      webhook_configs:
+      - url: https://oncall.manabie.io/integrations/v1/alertmanager/e7ETvC39oakvF9pyEOTJw3k5c/
+        send_resolved: true
+
+    - name: grafana-oncall-user
+      webhook_configs:
+      - url: https://oncall.manabie.io/integrations/v1/alertmanager/0oLtih9ad8n3NlJsaCHiwLzc6/
+        send_resolved: true
+
+    - name: grafana-oncall-kafka
+      webhook_configs:
+      - url: https://oncall.manabie.io/integrations/v1/alertmanager/IfgInmUIpKrCc7VtSWjXVstUF/
+        send_resolved: true
+
+serverFiles:
+  web_config.yml:
+    basic_auth_users:
+      admin: $2y$12$E78SV9B6GBHATf4UslRMqunqSqbn.gK7iXIm2ETaB0UTi2ECrOWhy
+
+  # This block is copied from Helm Prometheus's values.yaml file, with modification
+  # to ignore metrics relate to ARC (Actions Runner System) deployments, such as
+  # metrics come from actions-runner-system namespace, and metrics from runner nodes.
+  prometheus.yml:
+    scrape_configs:
+      # - job_name: prometheus
+      #   static_configs:
+      #     - targets:
+      #       - localhost:9090
+
+      # A scrape configuration for running Prometheus on a Kubernetes cluster.
+      # This uses separate scrape configs for cluster components (i.e. API server, node)
+      # and services to allow each to use different authentication configs.
+      #
+      # Kubernetes labels will be added as Prometheus labels on metrics via the
+      # `labelmap` relabeling action.
+
+      # Scrape config for API servers.
+      #
+      # Kubernetes exposes API servers as endpoints to the default/kubernetes
+      # service so this uses `endpoints` role and uses relabelling to only keep
+      # the endpoints associated with the default/kubernetes service using the
+      # default named port `https`. This works for single API server deployments as
+      # well as HA API server deployments.
+      - job_name: 'kubernetes-apiservers'
+
+        kubernetes_sd_configs:
+          - role: endpoints
+
+        # Default to scraping over https. If required, just disable this or change to
+        # `http`.
+        scheme: https
+
+        # This TLS & bearer token file config is used to connect to the actual scrape
+        # endpoints for cluster components. This is separate to discovery auth
+        # configuration because discovery & scraping are two separate concerns in
+        # Prometheus. The discovery auth config is automatic if Prometheus runs inside
+        # the cluster. Otherwise, more config options have to be provided within the
+        # <kubernetes_sd_config>.
+        tls_config:
+          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+          # If your node certificates are self-signed or use a different CA to the
+          # master CA, then disable certificate verification below. Note that
+          # certificate verification is an integral part of a secure infrastructure
+          # so this should only be disabled in a controlled environment. You can
+          # disable certificate verification by uncommenting the line below.
+          #
+          insecure_skip_verify: true
+        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+
+        # Keep only the default/kubernetes service endpoints for the https port. This
+        # will add targets for each API server which Kubernetes adds an endpoint to
+        # the default/kubernetes service.
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+            action: keep
+            regex: default;kubernetes;https
+
+      - job_name: 'kubernetes-nodes'
+
+        # Default to scraping over https. If required, just disable this or change to
+        # `http`.
+        scheme: https
+
+        # This TLS & bearer token file config is used to connect to the actual scrape
+        # endpoints for cluster components. This is separate to discovery auth
+        # configuration because discovery & scraping are two separate concerns in
+        # Prometheus. The discovery auth config is automatic if Prometheus runs inside
+        # the cluster. Otherwise, more config options have to be provided within the
+        # <kubernetes_sd_config>.
+        tls_config:
+          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+          # If your node certificates are self-signed or use a different CA to the
+          # master CA, then disable certificate verification below. Note that
+          # certificate verification is an integral part of a secure infrastructure
+          # so this should only be disabled in a controlled environment. You can
+          # disable certificate verification by uncommenting the line below.
+          #
+          insecure_skip_verify: true
+        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+
+        kubernetes_sd_configs:
+          - role: node
+
+        relabel_configs:
+          - action: drop
+            regex: .+runner.+|.+-spot?-.+
+            source_labels: [__meta_kubernetes_node_name]
+          - action: drop
+            regex: .+runner.+
+            source_labels: [__meta_kubernetes_node_name]
+          - action: labelmap
+            regex: __meta_kubernetes_node_label_(.+)
+          - target_label: __address__
+            replacement: kubernetes.default.svc:443
+          - source_labels: [__meta_kubernetes_node_name]
+            regex: (.+)
+            target_label: __metrics_path__
+            replacement: /api/v1/nodes/$1/proxy/metrics
+
+      # Scrape config for service endpoints.
+      #
+      # The relabeling allows the actual service scrape endpoint to be configured
+      # via the following annotations:
+      #
+      # * `prometheus.io/scrape`: Only scrape services that have a value of
+      # `true`, except if `prometheus.io/scrape-slow` is set to `true` as well.
+      # * `prometheus.io/scheme`: If the metrics endpoint is secured then you will need
+      # to set this to `https` & most likely set the `tls_config` of the scrape config.
+      # * `prometheus.io/path`: If the metrics path is not `/metrics` override this.
+      # * `prometheus.io/port`: If the metrics are exposed on a different port to the
+      # service then set this appropriately.
+      # * `prometheus.io/param_<parameter>`: If the metrics endpoint uses parameters
+      # then you can set any parameter
+      - job_name: 'kubernetes-service-endpoints'
+        honor_labels: true
+
+        kubernetes_sd_configs:
+          - role: endpoints
+
+        relabel_configs:
+          - action: drop
+            regex: actions-runner-system
+            source_labels: [__meta_kubernetes_namespace]
+          - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
+            action: keep
+            regex: true
+          - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape_slow]
+            action: drop
+            regex: true
+          - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
+            action: replace
+            target_label: __scheme__
+            regex: (https?)
+          - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]
+            action: replace
+            target_label: __metrics_path__
+            regex: (.+)
+          - source_labels: [__address__, __meta_kubernetes_service_annotation_prometheus_io_port]
+            action: replace
+            target_label: __address__
+            regex: ([^:]+)(?::\d+)?;(\d+)
+            replacement: $1:$2
+          - action: labelmap
+            regex: __meta_kubernetes_service_annotation_prometheus_io_param_(.+)
+            replacement: __param_$1
+          - action: labelmap
+            regex: __meta_kubernetes_service_label_(.+)
+          - source_labels: [__meta_kubernetes_namespace]
+            action: replace
+            target_label: namespace
+          - source_labels: [__meta_kubernetes_service_name]
+            action: replace
+            target_label: service
+          - source_labels: [__meta_kubernetes_pod_node_name]
+            action: replace
+            target_label: node
+
+      # Scrape config for slow service endpoints; same as above, but with a larger
+      # timeout and a larger interval
+      #
+      # The relabeling allows the actual service scrape endpoint to be configured
+      # via the following annotations:
+      #
+      # * `prometheus.io/scrape-slow`: Only scrape services that have a value of `true`
+      # * `prometheus.io/scheme`: If the metrics endpoint is secured then you will need
+      # to set this to `https` & most likely set the `tls_config` of the scrape config.
+      # * `prometheus.io/path`: If the metrics path is not `/metrics` override this.
+      # * `prometheus.io/port`: If the metrics are exposed on a different port to the
+      # service then set this appropriately.
+      # * `prometheus.io/param_<parameter>`: If the metrics endpoint uses parameters
+      # then you can set any parameter
+      - job_name: 'kubernetes-service-endpoints-slow'
+        honor_labels: true
+
+        scrape_interval: 5m
+        scrape_timeout: 30s
+
+        kubernetes_sd_configs:
+          - role: endpoints
+
+        relabel_configs:
+          - action: drop
+            regex: actions-runner-system
+            source_labels: [__meta_kubernetes_namespace]
+          - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape_slow]
+            action: keep
+            regex: true
+          - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
+            action: replace
+            target_label: __scheme__
+            regex: (https?)
+          - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]
+            action: replace
+            target_label: __metrics_path__
+            regex: (.+)
+          - source_labels: [__address__, __meta_kubernetes_service_annotation_prometheus_io_port]
+            action: replace
+            target_label: __address__
+            regex: ([^:]+)(?::\d+)?;(\d+)
+            replacement: $1:$2
+          - action: labelmap
+            regex: __meta_kubernetes_service_annotation_prometheus_io_param_(.+)
+            replacement: __param_$1
+          - action: labelmap
+            regex: __meta_kubernetes_service_label_(.+)
+          - source_labels: [__meta_kubernetes_namespace]
+            action: replace
+            target_label: namespace
+          - source_labels: [__meta_kubernetes_service_name]
+            action: replace
+            target_label: service
+          - source_labels: [__meta_kubernetes_pod_node_name]
+            action: replace
+            target_label: node
+
+      - job_name: 'prometheus-pushgateway'
+        honor_labels: true
+
+        kubernetes_sd_configs:
+          - role: service
+
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_probe]
+            action: keep
+            regex: pushgateway
+
+      # Example scrape config for probing services via the Blackbox Exporter.
+      #
+      # The relabeling allows the actual service scrape endpoint to be configured
+      # via the following annotations:
+      #
+      # * `prometheus.io/probe`: Only probe services that have a value of `true`
+      - job_name: 'kubernetes-services'
+
+        metrics_path: /probe
+        params:
+          module: [http_2xx]
+
+        kubernetes_sd_configs:
+          - role: service
+
+        relabel_configs:
+          - action: drop
+            regex: actions-runner-system
+            source_labels: [__meta_kubernetes_namespace]
+          - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_probe]
+            action: keep
+            regex: true
+          - source_labels: [__address__]
+            target_label: __param_target
+          - target_label: __address__
+            replacement: blackbox
+          - source_labels: [__param_target]
+            target_label: instance
+          - action: labelmap
+            regex: __meta_kubernetes_service_label_(.+)
+          - source_labels: [__meta_kubernetes_namespace]
+            target_label: namespace
+          - source_labels: [__meta_kubernetes_service_name]
+            target_label: service
+
+      # Example scrape config for pods
+      #
+      # The relabeling allows the actual pod scrape endpoint to be configured via the
+      # following annotations:
+      #
+      # * `prometheus.io/scrape`: Only scrape pods that have a value of `true`,
+      # except if `prometheus.io/scrape-slow` is set to `true` as well.
+      # * `prometheus.io/scheme`: If the metrics endpoint is secured then you will need
+      # to set this to `https` & most likely set the `tls_config` of the scrape config.
+      # * `prometheus.io/path`: If the metrics path is not `/metrics` override this.
+      # * `prometheus.io/port`: Scrape the pod on the indicated port instead of the default of `9102`.
+      - job_name: 'kubernetes-pods'
+
+        kubernetes_sd_configs:
+          - role: pod
+
+        relabel_configs:
+          - action: drop
+            regex: actions-runner-system
+            source_labels: [__meta_kubernetes_namespace]
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+            action: keep
+            regex: true
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape_slow]
+            action: drop
+            regex: true
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scheme]
+            action: replace
+            regex: (https?)
+            target_label: __scheme__
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+            action: replace
+            target_label: __metrics_path__
+            regex: (.+)
+          - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+            action: replace
+            regex: ([^:]+)(?::\d+)?;(\d+)
+            replacement: $1:$2
+            target_label: __address__
+          - action: labelmap
+            regex: __meta_kubernetes_pod_annotation_prometheus_io_param_(.+)
+            replacement: __param_$1
+          - action: labelmap
+            regex: __meta_kubernetes_pod_label_(.+)
+          - source_labels: [__meta_kubernetes_namespace]
+            action: replace
+            target_label: namespace
+          - source_labels: [__meta_kubernetes_pod_name]
+            action: replace
+            target_label: pod
+          - source_labels: [__meta_kubernetes_pod_phase]
+            regex: Pending|Succeeded|Failed|Completed
+            action: drop
+
+      # This job is copied from the 'kubernetes-pods' job above, with modification
+      # to only scrape metrics from kind-shared-registry pods.
+      - job_name: 'kubernetes-kind-shared-registry'
+
+        kubernetes_sd_configs:
+          - role: pod
+
+        relabel_configs:
+          - action: keep
+            regex: actions-runner-system;kind-shared-registry.+
+            source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_pod_name]
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scheme]
+            action: replace
+            regex: (https?)
+            target_label: __scheme__
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+            action: replace
+            target_label: __metrics_path__
+            regex: (.+)
+          - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+            action: replace
+            regex: ([^:]+)(?::\d+)?;(\d+)
+            replacement: $1:$2
+            target_label: __address__
+          - action: labelmap
+            regex: __meta_kubernetes_pod_annotation_prometheus_io_param_(.+)
+            replacement: __param_$1
+          - action: labelmap
+            regex: __meta_kubernetes_pod_label_(.+)
+          - source_labels: [__meta_kubernetes_namespace]
+            action: replace
+            target_label: namespace
+          - source_labels: [__meta_kubernetes_pod_name]
+            action: replace
+            target_label: pod
+          - source_labels: [__meta_kubernetes_pod_phase]
+            regex: Pending|Succeeded|Failed|Completed
+            action: drop
+
+      # Example Scrape config for pods which should be scraped slower. An useful example
+      # would be stackriver-exporter which queries an API on every scrape of the pod
+      #
+      # The relabeling allows the actual pod scrape endpoint to be configured via the
+      # following annotations:
+      #
+      # * `prometheus.io/scrape-slow`: Only scrape pods that have a value of `true`
+      # * `prometheus.io/scheme`: If the metrics endpoint is secured then you will need
+      # to set this to `https` & most likely set the `tls_config` of the scrape config.
+      # * `prometheus.io/path`: If the metrics path is not `/metrics` override this.
+      # * `prometheus.io/port`: Scrape the pod on the indicated port instead of the default of `9102`.
+      - job_name: 'kubernetes-pods-slow'
+
+        scrape_interval: 5m
+        scrape_timeout: 30s
+
+        kubernetes_sd_configs:
+          - role: pod
+
+        relabel_configs:
+          - action: drop
+            regex: actions-runner-system
+            source_labels: [__meta_kubernetes_namespace]
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape_slow]
+            action: keep
+            regex: true
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scheme]
+            action: replace
+            regex: (https?)
+            target_label: __scheme__
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+            action: replace
+            target_label: __metrics_path__
+            regex: (.+)
+          - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+            action: replace
+            regex: ([^:]+)(?::\d+)?;(\d+)
+            replacement: $1:$2
+            target_label: __address__
+          - action: labelmap
+            regex: __meta_kubernetes_pod_annotation_prometheus_io_param_(.+)
+            replacement: __param_$1
+          - action: labelmap
+            regex: __meta_kubernetes_pod_label_(.+)
+          - source_labels: [__meta_kubernetes_namespace]
+            action: replace
+            target_label: namespace
+          - source_labels: [__meta_kubernetes_pod_name]
+            action: replace
+            target_label: pod
+          - source_labels: [__meta_kubernetes_pod_phase]
+            regex: Pending|Succeeded|Failed|Completed
+            action: drop
+
+      # This job is copied from the 'kubernetes-pods' job above, with modification
+      # to only scrape metrics from github-actions-exporter pods.
+      - job_name: 'kubernetes-github-actions-exporter'
+
+        kubernetes_sd_configs:
+          - role: pod
+
+        relabel_configs:
+          - action: keep
+            regex: actions-runner-system;github-actions-exporter.+
+            source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_pod_name]
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scheme]
+            action: replace
+            regex: (https?)
+            target_label: __scheme__
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+            action: replace
+            target_label: __metrics_path__
+            regex: (.+)
+          - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+            action: replace
+            regex: ([^:]+)(?::\d+)?;(\d+)
+            replacement: $1:$2
+            target_label: __address__
+          - action: labelmap
+            regex: __meta_kubernetes_pod_annotation_prometheus_io_param_(.+)
+            replacement: __param_$1
+          - action: labelmap
+            regex: __meta_kubernetes_pod_label_(.+)
+          - source_labels: [__meta_kubernetes_namespace]
+            action: replace
+            target_label: namespace
+          - source_labels: [__meta_kubernetes_pod_name]
+            action: replace
+            target_label: pod
+          - source_labels: [__meta_kubernetes_pod_phase]
+            regex: Pending|Succeeded|Failed|Completed
+            action: drop
+
+      - job_name: 'kubernetes-actions-runner-controller-actions-metrics-server'
+
+        kubernetes_sd_configs:
+          - role: pod
+
+        relabel_configs:
+          - action: keep
+            regex: actions-runner-system;actions-runner-controller-actions-metrics-server.+
+            source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_pod_name]
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scheme]
+            action: replace
+            regex: (https?)
+            target_label: __scheme__
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+            action: replace
+            target_label: __metrics_path__
+            regex: (.+)
+          - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+            action: replace
+            regex: ([^:]+)(?::\d+)?;(\d+)
+            replacement: $1:$2
+            target_label: __address__
+          - action: labelmap
+            regex: __meta_kubernetes_pod_annotation_prometheus_io_param_(.+)
+            replacement: __param_$1
+          - action: labelmap
+            regex: __meta_kubernetes_pod_label_(.+)
+          - source_labels: [__meta_kubernetes_namespace]
+            action: replace
+            target_label: namespace
+          - source_labels: [__meta_kubernetes_pod_name]
+            action: replace
+            target_label: pod
+          - source_labels: [__meta_kubernetes_pod_phase]
+            regex: Pending|Succeeded|Failed|Completed
+            action: drop
+
+configmapReload:
+  reloadUrl: http://admin:30e7d92a4a20c5cebe38124b@127.0.0.1:9090/-/reload
+  prometheus:
+    enabled: true
+    # extraArgs:
+    #   webhook-url: http://admin:30e7d92a4a20c5cebe38124b@127.0.0.1:9090/-/reload
+  alertmanager:
+    enabled: true
+    extraArgs:
+      webhook-url: http://admin:9e674f24870e6c2bd31030fa@127.0.0.1:9093/-/reload

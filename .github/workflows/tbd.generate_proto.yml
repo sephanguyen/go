@@ -1,0 +1,427 @@
+name: tbd.generate_proto
+on:
+  push:
+    branches:
+      - develop
+    paths:
+      - "proto/**"
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "Which branch to generate proto from"
+        required: true
+        default: "develop"
+      targets:
+        description: "Options: ts, dart (separated by space)"
+        required: true
+        default: "ts dart"
+
+# all instances of this workflow will have same concurrency group, only runs latest workflow
+concurrency:
+  group: tbd.generate-proto
+  cancel-in-progress: true
+
+jobs:
+  prepare-inputs:
+    runs-on: ["self-hosted", "100m-400mi", "spot", "persistent"]
+    timeout-minutes: 5
+    outputs:
+      target-branch: ${{ steps.prepare-branch.outputs.TARGET_BRANCH }}
+      ts: ${{ steps.prepare-ts.outputs.TS }}
+      dart: ${{ steps.prepare-dart.outputs.DART }}
+      output-branch: ${{ steps.prepare-contents.outputs.BRANCH_NAME }}
+      timestamp: ${{ steps.prepare-contents.outputs.TIMESTAMP }}
+      labels: ${{ steps.prepare-contents.outputs.LABELS }}
+      short-commit-sha: ${{ steps.short_commit_sha.outputs.short_commit_sha }}
+    steps:
+      - name: Determine target branch
+        id: prepare-branch
+        run: |
+          set -e
+          echo "Event triggered: "${{ github.event_name }}""
+
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            # For push events, get the branch being pushed onto.
+            branch=${GITHUB_REF#refs/heads/}
+          else
+            # For manual events, use the specified branch.
+            branch="${{ github.event.inputs.branch }}"
+          fi
+
+
+          echo "Commit: ${commit_sha}"
+          echo "TARGET_BRANCH="${branch}"" >> $GITHUB_OUTPUT
+
+      - name: Decide whether to generate for ts
+        id: prepare-ts
+        run: |
+          set +e
+
+          ts=false
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            ts=true
+          else
+            count=$(echo "${{ github.event.inputs.targets }}" | grep -c "\bts\b")
+            if [[ $count == 1 ]]; then
+              ts=true
+            fi
+          fi
+
+          echo "Generating for ts: ${ts}"
+          echo "TS="${ts}"" >> $GITHUB_OUTPUT
+
+      - name: Decide whether to generate for dart
+        id: prepare-dart
+        run: |
+          set +e
+
+          dart=false
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            dart=true
+          else
+            count=$(echo ${{ github.event.inputs.targets }} | grep -c "\bdart\b")
+            if [[ $count == 1 ]]; then
+              dart=true
+            fi
+          fi
+
+          echo "Generating for dart: ${dart}"
+          echo "DART="${dart}"" >> $GITHUB_OUTPUT
+
+      - name: Prepare contents
+        id: prepare-contents
+        if: ${{ steps.prepare-ts.outputs.TS }} == true || ${{ steps.prepare-dart.outputs.DART }} == true
+        run: |
+          set -e
+          target_branch=${{ steps.prepare-branch.outputs.TARGET_BRANCH }}
+
+          echo "Target branch: ${branch}"
+          echo "BRANCH_NAME="generated/${target_branch}_${{ github.sha }}"" >> $GITHUB_OUTPUT
+
+          echo "TIMESTAMP=$(TZ='Asia/Ho_Chi_Minh' date +'%H:%M:%S, %a, %d/%m/%Y (GMT%:::z)')" >> $GITHUB_OUTPUT
+          if [[ "${{ github.event_name }}" == 'push' ]]; then
+            echo "LABELS="workflow,automatic"" >> $GITHUB_OUTPUT
+          else
+            echo "LABELS="workflow,manual"" >> $GITHUB_OUTPUT
+          fi
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Get short commit sha
+        shell: bash
+        id: short_commit_sha
+        run: |
+          echo "short_commit_sha=$(git rev-parse --short "$GITHUB_SHA")" >> $GITHUB_OUTPUT
+
+  gen-proto-dart:
+    needs: [prepare-inputs]
+    runs-on: ["self-hosted", "medium-runner"]
+    timeout-minutes: 10
+    if: ${{ needs.prepare-inputs.outputs.dart }} == true
+    steps:
+      - name: Collect Workflow Telemetry
+        continue-on-error: true
+        timeout-minutes: 5
+        uses: manabie-com/workflow-telemetry-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.BUILD_GITHUB_TOKEN }}
+        with:
+          comment_on_pr: false
+
+      - name: Checkout backend
+        uses: actions/checkout@v3
+        with:
+          path: "./backend"
+          ref: "${{ needs.prepare-inputs.outputs.target-branch }}"
+
+      - name: Generate proto from source
+        run: |
+          set -x
+          cd ./backend
+          make gen-proto-dart
+
+      - name: Checkout manabuf-dart
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+          repository: manabie-com/manabuf-dart
+          token: "${{ secrets.BUILD_GITHUB_TOKEN }}"
+          ref: "develop"
+          path: "./manabuf-dart"
+
+      - name: Copy proto
+        run: |
+          set -x
+          cd ./manabuf-dart/lib
+          rm -rf */
+          cp -rf ../../backend/pkg/manabuf-dart/. .
+
+      - name: Create PR on manabuf-dart
+        id: cpr
+        uses: peter-evans/create-pull-request@v4.2.4
+        with:
+          base: develop
+          branch: ${{ needs.prepare-inputs.outputs.output-branch }}
+          commit-message: "Automated proto generation for manabie-com/backend@${{ github.sha }}"
+          path: "./manabuf-dart"
+          token: "${{ secrets.BUILD_GITHUB_TOKEN }}"
+          title: "Generate proto from ${{ needs.prepare-inputs.outputs.short-commit-sha }} in ${{ needs.prepare-inputs.outputs.target-branch }}"
+          body: |
+            - Latest dispatcher: ${{ github.actor }}
+            - Timestamp: ${{ needs.prepare-inputs.outputs.timestamp }}
+            - Source: manabie-com/backend@${{ github.sha }} (branch: `${{ needs.prepare-inputs.outputs.target-branch }}`)
+            - Workflow: `${{ github.workflow }}`
+          labels: ${{ needs.prepare-inputs.outputs.labels }}
+          delete-branch: true
+
+      - name: Check outputs
+        run: |
+          if [[ -z "${{ steps.cpr.outputs.pull-request-number }}" ]]; then
+            echo "No new pull request was created"
+          else
+            echo "Pull request number: ${{ steps.cpr.outputs.pull-request-number }}"
+            echo "Pull request URL: ${{ steps.cpr.outputs.pull-request-url }}"
+          fi
+
+  gen-proto-ts-v2:
+    needs: [prepare-inputs]
+    runs-on: ["self-hosted", "medium-runner"]
+    timeout-minutes: 10
+    if: ${{ needs.prepare-inputs.outputs.ts }} == true
+    strategy:
+      matrix:
+        include:
+          - TEAM: syllabus
+            PROTO_DIR: "options/*.proto common/**/*.proto eureka/**/*.proto syllabus/**/*.proto google/**/*.proto"
+            OUT_DIR: ../../pkg/manabuf-syllabus-ts
+            SCRIPT: gen-syllabus-proto-ts-v2
+
+          - TEAM: calendar
+            PROTO_DIR: "common/**/*.proto google/**/*.proto calendar/**/*.proto lessonmgmt/**/*.proto"
+            OUT_DIR: ../../pkg/manabuf-calendar-ts
+            SCRIPT: gen-proto-ts-v2
+
+          - TEAM: lesson
+            PROTO_DIR: "common/**/*.proto google/**/*.proto lessonmgmt/**/*.proto"
+            OUT_DIR: ../../pkg/manabuf-lesson-ts
+            SCRIPT: gen-proto-ts-v2
+
+          - TEAM: communication
+            PROTO_DIR: "common/**/*.proto notificationmgmt/**/*.proto conversationmgmt/**/*.proto"
+            OUT_DIR: ../../pkg/manabuf-communication-ts
+            SCRIPT: gen-proto-ts-v2
+
+          - TEAM: payment
+            PROTO_DIR: "common/**/*.proto payment/**/*.proto discount/**/*.proto"
+            OUT_DIR: ../../pkg/manabuf-payment-ts
+            SCRIPT: gen-proto-ts-v2
+
+          - TEAM: timesheet
+            PROTO_DIR: "timesheet/**/*.proto google/**/*.proto"
+            OUT_DIR: ../../pkg/manabuf-timesheet-ts
+            SCRIPT: gen-proto-ts-v2
+
+          - TEAM: adobo
+            PROTO_DIR: "common/**/*.proto entryexitmgmt/**/*.proto invoicemgmt/**/*.proto"
+            OUT_DIR: ../../pkg/manabuf-adobo-ts
+            SCRIPT: gen-proto-ts-v2
+
+          - TEAM: user
+            PROTO_DIR: "common/**/*.proto bob/**/*.proto google/**/*.proto yasuo/**/*.proto fatima/**/*.proto usermgmt/**/*.proto auth/**/*.proto"
+            OUT_DIR: ../../pkg/manabuf-user-ts
+            SCRIPT: gen-proto-ts-v2
+    steps:
+      - name: Collect Workflow Telemetry
+        continue-on-error: true
+        timeout-minutes: 5
+        uses: manabie-com/workflow-telemetry-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.BUILD_GITHUB_TOKEN }}
+        with:
+          comment_on_pr: false
+
+      - name: Checkout backend
+        uses: actions/checkout@v3
+        with:
+          path: "./backend"
+          ref: "${{ needs.prepare-inputs.outputs.target-branch }}"
+
+      - name: Generate proto from source
+        env:
+          PROTO_DIR: ${{ matrix.PROTO_DIR }}
+          OUT_DIR: ${{ matrix.OUT_DIR }}
+          TEAM: ${{ matrix.TEAM }}
+        run: |
+          set -x
+          cd ./backend
+          make ${{matrix.SCRIPT}}
+
+      - name: Checkout manabuf-ts
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+          repository: manabie-com/manabuf-${{matrix.TEAM}}-ts
+          token: "${{ secrets.BUILD_GITHUB_TOKEN }}"
+          path: "./manabuf-${{matrix.TEAM}}-ts"
+
+      - name: Copy proto
+        run: |
+          set -x
+          cd ./manabuf-${{matrix.TEAM}}-ts
+          rm -rf */
+          cp -rf ../backend/pkg/manabuf-${{matrix.TEAM}}-ts/. .
+
+      - name: Create PR on manabuf-ts
+        id: cpr
+        uses: peter-evans/create-pull-request@v4.2.4
+        with:
+          base: main
+          branch: ${{ needs.prepare-inputs.outputs.output-branch }}
+          commit-message: "Automated proto generation for manabie-com/backend@${{ github.sha }}"
+          path: "./manabuf-${{matrix.TEAM}}-ts"
+          token: "${{ secrets.BUILD_GITHUB_TOKEN }}"
+          title: "[${{matrix.TEAM}}] Generate proto from ${{ needs.prepare-inputs.outputs.short-commit-sha }} in ${{ needs.prepare-inputs.outputs.target-branch }}"
+          body: |
+            - Latest dispatcher: ${{ github.actor }}
+            - Timestamp: ${{ needs.prepare-inputs.outputs.timestamp }}
+            - Source: manabie-com/backend@${{ github.sha }} (branch: `${{ needs.prepare-inputs.outputs.target-branch }}`)
+            - Workflow: `${{ github.workflow }}`
+          labels: ${{ needs.prepare-inputs.outputs.labels }}
+          delete-branch: true
+
+      - name: Check outputs
+        run: |
+          if [[ -z "${{ steps.cpr.outputs.pull-request-number }}" ]]; then
+            echo "No new pull request was created"
+          else
+            echo "Pull request number: ${{ steps.cpr.outputs.pull-request-number }}"
+            echo "Pull request URL: ${{ steps.cpr.outputs.pull-request-url }}"
+          fi
+
+  gen-proto-ts-v3:
+    needs: [prepare-inputs]
+    runs-on: ["self-hosted", "medium-runner"]
+    timeout-minutes: 10
+    if: ${{ needs.prepare-inputs.outputs.ts }} == true
+    strategy:
+      matrix:
+        include:
+          - TEAM: lesson
+            PROTO_DIR: "common/ google/ lessonmgmt/"
+            SCRIPT: gen-proto-ts-v3
+            OUTPUT_DIR: "./src/squads/lesson/__generated__/proto" #path in school portal
+
+          - TEAM: communication
+            PROTO_DIR: "common/ notificationmgmt/ conversationmgmt/"
+            SCRIPT: gen-proto-ts-v3
+            OUTPUT_DIR: "./src/squads/communication/__generated__/proto" #path in school portal
+
+          - TEAM: architecture
+            PROTO_DIR: "common/ google/ mastermgmt/"
+            SCRIPT: gen-proto-ts-v3
+            OUTPUT_DIR: "./src/squads/architecture/__generated__/proto" #path in school portal
+
+          - TEAM: syllabus
+            PROTO_DIR: "options/ common/ eureka/ syllabus/"
+            SCRIPT: gen-proto-ts-v3
+            OUTPUT_DIR: "./src/squads/syllabus/__generated__/proto" #path in school portal
+          
+          - TEAM: calendar
+            PROTO_DIR: "common/ google/ calendar/ lessonmgmt/"
+            SCRIPT: gen-proto-ts-v3
+            OUTPUT_DIR: "./src/squads/calendar/__generated__/proto" #path in school portal
+
+          - TEAM: payment
+            PROTO_DIR: "common/ payment/ discount/"
+            SCRIPT: gen-proto-ts-v3
+            OUTPUT_DIR: "./src/squads/payment/__generated__/proto" #path in school portal
+
+          - TEAM: timesheet
+            PROTO_DIR: "timesheet/ google/"
+            SCRIPT: gen-proto-ts-v3
+            OUTPUT_DIR: "./src/squads/timesheet/__generated__/proto" #path in school portal
+
+          - TEAM: adobo
+            PROTO_DIR: "common/ entryexitmgmt/ invoicemgmt/"
+            SCRIPT: gen-proto-ts-v3
+            OUTPUT_DIR: "./src/squads/adobo/__generated__/proto" #path in school portal
+
+          - TEAM: user
+            PROTO_DIR: "common/ bob/ google/ yasuo/ fatima/ usermgmt/ auth/"
+            SCRIPT: gen-proto-ts-v3
+            OUTPUT_DIR: "./src/squads/user/__generated__/proto" #path in school portal
+
+    steps:
+      - name: Collect Workflow Telemetry
+        continue-on-error: true
+        timeout-minutes: 5
+        uses: manabie-com/workflow-telemetry-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.BUILD_GITHUB_TOKEN }}
+        with:
+          comment_on_pr: false
+
+      - name: Checkout backend
+        uses: actions/checkout@v3
+        with:
+          path: "./backend"
+          ref: "${{ needs.prepare-inputs.outputs.target-branch }}"
+
+      - name: Generate proto from source
+        env:
+          PROTO_DIR: ${{ matrix.PROTO_DIR }}
+          TEAM: ${{ matrix.TEAM }}
+          GITHUB_TOKEN: ${{ secrets.BUILD_GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -x
+          cd ./backend
+
+          export TRANSPORT_PATH="src\/squads\/${{ matrix.TEAM }}\/internals\/mana-services\/grpc-bufbuild"
+          export GRPC_BUFBUILD_OPTIONS="src\/squads\/${{ matrix.TEAM }}\/internals\/mana-services\/grpc-bufbuild"
+          
+          make ${{matrix.SCRIPT}}
+
+      - name: Checkout manabuf-${{ matrix.TEAM }}-ts
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+          repository: manabie-com/school-portal-admin
+          token: "${{ secrets.BUILD_GITHUB_TOKEN }}"
+          path: "./manabuf-${{matrix.TEAM}}-ts"
+
+      - name: Copy proto
+        run: |
+          set -x
+          cd ./manabuf-${{matrix.TEAM}}-ts
+          rm -rf ${{ matrix.OUTPUT_DIR }}
+          mkdir ${{ matrix.OUTPUT_DIR }}
+
+          cp -rf ../backend/pkg/manabuf-ts/. ${{ matrix.OUTPUT_DIR }}
+
+      - name: Create PR on manabuf-${{matrix.TEAM}} proto in school portal repo
+        id: cpr
+        uses: peter-evans/create-pull-request@v4.2.4
+        with:
+          base: develop
+          branch: ${{ needs.prepare-inputs.outputs.output-branch }}-${{matrix.TEAM}}-buf
+          commit-message: "Automated proto generation for manabie-com/backend@${{ github.sha }}"
+          path: "./manabuf-${{matrix.TEAM}}-ts"
+          token: "${{ secrets.BUILD_GITHUB_TOKEN }}"
+          title: "[connect-bufbuild][${{matrix.TEAM}}] generate proto from ${{ needs.prepare-inputs.outputs.short-commit-sha }}"
+          body: |
+            - Latest dispatcher: ${{ github.actor }}
+            - Timestamp: ${{ needs.prepare-inputs.outputs.timestamp }}
+            - Source: manabie-com/backend@${{ github.sha }} (branch: `${{ needs.prepare-inputs.outputs.target-branch }}`)
+            - Workflow: `${{ github.workflow }}`
+            - Target branch: ${{ needs.prepare-inputs.outputs.target-branch }}
+          labels: ${{ needs.prepare-inputs.outputs.labels }}
+          delete-branch: true
+
+      - name: Check outputs
+        run: |
+          if [[ -z "${{ steps.cpr.outputs.pull-request-number }}" ]]; then
+            echo "No new pull request was created"
+          else
+            echo "Pull request number: ${{ steps.cpr.outputs.pull-request-number }}"
+            echo "Pull request URL: ${{ steps.cpr.outputs.pull-request-url }}"
+          fi

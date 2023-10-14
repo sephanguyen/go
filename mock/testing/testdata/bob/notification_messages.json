@@ -1,0 +1,65 @@
+{
+	"schema": [
+		{
+			"column_name": "notification_message_id",
+			"data_type": "integer",
+			"column_default": "nextval('notification_messages_notification_message_id_seq'::regclass)"
+		},
+		{
+			"column_name": "country",
+			"data_type": "text",
+			"column_default": null
+		},
+		{
+			"column_name": "key",
+			"data_type": "character varying",
+			"column_default": null
+		},
+		{
+			"column_name": "receiver_group",
+			"data_type": "character varying",
+			"column_default": null
+		},
+		{
+			"column_name": "title",
+			"data_type": "text",
+			"column_default": null
+		},
+		{
+			"column_name": "body",
+			"data_type": "text",
+			"column_default": null
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "notification_messages",
+			"policyname": "rls_notification_messages",
+			"qual": "permission_check(resource_path, 'notification_messages'::text)",
+			"with_check": "permission_check(resource_path, 'notification_messages'::text)",
+			"relrowsecurity": false,
+			"relforcerowsecurity": false
+		}
+	],
+	"table_name": "notification_messages"
+}

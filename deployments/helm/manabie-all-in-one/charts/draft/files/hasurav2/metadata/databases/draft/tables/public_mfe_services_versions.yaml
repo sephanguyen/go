@@ -1,0 +1,19 @@
+table:
+  schema: public
+  name: mfe_services_versions
+select_permissions:
+  - role: user
+    permission:
+      columns:
+        - id
+        - version
+        - squad_name
+        - service_name
+        - environment
+        - organization
+        - link
+        - created_at
+        - deployed_at
+        - rollback_at
+      filter: {}
+      allow_aggregations: true

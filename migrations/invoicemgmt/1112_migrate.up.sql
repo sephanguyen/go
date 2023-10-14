@@ -1,0 +1,1 @@
+ALTER TABLE public.payment ADD COLUMN IF NOT EXISTS validated_date timestamp with time zone;

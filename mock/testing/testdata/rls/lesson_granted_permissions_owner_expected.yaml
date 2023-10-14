@@ -1,0 +1,17 @@
+table:
+  schema: public
+  name: granted_permissions
+select_permissions:
+- role: MANABIE
+  permission:
+    columns:
+    - user_id
+    - permission_name
+    - location_id
+    - resource_path
+    filter:
+      _and:
+      - user_id:
+          _eq: X-Hasura-User-Id
+      - resource_path:
+          _eq: X-Hasura-Resource-Path

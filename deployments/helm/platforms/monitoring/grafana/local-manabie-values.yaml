@@ -1,0 +1,12 @@
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+      - name: Thanos
+        type: prometheus
+        # url: http://thanos-query-frontend:9090
+        url: http://prometheus-server.monitoring.svc.cluster.local
+        access: proxy
+        isDefault: true
+        jsonData:
+          timeInterval: 60s

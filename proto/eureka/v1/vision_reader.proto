@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package eureka.v1;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/eureka/v1;epb";
+
+message DetectTextFromImageRequest { 
+ string src = 1;
+ string lang = 2;
+}
+
+message DetectTextFromImageResponse { string text = 1; }
+
+service VisionReaderService {
+  rpc DetectTextFromImage(DetectTextFromImageRequest) returns (DetectTextFromImageResponse);
+}

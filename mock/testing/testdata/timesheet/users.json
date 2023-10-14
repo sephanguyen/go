@@ -1,0 +1,303 @@
+{
+	"schema": [
+		{
+			"column_name": "allow_notification",
+			"data_type": "boolean",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "avatar",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "birthday",
+			"data_type": "date",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "country",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "device_token",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "email",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "email_verified",
+			"data_type": "boolean",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "facebook_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "first_name",
+			"data_type": "text",
+			"column_default": "''::text",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "first_name_phonetic",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "full_name_phonetic",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "gender",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "given_name",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "is_tester",
+			"data_type": "boolean",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "last_login_date",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "last_name",
+			"data_type": "text",
+			"column_default": "''::text",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "last_name_phonetic",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "name",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "phone_number",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "phone_verified",
+			"data_type": "boolean",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "platform",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "user_group",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "user_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "users",
+			"policyname": "rls_users_delete_location",
+			"qual": "(true \u003c= ( SELECT true AS bool\n   FROM (granted_permissions p\n     JOIN user_access_paths usp ON ((usp.location_id = p.location_id)))\n  WHERE ((p.user_id = current_setting('app.user_id'::text)) AND (p.permission_id = ( SELECT p2.permission_id\n           FROM permission p2\n          WHERE ((p2.permission_name = 'user.user.write'::text) AND (p2.resource_path = current_setting('permission.resource_path'::text))))) AND (usp.user_id = users.user_id) AND (usp.deleted_at IS NULL))\n LIMIT 1))",
+			"with_check": null,
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "users",
+			"policyname": "rls_users_insert_location",
+			"qual": null,
+			"with_check": "(1 = 1)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "users",
+			"policyname": "rls_users_restrictive",
+			"qual": "permission_check(resource_path, 'users'::text)",
+			"with_check": "permission_check(resource_path, 'users'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "users",
+			"policyname": "rls_users_select_location",
+			"qual": "(true \u003c= ( SELECT true AS bool\n   FROM (granted_permissions p\n     JOIN user_access_paths usp ON ((usp.location_id = p.location_id)))\n  WHERE ((p.user_id = current_setting('app.user_id'::text)) AND (p.permission_id = ( SELECT p2.permission_id\n           FROM permission p2\n          WHERE ((p2.permission_name = 'user.user.read'::text) AND (p2.resource_path = current_setting('permission.resource_path'::text))))) AND (usp.user_id = users.user_id) AND (usp.deleted_at IS NULL))\n LIMIT 1))",
+			"with_check": null,
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "users",
+			"policyname": "rls_users_update_location",
+			"qual": "(true \u003c= ( SELECT true AS bool\n   FROM (granted_permissions p\n     JOIN user_access_paths usp ON ((usp.location_id = p.location_id)))\n  WHERE ((p.user_id = current_setting('app.user_id'::text)) AND (p.permission_id = ( SELECT p2.permission_id\n           FROM permission p2\n          WHERE ((p2.permission_name = 'user.user.write'::text) AND (p2.resource_path = current_setting('permission.resource_path'::text))))) AND (usp.user_id = users.user_id) AND (usp.deleted_at IS NULL))\n LIMIT 1))",
+			"with_check": "(true \u003c= ( SELECT true AS bool\n   FROM (granted_permissions p\n     JOIN user_access_paths usp ON ((usp.location_id = p.location_id)))\n  WHERE ((p.user_id = current_setting('app.user_id'::text)) AND (p.permission_id = ( SELECT p2.permission_id\n           FROM permission p2\n          WHERE ((p2.permission_name = 'user.user.write'::text) AND (p2.resource_path = current_setting('permission.resource_path'::text))))) AND (usp.user_id = users.user_id) AND (usp.deleted_at IS NULL))\n LIMIT 1))",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "users_pk",
+			"column_name": "user_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "users__email__key",
+			"column_name": "email",
+			"constraint_type": "UNIQUE"
+		},
+		{
+			"constraint_name": "users__facebook_id__key",
+			"column_name": "facebook_id",
+			"constraint_type": "UNIQUE"
+		},
+		{
+			"constraint_name": "users__email__key",
+			"column_name": "resource_path",
+			"constraint_type": "UNIQUE"
+		},
+		{
+			"constraint_name": "users__facebook_id__key",
+			"column_name": "resource_path",
+			"constraint_type": "UNIQUE"
+		}
+	],
+	"table_name": "users",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

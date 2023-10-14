@@ -1,0 +1,112 @@
+name: "Build MFE entrypoint"
+description: "A composite action for build MFE entrypoint"
+inputs:
+  github-token: 
+    description: "Github token"
+    required: true
+  env:
+    description: "Environment"
+    required: false
+    default: "staging"
+  release-tag:
+    description: "FE release tag"
+    required: true
+  organization:
+    description: "Organization"
+    required: true
+  fragments: 
+    description: "Fragments: 'user-auth, user-main, ...' or just please empty it will build all fragments"
+    required: true
+    default: ''
+  mfe-team-info:
+    description: "This object will contain teamName, manifestFileName, manifestPath"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Collect Workflow Telemetry
+      continue-on-error: true
+      uses: manabie-com/workflow-telemetry-action@v2
+
+    - name: Authenticate to Google Cloud 
+      uses: ./.github/actions/mfe.workload-identity
+      with:
+        env: "${{ inputs.env }}"
+    
+    - id: team-info
+      uses: actions/github-script@v6
+      with:
+        github-token: ${{ inputs.github-token }}
+        script: |
+          const teamInfo = ${{ inputs.mfe-team-info }}
+          const { teamName, manifestFileName, manifestPath } = teamInfo;
+          const bucketFilePath = `import-map-deployer-${{ inputs.env }}/${{ inputs.organization }}/${ teamName }/${{ inputs.release-tag }}`;
+          
+          console.log({ teamName, manifestFileName, manifestPath, bucketFilePath });
+
+          core.setOutput('teamName', teamName);
+          core.setOutput('manifestPath', manifestPath);
+          core.setOutput('bucketFilePath', bucketFilePath);
+          core.setOutput('manifestFileName', manifestFileName);
+
+    - id: release-info
+      shell: bash
+      run: |
+          set -eu
+
+          if gsutil -q stat gs://${{ steps.team-info.outputs.bucketFilePath }}/${{ steps.team-info.outputs.manifestFileName }} >/dev/null 2>&1; then
+            echo "Your tag has already been built."
+
+            echo "your-tag-has-already-been-built=true" >> $GITHUB_OUTPUT
+          else
+            echo "your-tag-has-already-been-built=false" >> $GITHUB_OUTPUT
+          fi
+
+    - name: Checkout Repo
+      uses: actions/checkout@v3
+      with:
+        persist-credentials: false
+        repository: ${{github.repository_owner}}/school-portal-admin
+        token: ${{ inputs.github-token }}
+        ref: ${{ inputs.release-tag }}
+        path: 'school-portal-admin'
+
+
+    - uses: actions/cache@v3
+      if: ${{ steps.release-info.outputs.your-tag-has-already-been-built == 'false' }}
+      continue-on-error: true
+      with:
+        path: |
+          ${{github.workspace}}/school-portal-admin/node_modules
+        key: |
+          yarn-${{ hashFiles('**/yarn.lock') }}
+
+    - name: yarn install --frozen-lockfile
+      working-directory: ./school-portal-admin
+      if: ${{ steps.release-info.outputs.your-tag-has-already-been-built == 'false' }}
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+      run: |
+        git config --global --add url."https://${{ inputs.github-token }}:x-oauth-basic@github.com/manabie-com".insteadOf "https://github.com/manabie-com"
+        yarn install --frozen-lockfile
+
+    - name: build-and-upload
+      if: ${{ steps.release-info.outputs.your-tag-has-already-been-built == 'false' }}
+      id: build
+      shell: bash
+      env:
+        NODE_OPTIONS: "--max-old-space-size=6144"
+        VITE_BUILD_VERSION: ${{ inputs.release-tag }}
+      run: |
+        set -eu
+        cd ./school-portal-admin
+
+        yarn env-cmd -f environments/.env.${{ inputs.organization }}.${{ inputs.env }} yarn mana app build --teams ${{steps.team-info.outputs.teamName}} --manifest-path ${{steps.team-info.outputs.manifestPath}}
+        yarn mana app upload --manifest-path ${{ steps.team-info.outputs.manifestPath }} --destination ${{ steps.team-info.outputs.bucketFilePath }}
+
+    - uses: actions/checkout@v3	
+      if: ${{ !cancelled() }}
+      with:	
+        token: ${{ inputs.github-token }}

@@ -1,0 +1,280 @@
+{
+	"schema": [
+		{
+			"column_name": "break_time",
+			"data_type": "integer",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "center_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "class_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "classdo_link",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "classdo_owner_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "classdo_room_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "control_settings",
+			"data_type": "jsonb",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "course_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "end_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "end_time",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "is_locked",
+			"data_type": "boolean",
+			"column_default": "false",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "learner_ids",
+			"data_type": "ARRAY",
+			"column_default": "'{}'::text[]",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "lesson_capacity",
+			"data_type": "integer",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "lesson_group_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "lesson_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "lesson_type",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "name",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "preparation_time",
+			"data_type": "integer",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "room_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "room_state",
+			"data_type": "jsonb",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "scheduler_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "scheduling_status",
+			"data_type": "text",
+			"column_default": "'LESSON_SCHEDULING_STATUS_PUBLISHED'::text",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "start_time",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "status",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "stream_learner_counter",
+			"data_type": "integer",
+			"column_default": "0",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "teacher_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "teaching_medium",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "teaching_method",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "teaching_model",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "zoom_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "zoom_link",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "zoom_occurrence_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "zoom_owner_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "lessons",
+			"policyname": "rls_lessons_location",
+			"qual": "(center_id IN ( SELECT p.location_id\n   FROM granted_permissions p\n  WHERE ((p.user_id = current_setting('app.user_id'::text)) AND (p.permission_id = ( SELECT p2.permission_id\n           FROM permission p2\n          WHERE ((p2.permission_name = 'lesson.lesson.read'::text) AND (p2.resource_path = current_setting('permission.resource_path'::text))))))))",
+			"with_check": "(center_id IN ( SELECT p.location_id\n   FROM granted_permissions p\n  WHERE ((p.user_id = current_setting('app.user_id'::text)) AND (p.permission_id = ( SELECT p2.permission_id\n           FROM permission p2\n          WHERE ((p2.permission_name = 'lesson.lesson.write'::text) AND (p2.resource_path = current_setting('permission.resource_path'::text))))))))",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "lessons",
+			"policyname": "rls_lessons_restrictive",
+			"qual": "permission_check(resource_path, 'lessons'::text)",
+			"with_check": "permission_check(resource_path, 'lessons'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "lessons_pk",
+			"column_name": "lesson_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "lessons",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

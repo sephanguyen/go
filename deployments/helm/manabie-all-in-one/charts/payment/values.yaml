@@ -1,0 +1,121 @@
+
+grpcPort: 6250
+
+resources:
+  requests:
+    cpu: "5m"
+    memory: "64Mi"
+
+metrics:
+  enabled: true
+  podAnnotations:
+    prometheus.io/scheme: "http"
+    prometheus.io/port: "8888"
+    prometheus.io/scrape: "true"
+
+tolerations:
+
+affinity: {}
+affinityOverride: {}
+
+cronjobs:
+  generate-billing-items:
+    cmd: payment_generate_billing_items
+    schedule: "0 17 * * *"
+  update-billing-status:
+    cmd: payment_update_billing_status
+    schedule: "0 17 * * *"
+  update-student-courses:
+    cmd: payment_update_student_courses
+    schedule: "0 17 * * *"
+  update-student-package:
+    cmd: payment_update_student_package
+    schedule: "0 17 * * *"
+  update-student-product-status-to-cancelled:
+    cmd: payment_update_student_product_status
+    schedule: "0 17 * * *"
+
+apiHttp:
+  - match:
+    - uri:
+        prefix: /payment.v1.InternalService
+    route:
+      - destination:
+          host: payment
+          port:
+            number: 6250
+    fault:
+      abort:
+        percentage:
+          value: 100
+        httpStatus: 403
+  - match:
+    - uri:
+        prefix: /payment.v1
+    route:
+      - destination:
+          host: payment
+          port:
+            number: 6250
+
+webHttp:
+  - match:
+    - uri:
+        prefix: /payment.v1
+    route:
+    - destination:
+        host: payment
+        port:
+          number: 6250
+    corsPolicy:
+      allowOrigins:
+        - regex: ".*"
+      allowMethods:
+        - POST
+        - GET
+        - OPTIONS
+        - PUT
+        - DELETE
+      allowHeaders:
+        - grpc-timeout
+        - content-type
+        - keep-alive
+        - user-agent
+        - cache-control
+        - content-type
+        - content-transfer-encoding
+        - token
+        - x-accept-content-transfer-encoding
+        - x-accept-response-streaming
+        - x-user-agent
+        - x-grpc-web
+        - pkg
+        - version
+      maxAge: 100s
+      exposeHeaders:
+        - grpc-status
+        - grpc-message
+        - grpc-status-details-bin
+
+jobs:
+  sync-elasticsearch:
+    cmd: payment_sync_elasticsearch
+
+  generate-billing-items:
+    cmd: payment_generate_billing_items
+
+  update-billing-status:
+    cmd: payment_update_billing_status
+
+  # Disabled, convert to gjob before enabling again
+  # update-student-product-status:
+  #   cmd: payment_update_student_product_status
+
+  update-student-product-status-to-cancelled:
+    cmd: payment_update_student_product_status
+
+  update-student-courses:
+    cmd: payment_update_student_courses
+
+  update-student-package:
+    cmd: payment_update_student_package

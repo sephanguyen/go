@@ -1,0 +1,9 @@
+dependencies:
+- name: redis
+  repository: https://charts.bitnami.com/bitnami
+  version: 17.0.10
+- name: util
+  repository: file://../../libs/util
+  version: 0.1.0
+digest: sha256:2fea83b478f60fa251ad41be4ba2d9a3d3c4eb25dde23d22ebc6ceca39526a53
+generated: "2023-05-01T22:38:35.910818612+07:00"

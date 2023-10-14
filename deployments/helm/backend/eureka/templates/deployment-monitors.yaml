@@ -1,0 +1,118 @@
+{{- if .Values.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "util.fullname" . }}-monitors
+  labels:
+    {{- include "eureka.monitorsLabels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "eureka.selectorMonitorsLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+        sidecar.istio.io/inject: "false"
+{{- if .Values.podAnnotations }}
+{{ toYaml .Values.podAnnotations | indent 8 }}
+{{- end }}
+      labels:
+        {{- include "eureka.selectorMonitorsLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "util.serviceAccountName" . }}
+      volumes:
+      - name: secrets-volume
+        secret:
+          secretName: {{ include "util.fullname" . }}
+          items:
+          - key: eureka.secrets.encrypted.yaml
+            path: eureka.secrets.encrypted.yaml
+          - key: hasura.secrets.encrypted.yaml
+            path: hasura.secrets.encrypted.yaml
+      - name: config-volume
+        configMap:
+          name: {{ include "util.fullname" . }}
+          items:
+          - key: eureka.common.config.yaml
+            path: eureka.common.config.yaml
+          - key: eureka.config.yaml
+            path: eureka.config.yaml
+{{- if eq "local" .Values.global.environment }}
+      - name: service-credential
+        secret:
+          secretName: {{ include "util.fullname" . }}
+          items:
+          - key: service_credential.json
+            path: service_credential.json
+{{- end }}
+      containers:
+        - name: {{ .Chart.Name }}-monitors
+          image: {{ include "util.image" . }}
+          imagePullPolicy: IfNotPresent
+        {{- if .Values.global.liveReloadEnabled }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              #!/bin/bash
+              set -eu
+              cat <<EOF > modd.conf
+              /server {
+                daemon +sigterm: /server gjob \\
+                  eureka_monitors \\
+                  --commonConfigPath=/configs/eureka.common.config.yaml \\
+                  --configPath=/configs/eureka.config.yaml \\
+                  --secretsPath=/configs/eureka.secrets.encrypted.yaml
+              }
+              EOF
+              exec modd
+        {{- else }}
+          args:
+          - "gjob"
+          - "eureka_monitors"
+          - "--commonConfigPath=/configs/eureka.common.config.yaml"
+          - "--configPath=/configs/eureka.config.yaml"
+          - "--secretsPath=/configs/eureka.secrets.encrypted.yaml"
+        {{- end }}
+          ports:
+            - name: grpc
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          volumeMounts:
+          - name: config-volume
+            mountPath: /configs/eureka.common.config.yaml
+            subPath: eureka.common.config.yaml
+            readOnly: true
+          - name: config-volume
+            mountPath: /configs/eureka.config.yaml
+            subPath: eureka.config.yaml
+            readOnly: true
+          - name: secrets-volume
+            mountPath: /configs/eureka.secrets.encrypted.yaml
+            subPath: eureka.secrets.encrypted.yaml
+            readOnly: true
+{{- if eq "local" .Values.global.environment }}
+          - name: service-credential
+            mountPath: /configs/service_credential.json
+            subPath: service_credential.json
+            readOnly: true
+          env:
+          - name: GOOGLE_APPLICATION_CREDENTIALS
+            value: "/configs/service_credential.json"
+{{- end }}
+          resources:
+            requests:
+              cpu: 1m
+              memory: 50Mi
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.eurekaMonitors }}
+      {{- $context := (mustMerge (deepCopy .) $) }}
+      affinity: {{- include "util.affinityNew" $context | nindent 8 }}
+      tolerations: {{- include "util.tolerations" $context | nindent 8 }}
+      {{- end }}
+{{- end -}}

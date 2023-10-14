@@ -1,0 +1,117 @@
+service:
+  type: ClusterIP
+  port: 7450
+
+grpcPort: 7450
+httpPort: 7480
+
+resources:
+  requests:
+    memory: "120Mi"
+
+metrics:
+  enabled: true
+  podAnnotations:
+    prometheus.io/scheme: "http"
+    prometheus.io/port: "8888"
+    prometheus.io/scrape: "true"
+
+clientVersion: "v0.30.0"
+
+
+nodeSelector: {}
+
+tolerations:
+
+affinity: {}
+affinityOverride: {}
+
+apiHttp:
+  - match:
+    - uri:
+        exact: /spike.v1.EmailModifierService/SendEmail
+    route:
+      - destination:
+          host: spike
+          port:
+            number: 7450
+    fault:
+      abort:
+        percentage:
+          value: 100
+        httpStatus: 403
+  - match:
+    - uri:
+        prefix: /spike/api
+    route:
+      - destination:
+          host: spike
+          port:
+            number: 7480
+  - match:
+    - uri:
+          prefix: /spike
+    route:
+      - destination:
+          host: spike
+          port:
+            number: 7450
+
+webHttp:
+  - match:
+    - uri:
+        prefix: /spike.v1.EmailModifierService/SendEmail
+    route:
+      - destination:
+          host: spike
+          port:
+            number: 7450
+    fault:
+      abort:
+        percentage:
+          value: 100
+        httpStatus: 403
+  - match:
+      - uri:
+          prefix: /spike
+    route:
+      - destination:
+          host: spike
+          port:
+            number: 7450
+    corsPolicy:
+      allowOrigins:
+        - regex: ".*"
+      allowMethods:
+        - POST
+        - GET
+        - OPTIONS
+        - PUT
+        - DELETE
+      allowHeaders:
+        - grpc-timeout
+        - content-type
+        - keep-alive
+        - user-agent
+        - cache-control
+        - content-type
+        - content-transfer-encoding
+        - token
+        - x-accept-content-transfer-encoding
+        - x-accept-response-streaming
+        - x-user-agent
+        - x-grpc-web
+        - pkg
+        - version
+      maxAge: 100s
+      exposeHeaders:
+        - grpc-status
+        - grpc-message
+
+podAnnotations:
+  sidecar.istio.io/proxyCPU: "10m"
+  sidecar.istio.io/proxyMemory: "50Mi"
+
+jobs:
+  send-email:
+    cmd: send_email

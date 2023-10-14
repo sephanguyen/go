@@ -1,0 +1,214 @@
+suite: payment deployment yaml file
+templates:
+  - charts/payment/templates/app.yaml
+values:
+  - ../charts/payment/values.yaml
+  - ../values.yaml
+  - ../local-manabie-values.yaml
+  - ../../platforms/gateway/local-manabie-values.yaml
+tests:
+  - it: First template should be configmaps
+    set:
+      global.payment.enabled: true
+      global.payment.sops.enabled: true
+      global.environment: local
+      global.vendor: manabie
+      global.image.repository: local
+      payment.image.tag: v1
+      payment.service.port: 1234
+    documentIndex: 0
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - isNotNull:
+          path: data.[payment.common.config.yaml]
+      - isNotNull:
+          path: data.[payment.config.yaml]
+
+  - it: Second template should be secrect
+    set:
+      global.payment.enabled: true
+      global.payment.sops.enabled: true
+      global.environment: local
+      global.vendor: manabie
+      global.image.repository: local
+      payment.image.tag: v1
+      payment.service.port: 1234
+    documentIndex: 1
+    asserts:
+      - isKind:
+          of: Secret
+      - isNotNull:
+          path: data.[service_credential.json]
+      - isNotNull:
+          path: data.[payment.secrets.encrypted.yaml]
+      - isNull:
+          path: data.[hasura.secrets.encrypted.yaml]
+
+  - it: Third template should be PodDisruptionBudget
+    set:
+      global.payment.enabled: true
+      global.payment.sops.enabled: true
+      global.environment: local
+      global.vendor: manabie
+      global.image.repository: local
+      payment.image.tag: v1
+      payment.service.port: 1234
+    documentIndex: 2
+    asserts:
+      - isKind:
+          of: PodDisruptionBudget
+      - equal:
+          path: spec.maxUnavailable
+          value: 1
+
+  - it: fourth template should be ServiceAccount
+    set:
+      global.payment.enabled: true
+      global.payment.sops.enabled: true
+      global.environment: local
+      global.vendor: manabie
+      global.image.repository: local
+      payment.image.tag: v1
+      payment.service.port: 1234
+    documentIndex: 3
+    asserts:
+      - isKind:
+          of: ServiceAccount
+      - equal:
+          path: metadata.name
+          value: local-payment
+  - it: fifth template should be Deployment
+    set:
+      global.payment.enabled: true
+      global.payment.sops.enabled: true
+      global.environment: local
+      global.vendor: manabie
+      global.image.repository: local
+      payment.image.tag: v1
+    documentIndex: 4
+    asserts:
+      - isKind:
+          of: Deployment
+
+      # init containers
+      - equal:
+          path: spec.template.spec.initContainers[0].name
+          value: wait-for-shamir
+
+      # metadata
+      - equal:
+          path: spec.template.metadata.labels.[app.kubernetes.io/name]
+          value: "payment"
+      - equal:
+          path: spec.template.metadata.annotations.[sidecar.istio.io/proxyCPU]
+          value: "5m"
+      - isNotEmpty:
+          path: spec.template.metadata.annotations.[checksum/payment.config.yaml]
+      - isNotEmpty:
+          path: spec.template.metadata.annotations.[checksum/payment.secrets.encrypted.yaml]
+      - isEmpty:
+          path: spec.template.metadata.annotations.[checksum/payment_migrate.secrets.encrypted.yaml]
+
+      # containers
+      - equal:
+          path: spec.template.spec.containers[0].name
+          value: payment
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: local:v1
+      - equal:
+          path: spec.template.spec.containers[0].command
+          value:
+            - /bin/sh
+            - -c
+            - |
+              #!/bin/bash
+              set -eu
+              cat <<EOF > modd.conf
+              /server {
+                daemon +sigterm: /server \\
+                  gserver \\
+                  payment \\
+                  --commonConfigPath=/configs/payment.common.config.yaml \\
+                  --configPath=/configs/payment.config.yaml \\
+                  --secretsPath=/configs/payment.secrets.encrypted.yaml
+              }
+              EOF
+              exec modd
+      - matchRegex:
+          path: spec.template.spec.containers[0].readinessProbe.exec.command[2]
+          pattern: .*localhost:6250.*
+      - isNotNull:
+          path: spec.template.spec.containers[0].readinessProbe
+      - contains:
+          path: spec.template.spec.containers[0].ports
+          content:
+            name: grpc
+            containerPort: 6250
+            protocol: TCP
+
+      # volumes
+      - equal:
+          path: spec.template.spec.volumes[0].secret.secretName
+          value: payment
+      - equal:
+          path: spec.template.spec.volumes[0].secret.items[0].key
+          value: payment.secrets.encrypted.yaml
+      - equal:
+          path: spec.template.spec.volumes[1].secret.items[0].key
+          value: service_credential.json
+      - equal:
+          path: spec.template.spec.volumes[2].configMap.name
+          value: payment
+      - equal:
+          path: spec.template.spec.volumes[2].configMap.items[0].key
+          value: payment.common.config.yaml
+
+      #affinity
+      - contains:
+          path: spec.template.spec.affinity.nodeAffinity.preferredDuringSchedulingIgnoredDuringExecution
+          content:
+            weight: 10
+            preference:
+              matchExpressions:
+              - key: cloud.google.com/gke-spot
+                operator: In
+                values:
+                - "true"
+      - contains:
+          path: spec.template.spec.affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution
+          content:
+            weight: 100
+            podAffinityTerm:
+              labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: payment
+              topologyKey: kubernetes.io/hostname
+      - contains:
+          path: spec.template.spec.tolerations
+          content:
+            effect: NoSchedule
+            key: "cloud.google.com/gke-spot"
+            operator: Exists
+
+  - it: sixth template should be Service
+    set:
+      global.payment.enabled: true
+      global.payment.sops.enabled: true
+      global.environment: local
+      global.vendor: manabie
+      global.image.repository: local
+      payment.image.tag: v1
+      payment.service.port: 1234
+    documentIndex: 5
+    asserts:
+      - isKind:
+          of: Service
+      - contains:
+          path: spec.ports
+          content:
+            name: grpc-web-port
+            protocol: TCP
+            targetPort: grpc
+            port: 6250

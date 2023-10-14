@@ -1,0 +1,14 @@
+table:
+  schema: public
+  name: e2e_features_status
+select_permissions:
+  - role: user
+    permission:
+      columns:
+        - feature_ids
+        - instance_ids
+        - status
+        - count
+        - name
+      filter: {}
+      allow_aggregations: true

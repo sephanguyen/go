@@ -1,0 +1,57 @@
+name: Get Deployment Commit
+
+# Controls when the workflow will run
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        type: choice
+        description: "Choose a branch to run the operation"
+        required: true
+        options:
+          - "LT-27042"
+          - develop
+      commit_hash:
+        type: string
+        description: "Enter a commit hash of the deployment to test the tool"
+        required: true
+      created_at:
+        type: string
+        description: "Enter a time of the deployment to test the tool"
+        required: true
+
+
+jobs:
+  get_commit_between_two_deployments:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+        timeout-minutes: 5
+        with:
+          ref: ${{ github.event.inputs.branch }}
+          fetch-depth: 0
+
+      - id: version
+        uses: ./.github/actions/tool-version
+
+      # Setup go
+      - uses: actions/setup-go@v4
+        with:
+          go-version: "${{ steps.version.outputs.go }}"
+
+      # Runs main.go to collect commits between 2 deployments and update the commit data of all features/folders
+      - name: Collect Commits Between 2 Deployments
+        env:
+          GITHUB_DEPLOYMENT_SHA: ${{ github.event.inputs.commit_hash }}
+          GITHUB_DEPLOYMENT_CREATED: ${{ github.event.inputs.created_at }}
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: |
+          echo "$GITHUB_CONTEXT"
+          echo $(which git)
+          echo ${GITHUB_WORKSPACE}
+          cd github_crawler
+          go run main.go -f ${GITHUB_WORKSPACE} -g $(which git) -l True -c True

@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package manabie.bob;
+
+import "enum.proto";
+import "location.proto";
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option (gogoproto.goproto_registration) = true;
+option go_package = "github.com/manabie-com/backend/pkg/genproto/bob;pb";
+
+message School {
+  int32 id = 1;
+  string name = 2;
+  Country country = 3;
+  City city = 4;
+  District district = 5;
+  Point point = 6;
+}

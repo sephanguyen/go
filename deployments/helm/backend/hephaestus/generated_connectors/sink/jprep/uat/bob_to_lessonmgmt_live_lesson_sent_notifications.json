@@ -1,0 +1,23 @@
+{
+  "name": "uat_jprep_bob_to_lessonmgmt_live_lesson_sent_notifications_sink_connector",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+    "tasks.max": "1",
+    "topics": "uat.jprep.bob.public.live_lesson_sent_notifications",
+    "connection.url": "${file:/config/kafka-connect-config.properties:lessonmgmt_url}",
+    "auto.create": "false",
+    "insert.mode": "upsert",
+    "table.name.format": "live_lesson_sent_notifications",
+    "fields.whitelist": "created_at,deleted_at,lesson_id,resource_path,sent_at,sent_at_interval,sent_notification_id,updated_at",
+    "transforms": "unwrap,route",
+    "transforms.route.type": "org.apache.kafka.connect.transforms.RegexRouter",
+    "transforms.route.regex": "([^.]+).([^.]+).([^.]+).([^.]+).([^.]+)",
+    "transforms.route.replacement": "$5",
+    "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+    "delete.enabled": "false",
+    "pk.mode": "record_value",
+    "pk.fields": "sent_notification_id",
+    "transforms.unwrap.drop.tombstones": "true",
+    "transforms.unwrap.delete.handling.mode": "drop"
+  }
+}

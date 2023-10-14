@@ -1,0 +1,123 @@
+{
+	"schema": [
+		{
+			"column_name": "conversation_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "conversation_type",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "guest_ids",
+			"data_type": "ARRAY",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "last_message_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "name",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "owner",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "status",
+			"data_type": "text",
+			"column_default": "'CONVERSATION_STATUS_NONE'::text",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "conversations",
+			"policyname": "rls_conversations",
+			"qual": "permission_check(resource_path, 'conversations'::text)",
+			"with_check": "permission_check(resource_path, 'conversations'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "conversations",
+			"policyname": "rls_conversations_restrictive",
+			"qual": "permission_check(resource_path, 'conversations'::text)",
+			"with_check": "permission_check(resource_path, 'conversations'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "conversations_last_message_id_fkey",
+			"column_name": "last_message_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "conversations_pk",
+			"column_name": "conversation_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "conversations",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

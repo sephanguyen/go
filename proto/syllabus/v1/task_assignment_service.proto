@@ -1,0 +1,117 @@
+syntax = "proto3";
+
+package syllabus.v1;
+
+import "syllabus/v1/learning_material.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/syllabus/v1;sspb";
+
+
+//TaskAssignmentBase is task assignment metadata
+message TaskAssignmentBase {
+    //Learning Material metadata
+    LearningMaterialBase base = 1;
+    //list of attachments urls
+    repeated string attachments = 2;
+    // instruction or descriptions
+    string instruction = 3;
+    // require student submit duration time
+    bool require_duration = 4;
+    // require student submit completed date
+    bool require_complete_date = 5;
+    // require student submit emotional understanding level
+    bool require_understanding_level = 6;
+    // require student submit grade number
+    bool require_correctness = 7;
+    // require student submit attachments
+    bool require_attachment = 8;
+    // require student submit attachments text notes
+    bool require_assignment_note = 9;
+}
+
+message InsertTaskAssignmentRequest{
+    // We only need send some fields bellow
+    // 1. LearningMaterialBase 
+        // 1. No learning_material 
+        // 2. topic_id
+        // 3. name
+        // 4. No send type
+    // 2. attachments
+    // 3. instruction
+    // 4. require_duration
+    // 5. No require_complete_date, todo future
+    // 6. require_understanding_level
+    // 7. require_correctness
+    // 8. require_attachment
+    // 9. require_assignment_note
+    TaskAssignmentBase task_assignment = 1;
+}
+
+message InsertTaskAssignmentResponse {
+    // return generated Learning Material ULID
+    string learning_material_id = 1;
+}
+
+message UpdateTaskAssignmentRequest{
+    // We only need send some fields bellow
+    // 1. LearningMaterialBase 
+        // 1. No learning_material 
+        // 2. No topic_id
+        // 3. name
+        // 4. No send type
+    // 2. attachments
+    // 3. instruction
+    // 4. require_duration
+    // 5. No require_complete_date, todo future
+    // 6. require_understanding_level
+    // 7. require_correctness
+    // 8. require_attachment
+    // 9. require_assignment_note
+    TaskAssignmentBase task_assignment = 1;
+}
+
+// UpdateTaskAssignmentResponse is empty message 
+message UpdateTaskAssignmentResponse{
+}
+
+
+message ListTaskAssignmentRequest {
+    repeated string learning_material_ids = 1;
+}
+
+message ListTaskAssignmentResponse {
+    repeated TaskAssignmentBase task_assignments = 1;
+}
+
+message UpsertAdhocTaskAssignmentRequest {
+    string student_id = 1;
+    string course_id = 2;
+    string chapter_name = 3;
+    string topic_name = 4;
+    string book_name = 5;
+    string study_plan_name = 6;
+    google.protobuf.Timestamp start_date = 7;
+    google.protobuf.Timestamp end_date = 8;
+    TaskAssignmentBase task_assignment = 9;
+}
+
+message UpsertAdhocTaskAssignmentResponse{
+    string learning_material_id = 1;
+}
+
+
+// TaskAssignment is a gRPC service used for Task Assignment type
+service TaskAssignment {
+    // InsertTaskAssignment insert a task assignment
+    rpc InsertTaskAssignment(InsertTaskAssignmentRequest)
+        returns (InsertTaskAssignmentResponse);
+    // InsertTaskAssignment update a task assignment
+    rpc UpdateTaskAssignment(UpdateTaskAssignmentRequest)
+        returns (UpdateTaskAssignmentResponse);
+    rpc ListTaskAssignment (ListTaskAssignmentRequest) 
+        returns (ListTaskAssignmentResponse);
+    // UpsertAdhocTaskAssignment create or update an adhoc task assignment 
+    rpc UpsertAdhocTaskAssignment(UpsertAdhocTaskAssignmentRequest)
+        returns (UpsertAdhocTaskAssignmentResponse);
+}

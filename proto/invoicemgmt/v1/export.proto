@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package invoicemgmt.v1;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/invoicemgmt/v1;invoice_pb";
+
+
+message ExportInvoiceScheduleRequest {
+
+}
+  
+message ExportInvoiceScheduleResponse {
+    bytes data = 1;
+}
+
+message ExportBankRequest {
+}
+
+message ExportBankResponse {
+    bytes data = 1;
+}
+
+message ExportBankBranchRequest {
+}
+  
+message ExportBankBranchResponse {
+    bytes data = 1;
+}
+
+message ExportBankMappingRequest {
+
+}
+
+message ExportBankMappingResponse {
+    bytes data = 1;
+}
+
+
+service ExportMasterDataService {
+    rpc ExportInvoiceSchedule(ExportInvoiceScheduleRequest)
+        returns (ExportInvoiceScheduleResponse);
+    rpc ExportBank(ExportBankRequest)
+        returns (ExportBankResponse);
+    rpc ExportBankBranch(ExportBankBranchRequest)
+        returns (ExportBankBranchResponse);
+    rpc ExportBankMapping(ExportBankMappingRequest)
+        returns (ExportBankMappingResponse);
+}

@@ -1,0 +1,9 @@
+common:
+  google_cloud_project: student-coach-e1e95
+issuers:
+  - issuer: manabie
+    audience: prod-aic
+    jwks_endpoint: http://shamir:5680/.well-known/jwks.json
+storage:
+  bucket: jp-partners-backend
+  file_upload_folder_path: aic/invoicemgmt-upload

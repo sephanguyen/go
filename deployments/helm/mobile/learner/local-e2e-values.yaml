@@ -1,0 +1,6 @@
+tolerations: 
+affinity: 
+
+vpa:
+  enabled: false
+  updateMode: "Auto"

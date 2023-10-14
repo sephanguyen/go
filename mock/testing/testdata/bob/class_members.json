@@ -1,0 +1,139 @@
+{
+	"schema": [
+		{
+			"column_name": "class_id",
+			"data_type": "integer",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "class_member_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "is_owner",
+			"data_type": "boolean",
+			"column_default": "false",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "status",
+			"data_type": "text",
+			"column_default": "'CLASS_MEMBER_STATUS_NONE'::text",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "student_subscription_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "user_group",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "user_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "class_members",
+			"policyname": "rls_class_members",
+			"qual": "permission_check(resource_path, 'class_members'::text)",
+			"with_check": "permission_check(resource_path, 'class_members'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "class_members",
+			"policyname": "rls_class_members_restrictive",
+			"qual": "permission_check(resource_path, 'class_members'::text)",
+			"with_check": "permission_check(resource_path, 'class_members'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "class_members__class_id_fk",
+			"column_name": "class_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "class_members__student_subscription_id__fk",
+			"column_name": "student_subscription_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "class_members__user_id_fk",
+			"column_name": "user_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "class_members_pk",
+			"column_name": "class_member_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "class_members",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

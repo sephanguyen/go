@@ -1,0 +1,44 @@
+---
+- name: Delete content & directory
+  ansible.builtin.file:
+    state: absent
+    path: /etc/redhat-release
+
+- name: Disable SWAP since kubernetes can't work with swap enabled (1/2)
+  shell: |
+    swapoff -a
+
+- name: Disable SWAP in fstab since kubernetes can't work with swap enabled (2/2)
+  replace:
+    path: /etc/fstab
+    regexp: '^([^#].*?\sswap\s+sw\s+.*)$'
+    replace: '# \1'
+
+- name: Add registry configuration file
+  copy:
+    src: "{{ registry_config_file_path }}"
+    dest: "/tmp/registries.yaml"
+    mode: '0640'
+    owner: root
+    group: root
+
+- name: Add IP address of server hosts to all hosts
+  lineinfile:
+    dest: /etc/hosts
+    regexp: '.*{{ item }}$'
+    line: "{{ hostvars[item].ansible_host }} {{item}} {{ cluster_name }}"
+    state: present
+  when: hostvars[item].ansible_host is defined
+  with_items: "{{ groups.rke2_servers }}"
+
+- name: set sysctl settings
+  sysctl: sysctl_set=yes reload=yes state=present
+    name="{{ item.key }}"
+    value="{{ item.value }}"
+  with_dict: "{{ sysctl_settings }}"
+
+- name: Install the latest version of additional packages
+  ansible.builtin.package:
+    name:
+      - open-iscsi
+    state: present

@@ -1,0 +1,123 @@
+name: 'unleash-auth'
+description: |
+  Retrieve a token to access Unleash on production.
+  Requires a checkout action of backend repo to run first.
+
+  Example usage:
+
+  jobs:
+    run:
+      name: 'My job'
+      runs-on: ["self-hosted", "100m-400mi", "spot", "persistent"]
+      permissions:  # extra permissions are required
+        contents: 'read'
+        id-token: 'write'
+      steps:
+        - name: Checkout source
+          uses: actions/checkout@v3
+
+        - name: Get unleash admin token
+          uses: ./.github/actions/unleash-auth
+          id: unleashauth
+          with:
+            organization: manabie
+            environment: stag
+
+        # Use the token value from steps.unleashauth.outputs.token
+        - run: curl ...
+
+inputs:
+  organization:
+    description: 'Organization (partner)'
+    required: true
+    default: 'manabie'
+  environment:
+    description: 'Environment (stag/staging, uat, prod/production)'
+    required: true
+    default: 'stag'
+  workload_identity_provider:
+    description: |
+      The full identifier of the Workload Identity Provider.
+      Defaults to the unleash-decryptor-bot provider created by Terraform in "learner" project.
+    default: 'projects/418860883682/locations/global/workloadIdentityPools/gh-action-pool/providers/unleash-decryptor-bot'
+  service_account:
+    description: |
+      Email of the service account which will be used to decrypt secret.
+      Defaults to "unleash-decryptor-bot@student-coach-e1e95.iam.gserviceaccount.com".
+    default: 'unleash-decryptor-bot@student-coach-e1e95.iam.gserviceaccount.com'
+  get_plain_token:
+    default: "true"
+    description: |
+      If set to true, the action will output the plain token instead of the object token.
+      Defaults to true.
+outputs:
+  token:
+    description: 'Admin token of Unleash'
+    value: ${{ steps.get.outputs.token }}
+  obj-token:
+    description: 'Object of admin token of Unleash'
+    value: ${{ steps.obj-token.outputs.obj-token }}
+runs:
+  using: 'composite'
+  steps:
+    - uses: google-github-actions/auth@v1
+      with:
+        workload_identity_provider: ${{ inputs.workload_identity_provider }}
+        service_account: ${{ inputs.service_account }}
+
+    - name: Install sops if necessary
+      shell: bash
+      run: |
+        set -eu
+        if ! command -v sops; then
+          destdir=${RUNNER_TOOL_CACHE}/sops
+          curl -fL https://github.com/mozilla/sops/releases/download/v3.7.3/sops-v3.7.3.linux.amd64 -o ${destdir}/sops --create-dirs
+          chmod +x ${destdir}/sops
+          echo "${destdir}" >> $GITHUB_PATH
+        fi
+
+    - name: Sops version
+      run: sops --version
+      shell: bash
+
+    - name: Get object token for ${{ inputs.environment }}
+      id: obj-token
+      shell: bash
+      run: |
+        set -eu
+        token=$(sops -d deployments/helm/platforms/unleash/secrets/unleash_admin_tokens.secrets.encrypted.yaml \
+          | yq '.${{ inputs.environment }}'
+        )
+
+        declare -A result
+
+        while IFS=: read -r key value; do
+          key=${key% }
+          value=${value# }
+
+          echo "::add-mask::${value}"
+          
+          result[$key]=$value
+        done <<< "$token"
+
+        result_json="{"
+        for key in "${!result[@]}"; do
+          result_json+="\"$key\":\"${result[$key]}\","
+        done
+        result_json="${result_json%,}"
+        result_json+="}"
+
+        echo "obj-token=${result_json}" >> $GITHUB_OUTPUT
+
+    # Keep this step for backward compatibility
+    - name: Get token for ${{ inputs.environment }}.${{ inputs.organization }}
+      id: get
+      shell: bash
+      if: ${{ inputs.get_plain_token == 'true' }}
+      run: |
+        set -eu
+        token=$(sops -d deployments/helm/platforms/unleash/secrets/unleash_admin_tokens.secrets.encrypted.yaml \
+          | yq '.${{ inputs.environment }}.${{ inputs.organization }}'
+        )
+        echo "::add-mask::${token}"
+        echo "token=${token}" >> $GITHUB_OUTPUT

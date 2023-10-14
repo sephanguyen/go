@@ -1,0 +1,62 @@
+unleash:
+  featureFlags:
+    platform:
+      - name: Platform_Backoffice_UpdateOrgViaTenantId
+        description: "A feature flag to update org via tenantId"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Platform_Unleash_EnableDemoUnleashWithEnvAndOrg
+        description: "A feature flag to demo Unleash Proxy SDK with both Environment and Organization Strategies"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+          - name: strategy_organization
+            parameters:
+              organizations: "-2147483648"
+            constraints: []
+      - name: Platform_Unleash_EnableDemoUnleashWithEnv
+        description: "A feature flag to demo Unleash Proxy SDK with Environment Strategies"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: Platform_Unleash_EnableDemoUnleashWithOrg
+        description: "A feature flag to demo Unleash Proxy SDK with Org Strategies"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_organization
+            parameters:
+              organizations: "-2147483648"
+            constraints: []
+      - name: PlatformPurple_MicroFrontend_MultipleSidebarHook
+        description: "A feature flag to enable multiple sidebar hook"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []

@@ -1,0 +1,48 @@
+[[- if .Sink.DeployEnv -]] 
+[[ range $index, $elem := .Sink.DeployEnv ]] [[- if eq 0 $index -]] {{- if or [[ end -]] (eq "[[ $elem ]]" .Values.global.environment) [[ end -]] }} 
+[[- end ]]
+[[- if .Sink.DeployOrg ]] 
+[[ range $index, $elem := .Sink.DeployOrg ]] [[- if eq 0 $index -]] {{- if or [[ end -]] (eq "[[ $elem ]]" .Values.global.vendor) [[ end -]] }} 
+[[- end ]]
+{
+  "name": "{{ .Values.global.environment }}_{{ .Values.global.vendor }}_[[ .Sink.Name ]]_sink_connector",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+    "tasks.max": "1",
+    "topics": "{{ .Values.global.environment }}.{{ .Values.global.vendor }}.[[ .Source.Database ]].[[ .Source.Schema ]].[[ .Source.Table ]]",
+    "connection.url": "${file:/config/kafka-connect-config.properties:[[ .Sink.Database ]]_url}",
+    "auto.create": "false",
+    "insert.mode": "upsert",
+    "table.name.format": "[[ .Sink.Table ]]",
+    "fields.whitelist": "
+      [[- range $index, $elem := .Sink.Columns ]] 
+        [[- if $index ]],[[ end ]]
+        [[- $elem ]]
+      [[- end -]]
+    ",
+    "transforms": "unwrap,route",
+    "transforms.route.type": "org.apache.kafka.connect.transforms.RegexRouter",
+    "transforms.route.regex": "([^.]+).([^.]+).([^.]+).([^.]+).([^.]+)",
+    "transforms.route.replacement": "$5",
+    "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+    [[- if .Sink.CaptureDeleteEnabled ]]
+    "delete.enabled": "true",
+    "pk.mode": "record_key",
+    "transforms.unwrap.drop.tombstones": "false",
+    "transforms.unwrap.delete.handling.mode": "none"
+    [[- else ]]
+    "delete.enabled": "false",
+    "pk.mode": "record_value",
+    "pk.fields": "
+      [[- range $index, $elem := .Sink.PrimaryKeys ]] 
+        [[- if $index ]],[[ end ]]
+        [[- $elem ]]
+      [[- end -]]
+    ",
+    "transforms.unwrap.drop.tombstones": "true",
+    "transforms.unwrap.delete.handling.mode": "drop"
+    [[- end ]]
+  }
+}
+[[ if .Sink.DeployEnv -]] {{- end }} [[- end ]]
+[[ if .Sink.DeployOrg -]] {{- end }} [[- end ]]

@@ -1,0 +1,1 @@
+ALTER TABLE public.student_qr ADD CONSTRAINT student_qr_student_id_key UNIQUE(student_id);

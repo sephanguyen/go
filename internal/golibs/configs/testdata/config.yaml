@@ -1,0 +1,8 @@
+b: 2
+c: 2
+child:
+  b: 2
+  c: 2
+  child:
+    b: 2
+    c: 2

@@ -1,0 +1,138 @@
+syntax = "proto3";
+
+package manabie.bob;
+
+import "enum.proto";
+import "google/protobuf/timestamp.proto";
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option (gogoproto.goproto_registration) = true;
+option go_package = "github.com/manabie-com/backend/pkg/genproto/bob;pb";
+
+message UpdateUserDeviceTokenRequest {
+  string user_id = 1;
+  string device_token = 2;
+  bool allow_notification = 3;
+}
+
+message UpdateUserDeviceTokenResponse { bool successful = 1; }
+
+message UserProfile {
+  string id = 1;
+  string name = 2;
+  Country country = 3;
+  string phone_number = 4;
+  string email = 5;
+  string avatar = 6;
+  string device_token = 7;
+  string user_group = 8;
+  google.protobuf.Timestamp created_at = 9;
+  google.protobuf.Timestamp updated_at = 10;
+}
+
+message TutorProfile {
+  string id = 1;
+  string name = 2;
+  Country country = 3;
+  string phone_number = 4;
+  string email = 5;
+  string avatar = 6;
+  string device_token = 7;
+  string user_group = 8;
+  repeated Subject skill_set = 9;
+  TutorStatus status = 10;
+  google.protobuf.Timestamp created_at = 11;
+  google.protobuf.Timestamp updated_at = 12;
+}
+
+message GetCoachProfileResponse { UserProfile profile = 1; }
+
+message GetCoachProfileRequest { string profile_id = 1; }
+
+message UpdateUserProfileRequest { UserProfile profile = 1; }
+
+message UpdateUserProfileResponse { bool successful = 1; }
+
+message UpdateTutorStatusRequest { TutorStatus status = 1; }
+
+message UpdateTutorStatusResponse {}
+
+message GetCurrentUserProfileRequest {}
+
+message GetCurrentUserProfileResponse { UserProfile profile = 1; }
+
+message GetTutorProfileRequest { repeated string profile_ids = 1; }
+
+message GetTutorProfileResponse { repeated TutorProfile profiles = 1; }
+
+message ClaimsUserAuthRequest {}
+
+message ClaimsUserAuthResponse { bool successful = 1; }
+
+message GetCoachProfilesRequest { repeated string profile_ids = 1; }
+
+message GetCoachProfilesResponse { repeated UserProfile profiles = 1; }
+
+message TeacherProfile {
+  string id = 1;
+  string name = 2;
+  Country country = 3;
+  string phone_number = 4;
+  string email = 5;
+  string avatar = 6;
+  string device_token = 7;
+  string user_group = 8;
+  repeated int32 school_ids = 9;
+  google.protobuf.Timestamp created_at = 10;
+  google.protobuf.Timestamp updated_at = 11;
+}
+
+message GetTeacherProfilesRequest { repeated string ids = 1; }
+
+message GetTeacherProfilesResponse { repeated TeacherProfile profiles = 1; }
+
+message BasicProfile {
+  string user_id = 1;
+  string name = 2;
+  string avatar = 3;
+  string user_group = 4;
+  string facebook_id = 5;
+  string apple_user_id = 6;
+}
+
+message GetBasicProfileRequest { repeated string user_ids = 1; }
+
+message GetBasicProfileResponse { repeated BasicProfile profiles = 1; }
+
+message CheckProfileRequest {
+  oneof filter {
+    string email = 1;
+    string phone = 2;
+  }
+}
+
+message CheckProfileResponse {
+  bool found = 1;
+  BasicProfile profile = 2;
+}
+
+service UserService {
+  rpc UpdateUserDeviceToken(UpdateUserDeviceTokenRequest)
+      returns (UpdateUserDeviceTokenResponse);
+  rpc GetCoachProfile(GetCoachProfileRequest) returns (GetCoachProfileResponse){option deprecated = true;};
+  rpc GetCoachProfiles(GetCoachProfilesRequest)
+      returns (GetCoachProfilesResponse){option deprecated = true;};
+  rpc UpdateUserProfile(UpdateUserProfileRequest)
+      returns (UpdateUserProfileResponse);
+
+  rpc UpdateTutorStatus(UpdateTutorStatusRequest)
+      returns (UpdateTutorStatusResponse);
+  rpc GetCurrentUserProfile(GetCurrentUserProfileRequest)
+      returns (GetCurrentUserProfileResponse);
+  rpc GetTutorProfile(GetTutorProfileRequest) returns (GetTutorProfileResponse);
+  rpc ClaimsUserAuth(ClaimsUserAuthRequest) returns (ClaimsUserAuthResponse);
+  rpc GetTeacherProfiles(GetTeacherProfilesRequest)
+      returns (GetTeacherProfilesResponse);
+  rpc GetBasicProfile(GetBasicProfileRequest) returns (GetBasicProfileResponse);
+  rpc CheckProfile(CheckProfileRequest) returns (CheckProfileResponse);
+}

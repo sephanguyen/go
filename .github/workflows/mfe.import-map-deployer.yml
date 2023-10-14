@@ -1,0 +1,94 @@
+name: mfe.import-map-deployer
+
+on:
+    repository_dispatch:
+        types: [mfe.import-map-deployer]
+
+    workflow_dispatch:
+        inputs:
+            org:
+                type: choice
+                required: true
+                description: "organization"
+                default: "manabie"
+                options:
+                    - manabie
+                    - jprep
+                    - tokyo
+            env:
+                type: choice
+                description: "environment"
+                default: "staging"
+                options:
+                    - staging
+                    - uat
+                    - production
+                    - preproduction
+                required: true
+            upsert_service:
+                description: "the pattern: service-name:url_version"
+                default: ""
+                required: false
+            delete_service:
+                default: ""
+                required: false
+                description: "List of service name to delete, separated by comma"
+                type: string
+
+concurrency:
+    group: mfe.import-map-deployer
+
+env:
+    GITHUB_TOKEN: ${{ secrets.BUILD_GITHUB_TOKEN }}
+    IMD_PASSWORD: ${{ secrets.IMD_PASSWORD }}
+    ENV: "${{ inputs.env }}"
+    ORG: "${{ inputs.org }}"
+    DELETE_SERVICE: "${{ inputs.delete_service }}"
+
+jobs:
+    import-map-deployer:
+        runs-on: ["self-hosted", "100m-400mi", "spot", "persistent"]
+        steps:
+            - uses: actions/checkout@v3
+              timeout-minutes: 5
+
+            - uses: actions/github-script@v6
+              with:
+                script: |
+                    const fs = require('fs');
+
+                    const svcArr = "${{ inputs.upsert_service }}".split(",").map(s => s.trim());
+
+                    if(!svcArr.length) {
+                        console.log("No service to update");
+                        return;
+                    }
+
+                    const svc = svcArr.reduce((accumulator, currentValue) => {
+                        const firstIndex = currentValue.indexOf(":");
+                        const key = currentValue.slice(0, firstIndex);
+                        const value = currentValue.slice(firstIndex + 1);
+
+                        accumulator[key] = value;
+                    
+                        return  accumulator;
+                    }, {});
+
+
+                    console.log("svc", svc)
+
+                    fs.writeFileSync(`import-map.json`, JSON.stringify({
+                        "imports": svc
+                    }));
+
+            - name: Update import-map-deployer
+              shell: bash
+              run: |
+                  if [[ "$ENV" == "production" || "$ENV" == "preproduction" ]]; then
+                     echo "Exporting secrets.PROD_IMD_PASSWORD"
+
+                     export IMD_PASSWORD=${{ secrets.PROD_IMD_PASSWORD }}
+                  fi
+
+                  bash .github/scripts/import-map-deployer.bash
+

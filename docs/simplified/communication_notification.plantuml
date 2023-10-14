@@ -1,0 +1,190 @@
+
+@startuml communication_simplified
+hide circle
+
+namespace Notification {
+    UserInfoNotification "many" .. "1" UserManagement.User
+    UserInfoNotification "many" .. "1" InfoNotification
+
+    UserInfoNotification .. UserManagement.Student
+    UserInfoNotification .. UserManagement.Parent
+
+    InfoNotificationMsg "1" .up. "1" InfoNotification
+
+    InfoNotification "1" .down. "<color:#red>1" UserManagement.User
+    note on link
+        editor id
+    end note
+    InfoNotificationMsg .. FileStorage
+    note on link
+        content
+    end note
+
+    class InfoNotificationMsg <<entity>> {
+        notification_message_id: string
+        title: string
+        content: json
+        media_ids: []string
+        created_at: timestamp
+        updated_at: timestamp
+        deleted_at: timestamp
+    }
+
+
+
+    class UserInfoNotification <<entity>> {
+        user_notification_id: string
+        notification_id: string
+        user_id: string
+        status: string
+        course_ids: []string
+        current_grade: int
+        is_individual:bool
+        created_at: timestamp
+        updated_at: timestamp
+        deleted_at: timestamp
+        user_group: string
+        parent_id: string
+        student_id: string
+    }
+    note right of UserInfoNotification::status
+    one of
+    USER_NOTIFICATION_STATUS_NONE
+    USER_NOTIFICATION_STATUS_NEW
+    USER_NOTIFICATION_STATUS_SEEN
+    USER_NOTIFICATION_STATUS_READ
+    USER_NOTIFICATION_STATUS_FAILED
+    end note
+
+
+
+
+    class InfoNotification<<entity>>{
+        notification_id: string
+        notification_msg_id: string
+        type: string
+        data: json
+        editor_id: string
+        target_groups: json
+        receiver_ids: []string
+        event: string
+        status: string
+        scheduled_at: timestamp
+        owner: int
+        sent_at: timestamp
+        created_at: timestamp
+        updated_at: timestamp
+        deleted_at: timestamp
+    }
+    note right of InfoNotification::type
+    one of
+    NOTIFICATION_TYPE_NONE
+    NOTIFICATION_TYPE_TEXT
+    NOTIFICATION_TYPE_PROMO_CODE
+    NOTIFICATION_TYPE_ASSIGNMENT
+    NOTIFICATION_TYPE_COMPOSED
+    NOTIFICATION_TYPE_NATS_ASYNC
+    end note
+
+    note left of InfoNotification::target_groups
+    {
+        "course_filter":,
+        "grade_filter":
+        "user_group_filter":
+    }
+    end note
+
+    note right of InfoNotification::event
+    one of
+    NOTIFICATION_EVENT_NONE
+    NOTIFICATION_EVENT_X_LO_COMPLETED
+    NOTIFICATION_EVENT_TEACHER_GIVE_ASSIGNMENT
+    NOTIFICATION_EVENT_TEACHER_RETURN_ASSIGNMENT
+    NOTIFICATION_EVENT_STUDENT_SUBMIT_ASSIGNMENT
+    NOTIFICATION_EVENT_ASSIGNMENT_UPDATED
+    end note
+    note left of InfoNotification::status
+    NOTIFICATION_STATUS_NONE
+    NOTIFICATION_STATUS_DRAFT
+    NOTIFICATION_STATUS_SCHEDULED
+    NOTIFICATION_STATUS_SENT
+    NOTIFICATION_STATUS_DISCARD
+    end note
+
+    class Notification <<entity>> #red{
+    }
+
+    class NotificationTarget <<entity>> #red{
+    }
+
+    class NotificatonMessage <<entity>> #red{
+    }
+
+    class NotificationTargetServiceServer <<service>> #red{
+    }
+
+    class NotificationService <<service>> #red{
+    }
+    
+    class NotificationServiceServer <<service>> #red{
+    }
+
+    class NotificationModifierServiceServer <<gRPC synchronous service>> {
+        UpsertNotification
+        SendNotification
+        SendScheduledNotification
+        DiscardNotification
+        NotifyUnreadUser
+    }
+
+    class NotificationModifierService <<gRPC synchronous service>> {
+        SetUserNotificationStatus
+    }
+
+   
+    class NotificationReaderService <<gRPC synchronous service>> {
+        RetrieveNotificationDetail
+        RetrieveNotifications
+        CountUserNotification
+    }
+
+    class NATJetStreamProducer <<message broker>> {
+        PublishContext 
+    }
+
+    note left of NATJetStreamProducer
+    NATS publisher (asynchronous)
+    end note
+
+    class NATJetStreamConsumer <<message broker>> {
+        StartConsume 
+    }
+
+    note left of NATJetStreamConsumer
+    NATS subscriber (asynchronous)
+    end note
+
+    class AnotherServiceUseNotificationSystem <<service>> {
+    }
+
+    note right of AnotherServiceUseNotificationSystem
+    Currently we have 2 teams is Syllabus and Entry&Exit
+    end note
+
+    AnotherServiceUseNotificationSystem ..> NATJetStreamProducer
+    note on link
+        publish asynchronously
+    end note
+
+    NATJetStreamConsumer ..> NATJetStreamProducer
+    note on link
+        listen
+    end note
+
+     NATJetStreamConsumer ..> NotificationModifierServiceServer
+    note on link
+        use 
+    end note
+}
+
+@enduml

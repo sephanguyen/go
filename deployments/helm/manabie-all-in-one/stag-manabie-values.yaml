@@ -1,0 +1,636 @@
+global:
+  dbPrefix: ""
+  dbUserPrefix: "stag-"
+  serviceAccountEmailSuffix: "staging-manabie-online"
+  replicaCount: 2
+  hasura:
+    replicaCount: 2
+    cronScheduledScaling:
+      - timezone: UTC
+        start: "0 13 * * *" # 20h ICT
+        end: "0 20 * * *" # 3h  ICT
+        desiredReplicas: "1"
+      - timezone: UTC
+        start: "1 20 * * *" # 3h01  ICT
+        end: "59 12 * * *" # 19h59 ICT
+        desiredReplicas: "2"
+    onDemandNodeDeployment:
+      replicaCount: 1
+      cronScheduledScaling:
+        - timezone: UTC
+          start: "0 13 * * *" # 20h ICT
+          end: "0 20 * * *" # 3h  ICT
+          desiredReplicas: "0"
+        - timezone: UTC
+          start: "1 20 * * *" # 3h01  ICT
+          end: "59 12 * * *" # 19h59 ICT
+          desiredReplicas: "1"
+  virtualclassroom:
+    enabled: false
+  calendar:
+    enabled: false
+  conversationmgmt:
+    enabled: false
+  spike:
+    enabled: false
+  fink:
+    enabled: false
+  yasuo:
+    enabled: false
+  eureka:
+    enabled: false
+  notificationmgmt:
+    enabled: false
+  bob:
+    enabled: false
+  enigma:
+    enabled: false
+  entryexitmgmt:
+    enabled: false
+  discount:
+    enabled: false
+  lessonmgmt:
+    enabled: false
+  auth:
+    enabled: false
+  mastermgmt:
+    enabled: false
+  usermgmt:
+    enabled: false
+  tom:
+    enabled: false
+  invoicemgmt:
+    enabled: false
+  timesheet:
+    enabled: false
+  fatima:
+    enabled: false
+  payment:
+    enabled: false
+  hephaestus:
+    enabled: false
+  shamir:
+    enabled: false
+
+
+  cloudSQLCommonInstance: "staging-manabie-online:asia-southeast1:manabie-common-88e1ee71"
+  cloudSQLLMSInstance: "staging-manabie-online:asia-southeast1:manabie-lms-de12e08e"
+  cloudSQLAuthInstance: "staging-manabie-online:asia-southeast1:manabie-auth-f2dc7988"
+
+  kedaScaledObjectMinReplicas: 0
+  kedaScaledObjectMaxReplicas: 1
+
+  onDemandNodeDeployment:
+    replicaCount: 1
+    cronScheduledScaling:
+      - timezone: UTC
+        start: "0 13 * * *" # 20h ICT
+        end: "0 20 * * *" # 3h  ICT
+        desiredReplicas: "0"
+      - timezone: UTC
+        start: "1 20 * * *" # 3h01  ICT
+        end: "59 12 * * *" # 19h59 ICT
+        desiredReplicas: "1"
+auth:
+  resources:
+    requests:
+      memory: "164Mi"
+      cpu: "10m"
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "5m"
+    sidecar.istio.io/proxyMemory: "50Mi"
+  hpa:
+    minReplicas: 2
+    maxReplicas: 3
+    averageCPUUtilization: 300
+    averageMemoryValue: 512Mi
+  useGlobalCronScheduledScaling: true
+  hasura:
+    useGlobalCronScheduledScaling: true
+    pgConnections: 32
+  migrationEnabled: true
+  hasuraEnabled: true
+bob:
+  resources:
+    requests:
+      memory: "164Mi"
+      cpu: "10m"
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "5m"
+    sidecar.istio.io/proxyMemory: "50Mi"
+  hpa:
+    minReplicas: 2
+    maxReplicas: 3
+    averageCPUUtilization: 300
+    averageMemoryValue: 512Mi
+  useGlobalCronScheduledScaling: true
+  hasura:
+    useGlobalCronScheduledScaling: true
+    pgConnections: 32
+  adminHttp:
+    - match:
+        - uri:
+            prefix: /v1/graphql
+      corsPolicy: &CORSPolicy
+        allowHeaders:
+          - authorization
+          - grpc-timeout
+          - content-type
+          - keep-alive
+          - user-agent
+          - cache-control
+          - content-transfer-encoding
+          - token
+          - x-accept-content-transfer-encoding
+          - x-accept-response-streaming
+          - x-request-id
+          - x-user-agent
+          - x-graphql-mesh-authorization
+          - x-grpc-web
+          - if-none-match
+          - pkg
+          - version
+          - connect-timeout-ms
+          - connect-protocol-version
+          - connect-content-encoding
+          - connect-accept-encoding
+        allowMethods:
+          - POST
+          - GET
+          - OPTIONS
+          - PUT
+          - DELETE
+        allowOrigins:
+          - regex: .*
+        exposeHeaders:
+          - grpc-status
+          - grpc-message
+          - etag
+        maxAge: 100s
+      mirror:
+        host: bob-caching
+        port:
+          number: 5080
+      route:
+        - destination:
+            host: bob-hasura
+            port:
+                number: 8080
+    - match:
+        - uri:
+            exact: /healthz
+        - uri:
+            prefix: /v1
+        - uri:
+            prefix: /console
+        - uri:
+            prefix: //v1 # bug: https://github.com/hasura/graphql-engine/issues/7196
+        - uri:
+            prefix: /v2
+      route:
+        - destination:
+            host: bob-hasura
+            port:
+              number: 8080
+      corsPolicy: *CORSPolicy
+  caching:
+    enabled: true
+calendar:
+  useGlobalCronScheduledScaling: true
+  hasura:
+    useGlobalCronScheduledScaling: true
+draft:
+  replicaCount: 1
+  resources:
+    requests:
+      memory: "96Mi"
+      cpu: "5m"
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "5m"
+    sidecar.istio.io/proxyMemory: "50Mi"
+  hpa:
+    minReplicas: 2
+    maxReplicas: 3
+    averageCPUUtilization: 300
+    averageMemoryValue: 512Mi
+  useGlobalCronScheduledScaling: true
+  hasura:
+    useGlobalCronScheduledScaling: true
+  alloydbProxy:
+    enabled: false
+    alloydbConnName: "projects/staging-manabie-online/locations/asia-southeast1/clusters/stag-alloydb/instances/stag-alloydb-w01?port=6432"
+    image:
+      repository: gcr.io/alloydb-connectors/alloydb-auth-proxy
+      tag: 0.5.0
+    resources:
+      requests:
+        cpu: "5m"
+        memory: "16Mi"
+  cronjobs:
+    clean-data-tom:
+      cmd: clean_test_data
+      schedule: "0 22 * * 5"
+      args:
+        batchEnabled: true
+        before: "7 days ago"
+        dryRun: false
+        perBatch: "1000"
+        schoolID: "-2147483644"
+        service: tom
+        tables: conversations
+    clean-data-bob:
+      cmd: clean_test_data
+      schedule: "0 22 * * 5"
+      args:
+        batchEnabled: true
+        before: "7 days ago"
+        dryRun: false
+        perBatch: "1000"
+        schoolID: "-2147483644"
+        service: bob
+        tables: info_notification_msgs,users,staff,students,locations,courses
+    clean-data-eureka:
+      cmd: clean_test_data
+      schedule: "0 22 * * 5"
+      args:
+        batchEnabled: true
+        before: "7 days ago"
+        dryRun: false
+        perBatch: "300000"
+        schoolID: "-2147483644"
+        service: eureka
+        tables: study_plan_items,books,quizzes
+    clean-data-timesheet:
+      cmd: clean_test_data
+      schedule: "0 22 * * 5"
+      args:
+        batchEnabled: true
+        before: "7 days ago"
+        dryRun: false
+        perBatch: "300000"
+        schoolID: "-2147483644"
+        service: timesheet
+        tables: users,staff,timesheet,transportation_expense,lessons,locations
+    clean-data-invoicemgmt:
+      cmd: clean_test_data
+      schedule: "0 22 * * 5"
+      args:
+        batchEnabled: true
+        before: "7 days ago"
+        dryRun: false
+        perBatch: "300000"
+        schoolID: "-2147483644"
+        service: invoicemgmt
+        tables: users,students,bank,student_payment_detail
+    clean-data-lessonmgmt:
+      cmd: clean_test_data
+      schedule: "0 22 * * 5"
+      args:
+        batchEnabled: true
+        before: "7 days ago"
+        dryRun: false
+        perBatch: "1000"
+        schoolID: "-2147483644"
+        service: lessonmgmt
+        tables: locations,courses,lessons,lesson_members,lessons_teachers
+enigma:
+  resources:
+    requests:
+      memory: "32Mi"
+      cpu: "5m"
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "5m"
+    sidecar.istio.io/proxyMemory: "50Mi"
+  hpa:
+    minReplicas: 2
+    maxReplicas: 3
+    averageCPUUtilization: 300
+    averageMemoryValue: 512Mi
+  useGlobalCronScheduledScaling: true
+  metrics:
+    enabled: true
+    podAnnotations:
+      prometheus.io/scheme: "http"
+      prometheus.io/port: "8888"
+      prometheus.io/scrape: "true"
+entryexitmgmt:
+  resources:
+    requests:
+      memory: "96Mi"
+      cpu: "15m"
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "5m"
+    sidecar.istio.io/proxyMemory: "50Mi"
+  hpa:
+    minReplicas: 2
+    maxReplicas: 3
+    averageCPUUtilization: 300
+    averageMemoryValue: 512Mi
+  useGlobalCronScheduledScaling: true
+  hasura:
+    useGlobalCronScheduledScaling: true
+eureka:
+  resources:
+    requests:
+      memory: "72Mi"
+      cpu: "5m"
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "5m"
+    sidecar.istio.io/proxyMemory: "50Mi"
+  hpa:
+    minReplicas: 2
+    maxReplicas: 3
+    averageCPUUtilization: 300
+    averageMemoryValue: 512Mi
+  useGlobalCronScheduledScaling: true
+  hasura:
+    useGlobalCronScheduledScaling: true
+  adminHttp:
+    - match:
+        - uri:
+            exact: /eureka/v1/graphql
+      rewrite:
+        uri: /v1/graphql
+      mirror:
+        host: eureka-caching
+        port:
+          number: 5580
+      route:
+        - destination:
+            host: eureka-hasura
+            port:
+              number: 8080
+      corsPolicy: &CORSPolicy
+        allowOrigins:
+          - regex: ".*"
+        allowMethods:
+          - POST
+          - GET
+          - OPTIONS
+          - PUT
+          - DELETE
+        allowHeaders:
+          - authorization
+          - grpc-timeout
+          - content-type
+          - keep-alive
+          - user-agent
+          - cache-control
+          - content-transfer-encoding
+          - token
+          - student-id
+          - x-accept-content-transfer-encoding
+          - x-accept-response-streaming
+          - x-request-id
+          - x-user-agent
+          - x-graphql-mesh-authorization
+          - x-grpc-web
+          - if-none-match
+          - pkg
+          - version
+          - connect-timeout-ms
+          - connect-protocol-version
+          - connect-content-encoding
+          - connect-accept-encoding
+        maxAge: 100s
+        exposeHeaders:
+          - grpc-status
+          - grpc-message
+          - etag
+    - match:
+        - uri:
+            prefix: /eureka/
+      rewrite:
+        uri: /
+      route:
+        - destination:
+            host: eureka-hasura
+            port:
+              number: 8080
+      corsPolicy: *CORSPolicy
+  caching:
+    enabled: true
+fatima:
+  resources:
+    requests:
+      memory: "60Mi"
+      cpu: "5m"
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "5m"
+    sidecar.istio.io/proxyMemory: "50Mi"
+  hpa:
+    minReplicas: 2
+    maxReplicas: 3
+    averageCPUUtilization: 300
+    averageMemoryValue: 512Mi
+  useGlobalCronScheduledScaling: true
+  hasura:
+    useGlobalCronScheduledScaling: true
+hephaestus:
+  postHookMigrateDataLake: true
+  postHookMigrateDatawarehouses: true
+  postHookUpsertKsqlMigration: true
+  postHookSyncDataLake: true
+  postHookSyncDataWarehouse: true
+  migrationEnabled: false
+invoicemgmt:
+  resources:
+    requests:
+      memory: "72Mi"
+      cpu: "5m"
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "5m"
+    sidecar.istio.io/proxyMemory: "50Mi"
+  hpa:
+    minReplicas: 2
+    maxReplicas: 3
+    averageCPUUtilization: 300
+    averageMemoryValue: 512Mi
+  useGlobalCronScheduledScaling: true
+  hasura:
+    useGlobalCronScheduledScaling: true
+learner-web:
+  resources:
+    requests:
+      memory: "20Mi"
+      cpu: "5m"
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "5m"
+    sidecar.istio.io/proxyMemory: "50Mi"
+  hpa:
+    minReplicas: 2
+    maxReplicas: 3
+    averageCPUUtilization: 300
+    averageMemoryValue: 512Mi
+  useGlobalCronScheduledScaling: true
+lessonmgmt:
+  resources:
+    requests:
+      memory: "64Mi"
+      cpu: "5m"
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "5m"
+    sidecar.istio.io/proxyMemory: "50Mi"
+  hpa:
+    minReplicas: 2
+    maxReplicas: 3
+    averageCPUUtilization: 300
+    averageMemoryValue: 512Mi
+  useGlobalCronScheduledScaling: true
+  hasura:
+    useGlobalCronScheduledScaling: true
+mastermgmt:
+  resources:
+    requests:
+      memory: "64Mi"
+      cpu: "5m"
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "5m"
+    sidecar.istio.io/proxyMemory: "50Mi"
+  hpa:
+    minReplicas: 2
+    maxReplicas: 3
+    averageCPUUtilization: 300
+    averageMemoryValue: 512Mi
+  useGlobalCronScheduledScaling: true
+  hasura:
+    useGlobalCronScheduledScaling: true
+  hasuraEnabled: true
+payment:
+  resources:
+    requests:
+      memory: "64Mi"
+      cpu: "5m"
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "5m"
+    sidecar.istio.io/proxyMemory: "50Mi"
+  hpa:
+    minReplicas: 2
+    maxReplicas: 3
+    averageCPUUtilization: 300
+    averageMemoryValue: 512Mi
+  useGlobalCronScheduledScaling: true
+shamir:
+  resources:
+    requests:
+      memory: "72Mi"
+      cpu: "5m"
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "5m"
+    sidecar.istio.io/proxyMemory: "50Mi"
+  hpa:
+    minReplicas: 2
+    maxReplicas: 3
+    averageCPUUtilization: 300
+    averageMemoryValue: 512Mi
+  useGlobalCronScheduledScaling: true
+  metrics:
+    enabled: true
+    podAnnotations:
+      prometheus.io/scheme: "http"
+      prometheus.io/port: "8888"
+      prometheus.io/scrape: "true"
+teacher-web:
+  resources:
+    requests:
+      memory: "20Mi"
+      cpu: "5m"
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "5m"
+    sidecar.istio.io/proxyMemory: "50Mi"
+  hpa:
+    minReplicas: 2
+    maxReplicas: 3
+    averageCPUUtilization: 300
+    averageMemoryValue: 512Mi
+  useGlobalCronScheduledScaling: true
+tom:
+  resources:
+    requests:
+      memory: "96Mi"
+      cpu: "10m"
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "5m"
+    sidecar.istio.io/proxyMemory: "50Mi"
+usermgmt:
+  resources:
+    requests:
+      memory: "96Mi"
+      cpu: "10m"
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "5m"
+    sidecar.istio.io/proxyMemory: "50Mi"
+  hpa:
+    minReplicas: 2
+    maxReplicas: 3
+    averageCPUUtilization: 300
+    averageMemoryValue: 512Mi
+  useGlobalCronScheduledScaling: true
+yasuo:
+  resources:
+    requests:
+      memory: "96Mi"
+      cpu: "5m"
+    limits:
+      memory: "2Gi"
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "5m"
+    sidecar.istio.io/proxyMemory: "50Mi"
+  hpa:
+    minReplicas: 2
+    maxReplicas: 3
+    averageCPUUtilization: 300
+    averageMemoryValue: 512Mi
+  useGlobalCronScheduledScaling: true
+zeus:
+  resources:
+    requests:
+      memory: 64Mi
+      cpu: "5m"
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "10m"
+    sidecar.istio.io/proxyMemory: "50Mi"
+notificationmgmt:
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "5m"
+    sidecar.istio.io/proxyMemory: "50Mi"
+  resources:
+    limits:
+      memory: "2Gi"
+  hpa:
+    minReplicas: 2
+    maxReplicas: 3
+    averageCPUUtilization: 300
+    averageMemoryValue: 512Mi
+  useGlobalCronScheduledScaling: true
+spike:
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "5m"
+    sidecar.istio.io/proxyMemory: "50Mi"
+  resources:
+    limits:
+      memory: "2Gi"
+timesheet:
+  useGlobalCronScheduledScaling: true
+  hasura:
+    useGlobalCronScheduledScaling: true
+virtualclassroom:
+  resources:
+    requests:
+      cpu: "8m"
+      memory: 64Mi
+  useGlobalCronScheduledScaling: true
+discount:
+  resources:
+    requests:
+      memory: "64Mi"
+      cpu: "5m"
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "5m"
+    sidecar.istio.io/proxyMemory: "50Mi"
+  hpa:
+    minReplicas: 2
+    maxReplicas: 3
+    averageCPUUtilization: 300
+    averageMemoryValue: 512Mi
+  useGlobalCronScheduledScaling: true

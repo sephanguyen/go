@@ -1,0 +1,210 @@
+{
+    "stag": {
+        "manabie": {
+            "cluster": "staging-2",
+            "region": "asia-southeast1-b",
+            "environment": "stag",
+            "organization": "manabie",
+            "projectId": "staging-manabie-online",
+            "serviceAccountEmailSuffix": "staging-manabie-online",
+            "namespace": "stag-manabie-services",
+            "kmsPath": "projects/staging-manabie-online/locations/global/keyRings/deployments/cryptoKeys/github-actions",
+            "sqlProxyConnectionName": "staging-manabie-online:asia-southeast1:manabie-common-88e1ee71",
+            "dbPrefix": "",
+            "eureka": "staging-manabie-online:asia-southeast1:manabie-lms-de12e08e",
+            "auth": "staging-manabie-online:asia-southeast1:manabie-auth-f2dc7988"
+        },
+        "jprep": {
+            "cluster": "staging-2",
+            "region": "asia-southeast1-b",
+            "environment": "stag",
+            "organization": "jprep",
+            "projectId": "staging-manabie-online",
+            "serviceAccountEmailSuffix": "staging-manabie-online",
+            "namespace": "stag-jprep-services",
+            "kmsPath": "projects/staging-manabie-online/locations/global/keyRings/deployments/cryptoKeys/github-actions",
+            "sqlProxyConnectionName": "staging-manabie-online:asia-southeast1:jprep-uat",
+            "dbPrefix": "stag_"
+        }
+    },
+    "uat":{
+        "manabie": {
+            "cluster": "staging-2",
+            "region": "asia-southeast1-b",
+            "environment": "uat",
+            "organization": "manabie",
+            "projectId": "staging-manabie-online",
+            "serviceAccountEmailSuffix": "uat-manabie",
+            "namespace": "uat-manabie-services",
+            "kmsPath": "projects/staging-manabie-online/locations/global/keyRings/deployments/cryptoKeys/uat-manabie",
+            "sqlProxyConnectionName": "staging-manabie-online:asia-southeast1:manabie-common-88e1ee71",
+            "dbPrefix": "uat_",
+            "eureka": "staging-manabie-online:asia-southeast1:manabie-lms-de12e08e"
+        },
+        "jprep": {
+            "cluster": "staging-2",
+            "region": "asia-southeast1-b",
+            "environment": "uat",
+            "organization": "jprep",
+            "projectId": "staging-manabie-online",
+            "serviceAccountEmailSuffix": "staging-manabie-online",
+            "namespace": "uat-jprep-services",
+            "kmsPath": "projects/staging-manabie-online/locations/global/keyRings/deployments/cryptoKeys/uat-jprep",
+            "sqlProxyConnectionName": "staging-manabie-online:asia-southeast1:jprep-uat",
+            "dbPrefix": ""
+        }
+    },
+    "dorp":{
+        "jprep": {
+            "cluster": "production",
+            "region": "asia-northeast1-c",
+            "environment": "dorp",
+            "organization": "jprep",
+            "projectId": "live-manabie",
+            "serviceAccountEmailSuffix": "live-manabie",
+            "namespace": "dorp-jprep-services",
+            "kmsPath": "projects/live-manabie/locations/global/keyRings/deployments/cryptoKeys/prod-jprep",
+            "sqlProxyConnectionName": "student-coach-e1e95:asia-northeast1:clone-jprep-6a98",
+            "sqlProxySourceConnectionName": "live-manabie:asia-northeast1:jprep-6a98",
+            "dbPrefix": ""
+        },
+        "synersia":{
+            "cluster": "jp-partners",
+            "region": "asia-northeast1",
+            "environment": "dorp",
+            "organization": "synersia",
+            "projectId": "student-coach-e1e95",
+            "serviceAccountEmailSuffix": "synersia",
+            "namespace": "dorp-synersia-services",
+            "kmsPath": "projects/student-coach-e1e95/locations/asia-northeast1/keyRings/jp-partners/cryptoKeys/prod-synersia",
+            "dbPrefix": ""
+        },
+        "renseikai": {
+            "cluster": "jp-partners",
+            "region": "asia-northeast1",
+            "environment": "dorp",
+            "organization": "renseikai",
+            "projectId": "student-coach-e1e95",
+            "serviceAccountEmailSuffix": "production-renseikai",
+            "namespace": "dorp-renseikai-services",
+            "kmsPath": "projects/student-coach-e1e95/locations/asia-northeast1/keyRings/jp-partners/cryptoKeys/prod-renseikai",
+            "sqlProxyConnectionName": "production-renseikai:asia-northeast1:clone-renseikai-83fc",
+            "sqlProxySourceConnectionName": "production-renseikai:asia-northeast1:renseikai-83fc",
+            "dbPrefix": ""
+        },
+        "ga":{
+            "cluster": "jp-partners",
+            "region": "asia-northeast1",
+            "environment": "dorp",
+            "organization": "ga",
+            "projectId": "student-coach-e1e95",
+            "serviceAccountEmailSuffix": "production-ga",
+            "namespace": "dorp-ga-services",
+            "kmsPath": "projects/student-coach-e1e95/locations/asia-northeast1/keyRings/jp-partners/cryptoKeys/prod-ga",
+            "sqlProxyConnectionName": "student-coach-e1e95:asia-northeast1:clone-jp-partners-b04fbb69",
+            "sqlProxySourceConnectionName": "student-coach-e1e95:asia-northeast1:jp-partners-b04fbb69",       
+            "dbPrefix": "ga_"     
+        },
+        "aic":{
+            "cluster": "jp-partners",
+            "region": "asia-northeast1",
+            "environment": "dorp",
+            "organization": "aic",
+            "projectId": "student-coach-e1e95",
+            "serviceAccountEmailSuffix": "production-aic",
+            "namespace": "dorp-aic-services",
+            "kmsPath": "projects/student-coach-e1e95/locations/asia-northeast1/keyRings/jp-partners/cryptoKeys/prod-aic",
+            "sqlProxyConnectionName": "student-coach-e1e95:asia-northeast1:clone-jp-partners-b04fbb69",
+            "sqlProxySourceConnectionName": "student-coach-e1e95:asia-northeast1:jp-partners-b04fbb69",
+            "dbPrefix": "aic_"
+        },
+        "tokyo":{
+            "cluster": "tokyo",
+            "region": "asia-northeast1",
+            "environment": "dorp",
+            "organization": "tokyo",
+            "projectId": "student-coach-e1e95",
+            "serviceAccountEmailSuffix": "student-coach-e1e95",
+            "namespace": "dorp-tokyo-services",
+            "kmsPath": "projects/student-coach-e1e95/locations/asia-northeast1/keyRings/prod-tokyo/cryptoKeys/prod-tokyo",
+            "sqlProxyConnectionName": "student-coach-e1e95:asia-northeast1:clone-prod-tokyo",
+            "sqlProxySourceConnectionName": "student-coach-e1e95:asia-northeast1:prod-tokyo",
+            "eureka": "student-coach-e1e95:asia-northeast1:clone-prod-tokyo-lms-b2dc4508",
+            "dbPrefix": "tokyo_"
+        }
+    },
+    "prod":{
+        "jprep": {
+            "cluster": "tokyo",
+            "region": "asia-northeast1",
+            "environment": "prod",
+            "organization": "jprep",
+            "projectId": "student-coach-e1e95",
+            "serviceAccountEmailSuffix": "student-coach-e1e95",
+            "namespace": "prod-jprep-services",
+            "kmsPath": "projects/live-manabie/locations/global/keyRings/deployments/cryptoKeys/prod-jprep",
+            "sqlProxyConnectionName": "student-coach-e1e95:asia-northeast1:prod-jprep-d995522c",
+            "dbPrefix": ""
+        },
+        "synersia":{
+            "cluster": "jp-partners",
+            "region": "asia-northeast1",
+            "environment": "prod",
+            "organization": "synersia",
+            "projectId": "student-coach-e1e95",
+            "serviceAccountEmailSuffix": "synersia",
+            "namespace": "prod-synersia-services",
+            "kmsPath": "projects/student-coach-e1e95/locations/asia-northeast1/keyRings/jp-partners/cryptoKeys/prod-synersia",
+            "dbPrefix": ""
+        },
+        "renseikai":{
+            "cluster": "jp-partners",
+            "region": "asia-northeast1",
+            "environment": "prod",
+            "organization": "renseikai",
+            "projectId": "student-coach-e1e95",
+            "serviceAccountEmailSuffix": "production-renseikai",
+            "namespace": "prod-renseikai-services",
+            "kmsPath": "projects/student-coach-e1e95/locations/asia-northeast1/keyRings/jp-partners/cryptoKeys/prod-renseikai",
+            "sqlProxyConnectionName": "production-renseikai:asia-northeast1:renseikai-83fc",
+            "dbPrefix": ""
+        },
+        "ga": {
+            "cluster": "jp-partners",
+            "region": "asia-northeast1",
+            "environment": "prod",
+            "organization": "ga",
+            "projectId": "student-coach-e1e95",
+            "serviceAccountEmailSuffix": "production-ga",
+            "namespace": "prod-ga-services",
+            "kmsPath": "projects/student-coach-e1e95/locations/asia-northeast1/keyRings/jp-partners/cryptoKeys/prod-ga",
+            "sqlProxyConnectionName": "student-coach-e1e95:asia-northeast1:jp-partners-b04fbb69",
+            "dbPrefix": "ga_"
+        },
+        "aic":{
+            "cluster": "jp-partners",
+            "region": "asia-northeast1",
+            "environment": "prod",
+            "organization": "aic",
+            "projectId": "student-coach-e1e95",
+            "serviceAccountEmailSuffix": "production-aic",
+            "namespace": "prod-aic-services",
+            "kmsPath": "projects/student-coach-e1e95/locations/asia-northeast1/keyRings/jp-partners/cryptoKeys/prod-aic",
+            "sqlProxyConnectionName": "student-coach-e1e95:asia-northeast1:jp-partners-b04fbb69",
+            "dbPrefix": "aic_"
+        },
+        "tokyo": {
+            "cluster": "tokyo",
+            "region": "asia-northeast1",
+            "environment": "prod",
+            "organization": "tokyo",
+            "projectId": "student-coach-e1e95",
+            "serviceAccountEmailSuffix": "student-coach-e1e95",
+            "namespace": "prod-tokyo-services",
+            "kmsPath": "projects/student-coach-e1e95/locations/asia-northeast1/keyRings/prod-tokyo/cryptoKeys/prod-tokyo",
+            "sqlProxyConnectionName": "student-coach-e1e95:asia-northeast1:prod-tokyo",
+            "dbPrefix": "tokyo_",
+            "eureka": "student-coach-e1e95:asia-northeast1:prod-tokyo-lms-b2dc4508"
+        }
+    }
+}

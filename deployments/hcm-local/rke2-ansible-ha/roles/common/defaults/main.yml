@@ -1,0 +1,5 @@
+---
+cluster_name: k8s-local.dev
+sysctl_settings:
+  fs.inotify.max_user_instances: 512
+  fs.inotify.max_user_watches: 524288

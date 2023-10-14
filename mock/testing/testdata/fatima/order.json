@@ -1,0 +1,202 @@
+{
+	"schema": [
+		{
+			"column_name": "background",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "future_measures",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "is_reviewed",
+			"data_type": "boolean",
+			"column_default": "false",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "loa_end_date",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "loa_start_date",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "location_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "order_comment",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "order_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "order_sequence_number",
+			"data_type": "integer",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "order_status",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "order_type",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "student_full_name",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "student_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "version_number",
+			"data_type": "integer",
+			"column_default": "0",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "withdrawal_effective_date",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "order",
+			"policyname": "rls_order_location",
+			"qual": "(location_id IN ( SELECT p.location_id\n   FROM granted_permissions p\n  WHERE ((p.user_id = current_setting('app.user_id'::text)) AND (p.permission_id = ( SELECT p2.permission_id\n           FROM permission p2\n          WHERE ((p2.permission_name = 'payment.order.read'::text) AND (p2.resource_path = current_setting('permission.resource_path'::text))))))))",
+			"with_check": "(location_id IN ( SELECT p.location_id\n   FROM granted_permissions p\n  WHERE ((p.user_id = current_setting('app.user_id'::text)) AND (p.permission_id = ( SELECT p2.permission_id\n           FROM permission p2\n          WHERE ((p2.permission_name = 'payment.order.write'::text) AND (p2.resource_path = current_setting('permission.resource_path'::text))))))))",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "order",
+			"policyname": "rls_order_read_all",
+			"qual": "(1 = 1)",
+			"with_check": null,
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "order",
+			"policyname": "rls_order_restrictive",
+			"qual": "permission_check(resource_path, 'order'::text)",
+			"with_check": "permission_check(resource_path, 'order'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "fk_order_location_id",
+			"column_name": "location_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "order_pk",
+			"column_name": "order_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "order_sequence_number_resource_path_unique",
+			"column_name": "order_sequence_number",
+			"constraint_type": "UNIQUE"
+		},
+		{
+			"constraint_name": "order_sequence_number_resource_path_unique",
+			"column_name": "resource_path",
+			"constraint_type": "UNIQUE"
+		}
+	],
+	"table_name": "order",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

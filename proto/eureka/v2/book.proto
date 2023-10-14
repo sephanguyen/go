@@ -1,0 +1,72 @@
+syntax = "proto3";
+
+package eureka.v2;
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/eureka/v2;epb";
+import "eureka/v2/common/enums.proto";
+
+message UpsertBooksRequest {
+  message Book {
+    string book_id = 1;
+    string name = 2;
+  }
+  repeated Book books = 1;
+}
+
+message UpsertBooksResponse {
+  repeated string book_ids = 1;
+}
+
+message GetBookContentResponse {
+  string id = 1;
+  string name = 2;
+  repeated Chapter chapters = 3;
+
+  message Chapter {
+    string id = 1;
+    string name = 2;
+    int32 display_order = 3;
+    repeated Topic topics = 4;
+  }
+
+  message Topic {
+    string id = 1;
+    string name = 2;
+    int32 display_order = 3;
+    string icon_url = 4;
+    repeated LearningMaterial learning_materials = 5;
+  }
+
+  message LearningMaterial {
+    string id = 1;
+    int32 display_order = 2;
+    string name = 3;
+    common.LearningMaterialType type = 4;
+  }
+}
+
+
+message GetBookContentRequest {
+  string book_id = 1;
+}
+
+message GetBookHierarchyFlattenByLearningMaterialIDRequest {
+  string learning_material_id = 1;
+}
+
+message GetBookHierarchyFlattenByLearningMaterialIDResponse {
+  message BookHierarchyFlatten {
+    string book_id = 1;
+    string chapter_id = 2;
+    string topic_id = 3;
+    string learning_material_id = 4;
+  }
+
+  BookHierarchyFlatten book_hierarchy_flatten = 1;
+}
+
+service BookService {
+  rpc UpsertBooks(UpsertBooksRequest) returns (UpsertBooksResponse);
+  rpc GetBookContent(GetBookContentRequest) returns (GetBookContentResponse);
+  rpc GetBookHierarchyFlattenByLearningMaterialID (GetBookHierarchyFlattenByLearningMaterialIDRequest) 
+  returns (GetBookHierarchyFlattenByLearningMaterialIDResponse);
+}

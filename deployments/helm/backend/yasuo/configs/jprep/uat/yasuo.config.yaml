@@ -1,0 +1,24 @@
+common:
+  google_cloud_project: staging-manabie-online
+issuers:
+  - issuer: manabie
+    audience: 803wsd1dyl3x5jz22t
+    jwks_endpoint: http://shamir:5680/.well-known/jwks.json
+  - issuer: https://securetoken.google.com/staging-manabie-online
+    audience: staging-manabie-online
+    jwks_endpoint: https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com
+brightcove:
+  account_id: 6415622117001
+  client_id: 842a6c12-06ad-49c6-8920-14d07aed81b5
+  profile: multi-platform-standard-static
+storage:
+  bucket: stag-manabie-backend
+jwt_applicant: 803wsd1dyl3x5jz22t
+question_bucket: stag-manabie-questions-content
+keycloak_auth:
+  path: https://d2020-ji-sso.jprep.jp
+  realm: manabie-test
+  client_id: manabie-app
+postgres_v2:
+  bob:
+    shard_id: 2

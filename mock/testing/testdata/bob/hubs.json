@@ -1,0 +1,154 @@
+{
+	"schema": [
+		{
+			"column_name": "address",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "city_id",
+			"data_type": "integer",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "country",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "description",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "district_id",
+			"data_type": "integer",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "events",
+			"data_type": "jsonb",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "hub_id",
+			"data_type": "integer",
+			"column_default": "nextval('hubs_hub_id_seq'::regclass)",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "images",
+			"data_type": "ARRAY",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "name",
+			"data_type": "character varying",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "opening_hours",
+			"data_type": "ARRAY",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "phone_number",
+			"data_type": "character varying",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "point",
+			"data_type": "point",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "hubs",
+			"policyname": "rls_hubs",
+			"qual": "permission_check(resource_path, 'hubs'::text)",
+			"with_check": "permission_check(resource_path, 'hubs'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "hubs",
+			"policyname": "rls_hubs_restrictive",
+			"qual": "permission_check(resource_path, 'hubs'::text)",
+			"with_check": "permission_check(resource_path, 'hubs'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "hub_pk",
+			"column_name": "hub_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "hubs",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

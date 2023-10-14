@@ -1,0 +1,174 @@
+syntax = "proto3";
+
+package bob.v1;
+
+import "bob/v1/schools.proto";
+import "common/v1/enums.proto";
+import "common/v1/profiles.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+import "google/protobuf/wrappers.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/bob/v1;bpb";
+
+message RetrieveArchivedTopicsRequest {
+  string student_id = 1;
+}
+
+message ListStudentSubmissionsRequest {
+  string topic_id = 1;
+  int32 limit = 2;
+  google.protobuf.StringValue offset_id = 3;
+}
+
+message FindStudentRequest {
+  string phone = 1;
+}
+
+message FindStudentResponse {
+  StudentProfile profile = 1;
+}
+
+message RetrieveStudentProfileRequest {
+  repeated string student_ids = 1;
+}
+
+message StudentProfile {
+  string id = 1;
+  string name = 2;
+  common.v1.Country country = 3;
+  string phone = 4;
+  string email = 5;
+  string grade = 6;
+  string target_university = 7;
+  string avatar = 8;
+  string biography = 9;
+  School school = 10;
+  string plan_id = 11;
+  bool is_tester = 12;
+  string facebook_id = 13;
+  google.protobuf.Timestamp birthday = 14;
+  google.protobuf.Timestamp created_at = 15;
+  repeated int64 divs = 16;
+  google.protobuf.Timestamp last_login_date = 17;
+  string full_name_phonetic = 18;
+}
+
+message RetrieveStudentProfileResponse {
+  message Data {
+    StudentProfile profile = 1;
+    string coach_id = 2 [deprecated = true];
+  }
+  repeated Data items = 1;
+}
+
+message RetrieveLearningProgressRequest {
+  string student_id = 1;
+  string session_id = 2;
+  google.protobuf.Timestamp from = 3;
+  google.protobuf.Timestamp to = 4;
+}
+
+message RetrieveLearningProgressResponse {
+  message DailyLearningTime {
+    int64 total_time_spent_in_day = 1;
+    google.protobuf.Timestamp day = 2;
+  }
+  repeated DailyLearningTime dailies = 1;
+}
+
+message StudentStat {
+  int32 total_learning_time = 1;
+  int32 total_lo_finished = 2;
+  int32 total_lo = 3;
+  map<string, int32> crowns = 4;  // AchievementCrown string => total
+}
+
+message RetrieveStatRequest {
+  string student_id = 1;
+}
+
+message RetrieveStatResponse {
+  StudentStat student_stat = 1;
+}
+
+message RetrieveStudentAssociatedToParentAccountRequest {
+}
+
+message RetrieveStudentAssociatedToParentAccountResponse {
+  repeated common.v1.BasicProfile profiles = 1;
+}
+
+message GetListSchoolIDsByStudentIDsRequest { repeated string student_ids = 1; }
+
+message SchoolIDWithStudentIDs {
+  string school_id = 1;
+  repeated string student_ids = 2;
+}
+
+message GetListSchoolIDsByStudentIDsResponse { repeated SchoolIDWithStudentIDs school_ids = 1; }
+
+message RetrieveStudentSchoolHistoryRequest {
+  repeated string student_ids = 1;
+}
+
+message RetrieveStudentSchoolHistoryResponse {
+  message School {
+    string school_id = 1;
+    string school_name = 2;
+    repeated string student_ids = 3;
+  }
+
+  map<string, School> schools = 1;
+}
+
+service StudentReaderService {
+  rpc FindStudent(FindStudentRequest) returns (FindStudentResponse);
+  rpc RetrieveStudentProfile(RetrieveStudentProfileRequest)
+      returns (RetrieveStudentProfileResponse);
+  rpc RetrieveLearningProgress(RetrieveLearningProgressRequest)
+      returns (RetrieveLearningProgressResponse);
+  rpc RetrieveStat(RetrieveStatRequest) returns (RetrieveStatResponse);
+  rpc RetrieveStudentAssociatedToParentAccount(RetrieveStudentAssociatedToParentAccountRequest)
+    returns (RetrieveStudentAssociatedToParentAccountResponse);
+  rpc GetListSchoolIDsByStudentIDs(GetListSchoolIDsByStudentIDsRequest)
+      returns (GetListSchoolIDsByStudentIDsResponse);
+  rpc RetrieveStudentSchoolHistory(RetrieveStudentSchoolHistoryRequest)
+      returns (RetrieveStudentSchoolHistoryResponse);
+}
+
+message UpdateProfileRequest {
+  string name = 1;
+  string grade = 2;
+  string target_university = 3;
+  string avatar = 4;
+  google.protobuf.Timestamp birthday = 5;
+  string biography = 6;
+  School school = 7;
+}
+
+message UpdateProfileResponse {
+  bool successful = 1;
+}
+
+message StudentEventLog {
+  string event_id = 1;
+  string event_type = 2;
+  google.protobuf.Timestamp created_at = 3;
+  google.protobuf.Struct payload = 4;
+}
+
+message DeleteStudentCommentsRequest {
+  repeated string comment_ids = 1;
+}
+
+message DeleteStudentCommentsResponse {
+  bool successful = 1;
+}
+
+service StudentModifierService {
+  rpc UpdateProfile(UpdateProfileRequest) returns (UpdateProfileResponse);
+
+  rpc DeleteStudentComments (DeleteStudentCommentsRequest)
+      returns (DeleteStudentCommentsResponse);
+}

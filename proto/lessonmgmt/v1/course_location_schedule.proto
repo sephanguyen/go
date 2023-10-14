@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package lessonmgmt.v1;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/lessonmgmt/v1;lpb";
+
+
+message ImportCourseLocationScheduleRequest {
+  bytes payload = 1;
+}
+
+message ImportCourseLocationScheduleResponse {
+  message ImportError {
+    int32 row_number = 1;
+    string error = 2;
+  }
+  repeated ImportError errors = 1;
+}
+
+message ExportCourseLocationScheduleResponse {
+    bytes data = 1;
+}
+
+message ExportCourseLocationScheduleRequest {
+}
+
+service CourseLocationScheduleService {
+  rpc ImportCourseLocationSchedule(ImportCourseLocationScheduleRequest) returns (ImportCourseLocationScheduleResponse);
+  rpc ExportCourseLocationSchedule(ExportCourseLocationScheduleRequest) returns (ExportCourseLocationScheduleResponse);
+}

@@ -1,0 +1,210 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  # name: {{ include "yugabyte.fullname" . }}-tserver
+  name: {{ include "yugabyte.fullname" . }}
+  labels:
+    {{- include "yugabyte.labels" . | nindent 4 }}
+spec:
+# {{- $svcName := printf "%s-tserver-headless" (include "yugabyte.fullname" .) }}
+{{- $svcName := printf "%s-headless" (include "yugabyte.fullname" .) }}
+  serviceName: {{ $svcName }}
+  replicas: {{ .Values.replicas.tserver }}
+  selector:
+    matchLabels:
+      {{- include "yugabyte.selectorLabels" . | nindent 6 }}
+      # role: tserver
+  template:
+    metadata:
+    {{- with .Values.podAnnotations.tserver }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      labels:
+        {{- include "yugabyte.selectorLabels" . | nindent 8 }}
+        # role: tserver
+    spec:
+      serviceAccountName: {{ include "yugabyte.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      initContainers:
+      - name: decrypt-secret
+        image: google/cloud-sdk:323.0.0-alpine
+        imagePullPolicy: IfNotPresent
+        command:
+          - /bin/sh
+          - -c
+          - |
+          {{- if eq "local" .Values.environment }}
+            gcloud auth activate-service-account --key-file /configs/service_credential.json
+          {{- end }}
+
+            kmsPath={{ .Values.configs.kmsPath }}
+            project=$(echo $kmsPath | cut -d'/' -f 2)
+            location=$(echo $kmsPath | cut -d'/' -f 4)
+            keyring=$(echo $kmsPath | cut -d'/' -f 6)
+            key=$(echo $kmsPath | cut -d'/' -f 8)
+
+            gcloud kms decrypt \
+              --project=$project \
+              --keyring=$keyring \
+              --key=$key \
+              --location=$location \
+              --ciphertext-file /configs/yugabyte_universe_key.encrypted \
+              --plaintext-file /yugabyte/universe_key
+        volumeMounts:
+          - name: encrypted-universe-key
+            mountPath: /configs/yugabyte_universe_key.encrypted
+            subPath: yugabyte_universe_key.encrypted
+            readOnly: true
+          - name: decrypted-universe-key
+            mountPath: /yugabyte
+{{- if eq "local" .Values.environment }}
+          - name: service-credential
+            mountPath: /configs/service_credential.json
+            subPath: service_credential.json
+            readOnly: true
+{{- end }}
+      containers:
+        - name: {{ .Chart.Name }}-master
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          workingDir: /data
+          command:
+            - "/home/yugabyte/bin/yb-master"
+            - "--fs_data_dirs=/data"
+            - "--rpc_bind_addresses={{ printf "$(HOSTNAME).%s.%s.svc.cluster.local" $svcName .Release.Namespace }}"
+            - "--server_broadcast_addresses={{ printf "$(HOSTNAME).%s.%s.svc.cluster.local" $svcName .Release.Namespace }}:7100"
+            - "--master_addresses={{ template "yugabyte.masterAddresses" . }}"
+            - "--replication_factor={{ .Values.replicas.master }}"
+            - "--memory_limit_hard_bytes={{ template "yugabyte.memoryHardLimit" .Values.resource.master }}"
+            - "--stderrthreshold=0"
+            - "--num_cpus={{ ceil .Values.resource.master.limits.cpu }}"
+            - "--webserver_interface=0.0.0.0"
+            - "--enable_ysql=true"
+            - "--metric_node_name=$(HOSTNAME)"
+            - "--logtostderr"
+          env:
+            - name: HOSTNAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          ports:
+            - name: master-rpc
+              containerPort: 7100
+              protocol: TCP
+            - name: master-http-ui
+              containerPort: 7000
+              protocol: TCP
+          resources:
+            requests:
+              {{- toYaml .Values.resource.master.requests | nindent 14 }}
+            limits:
+              {{- toYaml .Values.resource.master.limits | nindent 14 }}
+          volumeMounts:
+            - name: data
+              mountPath: /data
+              subPath: master
+            - name: decrypted-universe-key
+              mountPath: /yugabyte
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                  - /bin/bash
+                  - -c
+                  - |
+                    if [[ -f /data/yb-data/master/universe_key ]]; then
+                      exit 0
+                    fi
+
+                    until [ -d /data/yb-data/master ]; do
+                      sleep 5
+                    done
+
+                    cp /yugabyte/universe_key /data/yb-data/master/universe_key
+        - name: {{ .Chart.Name }}-tserver
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          workingDir: /data
+          command:
+            - "/home/yugabyte/bin/yb-tserver"
+            - "--fs_data_dirs=/data"
+            - "--rpc_bind_addresses={{ printf "$(HOSTNAME).%s.%s.svc.cluster.local" $svcName .Release.Namespace }}"
+            - "--server_broadcast_addresses={{ printf "$(HOSTNAME).%s.%s.svc.cluster.local" $svcName .Release.Namespace }}:9100"
+            - "--tserver_master_addrs={{ template "yugabyte.masterAddresses" . }}"
+            - "--replication_factor={{ .Values.replicas.tserver }}"
+            - "--memory_limit_hard_bytes={{ template "yugabyte.memoryHardLimit" .Values.resource.tserver }}"
+            - "--stderrthreshold=0"
+            - "--num_cpus={{ ceil .Values.resource.tserver.requests.cpu }}"
+            - "--ysql_pg_conf=password_encryption=scram-sha-256"
+            - "--ysql_hba_conf=host all yugabyte 0.0.0.0/0 md5,host all all 0.0.0.0/0 scram-sha-256,host all all ::0/0 scram-sha-256"
+            - "--pgsql_proxy_bind_address=0.0.0.0:5433"
+            - "--webserver_interface=0.0.0.0"
+            - "--enable_ysql=true"
+            - "--metric_node_name=$(HOSTNAME)"
+            - "--logtostderr"
+            - "--client_read_write_timeout_ms=600000"
+          env:
+            - name: HOSTNAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          ports:
+            - name: pgsql
+              containerPort: 5433
+              protocol: TCP
+            - name: tserver-rpc
+              containerPort: 9100
+              protocol: TCP
+            - name: tserver-http-ui
+              containerPort: 9000
+              protocol: TCP
+          resources:
+            requests:
+              {{- toYaml .Values.resource.tserver.requests | nindent 14 }}
+            limits:
+              {{- toYaml .Values.resource.tserver.limits | nindent 14 }}
+          volumeMounts:
+            - name: data
+              mountPath: /data
+              subPath: tserver
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        - name: encrypted-universe-key
+          secret:
+            secretName: {{ include "yugabyte.fullname" . }}
+            items:
+              - key: yugabyte_universe_key.encrypted
+                path: yugabyte_universe_key.encrypted
+        - name: decrypted-universe-key
+          emptyDir: {}
+{{- if eq "local" .Values.environment }}
+        - name: service-credential
+          secret:
+            secretName: {{ include "yugabyte.fullname" . }}
+            items:
+            - key: service_credential.json
+              path: service_credential.json
+{{- end }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        storageClassName: {{ .Values.storage.tserver.storageClass }}
+        resources:
+          requests:
+            storage: {{ .Values.storage.tserver.size }}
+

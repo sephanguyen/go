@@ -1,0 +1,91 @@
+
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: scheduling-api
+  namespace: {{ .Values.environment }}-{{ .Values.vendor }}-services
+spec:
+  hosts:
+{{ toYaml .Values.dnsNames | indent 4 }}
+  gateways:
+    - istio-system/{{ .Values.environment }}-{{ .Values.vendor }}-gateway
+  exportTo:
+    - istio-system
+  http:
+  # start default service.
+  - match:
+      - uri:
+          exact: /scheduling
+    rewrite:
+        uri: "/"
+    route:
+      - destination:
+          host: auto-scheduling
+          port:
+            number: {{ .Values.httpEndpoint.service.port }}
+    corsPolicy: &CORSPolicy
+        allowOrigins:
+          - regex: ".*"
+        allowMethods:
+          - POST
+          - GET
+          - OPTIONS
+          - PUT
+          - DELETE
+        allowHeaders:
+          - authorization
+          - grpc-timeout
+          - content-type
+          - keep-alive
+          - user-agent
+          - cache-control
+          - content-transfer-encoding
+          - token
+          - x-accept-content-transfer-encoding
+          - x-accept-response-streaming
+          - x-request-id
+          - x-user-agent
+          - x-graphql-mesh-authorization
+          - x-grpc-web
+          - if-none-match
+          - pkg
+          - version
+          - connect-timeout-ms
+          - connect-protocol-version
+          - connect-content-encoding
+          - connect-accept-encoding
+        maxAge: 100s
+        exposeHeaders:
+          - grpc-status
+          - grpc-message
+          - etag
+  # end default service.
+
+  # start scheduling service
+  - match:
+      - uri:
+          exact: /scheduling/v1/scheduling
+    rewrite:
+        uri: "/v1/scheduling/"
+    route:
+      - destination:
+          host: auto-scheduling
+          port:
+            number: {{ .Values.httpEndpoint.service.port }}
+    corsPolicy: *CORSPolicy
+  # end scheduling service
+
+  # start download service
+  - match:
+      - uri:
+          exact: /scheduling/v1/download/
+    rewrite:
+        uri: "/v1/download/"
+    route:
+      - destination:
+          host: auto-scheduling
+          port:
+            number: {{ .Values.httpEndpoint.service.port }}
+    corsPolicy: *CORSPolicy
+  # end download service
+

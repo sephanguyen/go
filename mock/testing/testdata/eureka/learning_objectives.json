@@ -1,0 +1,232 @@
+{
+	"schema": [
+		{
+			"column_name": "approve_grading",
+			"data_type": "boolean",
+			"column_default": "false",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "copied_from",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "country",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "display_order",
+			"data_type": "smallint",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "grade",
+			"data_type": "smallint",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "grade_capping",
+			"data_type": "boolean",
+			"column_default": "false",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "grade_to_pass",
+			"data_type": "integer",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "instruction",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "lo_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "manual_grading",
+			"data_type": "boolean",
+			"column_default": "false",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "master_lo_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "maximum_attempt",
+			"data_type": "integer",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "name",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "prerequisites",
+			"data_type": "ARRAY",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "review_option",
+			"data_type": "text",
+			"column_default": "'EXAM_LO_REVIEW_OPTION_IMMEDIATELY'::text",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "school_id",
+			"data_type": "integer",
+			"column_default": "'-2147483648'::integer",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "study_guide",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "subject",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "time_limit",
+			"data_type": "integer",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "topic_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "type",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "vendor_reference_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "vendor_type",
+			"data_type": "text",
+			"column_default": "'LM_VENDOR_TYPE_MANABIE'::text",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "video",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "video_script",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "learning_objectives",
+			"policyname": "rls_learning_objectives",
+			"qual": "permission_check(resource_path, 'learning_objectives'::text)",
+			"with_check": "permission_check(resource_path, 'learning_objectives'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "learning_objectives",
+			"policyname": "rls_learning_objectives_restrictive",
+			"qual": "permission_check(resource_path, 'learning_objectives'::text)",
+			"with_check": "permission_check(resource_path, 'learning_objectives'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "learning_objectives_pk",
+			"column_name": "lo_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "learning_objectives",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

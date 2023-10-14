@@ -1,0 +1,17 @@
+{
+    "iss": "{{ or .IssuerPrefix "http://firebase.emulator.svc.cluster.local:40401" }}/{{ or .Audience "fake_aud" }}",
+    "aud": "{{ or .Audience "fake_aud" }}",
+    "auth_time": {{ .AuthTime }},
+    "user_id": "{{ .UserID }}",
+    "sub": "{{ .UserID }}",
+    "iat": {{ .IssueAt }},
+    "exp": {{ .Expiration }},
+    "firebase": {
+        "identities": {
+            "apple.com": [
+                "apple_{{ .UserID }}"
+            ]
+        },
+        "sign_in_provider": "apple.com"
+    }
+}

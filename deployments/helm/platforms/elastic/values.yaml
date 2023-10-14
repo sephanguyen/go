@@ -1,0 +1,141 @@
+elasticsearch:
+  replicas: 3
+  image:
+    repository: asia.gcr.io/student-coach-e1e95/customized_elastic
+    pullPolicy: IfNotPresent
+    tag: "1.13.1"
+  imagePullSecrets: []
+  nameOverride: ""
+  fullnameOverride: ""
+  service:
+    type: ClusterIP
+    port: 9200
+  storage:
+    storageClass: standard
+    storageSize: 10Gi
+
+  snapshot:
+    enabled: true
+    schedule: "*/30 * * * *"
+    storageClass: standard
+    storageSize: 10Gi
+
+  # Whether to make a HTTP POST to create initial indices with a batch job.
+  initIndices: false
+
+  # Whether to run the securityadmin.sh script after the elasticsearch cluster is deployed.
+  runApplyConfigs: true
+
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 1
+        podAffinityTerm:
+          topologyKey: kubernetes.io/hostname
+          labelSelector:
+            matchExpressions:
+            - key: app.kubernetes.io/name
+              operator: In
+              values:
+              - elasticsearch-elastic # TODO: is this correct, due to the nameOverride?
+
+kibana:
+  image:
+    repository: amazon/opendistro-for-elasticsearch-kibana
+    pullPolicy: IfNotPresent
+    tag: "1.13.1"
+  imagePullSecrets: []
+  nameOverride: ""
+  fullnameOverride: ""
+  externalPort: 443
+  elasticsearchAccount:
+  secret: ""
+  keyPassphrase:
+    enabled: true
+  service:
+    type: ClusterIP
+    port: 5601
+  resources: {}
+  podAffinityIdentifier: kibana-elastic
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 1
+        podAffinityTerm:
+          topologyKey: kubernetes.io/hostname
+          labelSelector:
+            matchExpressions:
+            - key: app.kubernetes.io/name
+              operator: In
+              values: ["kibana-elastic"]
+
+elasticsearch_exporter:
+  replicaCount: 1
+  restartPolicy: Always
+  image:
+    repository: quay.io/prometheuscommunity/elasticsearch-exporter
+    tag: v1.2.1
+    pullPolicy: IfNotPresent
+    pullSecret: ""
+  securityContext:
+    enabled: true  # Should be set to false when running on OpenShift
+    runAsUser: 1000
+  dnsConfig: {}
+  log:
+    format: logfmt
+    level: info
+  resources: {}
+  priorityClassName: ""
+  nodeSelector: {}
+  tolerations: []
+  podAnnotations:
+    prometheus.io/scheme: "http"
+    prometheus.io/port: "9108"
+    prometheus.io/scrape: "true"
+    cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+  podLabels: {}
+  podAffinityIdentifier: es-exporter-elastic
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 1
+        podAffinityTerm:
+          topologyKey: kubernetes.io/hostname
+          labelSelector:
+            matchExpressions:
+            - key: app.kubernetes.io/name
+              operator: In
+              values: ["es-exporter-elastic"]
+  service:
+    type: ClusterIP
+    httpPort: 9108
+    metricsPort:
+      name: http
+    annotations: {}
+    labels: {}
+  env: {}
+  envFromSecret: ""
+  extraEnvSecrets: {}
+  secretMounts:
+  extraVolumes: []
+  extraVolumeMounts: []
+  es:
+    uri: null
+    all: true
+    indices: true
+    indices_settings: true
+    shards: true
+    snapshots: true
+    cluster_settings: false
+    timeout: 30s
+    ssl_skip_verify: true
+  web:
+    path: /metrics
+
+serviceaccount:
+  create: true
+
+decryptorImage:
+  repository: asia.gcr.io/student-coach-e1e95/decrypt-secret
+  tag: "20220219"
+  legacyTag: "20220517"

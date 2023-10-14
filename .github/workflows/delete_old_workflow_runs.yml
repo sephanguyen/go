@@ -1,0 +1,25 @@
+name: delete_old_workflow_runs
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  del_runs:
+    runs-on: ["self-hosted", "100m-400mi", "spot", "persistent"]
+    steps:
+      - name: Collect Workflow Telemetry
+        continue-on-error: true
+        timeout-minutes: 5
+        uses: manabie-com/workflow-telemetry-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.BUILD_GITHUB_TOKEN }}
+        with:
+          comment_on_pr: false
+      - name: Delete workflow runs
+        uses: Mattraks/delete-workflow-runs@main
+        with:
+          token: ${{ secrets.BUILD_GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          keep_minimum_runs: 0
+          retain_days: 60

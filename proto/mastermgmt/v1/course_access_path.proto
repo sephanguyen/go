@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package mastermgmt.v1;
+import "common/v1/enums.proto";
+import "google/api/annotations.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/mastermgmt/v1;mpb";
+
+message ImportCourseAccessPathsRequest {
+  bytes payload = 1;
+}
+
+message ImportCourseAccessPathsResponse {
+}
+
+message ExportCourseAccessPathsRequest {
+}
+
+message ExportCourseAccessPathsResponse {
+  bytes data = 1;
+}
+
+service CourseAccessPathService {
+  rpc ImportCourseAccessPaths(ImportCourseAccessPathsRequest) returns (ImportCourseAccessPathsResponse)
+  {
+    option (google.api.http) = {
+      post: "/mastermgmt/api/v1/proxy/courses/access_paths:import",
+      body: "*"
+    };
+  };
+
+  rpc ExportCourseAccessPaths(ExportCourseAccessPathsRequest) returns (ExportCourseAccessPathsResponse) {
+    option (google.api.http) = {
+      get: "/mastermgmt/api/v1/proxy/courses/access_paths:export"
+    };
+  };
+}

@@ -1,0 +1,128 @@
+{
+	"schema": [
+		{
+			"column_name": "allocate_marker_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "created_by",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "learning_material_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "student_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "study_plan_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "teacher_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "allocate_marker",
+			"policyname": "rls_allocate_marker",
+			"qual": "permission_check(resource_path, 'allocate_marker'::text)",
+			"with_check": "permission_check(resource_path, 'allocate_marker'::text)",
+			"relrowsecurity": false,
+			"relforcerowsecurity": false,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "allocate_marker",
+			"policyname": "rls_allocate_marker_location",
+			"qual": "(1 \u003c= ( SELECT count(*) AS count\n   FROM (granted_permissions p\n     JOIN user_access_paths usp ON ((usp.location_id = p.location_id)))\n  WHERE ((p.user_id = current_setting('app.user_id'::text)) AND (p.permission_id IN ( SELECT p2.permission_id\n           FROM permission p2\n          WHERE ((p2.permission_name = 'syllabus.allocate_marker.read'::text) AND (p2.resource_path = current_setting('permission.resource_path'::text))))) AND (usp.deleted_at IS NULL))\n LIMIT 1))",
+			"with_check": "(1 \u003c= ( SELECT count(*) AS count\n   FROM (granted_permissions p\n     JOIN user_access_paths usp ON ((usp.location_id = p.location_id)))\n  WHERE ((p.user_id = current_setting('app.user_id'::text)) AND (p.permission_id IN ( SELECT p2.permission_id\n           FROM permission p2\n          WHERE ((p2.permission_name = 'syllabus.allocate_marker.write'::text) AND (p2.resource_path = current_setting('permission.resource_path'::text))))) AND (usp.user_id = allocate_marker.created_by) AND (usp.deleted_at IS NULL))\n LIMIT 1))",
+			"relrowsecurity": false,
+			"relforcerowsecurity": false,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "pk_allocate_marker",
+			"column_name": "learning_material_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "pk_allocate_marker",
+			"column_name": "student_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "pk_allocate_marker",
+			"column_name": "study_plan_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "allocate_marker",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

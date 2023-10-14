@@ -1,0 +1,13 @@
+{
+    "packageDirectories": [
+      {
+        "path": "usermgmt"
+      },
+      {
+        "path": "example-module"
+      }
+    ],
+    "name": "manabie",
+    "namespace": "",
+    "sourceApiVersion": "58.0"
+  }

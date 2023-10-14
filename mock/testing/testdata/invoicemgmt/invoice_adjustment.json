@@ -1,0 +1,144 @@
+{
+	"schema": [
+		{
+			"column_name": "amount",
+			"data_type": "numeric",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "description",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "invoice_adjustment_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "invoice_adjustment_sequence_number",
+			"data_type": "integer",
+			"column_default": "nextval('invoice_adjustment_sequence_number_seq'::regclass)",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "invoice_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "migrated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "student_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "invoice_adjustment",
+			"policyname": "rls_invoice_adjustment",
+			"qual": "permission_check(resource_path, 'invoice_adjustment'::text)",
+			"with_check": "permission_check(resource_path, 'invoice_adjustment'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "invoice_adjustment",
+			"policyname": "rls_invoice_adjustment_restrictive",
+			"qual": "permission_check(resource_path, 'invoice_adjustment'::text)",
+			"with_check": "permission_check(resource_path, 'invoice_adjustment'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "invoice_adjustment_invoice_fk",
+			"column_name": "invoice_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "invoice_adjustment_students_fk",
+			"column_name": "student_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "pk__invoice_adjustment",
+			"column_name": "invoice_adjustment_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "invoice_adjustment_sequence_number_resource_path_unique",
+			"column_name": "invoice_adjustment_sequence_number",
+			"constraint_type": "UNIQUE"
+		},
+		{
+			"constraint_name": "invoice_adjustment_sequence_number_resource_path_unique",
+			"column_name": "resource_path",
+			"constraint_type": "UNIQUE"
+		}
+	],
+	"table_name": "invoice_adjustment",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

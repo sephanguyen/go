@@ -1,0 +1,3 @@
+table:
+  schema: public
+  name: fourkeys_commit_data

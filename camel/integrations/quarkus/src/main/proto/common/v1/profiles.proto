@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package common.v1;
+
+import "google/protobuf/timestamp.proto";
+import "common/v1/enums.proto";
+
+option java_package = "io.manabie.quarkus.proto.common.v1";
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/common/v1;cpb";
+
+enum UserGroup {
+  USER_GROUP_NONE = 0;
+  USER_GROUP_STUDENT = 1;
+  USER_GROUP_COACH = 2 [deprecated = true];
+  USER_GROUP_TUTOR = 3;
+  USER_GROUP_STAFF = 4;
+  USER_GROUP_ADMIN = 5;
+  USER_GROUP_TEACHER = 6;
+  USER_GROUP_PARENT = 7;
+  USER_GROUP_CONTENT_ADMIN = 8;
+  USER_GROUP_CONTENT_STAFF = 9;
+  USER_GROUP_SALES_ADMIN = 10;
+  USER_GROUP_SALES_STAFF = 11;
+  USER_GROUP_CS_ADMIN = 12;
+  USER_GROUP_CS_STAFF = 13;
+  USER_GROUP_SCHOOL_ADMIN = 14;
+  USER_GROUP_SCHOOL_STAFF = 15;
+}
+
+message BasicProfile {
+  string user_id = 1;
+  string name = 2;
+  string avatar = 3;
+  UserGroup group = 4;
+  string facebook_id = 5;
+  string apple_user_id = 6;
+  string given_name = 7; //create student
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp last_login_date = 9;
+  Country country = 10;
+  string full_name_phonetic = 11;
+  string first_name = 12;
+  string last_name = 13;
+}

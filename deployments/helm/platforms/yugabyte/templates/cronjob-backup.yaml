@@ -1,0 +1,107 @@
+{{- if .Values.backups.enabled }}
+{{- if .Capabilities.APIVersions.Has "batch/v1/CronJob" }}
+apiVersion: batch/v1
+{{- else }}
+apiVersion: batch/v1beta1
+{{- end }}
+kind: CronJob
+metadata:
+  name: {{ include "yugabyte.fullname" . }}-backup
+spec:
+  concurrencyPolicy: Forbid
+  schedule: {{ .Values.backups.schedule | quote }}
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 604800 #7days
+      template:
+        spec:
+          serviceAccountName: {{ include "yugabyte.serviceAccountName" . }}
+          restartPolicy: Never
+          initContainers:
+          - name: decrypt-secret
+            image: google/cloud-sdk:323.0.0-alpine
+            imagePullPolicy: IfNotPresent
+            command:
+              - /bin/sh
+              - -c
+              - |
+              {{- if eq "local" .Values.environment }}
+                gcloud auth activate-service-account --key-file /configs/service_credential.json
+              {{- end }}
+
+                kmsPath={{ .Values.configs.kmsPath }}
+                project=$(echo $kmsPath | cut -d'/' -f 2)
+                location=$(echo $kmsPath | cut -d'/' -f 4)
+                keyring=$(echo $kmsPath | cut -d'/' -f 6)
+                key=$(echo $kmsPath | cut -d'/' -f 8)
+
+                gcloud kms decrypt \
+                  --project=$project \
+                  --keyring=$keyring \
+                  --key=$key \
+                  --location=$location \
+                  --ciphertext-file /configs/yugabyte.secrets.yaml.encrypted \
+                  --plaintext-file /yugabyte/config.env
+            volumeMounts:
+              - name: encrypted-secrets
+                mountPath: /configs/yugabyte.secrets.yaml.encrypted
+                subPath: yugabyte.secrets.yaml.encrypted
+                readOnly: true
+              - name: decrypted-secrets
+                mountPath: /yugabyte
+{{- if eq "local" .Values.environment }}
+              - name: service-credential
+                mountPath: /configs/service_credential.json
+                subPath: service_credential.json
+                readOnly: true
+{{- end }}
+          containers:
+          - name: backup
+            image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+            imagePullPolicy: IfNotPresent
+            command:
+              - /bin/bash
+              - -c
+              - |
+                pgpass=$(grep PGPASSWORD /yugabyte/config.env | awk '{print$2}')
+                backup_dir=$(date '+%Y-%m-%d-%H:%M:%S')
+
+                dbs=("eureka")
+                for db in "${dbs[@]}"; do
+                  echo "Backing up $db..."
+                  PGPASSWORD=$pgpass /home/yugabyte/postgres/bin/ysql_dump -h {{ include "yugabyte.fullname" . }}-tserver -d $db > /tmp/${db}.sql
+              {{- if eq "local" .Values.environment }}
+                  gsutil -o Credentials:gs_service_key_file=/configs/service_credential.json cp /tmp/${db}.sql {{ .Values.backups.bucket }}/${backup_dir}/${db}.sql
+              {{- else }}
+                  gsutil cp /tmp/${db}.sql {{ .Values.backups.bucket }}/${backup_dir}/${db}.sql
+              {{- end }}
+                done
+            volumeMounts:
+              - name: decrypted-secrets
+                mountPath: /yugabyte
+{{- if eq "local" .Values.environment }}
+              - name: service-credential
+                mountPath: /configs/service_credential.json
+                subPath: service_credential.json
+                readOnly: true
+{{- end }}
+          volumes:
+            - name: encrypted-secrets
+              secret:
+                secretName: {{ include "yugabyte.fullname" . }}
+                items:
+                - key: yugabyte.secrets.yaml.encrypted
+                  path: yugabyte.secrets.yaml.encrypted
+            - name: decrypted-secrets
+              emptyDir: {}
+{{- if eq "local" .Values.environment }}
+            - name: service-credential
+              secret:
+                secretName: {{ include "yugabyte.fullname" . }}
+                items:
+                - key: service_credential.json
+                  path: service_credential.json
+{{- end }}
+{{- end }}

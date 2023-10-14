@@ -1,0 +1,5 @@
+- "!include public_count_instances_group_by_date.yaml"
+- "!include public_count_instances_group_by_status.yaml"
+- "!include public_get_e2e_feature_status_count_in_last_n_days.yaml"
+- "!include public_get_instance_filter_by_tags.yaml"
+- "!include public_get_instances_with_filters.yaml"

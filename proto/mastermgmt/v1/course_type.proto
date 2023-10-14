@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package mastermgmt.v1;
+import "google/api/annotations.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/mastermgmt/v1;mpb";
+
+message ImportCourseTypesRequest {
+    bytes payload = 1;
+}
+
+message ImportCourseTypesResponse {
+}
+
+service CourseTypeService {
+    rpc ImportCourseTypes(ImportCourseTypesRequest) returns (ImportCourseTypesResponse){
+        option (google.api.http) = {
+            post: "/mastermgmt/api/v1/proxy/course_types",
+            body: "*"
+        };
+    };
+}

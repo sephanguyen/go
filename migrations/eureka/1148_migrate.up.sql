@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS shuffled_quiz_sets_study_plan_item_idx ON public.shuffled_quiz_sets(study_plan_item_id);

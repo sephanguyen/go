@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package manabie.yasuo;
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option (gogoproto.goproto_registration) = true;
+option go_package = "github.com/manabie-com/backend/pkg/genproto/yasuo;pb";
+
+import "bob/enum.proto";
+
+message City {
+  int32 id = 1;
+  string name = 2;
+  manabie.bob.Country country = 3;
+}
+
+message RetrieveCitiesRequest { manabie.bob.Country country = 1; }
+
+message RetrieveCitiesResponse { repeated City cities = 1; }
+
+message District {
+  int32 id = 1;
+  string name = 2;
+  manabie.bob.Country country = 3;
+  City city = 4;
+}
+
+message RetrieveDistrictsRequest {
+  manabie.bob.Country country = 1;
+  int32 city_id = 2;
+}
+
+message RetrieveDistrictsResponse { repeated District districts = 1; }
+
+message Point {
+  double lat = 1;
+  double long = 2;
+}

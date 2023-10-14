@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package syllabus.v1;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/syllabus/v1;sspb";
+
+message DownloadMappingFileRequest {
+}
+
+message DownloadMappingFileResponse {
+    string mapping_course_id_url = 1;
+    string mapping_exam_lo_id_url = 2;
+    string mapping_question_tag_url = 3;
+    string failed_sync_email_recipients_url = 4;
+}
+
+message UploadMappingFileRequest {
+    bytes mapping_course_id = 1;
+    bytes mapping_exam_lo_id = 2;
+    bytes mapping_question_tag = 3;
+    bytes failed_sync_email_recipients = 4;
+}
+
+message UploadMappingFileResponse {
+}
+
+service LearningHistoryDataSyncService {
+    rpc DownloadMappingFile(DownloadMappingFileRequest)
+        returns (DownloadMappingFileResponse); 
+    rpc UploadMappingFile(UploadMappingFileRequest)
+        returns (UploadMappingFileResponse);
+}

@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package eureka.v1;
+
+import "common/v1/contents.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/eureka/v1;epb";
+
+
+message UpsertLOsRequest {
+  repeated common.v1.LearningObjective learning_objectives = 1;
+}
+
+message UpsertLOsResponse {
+  repeated string lo_ids = 1;
+}
+
+message DeleteLosRequest {
+  repeated string lo_ids = 1;
+}
+
+message DeleteLosResponse {
+  bool successful = 1;
+}
+
+message TopicLODisplayOrder {
+  string lo_id = 1;
+  int32 display_order = 2;
+  string topic_id = 3;
+}
+
+message TopicLO {
+  string lo_id = 1;
+  string topic_id = 2;
+}
+
+message UpdateLearningObjectiveNameRequest {
+  string lo_id = 1;
+  string new_learning_objective_name = 2;
+}
+
+message UpdateLearningObjectiveNameResponse {
+}
+
+service LearningObjectiveModifierService {
+  rpc UpsertLOs(UpsertLOsRequest) returns (UpsertLOsResponse);
+  rpc DeleteLos(DeleteLosRequest) returns (DeleteLosResponse);
+  rpc UpdateLearningObjectiveName(UpdateLearningObjectiveNameRequest) returns (UpdateLearningObjectiveNameResponse);
+}

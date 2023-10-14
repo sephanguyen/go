@@ -1,0 +1,111 @@
+{
+	"schema": [
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "learner_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "lo_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "rating_value",
+			"data_type": "USER-DEFINED",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "video_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "lo_video_rating",
+			"policyname": "rls_lo_video_rating",
+			"qual": "permission_check(resource_path, 'lo_video_rating'::text)",
+			"with_check": "permission_check(resource_path, 'lo_video_rating'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "lo_video_rating",
+			"policyname": "rls_lo_video_rating_restrictive",
+			"qual": "permission_check(resource_path, 'lo_video_rating'::text)",
+			"with_check": "permission_check(resource_path, 'lo_video_rating'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "lo_video_rating_pk",
+			"column_name": "lo_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "lo_video_rating_pk",
+			"column_name": "video_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "lo_video_rating",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

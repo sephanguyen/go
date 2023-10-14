@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package eureka.v2;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/eureka/v2;epb";
+
+message UpdatePublishStatusLearningMaterialsRequest {
+    message PublishStatus {
+        string learning_material_id = 1;
+        bool is_published = 2;
+    }
+    repeated PublishStatus publish_statuses = 1;
+}
+
+message UpdatePublishStatusLearningMaterialsResponse {
+}
+
+message ListLearningMaterialInfoRequest{
+    repeated string learning_material_ids = 1;
+}
+
+message ListLearningMaterialInfoResponse{
+    message LearningMaterialInfo{
+        string learning_material_id = 1;
+        string learning_material_name = 2;
+        string chapter_id = 4;
+        string chapter_name = 5;
+        string topic_id = 6;
+        string topic_name = 7;
+    }
+    repeated  LearningMaterialInfo learning_materials = 1;
+}
+
+service LearningMaterialService {
+    rpc UpdatePublishStatusLearningMaterials (UpdatePublishStatusLearningMaterialsRequest)
+        returns (UpdatePublishStatusLearningMaterialsResponse);
+    rpc ListLearningMaterialInfo(ListLearningMaterialInfoRequest) returns (ListLearningMaterialInfoResponse);
+}

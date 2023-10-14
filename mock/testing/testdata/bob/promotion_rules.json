@@ -1,0 +1,129 @@
+{
+	"schema": [
+		{
+			"column_name": "conditions",
+			"data_type": "jsonb",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "discount_amount",
+			"data_type": "numeric",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "discount_type",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "promo_type",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "promotion_id",
+			"data_type": "integer",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "promotion_rule_id",
+			"data_type": "integer",
+			"column_default": "nextval('promotion_rules_promotion_rule_id_seq'::regclass)",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "rewards",
+			"data_type": "jsonb",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "promotion_rules",
+			"policyname": "rls_promotion_rules",
+			"qual": "permission_check(resource_path, 'promotion_rules'::text)",
+			"with_check": "permission_check(resource_path, 'promotion_rules'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "promotion_rules",
+			"policyname": "rls_promotion_rules_restrictive",
+			"qual": "permission_check(resource_path, 'promotion_rules'::text)",
+			"with_check": "permission_check(resource_path, 'promotion_rules'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "promotion_id_fk",
+			"column_name": "promotion_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "promotion_rule_id_pk",
+			"column_name": "promotion_rule_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "promotion_rules",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

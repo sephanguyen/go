@@ -1,0 +1,62 @@
+table:
+  schema: public
+  name: student_study_plans
+object_relationships:
+  - name: study_plan
+    using:
+      foreign_key_constraint_on: study_plan_id
+array_relationships:
+  - name: course_students
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: course_students
+        insertion_order: null
+        column_mapping:
+          student_id: student_id
+select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+        - study_plan_id
+        - student_id
+        - created_at
+        - updated_at
+        - deleted_at
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+          - course_students:
+              _and:
+                - deleted_at:
+                    _is_null: true
+          - study_plan:
+              _and:
+                - deleted_at:
+                    _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+        - study_plan_id
+        - student_id
+        - created_at
+        - updated_at
+        - deleted_at
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+          - course_students:
+              _and:
+                - deleted_at:
+                    _is_null: true
+          - study_plan:
+              _and:
+                - deleted_at:
+                    _is_null: true
+                - school_id:
+                    _in: X-Hasura-School-Ids
+      allow_aggregations: true

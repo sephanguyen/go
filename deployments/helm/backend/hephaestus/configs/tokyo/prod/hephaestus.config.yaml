@@ -1,0 +1,20 @@
+common:
+  google_cloud_project: student-coach-e1e95
+
+datalake:
+  alloydb:
+    cloudsql_instance: '{{ .Values.global.cloudSQLCommonInstance }}'
+    cloudsql_use_public_ip: {{ .Values.global.cloudSQLUsePublicIP }}
+    host: '{{ include "util.databaseHost" . }}'
+    port: '5432'
+    dbname: 'alloydb'
+    user: 'prod-kafka-connect@student-coach-e1e95.iam'
+
+datawarehouses:
+  kec:
+    cloudsql_instance: 'student-coach-e1e95:asia-northeast1:prod-tokyo-data-warehouse-251f01f8'
+    cloudsql_use_public_ip: {{ .Values.global.cloudSQLUsePublicIP }}
+    host: '{{ include "util.databaseHost" . }}'
+    port: '5432'
+    dbname: 'kec'
+    user: 'prod-dwh-kafka-connect@student-coach-e1e95.iam'

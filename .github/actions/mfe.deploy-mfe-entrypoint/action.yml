@@ -1,0 +1,118 @@
+name: "Deploy MFE entrypoint"
+description: "A composite action for deploy MFE entrypoint"
+inputs:
+  imd-password:
+    description: "IMD password"
+    required: false
+  prod-imd-password:  
+    description: "IMD password on PROD"
+    required: false
+  github-token: 
+    description: "Github token"
+    required: true
+  env:
+    description: "Environment"
+    required: false
+    default: "staging"
+  release-tag:
+    description: "FE release tag"
+    required: true
+  organization:
+    description: "Organization"
+    required: true
+  fragments: 
+    description: "Services: 'user-auth, user-main, ...' or all"
+    required: true
+    default: ''
+  mfe-team-infos:
+    description: "This object will contain teamName, manifestFileName, manifestPath"
+    required: true
+  mfe-fragments-args:
+    description: "The --fragments args of yarn mana deploy script"
+    required: false
+  mfe-teams-args:
+    description: "The --teams args of yarn mana deploy script"
+    required: false
+
+
+runs:
+  using: "composite"
+  steps:
+      - name: Collect Workflow Telemetry
+        continue-on-error: true
+        uses: manabie-com/workflow-telemetry-action@v2
+
+      - name: Authenticate to Google Cloud
+        uses: ./.github/actions/mfe.workload-identity
+        with:
+          env: "${{ inputs.env }}"
+
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+          repository: ${{github.repository_owner}}/school-portal-admin
+          token: ${{ inputs.github-token }}
+          ref: ${{ inputs.release-tag }}
+          path: './school-portal-admin'
+
+      - uses: actions/cache@v3
+        continue-on-error: true
+        with:
+          path: |
+            ${{github.workspace}}/school-portal-admin/node_modules
+          key: yarn-${{ hashFiles('**/yarn.lock') }}
+
+      - name: install-deps
+        working-directory: ./school-portal-admin
+        shell: bash
+        run: |
+          git config --global --add url."https://${{ inputs.github-token }}:x-oauth-basic@github.com/manabie-com".insteadOf "https://github.com/manabie-com"
+          yarn install --frozen-lockfile
+
+      - name: Deploy
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ inputs.github-token }}
+          script: |
+            const { execSync } = require("node:child_process");
+
+            const teamInfos = ${{ inputs.mfe-team-infos }};
+            const env = "${{ inputs.env }}";
+            const subdomain = env === "production" ? "prod.tokyo.manabie" : env === "preproduction" ? "prep.tokyo.manabie" : `${env}.manabie`;
+            const host = `https://admin.${subdomain}.io/imd`;
+            const password = env === "production" || env === "preproduction" ? "${{inputs.prod-imd-password}}" : "${{inputs.imd-password}}"
+
+            const customSort = (a, b) => {
+              if (a.teamName === "user" || a.teamName === "architecture") {
+                return -1;
+              }
+              if (b.teamName === "user" || b.teamName === "architecture") {
+                return 1;
+              }
+              return 0;
+            }
+
+            for (const teamInfo of Object.values(teamInfos).sort(customSort)) {
+              console.log("Deploying team: ", teamInfo.teamName);
+
+              const { teamName, manifestFileName, manifestPath, teamPath } = teamInfo;
+              const bucketFilePath = `import-map-deployer-${{ inputs.env }}/${{ inputs.organization }}/${ teamName }/${{ inputs.release-tag }}`;
+              execSync(`
+                gsutil cp gs://${bucketFilePath}/${manifestFileName} ${{github.workspace}}/school-portal-admin/${manifestFileName}
+              `)
+
+              execSync(
+                `cd ./school-portal-admin && yarn mana app deploy --host ${host} \
+                    --username admin --password ${password} \
+                    --storage-url "https://storage.googleapis.com/${bucketFilePath}" \
+                    --config ${teamPath}/mana.config.ts \
+                    --env ${{ inputs.organization }} \
+                    --manifest-path ${{github.workspace}}/school-portal-admin/${manifestFileName} ${{ inputs.mfe-fragments-args }}`,
+              );
+            }
+        
+      - uses: actions/checkout@v3	
+        if: ${{ !cancelled() }}
+        with:	
+          token: ${{ inputs.github-token }}

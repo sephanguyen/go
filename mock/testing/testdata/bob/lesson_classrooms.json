@@ -1,0 +1,109 @@
+{
+	"schema": [
+		{
+			"column_name": "classroom_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "lesson_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "lesson_classrooms",
+			"policyname": "rls_lesson_classrooms",
+			"qual": "permission_check(resource_path, 'lesson_classrooms'::text)",
+			"with_check": "permission_check(resource_path, 'lesson_classrooms'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "lesson_classrooms",
+			"policyname": "rls_lesson_classrooms_restrictive",
+			"qual": "permission_check(resource_path, 'lesson_classrooms'::text)",
+			"with_check": "permission_check(resource_path, 'lesson_classrooms'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "fk__lesson_classrooms__classroom_id",
+			"column_name": "classroom_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "fk__lesson_classrooms__lesson_id",
+			"column_name": "lesson_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "pk__lesson_classrooms",
+			"column_name": "classroom_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "pk__lesson_classrooms",
+			"column_name": "lesson_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "lesson_classrooms",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

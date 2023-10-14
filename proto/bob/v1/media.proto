@@ -1,0 +1,144 @@
+syntax = "proto3";
+
+package bob.v1;
+
+import "bob/v1/enums.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/bob/v1;bpb";
+
+enum UploadType {
+  UPLOAD_TYPE_AVATAR = 0;
+  UPLOAD_TYPE_CHAT = 1;
+  UPLOAD_TYPE_ASSIGNMENT = 2;
+}
+
+enum ConversionTaskStatus {
+  CONVERSION_TASK_STATUS_INVALID = 0;
+  CONVERSION_TASK_STATUS_WAITING = 1;
+  CONVERSION_TASK_STATUS_CONVERTING = 2;
+  CONVERSION_TASK_STATUS_FINISHED = 3;
+  CONVERSION_TASK_STATUS_FAILED = 4;
+}
+
+message UploadAssetRequest {
+  UploadType upload_type = 1;
+  bytes payload = 2;
+  string extension = 3;
+}
+
+message UploadAssetResponse {
+  string url = 1;
+}
+
+message CreateBrightCoveUploadUrlRequest {
+  string name = 1;
+}
+
+message CreateBrightCoveUploadUrlResponse {
+  string signed_url = 1;
+  string api_request_url = 2;
+  string video_id = 3;
+}
+
+message FinishUploadBrightCoveRequest {
+  string api_request_url = 1;
+  string video_id = 2;
+}
+
+message FinishUploadBrightCoveResponse {}
+
+message Comment {
+  string comment = 1;
+  google.protobuf.Duration duration = 2;
+}
+
+message ConvertedImage {
+    int32 width = 1;
+    int32 height = 2;
+    string image_url = 3;
+}
+
+message Media {
+  string media_id = 1;
+  string name = 2;
+  string resource = 3;
+  repeated Comment comments = 4;
+  MediaType type = 5;
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp updated_at = 7;
+  repeated ConvertedImage images = 8;
+}
+
+message RetrieveMediaRequest {
+  repeated string media_ids = 1;
+}
+
+message RetrieveMediaResponse {
+  repeated Media media = 1;
+}
+
+message UpsertMediaRequest {
+  repeated Media media = 1;
+}
+
+message UpsertMediaResponse {
+  repeated string media_ids = 1;
+}
+
+message AudioConfig {
+  string language = 1;
+}
+
+message AudioOptionRequest {
+  reserved 1;
+  reserved "language";
+  string text = 2;
+  string quiz_id = 3;
+  AudioOptionType type = 4;
+  AudioConfig configs = 5;
+}
+
+enum AudioOptionType {
+  FLASHCARD_AUDIO_TYPE_NONE = 0;
+  FLASHCARD_AUDIO_TYPE_TERM = 1;
+  FLASHCARD_AUDIO_TYPE_DEFINITION = 2;
+}
+
+message AudioOptionResponse {
+  string link = 1;
+  string quiz_id = 2;
+  string text = 3;
+  AudioOptionType type = 4;
+  AudioConfig configs = 5;
+}
+
+message GenerateAudioFileRequest {
+  repeated AudioOptionRequest options = 1;
+}
+
+message GenerateAudioFileResponse {
+  repeated AudioOptionResponse options = 1;
+}
+
+service MediaModifierService {
+  // UploadAsset uploads images, pdf ... to cloud storage
+  rpc UploadAsset(stream UploadAssetRequest) returns (UploadAssetResponse);
+
+  // creates dynamic upload URL
+  rpc CreateBrightCoveUploadUrl(CreateBrightCoveUploadUrlRequest)
+      returns (CreateBrightCoveUploadUrlResponse);
+  // indicate that upload finished
+  rpc FinishUploadBrightCove(FinishUploadBrightCoveRequest)
+      returns (FinishUploadBrightCoveResponse);
+
+  // work with media object in DB
+  rpc UpsertMedia(UpsertMediaRequest) returns (UpsertMediaResponse);
+
+  rpc GenerateAudioFile(GenerateAudioFileRequest) returns (GenerateAudioFileResponse);
+}
+
+service MediaReaderService {
+  rpc RetrieveMedia(RetrieveMediaRequest) returns (RetrieveMediaResponse);
+}

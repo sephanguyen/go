@@ -1,0 +1,16 @@
+---
+dls-role:
+  reserved: false
+  hidden: false
+  cluster_permissions:
+  - "*"
+  index_permissions:
+  - index_patterns:
+    - "*"
+    dls: "{\"bool\":{\"filter\":[{\"term\":{\"resource_path\":\"${attr.jwt.resource_path}\"}}]}}"
+    allowed_actions:
+    - "*"
+  static: false
+_meta:
+  type: "roles"
+  config_version: 2

@@ -1,0 +1,68 @@
+
+\connect bob;
+
+INSERT INTO public.users
+(user_id, country, name, avatar, phone_number, email, device_token, allow_notification, user_group, updated_at, created_at, is_tester, facebook_id, platform, phone_verified, email_verified, deleted_at, given_name, resource_path, is_system)
+VALUES('01GV01BYM4KFTDS1KRCR9HPET1', 'COUNTRY_JP', 'Temporary Teacher', '', NULL, 'temporary_teacher+lessonmgmt001@manabie.com', NULL, NULL, 'USER_GROUP_TEACHER', now(), now(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, '-2147483642', true) ON CONFLICT DO NOTHING;
+
+INSERT INTO public.courses (course_id,"name",country,subject,grade,display_order,updated_at,created_at,school_id,deleted_at,course_type,start_date,end_date,teacher_ids,preset_study_plan_id,icon,status,resource_path,teaching_method,course_type_id,remarks,is_archived,course_partner_id) VALUES
+	 ('01GV047H7F1C0XPZGA0860BXC1','Course Test 123',NULL,NULL,NULL,1,now(),now(),-2147483642,NULL,NULL,NULL,'2025-01-01 07:00:00+07',NULL,NULL,'','COURSE_STATUS_NONE','-2147483642','COURSE_TEACHING_METHOD_NONE',NULL,'',false,NULL) ON CONFLICT DO NOTHING;
+
+INSERT INTO public.teachers (teacher_id,school_ids,updated_at,created_at,school_name,deleted_at,resource_path) VALUES
+	 ('01GV01BYM4KFTDS1KRCR9HPET1','{-2147483642}',now(),now(),NULL,NULL,'-2147483642') ON CONFLICT DO NOTHING;
+
+INSERT INTO public.scheduler (scheduler_id,start_date,end_date,freq,created_at,updated_at,deleted_at,resource_path) 	
+VALUES ('01GTTAS9VKTBWTJVYSIWD09KA1','2023-03-06 00:15:00+07','2023-03-31 01:15:00+07','weekly', now(),	
+now(),NULL,'-2147483642') ON CONFLICT DO NOTHING;
+
+INSERT INTO public.lessons (lesson_id,teacher_id,course_id,created_at,updated_at,deleted_at,end_at,control_settings,lesson_group_id,room_id,lesson_type,status,stream_learner_counter,learner_ids,"name",start_time,end_time,resource_path,room_state,teaching_model,class_id,center_id,teaching_method,teaching_medium,scheduling_status,is_locked,scheduler_id,zoom_link,zoom_owner_id,zoom_id,zoom_occurrence_id) values
+	('01GV032YZ8FJ4JGEAR4XXQX6L1','01GV01BYM4KFTDS1KRCR9HPET1','01GV047H7F1C0XPZGA0860BXC1',now(),now(),NULL,NULL,NULL,'01GV032Z1DD4Y4GBB6GTG2Y8PD','2949968391343994785','LESSON_TYPE_OFFLINE','LESSON_STATUS_NOT_STARTED',0,'{}','','2023-03-08 00:15:00+07','2023-03-08 01:30:00+07','-2147483642',NULL,'LESSON_TEACHING_MODEL_GROUP',NULL,'01FR4M51XJY9E77GSN4QZ1Q911','LESSON_TEACHING_METHOD_GROUP','LESSON_TEACHING_MEDIUM_OFFLINE','LESSON_SCHEDULING_STATUS_DRAFT',false,'01GTTAS9VKTBWTJVYSIWD09KA1','','','','') ON CONFLICT DO NOTHING;
+
+INSERT INTO public.lessons_teachers (lesson_id,teacher_id,created_at,deleted_at,resource_path,teacher_name) VALUES
+	 ('01GV032YZ8FJ4JGEAR4XXQX6L1','01GV01BYM4KFTDS1KRCR9HPET1',now(),NULL,'-2147483642','') ON CONFLICT DO NOTHING;
+
+INSERT INTO public.lessons_courses (lesson_id,course_id,created_at,deleted_at,resource_path) VALUES
+	 ('01GV032YZ8FJ4JGEAR4XXQX6L1','01GV047H7F1C0XPZGA0860BXC1',now(),NULL,'-2147483642') ON CONFLICT DO NOTHING;
+
+INSERT INTO public.reallocation
+(student_id, original_lesson_id, new_lesson_id, created_at, updated_at, deleted_at, resource_path, course_id)
+VALUES('', '01GV032YZ8FJ4JGEAR4XXQX6L1', NULL, now(), now(), NULL, '-2147483642', '01GV047H7F1C0XPZGA0860BXC1') ON CONFLICT DO NOTHING;
+
+INSERT INTO public.partner_form_configs
+(form_config_id, resource_path, partner_id, feature_name, created_at, updated_at, deleted_at, form_config_data)
+VALUES('01FTCP0VPV85CV5C5RH7FKQ2WO','-2147483642', -2147483642, 'FEATURE_NAME_INDIVIDUAL_LESSON_REPORT', '2023-03-14 14:44:35.531', '2023-03-14 14:44:35.531', NULL, '{"sections": [{"fields": [{"label": {"i18n": {"translations": {"en": "Attendance", "ja": "出席情報", "vi": "Attendance"}, "fallback_language": "ja"}}, "field_id": "attendance_label", "value_type": "VALUE_TYPE_NULL", "is_required": false, "display_config": {"size": {"md": 12, "xs": 12}}, "component_props": {"variant": "body2"}, "component_config": {"type": "TYPOGRAPHY"}}, {"field_id": "attendance_status", "value_type": "VALUE_TYPE_STRING", "is_required": true, "display_config": {"size": {"md": 6, "xs": 6}}, "component_config": {"type": "ATTENDANCE_STATUS"}}, {"field_id": "attendance_remark", "value_type": "VALUE_TYPE_STRING", "is_required": false, "display_config": {"size": {"md": 6, "xs": 6}}, "component_config": {"type": "ATTENDANCE_REMARK"}}], "section_id": "attendance_section_id", "section_name": "attendance"}, {"fields": [{"label": {"i18n": {"translations": {"en": "Homework Submission", "ja": "課題", "vi": "Homework Submission"}, "fallback_language": "ja"}}, "field_id": "homework_submission_label", "value_type": "VALUE_TYPE_NULL", "is_required": false, "display_config": {"size": {"md": 12, "xs": 12}}, "component_props": {"variant": "body2"}, "component_config": {"type": "TYPOGRAPHY"}}, {"label": {"i18n": {"translations": {"en": "Homework Status", "ja": "提出状況", "vi": "Homework Status"}, "fallback_language": "ja"}}, "field_id": "homework_submission_status", "value_type": "VALUE_TYPE_STRING", "is_required": false, "display_config": {"size": {"md": 6, "xs": 6}}, "component_props": {"options": [{"key": "COMPLETED", "label": {"i18n": {"translations": {"en": "Completed", "ja": "完了", "vi": "Completed"}, "fallback_language": "ja"}}}, {"key": "INCOMPLETE", "label": {"i18n": {"translations": {"en": "Incomplete", "ja": "未完了", "vi": "Incomplete"}, "fallback_language": "ja"}}}], "optionLabelKey": "label"}, "component_config": {"type": "AUTOCOMPLETE"}}], "section_id": "homework_submission_section_id", "section_name": "homework_submission"}, {"fields": [{"label": {"i18n": {"translations": {"en": "Lesson", "ja": "授業", "vi": "Lesson"}, "fallback_language": "ja"}}, "field_id": "lesson_label", "value_type": "VALUE_TYPE_NULL", "is_required": false, "display_config": {"size": {"md": 6, "xs": 6}}, "component_props": {"variant": "body2"}, "component_config": {"type": "TYPOGRAPHY"}}, {"field_id": "lesson_view_study_plan_action", "value_type": "VALUE_TYPE_NULL", "is_required": false, "display_config": {"size": {"md": 3, "xs": 3}}, "component_config": {"type": "LINK_VIEW_STUDY_PLAN"}}, {"field_id": "lesson_previous_report_action", "value_type": "VALUE_TYPE_NULL", "is_required": false, "display_config": {"size": {"md": 3, "xs": 3}}, "component_config": {"type": "BUTTON_PREVIOUS_REPORT"}}, {"label": {"i18n": {"translations": {"en": "Content", "ja": "追加教材", "vi": "Content"}, "fallback_language": "ja"}}, "field_id": "lesson_content", "value_type": "VALUE_TYPE_STRING", "is_required": false, "display_config": {"size": {"md": 6, "xs": 6}}, "component_props": {"InputProps": {"rows": 6, "multiline": true}}, "component_config": {"type": "TEXT_FIELD_AREA"}}, {"label": {"i18n": {"translations": {"en": "Homework", "ja": "追加課題", "vi": "Homework"}, "fallback_language": "ja"}}, "field_id": "lesson_homework", "value_type": "VALUE_TYPE_STRING", "is_required": false, "display_config": {"size": {"md": 6, "xs": 6}}, "component_props": {"InputProps": {"rows": 6, "multiline": true}}, "component_config": {"type": "TEXT_FIELD_AREA"}}], "section_id": "lesson_section_id", "section_name": "lesson"}, {"fields": [{"label": {"i18n": {"translations": {"en": "Remarks", "ja": "備考", "vi": "Remarks"}, "fallback_language": "ja"}}, "field_id": "remarks_section_label", "value_type": "VALUE_TYPE_NULL", "is_required": false, "display_config": {"size": {"md": 12, "xs": 12}}, "component_props": {"variant": "body2"}, "component_config": {"type": "TYPOGRAPHY"}}, {"label": {"i18n": {"translations": {"en": "Remarks", "ja": "備考", "vi": "Remarks"}, "fallback_language": "ja"}}, "field_id": "remarks", "value_type": "VALUE_TYPE_STRING", "is_required": false, "display_config": {"size": {"md": 12, "xs": 12}}, "component_props": {"InputProps": {"rows": 6, "multiline": true}}, "component_config": {"type": "TEXT_FIELD_AREA"}}], "section_id": "remarks_section_id", "section_name": "remarks"}]}'::jsonb)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO public.lesson_members (lesson_id,user_id,updated_at,created_at,deleted_at,resource_path,attendance_status,attendance_remark,course_id,attendance_notice,attendance_reason,attendance_note,user_first_name,user_last_name)
+VALUES ('01GV032YZ8FJ4JGEAR4XXQX6L1','01GK1ETTR4ECP5DSAKFMAM24KV001',now(),now(),NULL,'-2147483642','STUDENT_ATTEND_STATUS_ATTEND',NULL,NULL,NULL,NULL,NULL,NULL,NULL) ON CONFLICT DO NOTHING;
+
+INSERT INTO public.lesson_reports (lesson_report_id,report_submitting_status ,created_at,updated_at,deleted_at,resource_path,form_config_id,lesson_id)
+VALUES ('01GTDDRCFX34FX26YH3JD92LR1','LESSON_REPORT_SUBMITTING_STATUS_SUBMITTED',now(),now(),NULL,'-2147483642','01FTCP0VPV85CV5C5RH7FKQ2WO','01GV032YZ8FJ4JGEAR4XXQX6L1') 
+ON CONFLICT ON constraint lesson_reports_pk DO UPDATE SET form_config_id = EXCLUDED.form_config_id;
+
+INSERT INTO public.lesson_report_details (lesson_report_id,student_id,created_at,updated_at,deleted_at,resource_path,lesson_report_detail_id,report_versions)
+VALUES ('01GTDDRCFX34FX26YH3JD92LR1','01GK1ETTR4ECP5DSAKFMAM24KV001',now(),now(),NULL,'-2147483642','01GTDDRCG4SF2SN4VDTD79LRD1',0) ON CONFLICT DO NOTHING;
+
+INSERT INTO public.classroom (classroom_id,"name",location_id,remarks,is_archived,created_at,updated_at,deleted_at,resource_path) VALUES
+	 ('01GM62GYKYPWSA1BK2N0TJ0CR1','Sample Classroom','01FR4M51XJY9E77GSN4QZ1Q9N7','Classroom',false,now(),now(),NULL,'-2147483642') ON CONFLICT DO NOTHING;
+
+INSERT INTO public.partner_dynamic_form_field_values
+(dynamic_form_field_value_id, field_id, lesson_report_detail_id, created_at, updated_at, deleted_at, value_type, string_value, bool_value, string_array_value, int_array_value, string_set_value, int_set_value, field_render_guide, resource_path, int_value)
+VALUES
+	('01GVFKKDPS0T55G20PBKF0WWA5', 'lesson_content', '01GTDDRCG4SF2SN4VDTD79LRD1', now(), now(), NULL, 'VALUE_TYPE_STRING', '', false, NULL, NULL, NULL, NULL, NULL, '-2147483642', 0),
+	('01GVHPF8VHVKSMG35F7SMTDK3W', 'homework_completion', '01GTDDRCG4SF2SN4VDTD79LRD1', now(), now(), NULL, 'VALUE_TYPE_STRING', '', false, NULL, NULL, NULL, NULL, NULL, '-2147483642', 0),
+	('01GVHPFW1WR1YT4EX3GSTZBTJB', 'in_lesson_quiz', '01GTDDRCG4SF2SN4VDTD79LRD1', now(), now(), NULL, 'VALUE_TYPE_INT', '', false, NULL, NULL, NULL, NULL, NULL, '-2147483642', 0),
+	('01GVHPG7WKNZ14ZX62Q2K5FG2S', 'lesson_understanding', '01GTDDRCG4SF2SN4VDTD79LRD1', now(), now(), NULL, 'VALUE_TYPE_STRING', '', false, NULL, NULL, NULL, NULL, NULL, '-2147483642', 0),
+	('01GVHPGEBNPY3QX9N4EY4GYBRF', 'lesson_homework', '01GTDDRCG4SF2SN4VDTD79LRD1', now(), now(), NULL, 'VALUE_TYPE_STRING', '', false, NULL, NULL, NULL, NULL, NULL, '-2147483642', 0),
+	('01GVHPGMJ0V1SQN91YY64BHZA2', 'lesson_announcement', '01GTDDRCG4SF2SN4VDTD79LRD1', now(), now(), NULL, 'VALUE_TYPE_STRING', '', false, NULL, NULL, NULL, NULL, NULL, '-2147483642', 0),
+	('01GVHPGTSE30BP3FNDDA6H672S', 'remark_internal', '01GTDDRCG4SF2SN4VDTD79LRD1', now(), now(), NULL, 'VALUE_TYPE_STRING', '', false, NULL, NULL, NULL, NULL, NULL, '-2147483642', 0)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO day_info("date",location_id,day_type_id,opening_time,status,resource_path,created_at,updated_at,deleted_at,time_zone) VALUES	
+	 ('2022-10-02','01FR4M51XJY9E77GSN4QZ1Q9N7','regular','8:00',NULL,'-2147483642','2022-09-05 02:54:47.126','2022-09-05 02:54:47.126',NULL,'Asia/Ho_Chi_Minh') ON CONFLICT DO NOTHING;	
+
+INSERT INTO day_type (day_type_id,resource_path,created_at,updated_at,deleted_at,display_name,is_archived) VALUES	
+	 ('regular','-2147483642','2022-06-24 16:18:04.100','2022-06-24 16:18:04.100',NULL,NULL,false) ON CONFLICT DO NOTHING;	
+
+INSERT INTO public.lesson_members (lesson_id,user_id,updated_at,created_at,deleted_at,resource_path,attendance_status,attendance_remark,course_id,attendance_notice,attendance_reason,attendance_note,user_first_name,user_last_name) VALUES
+    ('01GV032YZ8FJ4JGEAR4XXQX6L1','01GK1ETTR4ECP5DSAKFMAM24KV001',now(),now(),NULL,'-2147483642','STUDENT_ATTEND_STATUS_ATTEND',NULL,NULL,NULL,NULL,NULL,NULL,NULL) ON CONFLICT DO NOTHING;

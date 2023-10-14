@@ -1,0 +1,19 @@
+{
+    "students": [
+        {
+            "external_user_id": "external-user-id-open-api-01",
+            "username": "username :)",
+            "last_name": "last-name-open-api",
+            "first_name": "first-name-open-api",
+            "email": "open-api-01@gmail.com",
+            "grade": "grade_01",
+            "birthday": "1999/01/12",
+            "enrollment_status_histories": [
+                {
+                    "enrollment_status": 1,
+                    "location": "location-id-2"
+                }
+            ]
+        }
+    ]
+}

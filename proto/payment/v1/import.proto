@@ -1,0 +1,251 @@
+syntax = "proto3";
+
+package payment.v1;
+
+import "payment/v1/enums.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/payment/v1;pmpb";
+
+message ImportAccountingCategoryRequest {
+  bytes payload = 1;
+}
+
+message ImportAccountingCategoryResponse {
+  message ImportAccountingCategoryError {
+    int32 row_number = 1;
+    string error = 2;
+  }
+  repeated ImportAccountingCategoryError errors = 1;
+}
+
+message ImportBillingScheduleRequest {
+  bytes payload = 1;
+}
+
+message ImportBillingScheduleResponse {
+  message ImportBillingScheduleError {
+    int32 row_number = 1;
+    string error = 2;
+  }
+  repeated ImportBillingScheduleError errors = 1;
+}
+
+message ImportBillingSchedulePeriodRequest {
+  bytes payload = 1;
+}
+
+message ImportBillingSchedulePeriodResponse {
+  message ImportBillingSchedulePeriodError {
+    int32 row_number = 1;
+    string error = 2;
+  }
+  repeated ImportBillingSchedulePeriodError errors = 1;
+}
+
+message ImportDiscountRequest {
+  bytes payload = 1;
+}
+
+message ImportDiscountResponse {
+  message ImportDiscountError {
+    int32 row_number = 1;
+    string error = 2;
+  }
+  repeated ImportDiscountError errors = 1;
+}
+
+message ImportProductRequest {
+  ProductType product_type = 1;
+  bytes payload = 2;
+}
+
+message ImportProductResponse {
+  message ImportProductError {
+    int32 row_number = 1;
+    string error = 2;
+  }
+  repeated ImportProductError errors = 1;
+}
+
+message ImportTaxRequest {
+  bytes payload = 1;
+}
+
+message ImportTaxResponse {
+  message ImportTaxError {
+    int32 row_number = 1;
+    string error = 2;
+  }
+  repeated ImportTaxError errors = 1;
+}
+
+message ImportProductAssociatedDataRequest {
+  ProductAssociatedDataType product_associated_data_type = 1;
+  bytes payload = 2;
+}
+
+message ImportProductAssociatedDataResponse {
+  message ImportProductAssociatedDataError {
+    int32 row_number = 1;
+    string error = 2;
+  }
+  repeated ImportProductAssociatedDataError errors = 1;
+}
+
+message ImportProductPriceRequest {
+  bytes payload = 1;
+}
+
+message ImportProductPriceResponse {
+  message ImportProductPriceError {
+    int32 row_number = 1;
+    string error = 2;
+  }
+  repeated ImportProductPriceError errors = 1;
+}
+
+message ImportBillingRatioTypeRequest {
+  bytes payload = 1;
+}
+
+message ImportBillingRatioTypeResponse {
+  message ImportBillingRatioTypeError {
+    int32 row_number = 1;
+    string error = 2;
+  }
+  repeated ImportBillingRatioTypeError errors = 1;
+}
+
+message ImportLeavingReasonRequest {
+  bytes payload = 1;
+}
+
+message ImportLeavingReasonResponse {
+  message ImportLeavingReasonError {
+    int32 row_number = 1;
+    string error = 2;
+  }
+  repeated ImportLeavingReasonError errors = 1;
+}
+
+message ImportBillingRatioRequest {
+  bytes payload = 1;
+}
+
+message ImportBillingRatioResponse {
+  message ImportBillingRatioError {
+    int32 row_number = 1;
+    string error = 2;
+  }
+  repeated ImportBillingRatioError errors = 1;
+}
+
+message ImportPackageQuantityTypeMappingRequest {
+  bytes payload = 1;
+}
+
+message ImportPackageQuantityTypeMappingResponse {
+  message ImportPackageQuantityTypeMappingError {
+    int32 row_number = 1;
+    string error = 2;
+  }
+  repeated ImportPackageQuantityTypeMappingError errors = 1;
+}
+
+message ImportProductSettingRequest {
+    bytes payload = 1;
+}
+  
+message ImportProductSettingResponse {
+    message ImportProductSettingError {
+      int32 row_number = 1;
+      string error = 2;
+    }
+    repeated ImportProductSettingError errors = 1;
+}
+  
+message ImportAssociatedProductsRequest {
+  AssociatedProductsType associated_products_type = 1;
+  bytes payload = 2;
+}
+
+message ImportAssociatedProductsResponse {
+  message ImportAssociatedProductsError {
+    int32 row_number = 1;
+    string error = 2;
+  }
+  repeated ImportAssociatedProductsError errors = 1;
+}
+
+message ImportProductGroupRequest {
+  bytes payload = 1;
+}
+
+message ImportProductGroupResponse {
+  message ImportProductGroupError {
+    int32 row_number = 1;
+    string error = 2;
+  }
+  repeated ImportProductGroupError errors = 1;
+}
+
+message ImportProductGroupMappingRequest {
+  bytes payload = 1;
+}
+
+message ImportProductGroupMappingResponse {
+  message ImportProductGroupMappingError {
+    int32 row_number = 1;
+    string error = 2;
+  }
+  repeated ImportProductGroupMappingError errors = 1;
+}
+
+message ImportNotificationDateRequest {
+  bytes payload = 1;
+}
+
+message ImportNotificationDateResponse {
+  message ImportNotificationDateError {
+    int32 row_number = 1;
+    string error = 2;
+  }
+  repeated ImportNotificationDateError errors = 1;
+}
+
+service ImportMasterDataService {
+  rpc ImportAccountingCategory(ImportAccountingCategoryRequest)
+      returns (ImportAccountingCategoryResponse);
+  rpc ImportBillingSchedule(ImportBillingScheduleRequest)
+      returns (ImportBillingScheduleResponse);
+  rpc ImportBillingSchedulePeriod(ImportBillingSchedulePeriodRequest)
+      returns (ImportBillingSchedulePeriodResponse);
+  rpc ImportDiscount(ImportDiscountRequest)
+      returns (ImportDiscountResponse);
+  rpc ImportTax(ImportTaxRequest)
+      returns (ImportTaxResponse);
+  rpc ImportProduct(ImportProductRequest)
+      returns (ImportProductResponse);
+  rpc ImportProductAssociatedData(ImportProductAssociatedDataRequest)
+      returns (ImportProductAssociatedDataResponse);
+  rpc ImportProductPrice(ImportProductPriceRequest)
+      returns (ImportProductPriceResponse);
+  rpc ImportBillingRatioType(ImportBillingRatioTypeRequest)
+      returns (ImportBillingRatioTypeResponse);
+  rpc ImportLeavingReason(ImportLeavingReasonRequest)
+      returns (ImportLeavingReasonResponse);
+  rpc ImportBillingRatio(ImportBillingRatioRequest)
+      returns (ImportBillingRatioResponse);
+  rpc ImportPackageQuantityTypeMapping(ImportPackageQuantityTypeMappingRequest)
+      returns (ImportPackageQuantityTypeMappingResponse);
+  rpc ImportProductSetting(ImportProductSettingRequest)
+      returns (ImportProductSettingResponse);
+  rpc ImportAssociatedProducts(ImportAssociatedProductsRequest)
+      returns (ImportAssociatedProductsResponse);
+  rpc ImportProductGroup(ImportProductGroupRequest)
+      returns (ImportProductGroupResponse);
+  rpc ImportProductGroupMapping(ImportProductGroupMappingRequest)
+      returns (ImportProductGroupMappingResponse);
+  rpc ImportNotificationDate(ImportNotificationDateRequest)
+      returns (ImportNotificationDateResponse);
+}

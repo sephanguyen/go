@@ -1,0 +1,172 @@
+unleash:
+  featureFlags:
+    platform:
+      - name: Toggle_using_multiple_constraint
+        description: "Flag to test multiple constraint"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: default
+            parameters: {}
+            constraints:
+              - contextName: env
+                operator: IN
+                values:
+                  - "prod"
+                inverted: false
+                caseInsensitive: false
+              - contextName: org
+                operator: IN
+                values:
+                  - "-1234"
+                inverted: false
+                caseInsensitive: false
+      - name: Toggle_using_inverted_operator
+        description: "Flag to test inverted operator"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: default
+            parameters: {}
+            constraints:
+              - contextName: org
+                operator: IN
+                values:
+                  - "-1234"
+                  - "-7777"
+                inverted: true
+                caseInsensitive: false
+      - name: Toggle_using_strategy_and_constraint
+        description: "Flag to test combination of strategies and constrains"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: default
+            parameters: {}
+            constraints:
+              - contextName: env
+                operator: IN
+                values:
+                  - "stag"
+                  - "uat"
+                inverted: false
+                caseInsensitive: false
+              - contextName: org
+                operator: IN
+                values:
+                  - "-1234"
+                inverted: false
+                caseInsensitive: false
+          - name: default
+            parameters: {}
+            constraints:
+              - contextName: org
+                operator: IN
+                values:
+                  - "-1234"
+                inverted: true
+                caseInsensitive: false
+      - name: Toggle_using_rollout_and_constraint
+        description: "Flag to test rollout strategy and constraints"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+          - name: flexibleRollout
+            parameters:
+              groupId: Gradual_Rollout_Testing
+              rollout: "50"
+              stickiness: userId
+            constraints:
+              - contextName: env
+                operator: IN
+                values:
+                  - "prod"
+                inverted: false
+                caseInsensitive: false
+      - name: Platform_Backoffice_UpdateOrgViaTenantId
+        description: "A feature flag to update org via tenantId"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Platform_Backoffice_CrossImportMfe
+        description: "A feature flag to testing cross import in mfe"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+      - name: Platform_Gradual_Rollout_Testing_50Percent
+        description: "A feature flag to demo gradual rollout 50% stickiness via userId"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+          - name: flexibleRollout
+            parameters:
+              #The groupId defaults to feature toggle name, but the user can override it to correlate rollout of multiple feature toggles.
+              # for EX, if your flag A need to go with flag B, you can set the same groupId for both flags
+              groupId: Platform_Gradual_Rollout_Testing
+              rollout: "50" #50%
+              stickiness: userId # recommended to use userId
+            constraints: []
+      - name: Platform_Gradual_Rollout_Testing_30Percent
+        description: "A feature flag to demo gradual rollout 30% stickiness via userId"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+          - name: flexibleRollout
+            parameters:
+              groupId: Platform_Gradual_Rollout_Testing
+              rollout: "30" #30%
+              stickiness: userId # recommended to use userId
+            constraints: []
+      - name: Platform_Gradual_Rollout_Testing_40Percent_Standalone
+        description: "A feature flag to demo gradual rollout 30% stickiness via userId"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+          - name: flexibleRollout
+            parameters:
+              groupId: Platform_Gradual_Rollout_Testing_40Percent_Standalone
+              rollout: "40" #40%
+              stickiness: userId # recommended to use userId
+            constraints: []

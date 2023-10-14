@@ -1,0 +1,28 @@
+{
+  "admins": [
+    {
+      "email": "example@manabie.com",
+      "password": "example_password"
+    }
+  ],
+  "teachers":[
+    {
+      "email": "example-teacher-1@manabie.com",
+      "password": "example_password"
+    },
+    {
+      "email": "example-teacher-2@manabie.com",
+      "password": "example_password"
+    }
+  ],
+  "students":[
+    {
+      "email": "example-student-1@manabie.com",
+      "password": "example_password"
+    },
+    {
+      "email": "example-student-2@manabie.com",
+      "password": "example_password"
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS students_learning_objectives_records_study_plan_item_id_idx ON public.students_learning_objectives_records (study_plan_item_id);

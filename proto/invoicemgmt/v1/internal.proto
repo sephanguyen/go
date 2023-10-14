@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package invoicemgmt.v1;
+
+import "invoicemgmt/v1/invoice.proto";
+import "invoicemgmt/v1/payment.proto";
+import "invoicemgmt/v1/enums.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/invoicemgmt/v1;invoice_pb";
+
+service InternalService {
+    rpc InvoiceScheduleChecker(InvoiceScheduleCheckerRequest)
+        returns (InvoiceScheduleCheckerResponse);
+    rpc RetrieveStudentPaymentMethod(RetrieveStudentPaymentMethodRequest)
+        returns (RetrieveStudentPaymentMethodResponse);
+}

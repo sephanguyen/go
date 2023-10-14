@@ -1,0 +1,9 @@
+**/**/target
+**/**/withus/withus
+**/**/withus/withus.csv
+service_credential.json
+**/**/_output
+.camel-jbang
+.yaks-jbang
+_output
+generated

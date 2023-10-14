@@ -1,0 +1,11 @@
+replicaCount: 2
+
+httpRoute:
+  - match:
+      - uri:
+          prefix: /
+    route:
+      - destination:
+          host: backoffice.prod-jprep-backoffice-mfe.svc.cluster.local
+          port:
+            number: 80

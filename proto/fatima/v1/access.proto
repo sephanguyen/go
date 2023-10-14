@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package fatima.v1;
+
+import "common/v1/contents.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/fatima/v1;fpb";
+
+message RetrieveAccessibilityRequest {}
+
+message RetrieveAccessibilityResponse {
+  message CourseAccessibility {
+    bool can_watch_video = 1;
+    bool can_view_study_guide = 2;
+    bool can_do_quiz = 3;
+  }
+  map<string, CourseAccessibility> courses = 1;
+}
+
+message RetrieveStudentAccessibilityRequest {
+  string user_id = 1;
+}
+
+message RetrieveStudentAccessibilityResponse {
+  map<string, common.v1.CourseAccessibility> courses = 1;
+}
+
+service AccessibilityReadService {
+  rpc RetrieveAccessibility(RetrieveAccessibilityRequest)
+      returns (RetrieveAccessibilityResponse);
+  rpc RetrieveStudentAccessibility (RetrieveStudentAccessibilityRequest) 
+      returns (RetrieveStudentAccessibilityResponse);
+}

@@ -1,0 +1,790 @@
+name: tbd.build
+
+run-name: ${{ github.event.action || 'tbd.build' }} ${{ github.event.client_payload.payload.orgs || inputs.orgs }}/${{ github.event.client_payload.payload.env || inputs.env }}
+
+on:
+  repository_dispatch:
+    types: [tbd.build_be, tbd.build_fe, tbd.build_me, tbd.build_all]
+
+  workflow_dispatch:
+    inputs:
+      auto_deploy:
+        type: boolean
+        description: auto deploy after build
+        default: false
+
+      env:
+        type: choice
+        description: "Choose an environment to build"
+        options:
+          - staging
+          - uat
+          - preproduction
+          - production
+        required: true
+        default: staging
+
+      orgs:
+        description: "Choose organization(s) to deploy. Invalid organization will be automatically filtered. (manabie, jprep, tokyo, synersia, renseikai, ga, aic)"
+        required: true
+        default: "manabie, jprep, tokyo, synersia, renseikai, ga, aic"
+
+      # BE build inputs
+      be_release_tag: #---------
+        description: "---------------Backend----------------- Choose be_release_tag, will build BE if not empty."
+        default: ""
+        required: false
+
+      # FE build inputs
+      fe_release_tag:
+        description: "--------------Frontend----------------- Choose fe_release_tag, will build FE if not empty."
+        default: ""
+        required: false
+
+      # ME build inputs
+      me_release_tag:
+        description: "---------------Mobile------------------ Choose me_release_tag, will build ME if not empty."
+        default: ""
+        required: false
+
+      me_apps:
+        description: "Choose flutter me_apps to build"
+        required: true
+        default: "learner, teacher"
+
+      me_platforms:
+        description: "Choose me_platforms: web, ios, android. notes: teacher have web platform only!"
+        required: true
+        default: "web, ios, android"
+
+env:
+  BE_TAG: "${{ github.event.inputs.be_release_tag }}"
+  FE_TAG: "${{ github.event.inputs.fe_release_tag }}"
+  ME_TAG: "${{ github.event.inputs.me_release_tag }}"
+  AUTO_DEPLOY: ${{ github.event.inputs.auto_deploy }}
+
+  ENV: ${{ github.event.inputs.env }}
+  GITHUB_TOKEN: ${{ secrets.BUILD_GITHUB_TOKEN }}
+  ORGS: ${{ github.event.inputs.orgs }}
+
+  DOCKER_REPOSITORY: "asia.gcr.io"
+  PREFIX_IMAGE: "asia.gcr.io/student-coach-e1e95"
+
+  # KEYCHAIN_PASSWORD: ${{ secrets.P12_PASS }} for IOS
+
+jobs:
+  prepare-info:
+    runs-on: ["self-hosted", "100m-400mi", "spot", "persistent"]
+    outputs:
+      me_platforms: ${{ steps.prepare.outputs.me_platforms }}
+      me_apps: ${{ steps.prepare.outputs.me_apps }}
+      orgs: ${{ steps.prepare.outputs.orgs }}
+      env: ${{ steps.prepare.outputs.env }}
+      fe_release_tag: ${{ steps.prepare.outputs.fe_release_tag }}
+      me_release_tag: ${{ steps.prepare.outputs.me_release_tag }}
+      be_release_tag: ${{ steps.prepare.outputs.be_release_tag }}
+      auto_deploy: ${{ steps.prepare.outputs.auto_deploy }}
+      deploy_all: ${{ steps.prepare.outputs.deploy_all }}
+
+      actor: ${{ steps.prepare.outputs.actor }}
+
+      backend_k8s_orgs: ${{ steps.prepare.outputs.backend_k8s_orgs }}
+      backoffice_k8s_orgs: ${{ steps.prepare.outputs.backoffice_k8s_orgs }}
+      teacher_k8s_orgs: ${{ steps.prepare.outputs.teacher_k8s_orgs }}
+      learner_k8s_orgs: ${{ steps.prepare.outputs.learner_k8s_orgs }}
+      learner_android_orgs: ${{ steps.prepare.outputs.learner_android_orgs }}
+      learner_ios_orgs: ${{ steps.prepare.outputs.learner_ios_orgs }}
+      runners: ${{ steps.runners.outputs.runners }}
+      # mfe stuffs
+      mfe-squads: ${{ steps.mfe-prepare-info.outputs.squads }}
+      mfe-fragments: ${{ steps.mfe-prepare-info.outputs.fragments }}
+      mfe-team-infos: ${{ steps.mfe-prepare-info.outputs.mfe-team-infos }}
+    steps:
+      - uses: actions/checkout@v3
+        timeout-minutes: 5
+
+      - id: prepare
+        with:
+          workflow_type: "build"
+        uses: ./.github/actions/tbd.prepare-infos
+
+      - id: privileges-check
+        if: ${{ steps.prepare.outputs.env != 'staging' && steps.prepare.outputs.auto_deploy == 'true' && github.actor != 'manaops' }}
+        uses: ./.github/actions/tbd.privileges-check
+        with:
+          actor: ${{ github.actor }}
+          github-token: ${{ secrets.BUILD_GITHUB_TOKEN }}
+
+      - name: mfe.prepare-info
+        id: mfe-prepare-info
+        uses: ./.github/actions/mfe.prepare-info
+        if: ${{ steps.prepare.outputs.fe_release_tag != '' }}
+        with:
+          github-token: ${{ secrets.BUILD_GITHUB_TOKEN }}
+          release_tag: ${{ steps.prepare.outputs.fe_release_tag }}
+          orgs: ${{ github.event.inputs.orgs }}
+          env: ${{ steps.prepare.outputs.env }}
+          auto_deploy: ${{ steps.prepare.outputs.auto_deploy }}
+          squads: ""
+          fragments: "" # should use github.event.inputs.services
+          context_ref: "${{ github.ref }}"
+          build_and_deploy_root_only: false
+          workflow_type: "build"
+
+      - id: runners
+        uses: ./.github/actions/runners
+        with:
+          token: ${{ secrets.ORG_GITHUB_TOKEN }}
+
+  send-build-alert:
+    runs-on: ["self-hosted", "100m-400mi", "spot", "persistent"]
+    if: ${{ needs.prepare-info.outputs.be_release_tag != '' || needs.prepare-info.outputs.fe_release_tag != '' || needs.prepare-info.outputs.me_release_tag != '' }}
+    needs: [prepare-info]
+    env:
+      ENVIRONMENT: "${{ needs.prepare-info.outputs.env }}"
+    outputs:
+      alert_id: ${{ steps.alert.outputs.alert_id }}
+      channel_id: ${{ steps.alert.outputs.channel_id }}
+      squad_alert: ${{ steps.alert.outputs.squad_alert }}
+      user_alert: ${{ steps.alert.outputs.user_alert }}
+    steps:
+      - uses: actions/checkout@v3
+        timeout-minutes: 5
+
+      - id: alert
+        uses: ./.github/actions/slack-alert-send
+        with:
+          be_tag: ${{ needs.prepare-info.outputs.be_release_tag }}
+          fe_tag: ${{ needs.prepare-info.outputs.fe_release_tag }}
+          me_tag: ${{ needs.prepare-info.outputs.me_release_tag }}
+          message: "Build ${{ env.ENVIRONMENT }}"
+          orgs: ${{ needs.prepare-info.outputs.orgs }}
+          SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
+          actor: ${{ needs.prepare-info.outputs.actor }}
+
+  build-backend:
+    runs-on: ${{ fromJson(needs.prepare-info.outputs.runners)['build-backend'] }}
+    needs: [prepare-info, send-build-alert]
+    if: ${{ needs.prepare-info.outputs.be_release_tag != '' }}
+    concurrency:
+      group: build-backend-${{ needs.prepare-info.outputs.env }}
+      cancel-in-progress: ${{ needs.prepare-info.outputs.env != 'production' }}
+    outputs:
+      build_status: "${{ steps.build-backend.outcome }}"
+    permissions:
+      contents: "read"
+      id-token: "write"
+    steps:
+      - name: Collect Workflow Telemetry
+        continue-on-error: true
+        timeout-minutes: 5
+        uses: manabie-com/workflow-telemetry-action@v2
+
+      - uses: actions/checkout@v3
+        timeout-minutes: 5
+
+      - id: build-backend
+        timeout-minutes: 30
+        uses: ./.github/actions/tbd.build-backend
+        with:
+          be_release_tag: "${{ needs.prepare-info.outputs.be_release_tag }}"
+          token: "${{ secrets.BUILD_GITHUB_TOKEN }}"
+
+      - name: trigger deploy
+        uses: actions/github-script@v6
+        if: ${{ needs.prepare-info.outputs.auto_deploy == 'true' && steps.build-backend.outcome == 'success' && needs.prepare-info.outputs.deploy_all == 'false' }}
+        with:
+          github-token: ${{ env.GITHUB_TOKEN }}
+          script: |
+            core.exportVariable('ORGS', '${{ needs.prepare-info.outputs.orgs }}');
+            await github.rest.repos.createDispatchEvent({
+              owner: context.repo.owner,
+              repo: "backend",
+              event_type: "tbd.deploy_be",
+              client_payload: {
+                  payload: {
+                    be_release_tag: "${{needs.prepare-info.outputs.be_release_tag}}",
+                    env: "${{ needs.prepare-info.outputs.env }}",
+                    orgs: process.env.ORGS,
+                    workflow_ref: context.ref,
+                    slack_alert: {
+                      actor: "${{ needs.prepare-info.outputs.actor || github.triggering_actor }}",
+                      channel: "${{ needs.send-build-alert.outputs.channel_id }}",
+                      timestamp: "${{ needs.send-build-alert.outputs.alert_id }}"
+                    },
+                  },
+              },
+            });
+
+      - uses: actions/checkout@v3
+        timeout-minutes: 5
+
+      - uses: ./.github/actions/slack-alert-reply
+        if: always()
+        env:
+          ENVIRONMENT: ${{ needs.prepare-info.outputs.env }}
+        with:
+          actor: ${{ needs.send-build-alert.outputs.user_alert }}
+          repo: backend
+          release_tag: ${{ needs.prepare-info.outputs.be_release_tag }}
+          channel: ${{ needs.send-build-alert.outputs.channel_id }}
+          message-timestamp: ${{ needs.send-build-alert.outputs.alert_id }}
+          current-job: Backend
+          job-outcome: ${{ steps.build-backend.outcome }}
+          SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
+
+  build-fe:
+    needs: [prepare-info]
+    if: ${{ !contains(toJson(needs.prepare-info.outputs.backoffice_k8s_orgs), '[]') }}
+    env:
+      REPO: school-portal-admin
+      RELEASE_TAG: "${{ needs.prepare-info.outputs.fe_release_tag}}"
+      ENVIRONMENT: ${{ needs.prepare-info.outputs.env }}
+      ORGANIZATION: ${{ matrix.organization }}
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+    runs-on: ${{ fromJson(needs.prepare-info.outputs.runners)['build-fe'] }}
+    concurrency:
+      group: build-fe-${{ matrix.organization }}-${{ needs.prepare-info.outputs.env }}
+      cancel-in-progress: ${{ needs.prepare-info.outputs.env != 'production' }}
+    permissions:
+      contents: "read"
+      id-token: "write"
+    strategy:
+      fail-fast: false
+      matrix:
+        organization: ${{ fromJson(needs.prepare-info.outputs.backoffice_k8s_orgs) }}
+    steps:
+      - name: Collect Workflow Telemetry
+        continue-on-error: true
+        timeout-minutes: 5
+        uses: manabie-com/workflow-telemetry-action@v2
+
+      - uses: actions/checkout@v3
+        timeout-minutes: 5
+
+      - id: build-fe
+        timeout-minutes: 30
+        uses: ./.github/actions/tbd.build-web
+        env:
+          FE_TAG: ${{ env.RELEASE_TAG }}
+          IMAGE_TAG: ${{ env.PREFIX_IMAGE }}/${{ env.REPO }}:${{ env.RELEASE_TAG }}-${{ matrix.organization }}-${{ env.ENVIRONMENT }}
+
+  mfe-root-shell:
+    needs:
+      - prepare-info
+    if: ${{ !contains(toJson(needs.prepare-info.outputs.backoffice_k8s_orgs), '[]') }}
+    runs-on: ${{ fromJson(needs.prepare-info.outputs.runners)['mfe-root-shell'] }}
+    permissions:
+      contents: "read"
+      id-token: "write"
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        organization: ${{ fromJSON(needs.prepare-info.outputs.backoffice_k8s_orgs) }}
+    concurrency:
+      group: mfe-build-root-shell-${{ matrix.organization }}-${{ needs.prepare-info.outputs.fe_release_tag }}
+      cancel-in-progress: ${{ needs.prepare-info.outputs.env != 'production' }}
+    steps:
+      - name: Collect Workflow Telemetry
+        continue-on-error: true
+        timeout-minutes: 5
+        uses: manabie-com/workflow-telemetry-action@v2
+
+      - uses: actions/checkout@v3
+        timeout-minutes: 5
+
+      - id: build-mfe
+        timeout-minutes: 30
+        uses: ./.github/actions/tbd.build-web
+        with:
+          is_mfe: true
+        env:
+          DOCKER_REPOSITORY: "asia.gcr.io"
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+          ENVIRONMENT: ${{ needs.prepare-info.outputs.env }}
+          ORGANIZATION: ${{ matrix.organization }}
+          FE_TAG: ${{ needs.prepare-info.outputs.fe_release_tag }}
+          REPO: "school-portal-admin"
+          RELEASE_TAG: ${{ needs.prepare-info.outputs.fe_release_tag }}
+          GITHUB_TOKEN: ${{ secrets.BUILD_GITHUB_TOKEN }}
+          IMAGE_TAG: asia.gcr.io/student-coach-e1e95/backoffice:${{ needs.prepare-info.outputs.fe_release_tag }}-${{ matrix.organization }}-${{ needs.prepare-info.outputs.env }}
+
+      - uses: actions/checkout@v3
+        timeout-minutes: 5
+
+  install-deps-for-mfe-entrypoint:
+    needs:
+      - prepare-info
+    if: ${{ !contains(toJson(needs.prepare-info.outputs.backoffice_k8s_orgs), '[]') }}
+    runs-on: ${{ fromJson(needs.prepare-info.outputs.runners)['mfe-entrypoint'] }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v3
+        timeout-minutes: 5
+        with:
+          persist-credentials: false
+          repository: ${{github.repository_owner}}/school-portal-admin
+          token: ${{ secrets.BUILD_GITHUB_TOKEN }}
+          ref: ${{ needs.prepare-info.outputs.fe_release_tag }}
+
+      - uses: actions/cache@v3
+        timeout-minutes: 5
+        continue-on-error: true
+        with:
+          path: |
+            ${{github.workspace}}/node_modules
+          key: |
+            yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            yarn-
+
+      - name: yarn install --frozen-lockfile
+        run: |
+          git config --global --add url."https://${GITHUB_TOKEN}:x-oauth-basic@github.com/manabie-com".insteadOf "https://github.com/manabie-com"
+          yarn install --frozen-lockfile
+        env:
+          GITHUB_TOKEN: ${{ secrets.BUILD_GITHUB_TOKEN }}
+
+  mfe-entrypoint:
+    needs:
+      - prepare-info
+      - install-deps-for-mfe-entrypoint
+    if: ${{ !contains(toJson(needs.prepare-info.outputs.backoffice_k8s_orgs), '[]') }}
+    runs-on: ${{ fromJson(needs.prepare-info.outputs.runners)['mfe-entrypoint'] }}
+    permissions:
+      contents: "read"
+      id-token: "write"
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        squads: ${{ fromJSON(needs.prepare-info.outputs.mfe-squads) }}
+        organization: ${{ fromJSON(needs.prepare-info.outputs.backoffice_k8s_orgs) }}
+    concurrency:
+      group: mfe-build-entrypoint-${{ matrix.squads }}-${{ matrix.organization }}-${{ needs.prepare-info.outputs.fe_release_tag }}
+      cancel-in-progress: ${{ needs.prepare-info.outputs.env != 'production' }}
+    env:
+      VITE_PJ_OWNER: ${{ matrix.organization }}
+      VITE_PUBLIC_URL: ""
+      VITE_NO_HASH: true
+    steps:
+      - uses: actions/checkout@v3
+        timeout-minutes: 5
+
+      - name: Build MFE entrypoint for ${{ matrix.squads }}, all fragments
+        uses: ./.github/actions/mfe.build-mfe-entrypoint
+        with:
+          github-token: ${{ secrets.BUILD_GITHUB_TOKEN }}
+          env: ${{ needs.prepare-info.outputs.env }}
+          release-tag: ${{ needs.prepare-info.outputs.fe_release_tag }}
+          organization: ${{ matrix.organization }}
+          mfe-team-info: ${{ needs.prepare-info.outputs.mfe-team-infos }}['${{matrix.squads}}']
+          fragments: "" # all services
+
+  update-fe-alert:
+    runs-on: ["self-hosted", "100m-400mi", "spot", "persistent"]
+    if: ${{ needs.prepare-info.outputs.fe_release_tag != '' && always()}}
+    needs:
+      [prepare-info, send-build-alert, build-fe, mfe-root-shell, mfe-entrypoint]
+    env:
+      ENVIRONMENT: ${{ needs.prepare-info.outputs.env }}
+      AUTO_DEPLOY: "${{ needs.prepare-info.outputs.auto_deploy }}"
+    outputs:
+      status: ${{ steps.reply.outputs.status }}
+    steps:
+      - uses: actions/checkout@v3
+        timeout-minutes: 5
+
+      - id: fe_statuses
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const statuses = {
+              'mfe-entrypoint': {
+                status: '${{ needs.mfe-entrypoint.result }}'
+              },
+              'mfe-root-shell': {
+                status: '${{ needs.mfe-root-shell.result }}'
+              },
+              'build-fe': {
+                status: '${{ needs.build-fe.result }}'
+              }
+            }
+            core.setOutput('statuses', statuses)
+
+      - uses: ./.github/actions/slack-alert-reply
+        id: reply
+        with:
+          actor: ${{ needs.send-build-alert.outputs.user_alert }}
+          repo: school-portal-admin
+          release_tag: ${{ needs.prepare-info.outputs.fe_release_tag }}
+          channel: ${{ needs.send-build-alert.outputs.channel_id }}
+          message-timestamp: ${{ needs.send-build-alert.outputs.alert_id }}
+          current-job: "Frontend"
+          statuses: ${{ steps.fe_statuses.outputs.statuses }}
+          SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
+
+      - name: trigger deploy
+        uses: actions/github-script@v6
+        if: ${{ env.AUTO_DEPLOY == 'true' && steps.reply.outputs.status == 'success' && needs.prepare-info.outputs.deploy_all == 'false' }}
+        with:
+          github-token: ${{ env.GITHUB_TOKEN }}
+          script: |
+            core.exportVariable('ORGS', '${{ needs.prepare-info.outputs.orgs }}');
+            await github.rest.repos.createDispatchEvent({
+              owner: context.repo.owner,
+              repo: "backend",
+              event_type: "tbd.deploy_fe",
+              client_payload: {
+                  payload: {
+                    fe_release_tag: "${{needs.prepare-info.outputs.fe_release_tag}}",
+                    env: process.env.ENVIRONMENT,
+                    orgs: process.env.ORGS,
+                    workflow_ref: context.ref,
+                    slack_alert: {
+                      actor: "${{ needs.prepare-info.outputs.actor || github.triggering_actor }}",
+                      channel: "${{ needs.send-build-alert.outputs.channel_id }}",
+                      timestamp: "${{ needs.send-build-alert.outputs.alert_id }}"
+                    },
+                  },
+              },
+            });
+
+  build-me-web-learner:
+    needs: [prepare-info]
+    runs-on: ${{ fromJson(needs.prepare-info.outputs.runners)['build-me-web-learner'] }}
+    if: ${{ !contains(toJson(needs.prepare-info.outputs.learner_k8s_orgs), '[]')}}
+    permissions:
+      contents: "read"
+      id-token: "write"
+    env:
+      FLAVOR: ${{ matrix.organization }}_learner_${{ needs.prepare-info.outputs.env }}
+      APP: learner
+      REPO: student-app
+      ORGANIZATION: ${{ matrix.organization }}
+      RELEASE_TAG: ${{ needs.prepare-info.outputs.me_release_tag }}
+      ENVIRONMENT: ${{ needs.prepare-info.outputs.env }}
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+    strategy:
+      matrix:
+        organization: ${{ fromJson(needs.prepare-info.outputs.learner_k8s_orgs) }}
+    concurrency:
+      group: build-me-web-learner-${{ matrix.organization }}-${{ needs.prepare-info.outputs.env }}
+      cancel-in-progress: ${{ needs.prepare-info.outputs.env != 'production' }}
+    steps:
+      - name: Collect Workflow Telemetry
+        continue-on-error: true
+        timeout-minutes: 5
+        uses: manabie-com/workflow-telemetry-action@v2
+
+      - uses: actions/checkout@v3
+        timeout-minutes: 5
+
+      - id: build-me-web-learner
+        timeout-minutes: 30
+        uses: ./.github/actions/tbd.build-web
+        env:
+          IMAGE_TAG: ${{env.PREFIX_IMAGE}}/${{ env.APP }}-web:${{ env.RELEASE_TAG }}-${{ env.ORGANIZATION }}-${{ env.APP }}-${{ env.ENVIRONMENT }}
+
+  build-me-android:
+    needs: [prepare-info]
+    if: ${{ !contains(toJson(needs.prepare-info.outputs.learner_android_orgs), '[]') }}
+    env:
+      RELEASE_TAG: "${{ needs.prepare-info.outputs.me_release_tag }}"
+      ORGANIZATION: ${{ matrix.organization }}
+      APP: learner
+      REPO: student-app
+      ENVIRONMENT: ${{ needs.prepare-info.outputs.env }}
+      FLAVOR: ${{ matrix.organization }}_learner_${{ needs.prepare-info.outputs.env }}
+    runs-on: ${{ fromJson(needs.prepare-info.outputs.runners)['build-me-android'] }}
+    strategy:
+      matrix:
+        organization: ${{ fromJson(needs.prepare-info.outputs.learner_android_orgs) }}
+    concurrency:
+      group: android-${{ needs.prepare-info.outputs.me_release_tag }}-${{ matrix.organization }}-${{ needs.prepare-info.outputs.env }}
+      cancel-in-progress: false
+    steps:
+      - name: Collect Workflow Telemetry
+        continue-on-error: true
+        timeout-minutes: 5
+        uses: manabie-com/workflow-telemetry-action@v2
+
+      - uses: actions/checkout@v3
+        timeout-minutes: 5
+
+      - id: build-me-android
+        timeout-minutes: 30
+        uses: ./.github/actions/tbd.build-android
+
+  build-me-ios:
+    needs: [prepare-info]
+    if: ${{ !contains(toJson(needs.prepare-info.outputs.learner_ios_orgs), '[]') }}
+    env:
+      RELEASE_TAG: "${{ needs.prepare-info.outputs.me_release_tag}}"
+      ORGANIZATION: ${{ matrix.organization }}
+      APP: learner
+      REPO: student-app
+      ENVIRONMENT: ${{ needs.prepare-info.outputs.env }}
+      FLAVOR: ${{ matrix.organization }}_learner_${{ needs.prepare-info.outputs.env }}
+
+      KEYCHAIN_PASSWORD: ${{ secrets.P12_PASS }}
+
+      MANABIE_MOBILEPROVISION_BASE64: ${{secrets.MANABIE_MOBILEPROVISION_BASE64}}
+      MANABIE_APP_STORE_MOBILEPROVISION_BASE64: ${{ secrets.MANABIE_APP_STORE_MOBILEPROVISION_BASE64 }}
+      JPREP_MOBILEPROVISION_BASE64: ${{secrets.JPREP_MOBILEPROVISION_BASE64}}
+      JPREP_APP_STORE_MOBILEPROVISION_BASE64: ${{ secrets.JPREP_APP_STORE_MOBILEPROVISION_BASE64 }}
+      SYNERSIA_MOBILEPROVISION_BASE64: ${{secrets.SYNERSIA_MOBILEPROVISION_BASE64}}
+      SYNERSIA_APP_STORE_MOBILEPROVISION_BASE64: ${{secrets.SYNERSIA_APP_STORE_MOBILEPROVISION_BASE64}}
+      RENSEIKAI_MOBILEPROVISION_BASE64: ${{secrets.RENSEIKAI_MOBILEPROVISION_BASE64}}
+      RENSEIKAI_APP_STORE_MOBILEPROVISION_BASE64: ${{secrets.RENSEIKAI_APP_STORE_MOBILEPROVISION_BASE64}}
+      GA_MOBILEPROVISION_BASE64: ${{secrets.GA_MOBILEPROVISION_BASE64}}
+      GA_APP_STORE_MOBILEPROVISION_BASE64: ${{secrets.GA_APP_STORE_MOBILEPROVISION_BASE64}}
+      AIC_MOBILEPROVISION_BASE64: ${{ secrets.AIC_MOBILEPROVISION_BASE64 }}
+
+      MANABIE_BUILD_CERTIFICATE_BASE64: ${{ secrets.MANABIE_P12_BASE64 }}
+      MANABIE_P12_PASSWORD: ${{ secrets.MANABIE_P12_PASS }}
+      JPREP_BUILD_CERTIFICATE_BASE64: ${{ secrets.JPREP_P12_BASE64 }}
+      JPREP_P12_PASSWORD: ${{ secrets.JPREP_P12_PASS }}
+      SYNERSIA_BUILD_CERTIFICATE_BASE64: ${{ secrets.SYNERSIA_P12_BASE64 }}
+      SYNERSIA_P12_PASSWORD: ${{ secrets.SYNERSIA_P12_PASS }}
+      RENSEIKAI_BUILD_CERTIFICATE_BASE64: ${{ secrets.RENSEIKAI_P12_BASE64 }}
+      RENSEIKAI_P12_PASSWORD: ${{ secrets.RENSEIKAI_P12_PASS }}
+      GA_BUILD_CERTIFICATE_BASE64: ${{ secrets.GA_P12_BASE64 }}
+      GA_P12_PASSWORD: ${{ secrets.GA_P12_PASS }}
+      AIC_BUILD_CERTIFICATE_BASE64: ${{ secrets.AIC_P12_BASE64 }}
+      AIC_P12_PASSWORD: ${{ secrets.AIC_P12_PASS }}
+      TEST_FLIGHT_PASSWORD: ${{ secrets.TEST_FLIGHT_PASSWORD }}
+    runs-on: ${{ fromJson(needs.prepare-info.outputs.runners)['build-me-ios'] }}
+    strategy:
+      matrix:
+        organization: ${{ fromJson(needs.prepare-info.outputs.learner_ios_orgs) }}
+    concurrency:
+      group: ios-${{ needs.prepare-info.outputs.me_release_tag }}-${{ matrix.organization }}-${{ needs.prepare-info.outputs.env }}
+      cancel-in-progress: false
+    steps:
+      - name: Collect Workflow Telemetry
+        continue-on-error: true
+        timeout-minutes: 5
+        uses: manabie-com/workflow-telemetry-action@v2
+
+      - uses: actions/checkout@v3
+        timeout-minutes: 5
+
+      - id: build-ios
+        timeout-minutes: 40
+        uses: ./.github/actions/tbd.build-ios
+
+  build-me-web-teacher:
+    needs: [prepare-info]
+    runs-on: ${{ fromJson(needs.prepare-info.outputs.runners)['build-me-web-teacher'] }}
+    if: ${{ !contains(toJson(needs.prepare-info.outputs.teacher_k8s_orgs), '[]') }}
+    permissions:
+      contents: "read"
+      id-token: "write"
+    env:
+      FLAVOR: ${{ matrix.organization }}_teacher_${{ needs.prepare-info.outputs.env }}
+      APP: teacher
+      REPO: student-app
+      ORGANIZATION: ${{ matrix.organization }}
+      RELEASE_TAG: ${{ needs.prepare-info.outputs.me_release_tag }}
+      ENVIRONMENT: ${{ needs.prepare-info.outputs.env }}
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+    strategy:
+      matrix:
+        organization: ${{ fromJson(needs.prepare-info.outputs.teacher_k8s_orgs) }}
+    concurrency:
+      group: build-me-web-teacher-${{ matrix.organization }}-${{ needs.prepare-info.outputs.env }}
+      cancel-in-progress: ${{ needs.prepare-info.outputs.env != 'production' }}
+    steps:
+      - name: Collect Workflow Telemetry
+        continue-on-error: true
+        timeout-minutes: 5
+        uses: manabie-com/workflow-telemetry-action@v2
+
+      - uses: actions/checkout@v3
+        timeout-minutes: 5
+
+      - id: build-me-web-teacher
+        timeout-minutes: 30
+        uses: ./.github/actions/tbd.build-web
+        env:
+          IMAGE_TAG: ${{env.PREFIX_IMAGE}}/${{ env.APP }}-web:${{ env.RELEASE_TAG }}-${{ env.ORGANIZATION }}-${{ env.APP }}-${{ env.ENVIRONMENT }}
+
+  update-me-alert:
+    runs-on: ["self-hosted", "100m-400mi", "spot", "persistent"]
+    if: ${{ needs.prepare-info.outputs.me_release_tag != '' && always()}}
+    needs:
+      [
+        prepare-info,
+        send-build-alert,
+        build-me-web-learner,
+        build-me-web-teacher,
+        build-me-android,
+        build-me-ios,
+      ]
+    env:
+      ENVIRONMENT: ${{ needs.prepare-info.outputs.env }}
+      AUTO_DEPLOY: "${{ needs.prepare-info.outputs.auto_deploy }}"
+    outputs:
+      status: ${{ steps.reply.outputs.status }}
+    steps:
+      - uses: actions/checkout@v3
+        timeout-minutes: 5
+
+      - id: me_statuses
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const statuses = {
+              'build-me-web-teacher': {
+                status: '${{ needs.build-me-web-teacher.result }}'
+              },
+              'build-me-web-learner': {
+                status: '${{ needs.build-me-web-learner.result }}'
+              },
+              'build-me-android': {
+                status: '${{ needs.build-me-android.result }}'
+              },
+              'build-me-ios': {
+                status: '${{ needs.build-me-ios.result }}'
+              }
+            }
+            core.setOutput('statuses', statuses)
+
+      - uses: ./.github/actions/slack-alert-reply
+        id: reply
+        with:
+          actor: ${{ needs.send-build-alert.outputs.user_alert }}
+          repo: student-app
+          release_tag: ${{ needs.prepare-info.outputs.me_release_tag }}
+          channel: ${{ needs.send-build-alert.outputs.channel_id }}
+          message-timestamp: ${{ needs.send-build-alert.outputs.alert_id }}
+          current-job: "Mobile"
+          statuses: ${{ steps.me_statuses.outputs.statuses }}
+          SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
+
+      - name: trigger deploy
+        if: ${{ env.AUTO_DEPLOY == 'true' && steps.reply.outputs.status == 'success' && needs.prepare-info.outputs.deploy_all == 'false' }}
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ env.GITHUB_TOKEN }}
+          script: |
+            core.exportVariable('ORGS', '${{ needs.prepare-info.outputs.orgs }}');
+            await github.rest.repos.createDispatchEvent({
+              owner: context.repo.owner,
+              repo: "backend",
+              event_type: "tbd.deploy_me",
+              client_payload: {
+                  payload: {
+                    me_release_tag: "${{needs.prepare-info.outputs.me_release_tag}}",
+                    env: process.env.ENVIRONMENT,
+                    orgs: process.env.ORGS,
+                    me_apps: "${{ needs.prepare-info.outputs.me_apps }}",
+                    me_platforms: "${{ needs.prepare-info.outputs.me_platforms }}",
+                    workflow_ref: context.ref,
+                    slack_alert: {
+                      actor: "${{ needs.prepare-info.outputs.actor || github.triggering_actor }}",
+                      channel: "${{ needs.send-build-alert.outputs.channel_id }}",
+                      timestamp: "${{ needs.send-build-alert.outputs.alert_id }}"
+                    },
+                  },
+              },
+            });
+
+  update-build-alert:
+    runs-on: ["self-hosted", "100m-400mi", "spot", "persistent"]
+    if: ${{ needs.send-build-alert.outputs.alert_id != '' && always() }}
+    needs:
+      [
+        prepare-info,
+        send-build-alert,
+        build-backend,
+        update-fe-alert,
+        update-me-alert,
+      ]
+    env:
+      ENVIRONMENT: "${{ needs.prepare-info.outputs.env }}"
+    steps:
+      - uses: actions/checkout@v3
+        timeout-minutes: 5
+
+      - uses: ./.github/actions/slack-alert-update
+        with:
+          be_tag: ${{ needs.prepare-info.outputs.be_release_tag }}
+          fe_tag: ${{ needs.prepare-info.outputs.fe_release_tag }}
+          me_tag: ${{ needs.prepare-info.outputs.me_release_tag }}
+          be_status: ${{ needs.build-backend.result }}
+          fe_status: ${{ needs.update-fe-alert.outputs.status }}
+          me_status: ${{ needs.update-me-alert.outputs.status }}
+          message: "Build ${{ env.ENVIRONMENT }}"
+          channel: ${{ needs.send-build-alert.outputs.channel_id }}
+          message-timestamp: ${{ needs.send-build-alert.outputs.alert_id }}
+          orgs: ${{ needs.prepare-info.outputs.orgs }}
+          SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
+          squad_alert: ${{ needs.send-build-alert.outputs.squad_alert }}
+          user_alert: ${{ needs.send-build-alert.outputs.user_alert }}
+
+  trigger-deploy-all:
+    runs-on: ["self-hosted", "100m-400mi", "spot", "persistent"]
+    if: ${{ needs.prepare-info.outputs.deploy_all == 'true' && needs.prepare-info.outputs.auto_deploy == 'true' && (success() || failure()) }}
+    needs:
+      [
+        prepare-info,
+        send-build-alert,
+        build-backend,
+        update-fe-alert,
+        update-me-alert,
+      ]
+    steps:
+      - name: Check build status
+        id: build-status
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ env.GITHUB_TOKEN }}
+          result-encoding: string
+          script: |
+            const statuses = [
+              '${{ needs.build-backend.result }}',
+              '${{ needs.update-fe-alert.outputs.status }}',
+              '${{ needs.update-me-alert.outputs.status }}'
+            ]
+            var deploy_all = 'true'
+            if (statuses.includes('cancelled') || statuses.includes('failure') || statuses.includes(''))
+              deploy_all = 'false'
+              
+            core.setOutput('deploy_all', deploy_all);
+            console.log('Enabling deploy all', deploy_all)
+
+      - name: Trigger deploy all
+        if: steps.build-status.outputs.deploy_all == 'true'
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ env.GITHUB_TOKEN }}
+          script: |
+            await github.rest.repos.createDispatchEvent({
+              owner: context.repo.owner,
+              repo: "backend",
+              event_type: "tbd.deploy_all",
+              client_payload: {
+                  payload: {
+                    me_release_tag: "${{ needs.prepare-info.outputs.me_release_tag }}",
+                    fe_release_tag: "${{ needs.prepare-info.outputs.fe_release_tag }}",
+                    be_release_tag: "${{ needs.prepare-info.outputs.be_release_tag }}",
+                    env: "${{ needs.prepare-info.outputs.env }}",
+                    orgs: "${{ needs.prepare-info.outputs.orgs }}",
+                    me_apps: "${{ needs.prepare-info.outputs.me_apps }}",
+                    me_platforms: "${{ needs.prepare-info.outputs.me_platforms }}",
+                    workflow_ref: context.ref,
+                    slack_alert: {
+                      actor: "${{ needs.prepare-info.outputs.actor || github.triggering_actor }}",
+                      channel: "${{ needs.send-build-alert.outputs.channel_id }}",
+                      timestamp: "${{ needs.send-build-alert.outputs.alert_id }}"
+                    },
+                  },
+              },
+            });

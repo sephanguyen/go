@@ -1,0 +1,95 @@
+{
+	"schema": [
+		{
+			"column_name": "city_id",
+			"data_type": "integer",
+			"column_default": "nextval('cities_city_id_seq'::regclass)",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "country",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "display_order",
+			"data_type": "smallint",
+			"column_default": "0",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "name",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "cities",
+			"policyname": "rls_cities",
+			"qual": "permission_check(resource_path, (cities.*)::text)",
+			"with_check": "permission_check(resource_path, (cities.*)::text)",
+			"relrowsecurity": false,
+			"relforcerowsecurity": false,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "city_pk",
+			"column_name": "city_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "city_un",
+			"column_name": "country",
+			"constraint_type": "UNIQUE"
+		},
+		{
+			"constraint_name": "city_un",
+			"column_name": "name",
+			"constraint_type": "UNIQUE"
+		}
+	],
+	"table_name": "cities",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

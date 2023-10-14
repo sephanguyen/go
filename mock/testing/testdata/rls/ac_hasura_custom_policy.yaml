@@ -1,0 +1,94 @@
+- template: 1.1
+  tableName: ac_test_template_11_4
+  useCustomHasuraPolicy: true
+  hasuraPolicy:
+    selectPermission:
+    - name: USER_GROUP_ADMIN
+      filter:
+      - ac_test_template_11_4_location_permission:
+          _and:
+          - user_id:
+              _eq: X-Hasura-User-Id
+          - permission_name:
+              _eq: accesscontrol.b.read
+    - name: MANABIE
+      filter:
+        ac_test_template_11_4_location_permission:
+          _and:
+          - user_id:
+              _eq: X-Hasura-User-Id
+          - permission_name:
+              _eq: accesscontrol.b.read
+    insertPermission:
+    - name: USER_GROUP_ADMIN
+      check:
+      - ac_test_template_11_4_location_permission:
+          _and:
+          - user_id:
+              _eq: X-Hasura-User-Id
+          - permission_name:
+              _eq: accesscontrol.b.read
+    deletePermission:
+    - name: USER_GROUP_ADMIN
+      filter:
+      - ac_test_template_11_4_location_permission:
+          _and:
+          - user_id:
+              _eq: X-Hasura-User-Id
+          - permission_name:
+              _eq: accesscontrol.b.read
+      check:
+      - ac_test_template_11_4_location_permission:
+          _and:
+          - user_id:
+              _eq: X-Hasura-User-Id
+          - permission_name:
+              _eq: accesscontrol.b.read
+    updatePermission:
+    - name: USER_GROUP_ADMIN
+      filter:
+      - ac_test_template_11_4_location_permission:
+          _and:
+          - user_id:
+              _eq: X-Hasura-User-Id
+          - permission_name:
+              _eq: accesscontrol.b.read
+      check:
+      - ac_test_template_11_4_location_permission:
+          _and:
+          - user_id:
+              _eq: X-Hasura-User-Id
+          - permission_name:
+              _eq: accesscontrol.b.read
+    arrayCustomRelationship:
+    - tableName: ac_test_template_11_4
+      manualConfig:
+        name: ac_test_template_11_4_location_permission_array
+        using:
+          manual_configuration:
+            remote_table:
+              schema: public
+              name: granted_permissions
+            column_mapping:
+              owners: location_id
+    objectCustomRelationship:
+    - tableName: ac_test_template_11_4
+      manualConfig:
+        name: ac_test_template_11_4_location_permission
+        using:
+          manual_configuration:
+            remote_table:
+              schema: public
+              name: granted_permissions
+            column_mapping:
+              owners: location_id
+    - tableName: granted_permissions
+      manualConfig:
+        name: ac_test_template_11_4_location_permission
+        using:
+          manual_configuration:
+            remote_table:
+              schema: public
+              name: ac_test_template_11_4
+            column_mapping:
+              location_id: owners

@@ -1,0 +1,3 @@
+UPDATE study_plan_items
+SET status = 'STUDY_PLAN_ITEM_STATUS_ACTIVE'::TEXT
+WHERE status IS NULL;

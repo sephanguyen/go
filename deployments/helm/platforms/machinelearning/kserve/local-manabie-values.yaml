@@ -1,0 +1,18 @@
+
+vendor: "manabie"
+environment: "local"
+
+secrets:
+  serviceCredential: ""
+
+kserve: 
+  controller:
+    deploymentMode: "RawDeployment"
+  
+machinelearning:
+  namespace: local-manabie-machine-learning
+
+serviceAccountEmailSuffix: ""
+
+artifact:
+  gcs_path: "gs://dev-manabie-data/mlflow"

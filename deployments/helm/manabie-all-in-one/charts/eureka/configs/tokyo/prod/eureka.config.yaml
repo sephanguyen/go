@@ -1,0 +1,11 @@
+common:
+  google_cloud_project: student-coach-e1e95
+issuers:
+  - issuer: manabie
+    audience: prod-tokyo
+    jwks_endpoint: http://shamir:5680/.well-known/jwks.json
+school_information:
+  school_id: -2147483644 # TODO: handle multiple schools @enumerateee
+  school_name: GA School
+storage:
+  bucket: prod-tokyo-backend

@@ -1,0 +1,1 @@
+CREATE INDEX CONCURRENTLY IF NOT EXISTS flash_card_topic_id_idx ON public.flash_card USING btree (topic_id);

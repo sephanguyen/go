@@ -1,0 +1,210 @@
+syntax = "proto3";
+
+package yasuo.v1;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/yasuo/v1;ypb";
+
+import "bob/v1/enums.proto";
+import "common/v1/enums.proto";
+import "common/v1/contents.proto";
+import "google/protobuf/timestamp.proto";
+
+message UpsertChaptersRequest {
+  repeated common.v1.Chapter chapters = 1;
+  string book_id = 2;  // only for CMS
+}
+
+message UpsertChaptersResponse {
+  bool successful = 1;
+}
+
+message UpsertCoursesRequest {
+  repeated common.v1.Course courses = 1;
+}
+
+message UpsertCoursesResponse {
+  bool successful = 1;
+}
+
+message DeleteCoursesRequest {
+  repeated string course_ids = 1;
+}
+
+message DeleteCoursesResponse {
+  bool successful = 1;
+}
+
+message DeleteChaptersRequest {
+  repeated string chapter_ids = 1;
+}
+
+message DeleteChaptersResponse {
+  bool successful = 1;
+}
+
+message DeleteTopicsRequest {
+  repeated string topic_ids = 1;
+}
+
+message DeleteTopicsResponse {
+  bool successful = 1;
+}
+
+message DeleteLearningObjectivesRequest {
+  repeated string lo_ids = 1;
+}
+
+message DeleteLearningObjectivesResponse {
+  bool successful = 1;
+}
+
+message UpsertCourseClassesRequest {
+  UpsertCoursesRequest req = 1;
+}
+
+message UpsertCourseClassesResponse {
+  bool successful = 1;
+}
+
+message UpsertLiveCourseRequest {
+  string id = 1;
+  string name = 2;
+  string grade = 3;
+  common.v1.Subject subject = 4;
+  repeated int32 class_ids = 5;
+  repeated string teacher_ids = 6;
+  int64 school_id = 7;
+  common.v1.Country country = 8;
+  google.protobuf.Timestamp start_date = 9;
+  google.protobuf.Timestamp end_date = 10;
+}
+
+message UpsertLiveCourseResponse {
+  string id = 1;
+}
+
+message DeleteLiveCourseRequest {
+  repeated string course_ids = 1;
+}
+
+message DeleteLiveCourseResponse {}
+
+message CreateLiveLessonRequest {
+  message Lesson {
+    common.v1.Lesson lesson = 1;
+    ControlSettingLiveLesson control_settings = 2;
+  }
+  repeated Lesson lessons = 2;
+}
+
+message CreateLiveLessonResponse {}
+
+message UpdateLiveLessonRequest {
+  common.v1.Lesson lesson = 1;
+  ControlSettingLiveLesson control_settings = 2;
+}
+
+message UpdateLiveLessonResponse {
+  string lesson_id = 1;
+}
+
+message DeleteLiveLessonRequest {
+  repeated string lesson_ids = 1;
+}
+
+message DeleteLiveLessonResponse {}
+
+message ControlSettingLiveLesson {
+  repeated string lectures = 1;
+  repeated string teacher_obversers = 2;
+  common.v1.LiveLessonView default_view = 3;
+  // students can publish their video streams after joining a lesson
+  bob.v1.PublishStudentVideoStatus publish_student_video_status = 4;
+  // students can unmute their audio streams after joining a lesson
+  bob.v1.UnmuteStudentAudioStatus unmute_student_audio_status = 5;
+}
+
+message UpsertBooksRequest {
+  message Book {
+    string name = 1;
+    common.v1.Country country = 2;
+    common.v1.Subject subject = 3;
+    string grade = 4;
+    int32 school_id = 5;
+    repeated string chapter_ids = 6;
+    string book_id = 7;
+  }
+  repeated Book books = 1;
+}
+
+message UpsertBooksResponse {
+  bool successful = 1;
+}
+
+message AddBooksToCourseRequest {
+  repeated string book_ids = 1;
+  string course_id = 2;
+}
+
+message AddBooksToCourseResponse {
+  bool successful = 1;
+}
+
+message AttachMaterialsToCourseRequest {
+  repeated string material_ids = 1;
+  string course_id = 2;
+  string lesson_group_id = 3;
+}
+
+message AttachMaterialsToCourseResponse {}
+
+message QuizLO {
+  common.v1.QuizCore quiz = 1;
+  string lo_id = 2;
+}
+
+message ValidateUserSchoolRequest {
+  string userId = 1;
+  int32 expectSchoolId = 2;
+}
+
+message ValidateUserSchoolResponse {
+  bool result = 1;
+}
+
+service CourseModifierService {
+  rpc UpsertChapters(UpsertChaptersRequest) returns (UpsertChaptersResponse);
+  rpc DeleteChapters(DeleteChaptersRequest) returns (DeleteChaptersResponse);
+
+  rpc UpsertCourses(UpsertCoursesRequest) returns (UpsertCoursesResponse);
+  rpc DeleteCourses(DeleteCoursesRequest) returns (DeleteCoursesResponse);
+
+  rpc DeleteTopics(DeleteTopicsRequest) returns (DeleteTopicsResponse);
+
+  rpc DeleteLearningObjectives(DeleteLearningObjectivesRequest)
+      returns (DeleteLearningObjectivesResponse);
+  rpc UpsertCourseClasses(UpsertCourseClassesRequest)
+      returns (UpsertCourseClassesResponse);
+
+  rpc UpsertLiveCourse(UpsertLiveCourseRequest)
+      returns (UpsertLiveCourseResponse);
+  rpc DeleteLiveCourse(DeleteLiveCourseRequest)
+      returns (DeleteLiveCourseResponse);
+  rpc UpdateLiveLesson(UpdateLiveLessonRequest)
+      returns (UpdateLiveLessonResponse);
+  rpc CreateLiveLesson(CreateLiveLessonRequest)
+      returns (CreateLiveLessonResponse);
+  rpc DeleteLiveLesson(DeleteLiveLessonRequest)
+      returns (DeleteLiveLessonResponse);
+
+  rpc UpsertBooks(UpsertBooksRequest) returns (UpsertBooksResponse);
+
+  rpc AddBooksToCourse(AddBooksToCourseRequest)
+      returns (AddBooksToCourseResponse);
+
+  rpc AttachMaterialsToCourse(AttachMaterialsToCourseRequest) returns (AttachMaterialsToCourseResponse);
+}
+
+service CourseReaderService {
+  rpc ValidateUserSchool(ValidateUserSchoolRequest) returns (ValidateUserSchoolResponse);
+}

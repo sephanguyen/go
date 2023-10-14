@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "cp-schema-registry.fullname" . }}-jaas
+  labels:
+    app.kubernetes.io/name: {{ include "cp-schema-registry.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "cp-schema-registry.labels" . | nindent 4 }}
+data:
+  kafka_client_jaas.conf: |
+{{- tpl (printf "configs/%s/kafka_client_jaas.conf" .Values.environment | .Files.Get) . | nindent 4 }}

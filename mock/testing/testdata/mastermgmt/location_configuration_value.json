@@ -1,0 +1,137 @@
+{
+	"schema": [
+		{
+			"column_name": "config_key",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "config_value",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "config_value_type",
+			"data_type": "text",
+			"column_default": "'string'::text",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "location_config_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "location_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "location_configuration_value",
+			"policyname": "rls_location_configuration_value",
+			"qual": "permission_check(resource_path, 'location_configuration_value'::text)",
+			"with_check": "permission_check(resource_path, 'location_configuration_value'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "location_configuration_value",
+			"policyname": "rls_location_configuration_value_restrictive",
+			"qual": "permission_check(resource_path, 'location_configuration_value'::text)",
+			"with_check": "permission_check(resource_path, 'location_configuration_value'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "location_configuration_value_fk",
+			"column_name": "config_key",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "location_configuration_value_fk",
+			"column_name": "resource_path",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "location_configuration_value__pk",
+			"column_name": "location_config_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "location_configuration_value_resource_unique",
+			"column_name": "config_key",
+			"constraint_type": "UNIQUE"
+		},
+		{
+			"constraint_name": "location_configuration_value_resource_unique",
+			"column_name": "location_id",
+			"constraint_type": "UNIQUE"
+		},
+		{
+			"constraint_name": "location_configuration_value_resource_unique",
+			"column_name": "resource_path",
+			"constraint_type": "UNIQUE"
+		}
+	],
+	"table_name": "location_configuration_value",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

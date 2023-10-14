@@ -1,0 +1,97 @@
+jetstream:
+  image:
+    repository: nats
+    pullPolicy: IfNotPresent
+    tag: 2.8.4-alpine3.15
+
+  service:
+    type: ClusterIP
+    adminPort: 8223
+    clientPort: 4223
+    clusterPort: 6223
+
+  resources:
+    requests:
+      cpu: "20m"
+      memory: "256Mi"
+
+  fileStorage:
+    accessModes:
+      - ReadWriteOnce
+    storageDirectory: /data/jetstream
+    size: 10Gi
+    storageClassName: standard
+
+  cluster:
+    enabled: true
+    replicas: 3
+
+  # Default lame duck duration in the server is 2 minutes.
+  terminationGracePeriodSeconds: 120
+
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - podAffinityTerm:
+            topologyKey: kubernetes.io/hostname
+            labelSelector:
+              matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values: ["nats-jetstream"]
+          weight: 1
+  tolerations: []
+
+# NATS Box
+# https://github.com/nats-io/nats-box
+natsbox:
+  image:
+    repository: natsio/nats-box
+    tag: "0.13.8"
+  pullPolicy: IfNotPresent
+
+  resources:
+    requests:
+      cpu: "1m"
+      memory: "16Mi"
+  podAffinityIdentifier: nats-jetstream-box
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: cloud.google.com/gke-spot
+                operator: In
+                values: ["true"]
+  tolerations:
+    - effect: NoSchedule
+      key: cloud.google.com/gke-spot
+      operator: Exists
+
+# Prometheus NATS Exporter configuration.
+exporter:
+  image:
+    repository: natsio/prometheus-nats-exporter
+    tag: "0.9.3"
+  pullPolicy: IfNotPresent
+
+# The NATS config reloader image to use.
+reloader:
+  image:
+    repository: natsio/nats-server-config-reloader
+    tag: "0.7.0"
+  pullPolicy: IfNotPresent
+
+sopsImage:
+  repository: mozilla/sops
+  tag: v3.7.3-alpine
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+serviceAccountName: ""
+
+podAnnotations:
+  cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+
+securityContext: null

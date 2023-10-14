@@ -1,0 +1,2 @@
+ALTER TABLE public.student_entryexit_records
+DROP CONSTRAINT IF EXISTS student_entryexit_records_student_id_key;

@@ -1,0 +1,191 @@
+apiVersion: skaffold/v2beta29
+kind: Config
+metadata:
+  name: machinelearning
+profiles:
+  - name: mlflow-local
+    activation:
+      - env: APHELIOS_DEPLOYMENT_ENABLED=true
+    build:
+      artifacts:
+        - image: asia.gcr.io/student-coach-e1e95/aphelios
+          context: .
+          custom:
+            buildCommand: |
+              DOCKER_BUILDKIT=1 docker build \
+              --tag "$IMAGE" \
+              --file ./developments/python.Dockerfile "$BUILD_CONTEXT"
+            dependencies:
+              paths:
+                - ./cmd/aphelios/**
+                - ./internal/aphelios/**
+
+        - image: asia.gcr.io/student-coach-e1e95/mlflow
+          context: .
+          custom:
+            buildCommand: |
+              DOCKER_BUILDKIT=1 docker build \
+              --tag "$IMAGE" \
+              --file ./developments/mlflow.Dockerfile "$BUILD_CONTEXT"
+      tagPolicy: # Using the same tag policy as in skaffold.manabie-all-in-one.yaml
+        customTemplate:
+          template: '{{.DATETIME}}.{{.COMMIT_ID}}'
+          components:
+            - name: DATETIME
+              dateTime:
+                format: '20060102150405'
+            - name: COMMIT_ID
+              gitCommit:
+                variant: AbbrevCommitSha
+                ignoreChanges: true
+    deploy:
+      helm:
+        releases:
+          - name: mlflow
+            namespace: '{{.ENV}}-{{.ORG}}-machine-learning'
+            artifactOverrides:
+              image: asia.gcr.io/student-coach-e1e95/mlflow
+            createNamespace: true
+            chartPath: deployments/helm/platforms/machinelearning/mlflow
+            valuesFiles:
+              - "deployments/helm/platforms/machinelearning/mlflow/{{.ENV}}-{{.ORG}}-values.yaml"
+            setValueTemplates:
+              environment: "{{.ENV}}"
+              vendor: "{{.ORG}}"
+            imageStrategy:
+              helm: {}
+
+          - name: kserve
+            namespace: '{{.ENV}}-{{.ORG}}-machine-learning'
+            createNamespace: true
+            chartPath: deployments/helm/platforms/machinelearning/kserve
+            valuesFiles:
+              - "deployments/helm/platforms/machinelearning/kserve/{{.ENV}}-{{.ORG}}-values.yaml"
+            setValueTemplates:
+              environment: "{{.ENV}}"
+              vendor: "{{.ORG}}"
+              serviceAccountEmailSuffix: '{{.SERVICE_ACCOUNT_EMAIL_SUFFIX}}'
+            imageStrategy:
+              helm: {}
+
+          - name: aphelios
+            chartPath: deployments/helm/platforms/aphelios
+            artifactOverrides:
+              image: asia.gcr.io/student-coach-e1e95/aphelios
+            namespace: '{{.ENV}}-{{.ORG}}-machine-learning'
+            createNamespace: true
+            setValueTemplates:
+              appVersion: '{{.IMAGE_TAG}}'
+              environment: '{{.ENV}}'
+              vendor: '{{.ORG}}'
+              serviceAccountEmailSuffix: '{{.SERVICE_ACCOUNT_EMAIL_SUFFIX}}'
+            imageStrategy:
+              helm: {}
+
+
+  - name: ci-mlflow-stag
+    activation:
+      - kubeContext: gke_staging-manabie-online_asia-southeast1-b_staging-2
+        env: MLFLOW=true  #specific for each service when deployed on github action
+    build:
+      artifacts:
+        - image: asia.gcr.io/student-coach-e1e95/mlflow
+          context: .
+          custom:
+            buildCommand: |
+              DOCKER_BUILDKIT=1 docker build \
+              --tag "$IMAGE" \
+              --file ./developments/mlflow.Dockerfile "$BUILD_CONTEXT"
+      tagPolicy: # Using the same tag policy as in skaffold.manabie-all-in-one.yaml
+        customTemplate:
+          template: '{{.DATETIME}}.0'
+          components:
+            - name: DATETIME
+              dateTime:
+                format: '20060102150405'
+    deploy:
+      helm:
+        releases:
+          - name: mlflow
+            namespace: '{{.ENV}}-{{.ORG}}-machine-learning'
+            artifactOverrides:
+              image: asia.gcr.io/student-coach-e1e95/mlflow
+            createNamespace: true
+            chartPath: deployments/helm/platforms/machinelearning/mlflow
+            valuesFiles:
+              - "deployments/helm/platforms/machinelearning/mlflow/{{.ENV}}-{{.ORG}}-values.yaml"
+            setValueTemplates:
+              environment: "{{.ENV}}"
+              vendor: "{{.ORG}}"
+            imageStrategy:
+              helm: {}
+
+
+  - name: ci-kserve-stag
+    activation:
+      - kubeContext: gke_staging-manabie-online_asia-southeast1-b_staging-2
+        env: KSERVE=true  #specific for each service when deployed on github action
+    deploy:
+      helm:
+        releases:
+          - name: kserve
+            namespace: '{{.ENV}}-{{.ORG}}-machine-learning'
+            createNamespace: true
+            chartPath: deployments/helm/platforms/machinelearning/kserve
+            valuesFiles:
+              - "deployments/helm/platforms/machinelearning/kserve/{{.ENV}}-{{.ORG}}-values.yaml"
+            setValueTemplates:
+              environment: "{{.ENV}}"
+              vendor: "{{.ORG}}"
+              serviceAccountEmailSuffix: '{{.SERVICE_ACCOUNT_EMAIL_SUFFIX}}'
+            imageStrategy:
+              helm: {}
+
+  - name: ci-aphelios-stag
+    activation:
+      - kubeContext: gke_staging-manabie-online_asia-southeast1-b_staging-2
+        env: APHELIOS=true #specific for each service when deployed on github action
+    build:
+      artifacts:
+        - image: asia.gcr.io/student-coach-e1e95/aphelios
+          context: .
+          custom:
+            buildCommand: |
+              DOCKER_BUILDKIT=1 docker build \
+              --tag "$IMAGE" \
+              --file ./developments/python.Dockerfile "$BUILD_CONTEXT"
+            dependencies:
+              paths:
+                - ./cmd/aphelios/**
+                - ./internal/aphelios/**
+                - ./pkg/manabuf_py/**
+      tagPolicy: # Using the same tag policy as in skaffold.manabie-all-in-one.yaml
+        customTemplate:
+          template: '{{.DATETIME}}.{{.COMMIT_ID}}'
+          components:
+            - name: DATETIME
+              dateTime:
+                format: '20060102150405'
+            - name: COMMIT_ID
+              gitCommit:
+                variant: AbbrevCommitSha
+                ignoreChanges: true
+    deploy:
+      helm:
+        releases:
+        - name: aphelios
+          chartPath: deployments/helm/platforms/aphelios
+          artifactOverrides:
+            image: asia.gcr.io/student-coach-e1e95/aphelios
+          namespace: '{{.ENV}}-{{.ORG}}-machine-learning'
+          createNamespace: true
+          setValueTemplates:
+            appVersion: '{{.IMAGE_TAG}}'
+            environment: '{{.ENV}}'
+            vendor: '{{.ORG}}'
+            serviceAccountEmailSuffix: '{{.SERVICE_ACCOUNT_EMAIL_SUFFIX}}'
+          imageStrategy:
+            helm: {}
+
+
+

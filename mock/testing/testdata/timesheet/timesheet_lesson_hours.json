@@ -1,0 +1,110 @@
+{
+	"schema": [
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "flag_on",
+			"data_type": "boolean",
+			"column_default": "false",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "lesson_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "timesheet_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "timesheet_lesson_hours",
+			"policyname": "rls_timesheet_lesson_hours",
+			"qual": "permission_check(resource_path, 'timesheet_lesson_hours'::text)",
+			"with_check": "permission_check(resource_path, 'timesheet_lesson_hours'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "timesheet_lesson_hours",
+			"policyname": "rls_timesheet_lesson_hours_restrictive",
+			"qual": "permission_check(resource_path, 'timesheet_lesson_hours'::text)",
+			"with_check": "permission_check(resource_path, 'timesheet_lesson_hours'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "fk__timesheet_lesson_hours_timesheet_id",
+			"column_name": "timesheet_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "timesheet_lesson_hours_pk",
+			"column_name": "lesson_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "timesheet_lesson_hours_pk",
+			"column_name": "timesheet_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "timesheet_lesson_hours",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

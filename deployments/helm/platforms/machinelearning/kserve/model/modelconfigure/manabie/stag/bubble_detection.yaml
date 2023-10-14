@@ -1,0 +1,13 @@
+apiVersion: "serving.kserve.io/v1beta1"
+kind: "InferenceService"
+metadata:
+  name: "bubble"
+spec:
+  predictor:
+    serviceAccountName: stag-kserve 
+    containers:
+      - name: kserve-container
+        image: asia.gcr.io/student-coach-e1e95/bubble-model:2022101401
+        env:
+        - name: STORAGE_URI
+          value: "gs://stag-manabie-backend/0/9e809db975e54573b137691881289c8b/artifacts/model"

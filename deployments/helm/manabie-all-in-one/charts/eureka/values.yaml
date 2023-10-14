@@ -1,0 +1,269 @@
+service:
+  type: ClusterIP
+  port: 5550
+
+grpcPort: 5550
+httpPort: 5580
+
+resources:
+  requests:
+    cpu: 5m
+    memory: 72Mi
+
+eurekaAllConsumers:
+  podAffinityIdentifier: "eureka-all-consumers"
+  affinityOverride:
+    nodeAffinity: {}
+eurekaJPREPSyncCourseStudent:
+  podAffinityIdentifier: "eureka-jprep-sync-course-student"
+  affinityOverride:
+    nodeAffinity: {}
+eurekaMonitors:
+  podAffinityIdentifier: "eureka-monitors"
+
+metrics:
+  enabled: true
+  podAnnotations:
+    prometheus.io/scheme: "http"
+    prometheus.io/port: "8888"
+    prometheus.io/scrape: "true"
+
+clientVersion: "v0.30.0"
+
+hasura:
+  enableConsole: true
+  enabledApis: "metadata,graphql"
+  service:
+    type: ClusterIP
+    port: 8080
+  resources:
+    requests:
+      memory: 220Mi
+  pgConnections: 8
+  pgTimeout: 10
+  anonymous:
+    enabled: false
+
+apiHttp:
+  - match:
+      - uri:
+          prefix: /syllabus/api
+    route:
+      - destination:
+          host: eureka
+          port:
+            number: 5580
+  - match:
+    - uri:
+        exact: /eureka.v1.CourseReaderService/ListStudentIDsByCourseV2
+    - uri:
+        exact: /eureka.v1.CourseReaderService/ListCourseIDsByStudents
+    - uri:
+        prefix: /eureka.v1.InternalService
+    route:
+      - destination:
+          host: eureka
+          port:
+            number: 5550
+    fault:
+      abort:
+        percentage:
+          value: 100
+        httpStatus: 403
+  - match:
+      - uri:
+          prefix: /eureka
+      - uri:
+          prefix: /syllabus
+      - uri:
+          prefix: /manabie.eureka
+    route:
+      - destination:
+          host: eureka
+          port:
+            number: 5550
+        weight: 100
+
+webHttp:
+  - match:
+      - uri:
+          prefix: /syllabus/api
+    route:
+      - destination:
+          host: eureka
+          port:
+            number: 5580
+    corsPolicy: &CORSPolicy
+      allowOrigins:
+        - regex: ".*"
+      allowMethods:
+        - POST
+        - GET
+        - OPTIONS
+        - PUT
+        - DELETE
+      allowHeaders:
+        - authorization
+        - grpc-timeout
+        - content-type
+        - keep-alive
+        - user-agent
+        - cache-control
+        - content-transfer-encoding
+        - token
+        - student-id
+        - x-accept-content-transfer-encoding
+        - x-accept-response-streaming
+        - x-request-id
+        - x-user-agent
+        - x-graphql-mesh-authorization
+        - x-grpc-web
+        - if-none-match
+        - pkg
+        - version
+        - connect-timeout-ms
+        - connect-protocol-version
+        - connect-content-encoding
+        - connect-accept-encoding
+      maxAge: 100s
+      exposeHeaders:
+        - grpc-status
+        - grpc-message
+        - etag
+
+  - match:
+      - uri:
+          prefix: /eureka
+      - uri:
+          prefix: /syllabus
+      - uri:
+          prefix: /manabie.eureka
+    route:
+      - destination:
+          host: eureka
+          port:
+            number: 5550
+        weight: 100
+    corsPolicy: *CORSPolicy
+
+adminHttp:
+  - match:
+    - uri:
+        prefix: /eureka/ # accessing hasura by /eureka/console path
+    rewrite:
+      uri: /
+    route:
+    - destination:
+        host: eureka-hasura
+        port:
+          number: 8080
+    corsPolicy: *CORSPolicy
+
+
+hasurav2: #hasura v2
+  enableConsole: true
+  enableRemoteSchemaPermission: false #we dont use it now
+  experimentFeatures: "naming_convention"
+  allowList: true
+  namingConvention: "hasura-default"
+  enabledApis: "metadata,graphql"
+  unauthorized:
+    enable: false
+    role: anonymous
+  service:
+    type: ClusterIP
+    port: 8080
+  resources:
+    requests:
+      memory: 256Mi
+
+
+adminHttpV2: #hasura v2
+  - match:
+    - uri:
+        prefix: /eurekav2/ # accessing hasura by /eurekav2/console path
+    rewrite:
+      uri: /
+    route:
+    - destination:
+        host: eureka-hasurav2
+        port:
+          number: 8080
+
+
+yugabyteDeployment:
+  enabled: false
+
+nodeSelector: {}
+
+tolerations:
+
+affinity: {}
+affinityOverride: {}
+
+pdb:
+  enabled: false
+
+podAnnotations:
+  sidecar.istio.io/proxyCPU: 10m
+  sidecar.istio.io/proxyMemory: 50Mi
+
+jobs:
+  # Disabled, convert to gjob before enabling again
+  # fix-current-display-order:
+  #   cmd: eureka_fix_current_display_order
+
+  # Disabled, convert to gjob before enabling again
+  # migrate-master-study-plan:
+  #   cmd: eureka_migrate_master_study_plan
+
+  # Disabled, convert to gjob before enabling again
+  # migrate-study-plan-items-to-individual-study-plan:
+  #   cmd: eureka_migrate_study_plan_items_to_individual_study_plan
+
+  # Disabled, convert to gjob before enabling again
+  # migrate-study-plan:
+  #   cmd: eureka_migrate_study_plan
+
+  # Disabled, convert to gjob before enabling again
+  # sync-active-student:
+  #   cmd: eureka_sync_active_student
+
+  # Disabled, convert to gjob before enabling again
+  # update-deleted-study-plan-item:
+  #   cmd: eureka_update_deleted_study_plan_item
+
+  # Disabled, convert to gjob before enabling again
+  # update-student-event-logs-study-plan-item-id:
+  #   cmd: eureka_update_student_event_logs_study_plan_item_id
+
+  update-student-event-logs-study-plan-item-identity:
+    cmd: eureka_update_student_event_logs_study_plan_item_identity
+
+  regenerate-speeches-audio-link:
+    cmd: eureka_regenerate_speeches_audio_link
+
+  upload-data-file-to-withus:
+    cmd: eureka_upload_data_file_to_withus
+
+  migrate-max-score-submission:
+    cmd: eureka_migrate_max_score_submission
+
+  migrate-lo-submission-total-score:
+    cmd: eureka_lo_submission_total_score
+
+  migrate-submitted-submissions:
+    cmd: eureka_submitted_submissions
+
+  fix-student-event-logs-data:
+    cmd: fix_student_event_logs_data
+
+cronjobs:
+  cronjob-upload-data-file-to-withus:
+    schedule: "30 19 * * *"
+    cmd: eureka_upload_data_file_to_withus
+caching:
+  enabled: false
+  resources:
+    requests:
+      memory: 32Mi

@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package nats.v1;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/nats/v1;npb";
+
+import "google/protobuf/timestamp.proto";
+
+message ActivityLogEvtCreated {
+    string user_id = 1;
+    string action_type = 2;
+    string organization_id = 3;
+    google.protobuf.Timestamp request_at = 4;
+    bytes payload = 5;
+    string status = 6;
+    string resource_path = 7;
+    google.protobuf.Timestamp finished_at = 8;
+}

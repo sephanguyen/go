@@ -1,0 +1,22 @@
+
+@startuml teacher_join_live_lesson
+hide circle
+
+actor User as User order 10
+participant NATS as NATS order 30
+participant Bob as Bob order 20
+participant Tom as Tom order 40
+User   -> Bob:  Call "LessonModifierServices.JoinLesson"
+activate Bob
+Bob -> NATS: Publish "lesson_event"
+deactivate Bob
+NATS -> Tom: Publish "lesson_event"\nwith "EvtLesson_JoinLesson_"
+activate Tom
+note right Tom
+1. Check and only allow user_group teacher
+2. Upsert to table "conversation_members" with user_id is message user_id, role is message user_group,
+conversation_id is found using lesson_id
+3. Broadcast message to other users "CODES_MESSAGE_TYPE_JOINED_LESSON"
+end note
+deactivate Tom
+@enduml

@@ -1,0 +1,81 @@
+name: tbd.auto-deploy-staging
+
+on:
+  workflow_dispatch:
+  schedule:
+    # run at 15th and 45th minute from 8AM to 6PM (+7) monday to friday
+    - cron: "15,45 1,2,3,4,5,6,7,8,9,10,11 * * 1,2,3,4,5"
+
+env:
+  GITHUB_TOKEN: ${{ secrets.BUILD_GITHUB_TOKEN }}
+
+jobs:
+  auto-deploy:
+    runs-on: ["self-hosted", "100m-400mi", "spot", "persistent"]
+    timeout-minutes: 15
+    steps:
+      - name: Get latest tag on trunk
+        id: latest-tag
+        uses: manabie-com/backend/.github/actions/tbd.get-latest-tag-on-trunk@develop
+        with:
+          github-token: ${{ secrets.BUILD_GITHUB_TOKEN }}
+
+      - name: Build and Deploy
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ env.GITHUB_TOKEN }}
+          script: |
+            await github.rest.repos.createDispatchEvent({
+              owner: context.repo.owner,
+              repo: "backend",
+              event_type: 'tbd.build_fe',
+              client_payload: {
+                payload: {
+                  be_release_tag: "",
+                  fe_release_tag: "${{ steps.latest-tag.outputs.fe_tag }}",
+                  me_release_tag: "",
+                  env: "staging",
+                  orgs: "manabie, jprep",
+                  me_apps: "learner, teacher",
+                  me_platforms: "android, ios, web",
+                  auto_deploy: true,
+                  workflow_ref: context.ref,
+                },
+              },
+            });
+            await github.rest.repos.createDispatchEvent({
+              owner: context.repo.owner,
+              repo: "backend",
+              event_type: 'tbd.build_me',
+              client_payload: {
+                payload: {
+                  be_release_tag: "",
+                  fe_release_tag: "",
+                  me_release_tag: "${{ steps.latest-tag.outputs.me_tag }}",
+                  env: "staging",
+                  orgs: "manabie, jprep",
+                  me_apps: "learner, teacher",
+                  me_platforms: "android, ios, web",
+                  auto_deploy: true,
+                  workflow_ref: context.ref,
+                },
+              },
+            });
+            await github.rest.repos.createDispatchEvent({
+              owner: context.repo.owner,
+              repo: "backend",
+              event_type: 'tbd.build_be',
+              client_payload: {
+                payload: {
+                  be_release_tag: "${{ steps.latest-tag.outputs.be_tag }}",
+                  fe_release_tag: "",
+                  me_release_tag: "",
+                  env: "staging",
+                  orgs: "manabie, jprep",
+                  me_apps: "learner, teacher",
+                  me_platforms: "android, ios, web",
+                  auto_deploy: true,
+                  workflow_ref: context.ref,
+                },
+              },
+            });

@@ -1,0 +1,17 @@
+common:
+  google_cloud_project: dev-manabie-online
+postgres_v2:
+  entryexitmgmt:
+    max_conns: 16
+issuers:
+  - issuer: http://firebase.emulator.svc.cluster.local:40401/fake_aud
+    audience: fake_aud
+    jwks_endpoint: http://firebase.emulator.svc.cluster.local:40401/jwkset
+  - issuer: manabie
+    audience: manabie-local
+    jwks_endpoint: http://shamir:5680/.well-known/jwks.json
+storage:
+  endpoint: http://minio-infras.emulator.svc.cluster.local:9000
+  region: us-east-1
+  bucket: manabie
+  secure: false

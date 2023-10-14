@@ -1,0 +1,141 @@
+{
+	"schema": [
+		{
+			"column_name": "chapter_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "copied_from",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "country",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "current_topic_display_order",
+			"data_type": "integer",
+			"column_default": "0",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "display_order",
+			"data_type": "smallint",
+			"column_default": "0",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "grade",
+			"data_type": "smallint",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "name",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "school_id",
+			"data_type": "integer",
+			"column_default": "'-2147483648'::integer",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "subject",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "chapters",
+			"policyname": "rls_chapters",
+			"qual": "permission_check(resource_path, 'chapters'::text)",
+			"with_check": "permission_check(resource_path, 'chapters'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "chapters",
+			"policyname": "rls_chapters_restrictive",
+			"qual": "permission_check(resource_path, 'chapters'::text)",
+			"with_check": "permission_check(resource_path, 'chapters'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "chapters_school_id_fk",
+			"column_name": "school_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "chapters_pk",
+			"column_name": "chapter_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "chapters",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

@@ -1,0 +1,2 @@
+ALTER PUBLICATION alloydb_publication ADD TABLE
+public.alloydb_dbz_signal;

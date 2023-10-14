@@ -1,0 +1,41 @@
+affinity:
+    nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+                - matchExpressions:
+                    - key: cloud.google.com/gke-spot
+                      operator: In
+                      values:
+                        - "true"
+    podAntiAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                labelSelector:
+                    matchLabels:
+                        app.kubernetes.io/name: jerry
+                topologyKey: kubernetes.io/hostname
+              weight: 100
+disableScanRLS: true
+httpPort: 8081
+metrics:
+    enabled: true
+    podAnnotations:
+        prometheus.io/port: "8888"
+        prometheus.io/scheme: http
+        prometheus.io/scrape: "true"
+migrationEnabled: false
+readinessProbe:
+    enabled: false
+replicaCount: 1
+resources:
+    requests:
+        cpu: 5m
+        memory: 32Mi
+service:
+    type: ClusterIP
+tolerations:
+    - effect: NoSchedule
+      key: cloud.google.com/gke-spot
+      operator: Exists
+useGlobalCronScheduledScaling: false
+waitForServices: []

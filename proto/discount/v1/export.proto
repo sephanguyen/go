@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package discount.v1;
+
+import "discount/v1/enums.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/discount/v1;pmpb";
+
+message ExportMasterDataRequest {
+  ExportMasterDataType export_data_type = 1;
+}
+
+message ExportMasterDataResponse {
+    bytes data = 1;
+}
+
+service ExportService {
+    rpc ExportMasterData(ExportMasterDataRequest)
+    returns (ExportMasterDataResponse);
+}

@@ -1,0 +1,22 @@
+common:
+  google_cloud_project: student-coach-e1e95
+  firebase_project: production-ga
+  identity_platform_project: student-coach-e1e95
+issuers:
+  - issuer: manabie
+    audience: prod-ga
+    jwks_endpoint: http://shamir:5680/.well-known/jwks.json
+brightcove:
+  account_id: 6064018595001
+  client_id: ee2bed82-d231-4db7-85e5-169c7b5aa396
+  profile: Asia-PREMIUM (96-1500)
+storage:
+  bucket: jp-partners-backend
+jwt_applicant: prod-ga
+question_bucket: "--"
+elasticsearch:
+  addresses:
+    - https://elasticsearch-elastic.prod-ga-elastic.svc.cluster.local:9200
+postgres_v2:
+  bob:
+    shard_id: 6

@@ -1,0 +1,2 @@
+ALTER TABLE public.quizzes
+    ADD COLUMN IF NOT EXISTS point INTEGER DEFAULT 1;

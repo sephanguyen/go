@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package syllabus.v1;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/syllabus/v1;sspb";
+
+message ImportQuestionTagRequest{
+    bytes payload = 1;
+}
+
+message ImportQuestionTagResponse{
+}
+
+service QuestionTag {
+    rpc ImportQuestionTag(ImportQuestionTagRequest) 
+        returns (ImportQuestionTagResponse);
+}

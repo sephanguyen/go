@@ -1,0 +1,124 @@
+syntax = "proto3";
+
+package eureka.v1;
+
+import "eureka/v1/enums.proto";
+import "eureka/v1/assignments.proto";
+import "common/v1/enums.proto";
+import "common/v1/requests.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/eureka/v1;epb";
+
+message ListStudyPlansRequest {
+  common.v1.Paging paging = 1;
+  int32 school_id = 2;
+  common.v1.Country country = 3;
+  string student_id = 4;
+  string course_id = 5;
+}
+
+message ListStudyPlansResponse {
+  common.v1.Paging next_page = 1;
+  repeated StudyPlan items = 2;
+}
+
+message RetrieveAssignmentListByStudyPlanResponse {
+  common.v1.Paging next_page = 1;
+  repeated Assignment items = 2;
+}
+
+message ListStudentToDoItemsRequest {
+  common.v1.Paging paging = 1;
+  string student_id = 2;
+  ToDoStatus status = 3;
+  repeated string course_ids = 4;
+}
+
+message ListStudentToDoItemsResponse {
+  common.v1.Paging next_page = 1;
+  repeated ToDoItem items = 2;
+}
+
+message ListStudentAvailableContentsRequest {
+  repeated string study_plan_id = 1;
+  string book_id = 2;
+  string chapter_id = 3;
+  string topic_id = 4;
+  string course_id = 5;
+}
+
+message ListStudentAvailableContentsResponse {
+  repeated Content contents = 1;
+}
+
+message RetrieveAssignmentsRequest {
+  repeated string ids = 1;
+}
+
+message RetrieveAssignmentsResponse {
+  repeated Assignment items = 1;
+}
+
+message RetrieveStudyPlanProgressRequest {
+  string study_plan_id = 1;
+  string student_id = 2;
+}
+
+message RetrieveStudyPlanProgressResponse {
+  int32 completed_assignments = 1;
+  int32 total_assignments = 2;
+}
+
+message StatisticTodoItem {
+  ToDoItem item = 1;    
+  int32 completed_student = 2;        
+  int32 total_assigned_student = 3;
+}
+
+message ListCourseTodoRequest {
+  string study_plan_id = 1;    //course_study_plan
+}
+
+message ListCourseTodoResponse {
+  repeated StatisticTodoItem statistic_items = 1;
+}
+
+message GetChildStudyPlanItemsRequest {
+  string study_plan_item_id = 1;     //course study_plan_item_id
+  repeated string user_ids = 2;
+}
+
+message GetChildStudyPlanItemsResponse {
+  message UserStudyPlanItem {
+    string user_id = 1;
+    StudyPlanItem study_plan_item= 2;
+  }
+  repeated UserStudyPlanItem items = 1;
+}
+
+message RetrieveStatisticAssignmentClassRequest {
+  string class_id = 1;
+  string study_plan_item_id = 2;	
+}
+
+message RetrieveStatisticAssignmentClassResponse {
+  StatisticTodoItem statistic_item = 1;
+}
+
+service AssignmentReaderService {
+  rpc ListStudyPlans(ListStudyPlansRequest) returns (ListStudyPlansResponse);//x
+  rpc ListStudentToDoItems(ListStudentToDoItemsRequest) //x
+      returns (ListStudentToDoItemsResponse);
+  rpc ListStudentAvailableContents(ListStudentAvailableContentsRequest) // x
+      returns (ListStudentAvailableContentsResponse);
+  rpc RetrieveAssignments(RetrieveAssignmentsRequest) // TODO: for LM team
+      returns (RetrieveAssignmentsResponse);
+  rpc RetrieveStudyPlanProgress(RetrieveStudyPlanProgressRequest) //x
+      returns (RetrieveStudyPlanProgressResponse);
+  rpc ListCourseTodo (ListCourseTodoRequest)  //x 
+      returns (ListCourseTodoResponse);
+  rpc GetChildStudyPlanItems (GetChildStudyPlanItemsRequest) //x
+      returns (GetChildStudyPlanItemsResponse);
+  rpc RetrieveStatisticAssignmentClass (RetrieveStatisticAssignmentClassRequest) 
+      returns (RetrieveStatisticAssignmentClassResponse);
+}

@@ -1,0 +1,120 @@
+apiVersion: actions.summerwind.dev/v1alpha1
+kind: RunnerDeployment
+metadata:
+  name: arc-runner-hcm-8-32
+  namespace: actions-runner-system
+spec:
+  replicas: 9
+  template:
+    metadata:
+      labels:
+        app: arc-runner-hcm-8-32
+    spec:
+      organization: manabie-com
+      dockerMTU: 1400
+      image: asia-docker.pkg.dev/student-coach-e1e95/manaverse/actions-runner-dind:v2.307.1-ubuntu-20.04
+      dockerdWithinRunnerContainer: true
+      initContainers:
+      - name: init-dind-go-cache
+        image: asia-docker.pkg.dev/student-coach-e1e95/manaverse/actions-runner-dind:v2.307.1-ubuntu-20.04
+        command: ["sudo", "chown", "-R", "runner:runner", "/home/runner/go", "/home/runner/.gradle", "/home/runner/.pub-cache"]
+        volumeMounts:
+          - mountPath: /home/runner/go
+            name: go-cache
+          - mountPath: /home/runner/.gradle
+            name: gradle
+          - mountPath: /home/runner/.pub-cache
+            name: pub-cache
+      labels:
+        - custom-runner
+        - arc-runner-hcm-8-32
+      hostAliases:
+      - ip: "192.168.4.12"
+        hostnames:
+        - admin.local-green.manabie.io
+        - api.local-green.manabie.io
+        - web-api.local-green.manabie.io
+        - learner.local.manabie.io
+        - backoffice.local.manabie.io
+        - minio.local.manabie.io
+        - teacher.local.manabie.io
+      env:
+      - name: DISABLE_RUNNER_UPDATE
+        value: "true"
+      tolerations:
+      - effect: NoExecute
+        key: node.kubernetes.io/not-ready
+        operator: Exists
+        tolerationSeconds: 30
+      - effect: NoExecute
+        key: node.kubernetes.io/unreachable
+        operator: Exists
+        tolerationSeconds: 30
+      resources:
+        requests:
+          cpu: "5"
+          memory: "20G"
+        limits:
+          memory: "24G"       
+      volumeMounts:
+        - mountPath: /etc/docker/certs.d/kind-reg.actions-runner-system.svc
+          name: secret
+        - mountPath: /etc/docker/certs.d/pull-through-registry.actions-runner-system.svc
+          name: pull-through-secret
+        - mountPath: /var/lib/containerd
+          name: images-cache
+        - mountPath: /home/runner/go
+          name: go-cache
+        - mountPath: /var/lib/docker
+          name: docker
+        - mountPath: /home/runner/.gradle
+          name: gradle
+        - mountPath: /home/runner/.pub-cache
+          name: pub-cache
+      volumes:
+      - name: secret
+        projected:
+          sources:
+          - secret:
+              name: kind-shared-registry-secret
+          - secret:
+              name: kind-shared-registry-ca
+      - name: pull-through-secret
+        projected:
+          sources:
+          - secret:
+              name: pull-through-registry-secret
+          - secret:
+              name: pull-through-registry-ca
+      - hostPath:
+          path: /opt/cache/images
+          type: DirectoryOrCreate
+        name: images-cache
+      - hostPath:
+          path: /opt/cache/go
+          type: DirectoryOrCreate
+        name: go-cache
+      - hostPath:
+          path: /opt/cache/docker
+          type: DirectoryOrCreate
+        name: docker
+      - hostPath:
+          path: /opt/cache/gradle
+          type: DirectoryOrCreate
+        name: gradle
+      - hostPath:
+          path: /opt/cache/pub-cache
+          type: DirectoryOrCreate
+        name: pub-cache
+      dockerRegistryMirror: https://mirror.gcr.io/
+      imagePullPolicy: IfNotPresent
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: runner-deployment-name
+                    operator: In
+                    values:
+                      - arc-runner-hcm-8-32
+              topologyKey: kubernetes.io/hostname

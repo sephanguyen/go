@@ -1,0 +1,54 @@
+---
+
+- name: RKE2 agent and server tasks
+  vars:
+    caller_role_name: agent
+  include_role:
+    name: rke2_common
+    tasks_from: main
+
+- name: Does config file already have server token?  # noqa command-instead-of-shell
+  command: 'grep -i "^token:" /etc/rancher/rke2/config.yaml'
+  register: server_token_check
+  failed_when: server_token_check.rc >= 2
+  changed_when: false
+
+- name: Add token to config.yaml
+  lineinfile:
+    dest: /etc/rancher/rke2/config.yaml
+    line: "token: {{ hostvars[groups['rke2_servers'][0]].rke2_config_token }}"
+    state: present
+    insertbefore: BOF
+  when:
+    - '"token:" not in server_token_check.stdout'
+
+- name: Does config file already have server url?  # noqa command-instead-of-shell
+  command: 'grep -i "^server:" /etc/rancher/rke2/config.yaml'
+  register: server_url_check
+  failed_when: server_url_check.rc >= 2
+  changed_when: false
+
+- name: Add server url to config file
+  lineinfile:
+    dest: /etc/rancher/rke2/config.yaml
+    line: "server: https://{{ kubernetes_api_server_host }}:{{ kubernetes_api_server_port }}"
+    state: present
+    insertbefore: BOF
+  when:
+    - '"server:" not in server_url_check.stdout'
+
+- name: Restart rke2-agent if package installed and config changed
+  service:
+    state: restarted
+    name: rke2-agent
+  when:
+    - ansible_facts.services["rke2-agent.service"] is defined
+    - "ansible_facts.services['rke2-agent.service'].state == 'running'"
+    - tmp_sha1 != previous_rke2_config.stat.checksum
+
+- name: Start rke2-agent
+  systemd:
+    name: rke2-agent.service
+    state: started
+    enabled: yes
+    daemon_reload: yes

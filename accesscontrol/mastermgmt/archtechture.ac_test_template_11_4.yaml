@@ -1,0 +1,78 @@
+- template: 1.1
+  tableName: ac_test_template_11_4
+  useCustomPolicy: true
+  postgresPolicy:
+    - name: rls_ac_test_template_11_4_select_location
+      for: select
+      using: |
+        true <= (
+          select			
+            true
+          from
+                  granted_permissions p
+          join ac_test_template_11_4_access_paths usp on
+                  usp.location_id = p.location_id
+          where
+            p.user_id = current_setting('app.user_id')
+            and p.permission_name = 'accesscontrol.ac_test_template_11_4.read'
+            and usp."ac_test_template_11_4_id" = ac_test_template_11_4.ac_test_template_11_4_id
+          limit 1
+          )
+    - name: rls_ac_test_template_11_4_insert_location
+      for: insert
+      withCheck: |
+        (
+          1 = 1
+        )
+    - name: rls_ac_test_template_11_4_update_location
+      for: update
+      using: |
+        true <= (
+          select			
+            true
+          from
+                  granted_permissions p
+          join ac_test_template_11_4_access_paths usp on
+                  usp.location_id = p.location_id
+          where
+            p.user_id = current_setting('app.user_id')
+            and p.permission_name = 'accesscontrol.ac_test_template_11_4.write'
+            and usp."ac_test_template_11_4_id" = ac_test_template_11_4.ac_test_template_11_4_id
+          limit 1
+          )
+      withCheck: |
+        true <= (
+          select			
+            true
+          from
+                  granted_permissions p
+          join ac_test_template_11_4_access_paths usp on
+                  usp.location_id = p.location_id
+          where
+            p.user_id = current_setting('app.user_id')
+            and p.permission_name = 'accesscontrol.ac_test_template_11_4.write'
+            and usp."ac_test_template_11_4_id" = ac_test_template_11_4.ac_test_template_11_4_id
+          limit 1
+          )
+    - name: rls_ac_test_template_11_4_delete_location
+      for: delete
+      using: |
+        true <= (
+          select			
+            true
+          from
+                  granted_permissions p
+          join ac_test_template_11_4_access_paths usp on
+                  usp.location_id = p.location_id
+          where
+            p.user_id = current_setting('app.user_id')
+            and p.permission_name = 'accesscontrol.ac_test_template_11_4.write'
+            and usp."ac_test_template_11_4_id" = ac_test_template_11_4.ac_test_template_11_4_id
+          limit 1
+          )
+    - name: rls_ac_test_template_11_4_permission_v4
+      for: all
+      using: |
+        current_setting('app.user_id') = owners
+
+

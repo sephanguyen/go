@@ -1,0 +1,23 @@
+cronjobs:
+    check-enrollment-status-date:
+        cmd: usermgmt_cronjob_check_enrollment_status_date
+        disabled: true
+        schedule: 0 0 * * *
+    cronjob-itee-download-data-file:
+        cmd: usermgmt_itee_download_data_file
+        disabled: true
+        schedule: 13 19 * * *
+    cronjob-withus-download-data-file:
+        cmd: usermgmt_withus_download_data_file
+        disabled: true
+        schedule: 13 19 * * *
+onDemandNodeDeployment:
+    enabled: true
+podAnnotations:
+    cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+    sidecar.istio.io/proxyCPU: 2m
+    sidecar.istio.io/proxyMemory: 50Mi
+resources:
+    requests:
+        cpu: 4m
+        memory: 55Mi

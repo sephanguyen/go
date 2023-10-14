@@ -1,0 +1,40 @@
+affinity: {}
+affinityOverride: {}
+alloydbProxy:
+    enabled: false
+cpRegistryHost: http://dwh-cp-schema-registry:8081
+dataWarehousePartners:
+    - kec
+dwhCounter:
+    schedule: 0 * * * *
+enableAC: false
+enableCounterTest: false
+enabled: true
+fileFilter: "00"
+grpcPort: 7150
+hasuraEnabled: false
+hookLocalInitData:
+    image:
+        repository: jbergknoff/postgresql-client
+        tag: latest
+kecResourcePath: "-2147483642"
+ksqldb:
+    migrate:
+        image:
+            repository: confluentinc/ksqldb-cli
+            tag: 0.28.2
+metrics:
+    enabled: false
+    podAnnotations: {}
+migrationEnabled: false
+podAnnotations:
+    sidecar.istio.io/inject: "false"
+postHookMigrateDataLake: false
+postHookMigrateDatawarehouses: false
+postHookSyncDataLake: false
+postHookSyncDataWarehouse: false
+postHookUpsertKafkaConnect: true
+postHookUpsertKsqlMigration: true
+readinessProbe:
+    enabled: true
+topicPrefix: ""

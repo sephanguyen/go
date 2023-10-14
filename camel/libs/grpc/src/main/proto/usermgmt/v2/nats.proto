@@ -1,0 +1,100 @@
+syntax = "proto3";
+
+package usermgmt.v2;
+
+import "google/protobuf/timestamp.proto";
+import "usermgmt/v2/users.proto";
+
+option java_package = "com.manabie.libs.proto.usermgmt.v2";
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/usermgmt/v2;upb";
+
+message EvtUser{
+  message CreateStudent{
+    string student_id = 1;
+    string student_name = 2 [deprecated = true];
+    string school_id = 3;
+    // Use location_id of enrollment_status_histories
+    repeated string location_ids = 4 [deprecated = true];
+    string student_first_name = 5;
+    string student_last_name = 6;
+    string student_first_name_phonetic = 7;
+    string student_last_name_phonetic = 8;
+    usermgmt.v2.UserAddress user_address = 9;
+    repeated usermgmt.v2.EnrollmentStatusHistory enrollment_status_histories = 10;
+  }
+
+  message UpdateStudent{
+    string student_id = 1;
+    string device_token = 2;
+    bool allow_notification = 3;
+    string name = 4 [deprecated = true];
+    // Use location_id of enrollment_status_histories
+    repeated string location_ids = 5 [deprecated = true];
+    string student_first_name = 6;
+    string student_last_name = 7;
+    string student_first_name_phonetic = 8;
+    string student_last_name_phonetic = 9;
+    usermgmt.v2.UserAddress user_address = 10;
+    repeated usermgmt.v2.EnrollmentStatusHistory enrollment_status_histories = 11;
+  }
+
+  message CreateParent{
+    string student_id = 1;
+    string student_name = 2;
+    string parent_id = 3;
+    string school_id = 4;
+  }
+
+  message ParentRemovedFromStudent{
+    string student_id = 1;
+    string parent_id = 2;
+  }
+
+  message ParentAssignedToStudent{
+    string student_id = 1;
+    string parent_id = 2;
+  }
+
+  oneof message {
+    CreateStudent create_student = 1;
+    CreateParent create_parent = 2;
+    ParentRemovedFromStudent parent_removed_from_student = 3;
+    ParentAssignedToStudent parent_assigned_to_student = 4;
+    UpdateStudent update_student = 5;
+  }
+}
+
+message EvtUserInfo {
+  string user_id = 1;
+  string device_token = 2;
+  bool allow_notification = 3;
+  string name = 4;
+  repeated string location_ids = 5;
+}
+
+message EvtImportStudent {
+  message ImportStudent {
+    string student_id = 1;
+    string student_name = 2;
+    string school_id = 3;
+    repeated string location_ids = 4;
+  }
+  repeated ImportStudent evt_import_students = 1;
+}
+
+message EvtStaffUpsertTimesheetConfig {
+  string staff_id = 1;
+  bool auto_create_timesheet_config = 2;
+  google.protobuf.Timestamp updated_at = 3;
+}
+
+message EvtUpsertUserGroup {
+  string user_group_id = 1;
+}
+
+message EvtUpsertStaff {
+  string staff_id = 1;
+  repeated string user_group_ids = 2;
+  repeated string location_ids = 3;
+}
+

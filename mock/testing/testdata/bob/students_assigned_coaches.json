@@ -1,0 +1,105 @@
+{
+	"schema": [
+		{
+			"column_name": "coach_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "is_active",
+			"data_type": "boolean",
+			"column_default": "false",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "student_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "students_assigned_coaches",
+			"policyname": "rls_students_assigned_coaches",
+			"qual": "permission_check(resource_path, 'students_assigned_coaches'::text)",
+			"with_check": "permission_check(resource_path, 'students_assigned_coaches'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "students_assigned_coaches",
+			"policyname": "rls_students_assigned_coaches_restrictive",
+			"qual": "permission_check(resource_path, 'students_assigned_coaches'::text)",
+			"with_check": "permission_check(resource_path, 'students_assigned_coaches'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "assigned_coaches_fk_1",
+			"column_name": "coach_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "assigned_coaches_fk",
+			"column_name": "student_id",
+			"constraint_type": "FOREIGN KEY"
+		}
+	],
+	"table_name": "students_assigned_coaches",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

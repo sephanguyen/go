@@ -1,0 +1,304 @@
+syntax = "proto3";
+
+package notificationmgmt.v1;
+
+import "common/v1/notifications.proto";
+import "common/v1/requests.proto";
+import "common/v1/profiles.proto";
+import "google/protobuf/timestamp.proto";
+import "notificationmgmt/v1/questionnaire_template.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/notificationmgmt/v1;npb";
+
+// BOB requests - START
+message RetrieveNotificationDetailRequest {
+    string notification_id = 1;
+    string target_id = 2;
+    string user_notification_id = 3;
+}
+
+message RetrieveNotificationDetailResponse {
+    common.v1.Notification item = 1;
+    common.v1.UserNotification user_notification = 2; 
+    common.v1.UserQuestionnaire user_questionnaire = 3;
+}
+
+message RetrieveNotificationsRequest {
+    common.v1.Paging paging = 1;
+    bool important_only = 2;
+}
+
+message RetrieveNotificationsResponse {
+    message NotificationInfo {
+        string title = 1;
+        string description= 2;
+        common.v1.UserNotification user_notification = 3;
+        google.protobuf.Timestamp sent_at = 4;
+        bool is_important = 5;
+        string questionnaire_id = 6;
+        string target_id = 7;
+    }
+    common.v1.Paging next_page = 1;
+    repeated NotificationInfo items = 2;
+}
+
+message CountUserNotificationRequest{
+    common.v1.UserNotificationStatus status = 1;
+}
+
+message CountUserNotificationResponse{
+    int32 num_by_status = 1;
+    int32 total = 2;
+}
+
+message GetAnswersByFilterRequest {
+    string questionnaire_id = 1;
+    string keyword = 2;
+    common.v1.Paging paging = 3;
+}
+
+message GetAnswersByFilterResponse {
+    message UserAnswer {
+        string responder_name = 1;
+        string user_id = 2;
+        string target_id = 3;
+        string target_name = 4;
+        bool is_parent = 5;
+        google.protobuf.Timestamp submitted_at = 6;
+        repeated common.v1.Answer answers = 7;
+        string user_notification_id = 8;
+        bool is_individual = 9;
+    }
+    repeated UserAnswer user_answers = 1;
+    uint32 total_items = 2;
+    common.v1.Paging next_page = 3;
+    common.v1.Paging previous_page = 4;
+    repeated common.v1.Question questions = 5;
+}
+
+service NotificationReaderService {
+    rpc RetrieveNotificationDetail(RetrieveNotificationDetailRequest)
+        returns (RetrieveNotificationDetailResponse);
+
+    rpc RetrieveNotifications(RetrieveNotificationsRequest)
+        returns (RetrieveNotificationsResponse);
+
+    rpc CountUserNotification(CountUserNotificationRequest)
+        returns (CountUserNotificationResponse);
+
+    rpc GetAnswersByFilter(GetAnswersByFilterRequest)
+        returns (GetAnswersByFilterResponse);
+
+    rpc GetNotificationsByFilter(GetNotificationsByFilterRequest)
+        returns (GetNotificationsByFilterResponse);
+        
+    rpc RetrieveGroupAudience(RetrieveGroupAudienceRequest)
+        returns (RetrieveGroupAudienceResponse);
+
+    rpc GetQuestionnaireAnswersCSV(GetQuestionnaireAnswersCSVRequest)
+        returns (GetQuestionnaireAnswersCSVResponse);
+
+    rpc RetrieveDraftAudience(RetrieveDraftAudienceRequest)
+        returns (RetrieveDraftAudienceResponse);
+}
+
+message SetUserNotificationStatusRequest {
+    repeated string notification_ids = 1;
+    common.v1.UserNotificationStatus status = 2;
+}
+
+message SetUserNotificationStatusResponse {}
+
+// BOB requests - END
+
+// YASUO requests - START
+message UpsertNotificationRequest {
+    common.v1.Notification notification = 1;
+    common.v1.Questionnaire questionnaire = 2;
+    repeated string tag_ids = 3;
+}
+
+message UpsertNotificationResponse { string notification_id = 1; }
+
+message SendNotificationRequest { string notification_id = 1; }
+
+message SendNotificationResponse {}
+
+message DiscardNotificationRequest { string notification_id = 1; }
+
+message DiscardNotificationResponse {}
+
+message NotifyUnreadUserRequest { string notification_id = 1; }
+
+message NotifyUnreadUserResponse {}
+
+message SendScheduledNotificationRequest {
+    string organization_id = 1;
+    google.protobuf.Timestamp from = 2;
+    google.protobuf.Timestamp to = 3;
+    bool is_running_for_all_tenants = 4;
+    repeated string tenant_ids = 5;
+}
+
+message SendScheduledNotificationResponse {}
+
+message SubmitQuestionnaireRequest {
+    string user_info_notification_id = 1;
+    string questionnaire_id = 2;
+    repeated common.v1.Answer answers = 3;
+}
+
+message SubmitQuestionnaireResponse {}
+
+message UpdateUserDeviceTokenRequest {
+    string user_id = 1;
+    string device_token = 2;
+    bool allow_notification = 3;
+}
+
+message UpdateUserDeviceTokenResponse{
+    bool successful = 1;
+}
+
+message DeleteNotificationRequest{
+    string notification_id = 1;
+}
+
+message DeleteNotificationResponse{}
+
+service NotificationModifierService {
+    rpc UpsertNotification(UpsertNotificationRequest)
+        returns (UpsertNotificationResponse);
+    rpc SendNotification(SendNotificationRequest)
+        returns (SendNotificationResponse);
+    rpc DiscardNotification(DiscardNotificationRequest)
+        returns (DiscardNotificationResponse);
+    rpc NotifyUnreadUser(NotifyUnreadUserRequest)
+        returns (NotifyUnreadUserResponse);
+    rpc SendScheduledNotification(SendScheduledNotificationRequest)
+        returns (SendScheduledNotificationResponse);
+    rpc SubmitQuestionnaire(SubmitQuestionnaireRequest)
+        returns (SubmitQuestionnaireResponse);
+    rpc UpsertQuestionnaireTemplate(UpsertQuestionnaireTemplateRequest)
+        returns (UpsertQuestionnaireTemplateResponse);
+
+    rpc SetStatusForUserNotifications(SetStatusForUserNotificationsRequest)
+        returns (SetStatusForUserNotificationsResponse);
+    rpc UpdateUserDeviceToken(UpdateUserDeviceTokenRequest)
+        returns (UpdateUserDeviceTokenResponse);
+    rpc DeleteNotification(DeleteNotificationRequest)
+        returns (DeleteNotificationResponse);
+}
+
+message SetStatusForUserNotificationsRequest {
+    repeated string user_notification_ids = 1;
+    common.v1.UserNotificationStatus status = 2;
+}
+
+message SetStatusForUserNotificationsResponse {
+}
+
+message GetNotificationsByFilterRequest {
+    string keyword = 1;
+    repeated string tag_ids = 2;
+    google.protobuf.Timestamp sent_from = 3;
+    google.protobuf.Timestamp sent_to = 4;
+    common.v1.NotificationStatus status = 5;
+    common.v1.Paging paging = 6;
+    common.v1.NotificationTargetGroup target_group = 7;
+    bool is_questionnaire_fully_submitted = 8;
+    repeated string composer_ids = 9;
+}
+
+message GetNotificationsByFilterResponse {
+    message UserGroupFilter{
+        repeated common.v1.UserGroup user_groups = 1;
+    }
+
+    message Notification {
+        string notification_id = 1;
+        string notification_mgs_id = 2;
+        string title = 3;
+        string composer_id = 4;
+        repeated string tag_ids = 5;
+        UserGroupFilter user_group_filter = 6;
+        common.v1.NotificationStatus status = 7;
+        google.protobuf.Timestamp sent_at = 8;
+        google.protobuf.Timestamp updated_at = 9;
+        common.v1.NotificationTargetGroup target_group = 10;
+    }
+
+    message TotalNotificationForStatus {
+        common.v1.NotificationStatus status = 1;  
+        uint32 total_items = 2;
+    }
+
+    repeated Notification notifications = 1;
+    uint32 total_items = 2;
+    repeated TotalNotificationForStatus total_items_for_status = 3;
+    common.v1.Paging next_page = 4;
+    common.v1.Paging previous_page = 5;
+}
+
+message RetrieveGroupAudienceRequest {
+    string keyword = 1;
+    common.v1.NotificationTargetGroup target_group = 2;
+    common.v1.Paging paging = 3;
+    repeated string user_ids = 4;
+}
+
+message RetrieveGroupAudienceResponse{
+    message Audience{
+        string user_id = 1;
+        string user_name = 2;
+        string email = 3;
+        string grade = 4;
+        repeated string child_names = 5;
+    }
+
+    repeated Audience audiences = 1;
+    uint32 total_items = 2;
+    common.v1.Paging next_page = 3;
+    common.v1.Paging previous_page = 4;
+}
+
+message GetQuestionnaireAnswersCSVRequest {
+    string questionnaire_id = 1;
+    string timezone = 2;
+    string language = 3;
+}
+
+message GetQuestionnaireAnswersCSVResponse {
+    bytes data = 1;
+}
+
+message RetrieveDraftAudienceRequest {
+    string notification_id = 1;
+    common.v1.Paging paging = 2;
+}
+
+message RetrieveDraftAudienceResponse {
+    message Audience {
+        string user_id = 1;
+        string user_name = 2;
+        string email = 3;
+        string grade = 4;
+        common.v1.UserGroup user_group = 5;
+        bool is_individual = 6;
+        string child_name = 7;
+        string child_id = 8;
+    }
+
+    repeated Audience audiences = 1;
+    uint32 total_items = 2;
+    common.v1.Paging next_page = 3;
+    common.v1.Paging previous_page = 4;
+}
+
+message UpsertQuestionnaireTemplateRequest {
+    QuestionnaireTemplate questionnaire_template = 1;
+  }
+  
+message UpsertQuestionnaireTemplateResponse {
+    string questionnaire_template_id = 1;
+}

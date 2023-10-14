@@ -1,0 +1,14 @@
+common:
+  google_cloud_project: student-coach-e1e95
+issuers:
+  - issuer: manabie
+    audience: prod-ga
+    jwks_endpoint: http://shamir:5680/.well-known/jwks.json
+postgres_v2:
+  eureka:
+    max_conns: 12
+school_information:
+  school_id: -2147483644 #change when the Nhan's PR
+  school_name: GA School
+storage:
+  bucket: jp-partners-backend

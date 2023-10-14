@@ -1,0 +1,105 @@
+{
+	"schema": [
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "system_notification_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "system_notification_recipient_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "user_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "system_notification_recipients",
+			"policyname": "rls_system_notification_recipients",
+			"qual": "permission_check(resource_path, 'system_notification_recipients'::text)",
+			"with_check": "permission_check(resource_path, 'system_notification_recipients'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "system_notification_recipients",
+			"policyname": "rls_system_notification_recipients_restrictive",
+			"qual": "permission_check(resource_path, 'system_notification_recipients'::text)",
+			"with_check": "permission_check(resource_path, 'system_notification_recipients'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "fk__system_notification_recipients__system_notifications",
+			"column_name": "system_notification_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "pk__system_notification_recipients",
+			"column_name": "system_notification_recipient_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "system_notification_recipients",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

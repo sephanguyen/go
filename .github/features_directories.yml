@@ -1,0 +1,221 @@
+feature-bob:
+  - features/bob/**
+  - cmd/server/bob/**
+  - internal/bob/**
+  - deployments/helm/manabie-all-in-one/charts/bob/**
+  - deployments/helm/backend/bob/**
+  - migrations/bob/**
+  - mock/bob/**
+  - proto/bob/**
+
+feature-calendar:
+  - features/calendar/**
+  - cmd/server/calendar/**
+  - internal/calendar/**
+  # - features_flags/calendar/**
+  - deployments/helm/manabie-all-in-one/charts/calendar/**
+  - deployments/helm/backend/calendar/**
+  - migrations/calendar/**
+  - mock/calendar/**
+  - proto/calendar/**
+
+# feature-common:
+# - features/common/**
+# - proto/common/**
+
+feature-notificationmgmt:
+  - features/communication/**
+  # - cmd/server/notificationmgmgt/**
+  - internal/notification/**
+  # - features_flags/communication/**
+  - deployments/helm/manabie-all-in-one/charts/notificationmgmt/**
+  - deployments/helm/backend/notificationmgmt/**
+  - migrations/bob/**
+  - mock/notification/**
+  - proto/notificationmgmt/**
+
+feature-draft:
+  # - /cmd/server/  # go files only
+  - cmd/server/draft/**
+  - deployments/helm/manabie-all-in-one/charts/draft/**
+  - deployments/helm/backend/draft/**
+  - features/draft/**
+  - internal/draft/**
+  - internal/golibs/**
+  - migrations/draft/**
+  - mock/draft/**
+  - pkg/manabuf/draft/**
+  - proto/draft/**
+
+# feature-eibanam:
+#     - features/eibanam/**
+
+# feature-enigma
+#     - features/enigma/**
+#     - cmd/server/enigma/**
+#     - internal/enigma/**
+#     - deployments/helm/manabie-all-in-one/charts/enigma/**
+#     - mock/enigma/**
+
+feature-entryexitmgmt:
+  - features/entryexitmgmt/**
+  - cmd/server/entryexitmgmt/**
+  - internal/entryexitmgmt/**
+  - deployments/helm/manabie-all-in-one/charts/entryexitmgmt/**
+  - deployments/helm/backend/entryexitmgmt/**
+  - migrations/entryexitmgmt/**
+  - mock/entryexitmgmt/**
+  - proto/entryexitmgmt/**
+  - accesscontrol/entryexitmgmt/**
+
+# feature-fatima:
+#     - features/fatima/**
+#     - cmd/server/fatima/**
+#     - internal/fatima/**
+#     - deployments/helm/manabie-all-in-one/charts/fatima/**
+#     - migrations/fatima/**
+#     - mock/fatima/**
+#     - proto/fatima/**
+
+# fink is a migration job for NATS, not really a service.
+# But someone still has to maintain it.
+feature-fink:
+  # - /cmd/server/  # go files only
+  - cmd/server/fink/**
+  - deployments/helm/manabie-all-in-one/charts/fink/**
+  - deployments/helm/backend/fink/**
+  # - deployments/helm/manabie-all-in-one/values.yaml
+  - internal/fink/**
+  - internal/golibs/**
+  # - skaffold.manaverse.yaml
+
+# feature-gandalf:
+#     - features/gandalf/**
+#     - internal/gandalf/**
+#     - deployments/helm/manabie-all-in-one/charts/gandalf/**
+
+# feature-helper:
+#     - features/helper/**
+
+feature-invoicemgmt:
+  - features/invoicemgmt/**
+  - cmd/server/invoicemgmt/**
+  - internal/invoicemgmt/**
+  - deployments/helm/manabie-all-in-one/charts/invoicemgmt/**
+  - deployments/helm/backend/invoicemgmt/**
+  - migrations/invoicemgmt/**
+  - mock/invoicemgmt/**
+  - proto/invoicemgmt/**
+  - accesscontrol/invoicemgmt/**
+
+feature-lessonmgmt:
+  - features/lessonmgmt/**
+  - cmd/server/lessonmgmt/**
+  - internal/lessonmgmt/**
+  # - features_flags/lesson/**
+  - deployments/helm/manabie-all-in-one/charts/lessonmgmt/**
+  - deployments/helm/backend/lessonmgmt/**
+  - mock/lessonmgmt/**
+  - proto/lessonmgmt/**
+  - migrations/lessonmgmt/**
+
+# feature-mastermgmt:
+#     - features/mastermgmt/**
+#     - cmd/server/mastermgmt/**
+#     - internal/mastermgmt/**
+#     - deployments/helm/manabie-all-in-one/charts/mastermgmt/**
+#     - migrations/mastermgmt/**
+#     - mock/mastermgmt/**
+#     - proto/mastermgmt/**
+
+feature-payment:
+  - features/payment/**
+  - cmd/server/payment/**
+  - internal/payment/**
+  # - features_flags/payment/**
+  - deployments/helm/manabie-all-in-one/charts/payment/**
+  - deployments/helm/backend/payment/**
+  - mock/payment/**
+  - proto/payment/**
+  - accesscontrol/fatima/**
+  - migrations/fatima/**
+
+# feature-repository:
+#     - features/repository/**
+
+# feature-stub:
+#     - features/stub/**
+
+# feature-syllabus:
+#     - features/syllabus/**
+#     - features_flags/syllabus/**
+#     - proto/syllabus/**
+
+# feature-timesheet:
+#     - features/timesheet/**
+#     - cmd/server/timesheet/**
+#     - internal/timesheet/**
+#     - features_flags/timesheet/**
+#     - deployments/helm/manabie-all-in-one/charts/timesheet/**
+#     - migrations/timesheet/**
+#     - mock/timesheet/**
+#     - proto/timesheet/**
+
+feature-tom:
+  - features/tom/**
+  - cmd/server/tom/**
+  - internal/tom/**
+  - deployments/helm/manabie-all-in-one/charts/tom/**
+  - deployments/helm/backend/tom/**
+  - migrations/tom/**
+  - mock/tom/**
+  - proto/tom/**
+  # - features_flags/communication/**
+
+feature-unleash:
+  - features/unleash/**
+  - deployments/helm/platforms/unleash/**
+  - feature_flags/platform/**
+
+feature-usermgmt:
+  - features/usermgmt/**
+  - cmd/server/usermgmt/**
+  - internal/usermgmt/**
+  - deployments/helm/manabie-all-in-one/charts/usermgmt/**
+  - deployments/helm/backend/usermgmt/**
+  - mock/usermgmt/**
+  - proto/usermgmt/**
+
+feature-virtualclassroom:
+  - features/virtualclassroom/**
+  - cmd/server/virtualclassroom/**
+  - internal/virtualclassroom/**
+  # - features_flags/virtualclassroom/**
+  - deployments/helm/manabie-all-in-one/charts/virtualclassroom/**
+  - deployments/helm/backend/virtualclassroom/**
+  - mock/virtualclassroom/**
+  - proto/virtualclassroom/**
+
+# feature-yasuo:
+#     - features/yasuo/**
+#     - cmd/server/yasuo/**
+#     - internal/yasuo/**
+#     - deployments/helm/manabie-all-in-one/charts/yasuo/**
+#     - mock/yasuo/**
+#     - proto/yasuo/**
+
+feature-zeus:
+  # - /cmd/server/  # go files only
+  - cmd/server/zeus/**
+  - deployments/helm/manabie-all-in-one/charts/zeus/**
+  - deployments/helm/backend/zeus/**
+  # - /deployments/helm/manabie-all-in-one/values.yaml
+  # - /features/  # go files only
+  - features/zeus/**
+  - internal/zeus/**
+  - internal/golibs/**
+  - migrations/zeus/** # sql files only
+  - mock/zeus/**
+  - pkg/manabuf/zeus/** # these are generated from /proto, technically
+  - proto/zeus/**
+  # - /skaffold.manaverse.yaml

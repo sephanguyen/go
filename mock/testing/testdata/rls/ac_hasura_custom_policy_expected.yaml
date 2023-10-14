@@ -1,0 +1,160 @@
+- table:
+    schema: public
+    name: ac_test_template_11_4
+  object_relationships:
+  - name: ac_test_template_11_4_location_permission
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: granted_permissions
+        column_mapping:
+          owners: location_id
+  array_relationships:
+  - name: ac_test_template_11_4_location_permission_array
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: granted_permissions
+        column_mapping:
+          owners: location_id
+  insert_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      check:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - ac_test_template_11_4_location_permission:
+            _and:
+            - user_id:
+                _eq: X-Hasura-User-Id
+            - permission_name:
+                _eq: accesscontrol.b.read
+      set:
+        resource_path: x-hasura-Resource-Path
+      columns:
+      - ac_test_template_11_4_id
+      - created_at
+      - deleted_at
+      - updated_at
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - ac_test_template_11_4_id
+      - created_at
+      - deleted_at
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - ac_test_template_11_4_location_permission:
+            _and:
+            - user_id:
+                _eq: X-Hasura-User-Id
+            - permission_name:
+                _eq: accesscontrol.b.read
+      allow_aggregations: true
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - ac_test_template_11_4_id
+      - created_at
+      - deleted_at
+      - location_id
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - ac_test_template_11_4_location_permission:
+            _and:
+            - user_id:
+                _eq: X-Hasura-User-Id
+            - permission_name:
+                _eq: accesscontrol.b.read
+      allow_aggregations: true
+  update_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      check:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - ac_test_template_11_4_location_permission:
+            _and:
+            - user_id:
+                _eq: X-Hasura-User-Id
+            - permission_name:
+                _eq: accesscontrol.b.read
+      columns:
+      - ac_test_template_11_4_id
+      - created_at
+      - deleted_at
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - ac_test_template_11_4_location_permission:
+            _and:
+            - user_id:
+                _eq: X-Hasura-User-Id
+            - permission_name:
+                _eq: accesscontrol.b.read
+  delete_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      check:
+        _and:
+        - ac_test_template_11_4_location_permission:
+            _and:
+            - user_id:
+                _eq: X-Hasura-User-Id
+            - permission_name:
+                _eq: accesscontrol.b.read
+      filter:
+        _and:
+        - ac_test_template_11_4_location_permission:
+            _and:
+            - user_id:
+                _eq: X-Hasura-User-Id
+            - permission_name:
+                _eq: accesscontrol.b.read
+- table:
+    schema: public
+    name: granted_permissions
+  object_relationships:
+  - name: class_location_permission
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: class
+        column_mapping:
+          location_id: location_id
+  - name: ac_test_template_11_4_location_permission
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: ac_test_template_11_4
+        column_mapping:
+          location_id: owners
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - user_id
+      - permission_name
+      - location_id
+      - resource_path
+      filter:
+        _and:
+        - user_id:
+            _eq: X-Hasura-User-Id
+        - resource_path:
+            _eq: X-Hasura-Resource-Path

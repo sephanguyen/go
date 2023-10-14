@@ -1,0 +1,157 @@
+adminHttp:
+    - corsPolicy:
+        allowHeaders:
+            - authorization
+            - grpc-timeout
+            - content-type
+            - keep-alive
+            - user-agent
+            - cache-control
+            - content-transfer-encoding
+            - token
+            - x-accept-content-transfer-encoding
+            - x-accept-response-streaming
+            - x-request-id
+            - x-user-agent
+            - x-graphql-mesh-authorization
+            - x-grpc-web
+            - if-none-match
+            - pkg
+            - version
+            - connect-timeout-ms
+            - connect-protocol-version
+            - connect-content-encoding
+            - connect-accept-encoding
+        allowMethods:
+            - POST
+            - GET
+            - OPTIONS
+            - PUT
+            - DELETE
+        allowOrigins:
+            - regex: .*
+        exposeHeaders:
+            - grpc-status
+            - grpc-message
+            - etag
+        maxAge: 100s
+      match:
+        - uri:
+            prefix: /entryexitmgmt/
+      rewrite:
+        uri: /
+      route:
+        - destination:
+            host: entryexitmgmt-hasura
+            port:
+                number: 8080
+affinity: {}
+affinityOverride: {}
+apiHttp:
+    - fault:
+        abort:
+            httpStatus: 403
+            percentage:
+                value: 100
+      match:
+        - uri:
+            prefix: /entryexitmgmt.v1.InternalService
+      route:
+        - destination:
+            host: entryexitmgmt
+            port:
+                number: 6350
+    - match:
+        - uri:
+            prefix: /entryexitmgmt.v1
+        - uri:
+            prefix: /manabie.entryexitmgmt
+      route:
+        - destination:
+            host: entryexitmgmt
+            port:
+                number: 6350
+clientVersion: v0.30.0
+enabled: true
+grpcPort: 6350
+hasura:
+    anonymous:
+        enabled: false
+    enableConsole: true
+    enabledApis: metadata,graphql
+    pgConnections: 8
+    pgTimeout: 10
+    resources:
+        requests:
+            memory: 256Mi
+    service:
+        port: 8080
+        type: ClusterIP
+hasuraEnabled: true
+metrics:
+    enabled: true
+    podAnnotations:
+        prometheus.io/port: "8888"
+        prometheus.io/scheme: http
+        prometheus.io/scrape: "true"
+migrationEnabled: true
+nodeSelector: {}
+pdb:
+    enabled: false
+podAnnotations:
+    sidecar.istio.io/proxyCPU: 10m
+    sidecar.istio.io/proxyMemory: 50Mi
+readinessProbe:
+    enabled: true
+resources:
+    requests:
+        memory: 120Mi
+service:
+    port: 6350
+    type: ClusterIP
+tolerations: null
+webHttp:
+    - corsPolicy:
+        allowHeaders:
+            - authorization
+            - grpc-timeout
+            - content-type
+            - keep-alive
+            - user-agent
+            - cache-control
+            - content-transfer-encoding
+            - token
+            - x-accept-content-transfer-encoding
+            - x-accept-response-streaming
+            - x-request-id
+            - x-user-agent
+            - x-graphql-mesh-authorization
+            - x-grpc-web
+            - if-none-match
+            - pkg
+            - version
+            - connect-timeout-ms
+            - connect-protocol-version
+            - connect-content-encoding
+            - connect-accept-encoding
+        allowMethods:
+            - POST
+            - GET
+            - OPTIONS
+            - PUT
+            - DELETE
+        allowOrigins:
+            - regex: .*
+        exposeHeaders:
+            - grpc-status
+            - grpc-message
+            - etag
+        maxAge: 100s
+      match:
+        - uri:
+            prefix: /entryexitmgmt.v1
+      route:
+        - destination:
+            host: entryexitmgmt
+            port:
+                number: 6350

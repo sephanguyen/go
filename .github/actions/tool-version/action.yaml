@@ -1,0 +1,38 @@
+name: 'tool-version'
+description: |
+  This workflow returns the desired version for tools we are using in this monorepo.
+inputs:
+  version-dir:
+    description: |
+      Directory containing files indicating the versions for our tools.
+      Default is "./deployments/versions"
+    default: "./deployments/versions"
+
+outputs:
+  go:
+    description: Desired version for go
+    value: ${{ steps.version.outputs.go }}
+  helm:
+    description: Desired version for helm
+    value: ${{ steps.version.outputs.helm }}
+  jq:
+    description: Desired version for jq
+    value: ${{ steps.version.outputs.jq }}
+  kind:
+    description: Desired version for kind
+    value: ${{ steps.version.outputs.kind }}
+  skaffold:
+    description: Desired version for skaffold
+    value: ${{ steps.version.outputs.skaffold }}
+  skaffoldv2:
+    description: Desired version for skaffoldv2
+    value: ${{ steps.version.outputs.skaffoldv2 }}
+  yq:
+    description: Desired version for yq
+    value: ${{ steps.version.outputs.yq }}
+runs:
+  using: "composite"
+  steps:
+    - run: .github/actions/tool-version/tool_version.bash ${{ inputs.version-dir }}
+      id: version
+      shell: bash

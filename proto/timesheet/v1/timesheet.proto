@@ -1,0 +1,106 @@
+syntax = "proto3";
+
+package timesheet.v1;
+import "timesheet/v1/enums.proto";
+import "google/protobuf/timestamp.proto";
+import "google/api/annotations.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/timesheet/v1;tpb";
+
+service TimesheetService{
+  rpc UpdateTimesheet(UpdateTimesheetRequest) returns (UpdateTimesheetResponse);
+  rpc CreateTimesheet(CreateTimesheetRequest) returns (CreateTimesheetResponse);
+  rpc CountTimesheets(CountTimesheetsRequest) returns (CountTimesheetsResponse);
+  rpc CountTimesheetsV2(CountTimesheetsV2Request) returns (CountTimesheetsV2Response);
+  rpc CountSubmittedTimesheets (CountSubmittedTimesheetsRequest) returns (CountSubmittedTimesheetsResponse){
+    option (google.api.http) = {
+      post: "/timesheet/api/v1/proxy/timesheets/submitted_count",
+      body: "*"
+    };
+  };
+}
+
+message OtherWorkingHoursRequest {
+  string other_working_hours_id = 1;
+  string timesheet_config_id = 2;
+  google.protobuf.Timestamp start_time = 3; 
+  google.protobuf.Timestamp end_time = 4; 
+  string remarks = 5;
+  bool is_delete = 6 [ deprecated = true ];
+}
+
+message TransportationExpensesRequest {
+  string transportation_expense_id = 1;
+  TransportationType type = 2;
+  string from = 3;
+  string to = 4;
+  int32 amount = 5;
+  bool round_trip = 6;
+  string remarks = 7;
+}
+
+message UpdateTimesheetRequest{
+  string timesheet_id = 1;
+  string remark = 2;
+  repeated OtherWorkingHoursRequest list_other_working_hours = 3;
+  repeated TransportationExpensesRequest list_transportation_expenses = 4;
+}
+
+message UpdateTimesheetResponse{
+  bool success = 1;
+}
+    
+message CreateTimesheetRequest{
+  string staff_id = 1;
+  string location_id = 2;
+  google.protobuf.Timestamp timesheet_date = 3;
+  string remark = 4;
+  repeated OtherWorkingHoursRequest list_other_working_hours = 5;
+  repeated TransportationExpensesRequest list_transportation_expenses = 6;
+}
+
+
+message CreateTimesheetResponse{
+  string timesheet_id = 1;
+}
+
+message CountTimesheetsRequest{
+  string staff_name = 1;
+  string location_id = 2;
+  string staff_id = 3;
+  google.protobuf.Timestamp from_date = 4;
+  google.protobuf.Timestamp to_date = 5;
+}
+
+message CountTimesheetsResponse{
+  int64 all_count = 1;
+  int64 draft_count = 2;
+  int64 submitted_count = 3;
+  int64 approved_count = 4;
+  int64 confirmed_count = 5;
+}
+
+message CountTimesheetsV2Request{
+  string staff_name = 1;
+  repeated string location_ids = 2;
+  string staff_id = 3;
+  google.protobuf.Timestamp from_date = 4;
+  google.protobuf.Timestamp to_date = 5;
+}
+
+message CountTimesheetsV2Response{
+  int64 all_count = 1;
+  int64 draft_count = 2;
+  int64 submitted_count = 3;
+  int64 approved_count = 4;
+  int64 confirmed_count = 5;
+}
+
+message CountSubmittedTimesheetsRequest {
+  repeated string location_ids = 1;
+}
+
+message CountSubmittedTimesheetsResponse {
+  int64 count = 1;
+  bool is_enabled = 2;
+}

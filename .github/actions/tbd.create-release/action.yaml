@@ -1,0 +1,122 @@
+name: "create-release"
+description: "Create release for a tag and generate change logs"
+
+inputs:
+  repo-name:
+    required: true
+    description: Choose Repo to gen Changelog
+  previous-release:
+    required: true
+    description: Previous release tag
+  current-release:
+    required: true
+    description: Release tag
+  github-token:
+    required: true
+    description: Github Token
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v3
+      with:
+        repository: manabie-com/${{ inputs.repo-name }}
+        token: ${{ inputs.github-token }}
+        fetch-depth: 0
+        ref: develop
+
+    - name: Get PRs data
+      id: pr-data
+      env:
+        BASE_REF: ${{ inputs.previous-release }}
+        HEAD_REF: ${{ inputs.current-release }}
+        GH_TOKEN: ${{ inputs.github-token }}
+      shell: bash
+      run: |
+        SEARCH_INPUT_LIMIT=252
+
+        commit_logs_file="commit_logs_file.txt"
+
+        printf "$(git --no-pager log --oneline ${BASE_REF}...${HEAD_REF} --first-parent --merges)\n" >$commit_logs_file
+
+        commit_batches=()
+        current_batch=''
+
+        while IFS= read -r line; do
+            commit=$(echo $line | head -n1 | sed -e 's/\s.*$//')
+            commit="${commit%???},"
+
+            if [ ${#current_batch} -lt $((SEARCH_INPUT_LIMIT - 10)) ]; then
+                current_batch+="${commit}"
+                continue
+            fi
+
+            commit_batches+=(${current_batch%?})
+            # clear the current batch
+            current_batch="${commit}"
+        done <"$commit_logs_file"
+
+        commit_batches+=(${current_batch%?})
+
+        # fetch pr data using commits batch as search input
+        # append result into an array
+        pr_data=$(jq -n [])
+
+        for commit_batch in "${commit_batches[@]}"; do
+            batch_data=$(gh pr list --state=merged --search="${commit_batch}" --json='number,title,author,labels' --jq='map({prNumber:.number, author:.author.login, title:.title, labels:.labels|map(.name)})' | jq .)
+
+            pr_data=$(echo $pr_data | jq --argjson value "$batch_data" '. += $value')
+        done
+
+        pr_data="$(echo $pr_data)"
+
+        echo "PR_DATA=${pr_data}" >>$GITHUB_OUTPUT
+
+    - name: Gen changelog
+      id: gen-changelog
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const pr_data = ${{ steps.pr-data.outputs.PR_DATA }}
+          const repo = '${{ inputs.repo-name }}'
+
+          let feature_data = {}
+          for (const pr of pr_data) {
+            const labels = pr.labels
+            for (const label of labels) {
+              if (!feature_data[label]) feature_data[label] = []
+              const message = `${pr.title} by @${pr.author} in [#${pr.prNumber}](https://github.com/manabie-com/${repo}/pull/${pr.prNumber})`
+              feature_data[label].push(message)
+            }
+          }
+
+          let summary = ''
+          let changes = ''
+
+          for (const label in feature_data) {
+            if (label.startsWith("feature-")) {
+              summary += `- ${label}`
+              changes += `## ${label}\n`
+              let pr_count = 0
+              for (const pr of feature_data[label]) {
+                changes += `- ${pr}\n`
+                pr_count++
+              }
+              summary += ` \`${pr_count} PR\`\n`
+            }
+          }
+
+          let changelog = summary ? `${summary}\n\n${changes}` : 'This release either contains no changes to any features or the labels are not being added correctly to the PR. Check [here](https://github.com/manabie-com/backend/blob/develop/.github/features_directories.yml) for the label configuration.'
+
+          core.setOutput('changelog', changelog)
+
+    - name: Create Release
+      shell: bash
+      run: gh release create ${{ inputs.current-release }} -n "${{ steps.gen-changelog.outputs.changelog }}" >> $GITHUB_STEP_SUMMARY
+
+    - name: Adding summary
+      shell: bash
+      run: echo "${{ steps.gen-changelog.outputs.changelog }}" >> $GITHUB_STEP_SUMMARY
+
+    - name: Checkout back to develop BE
+      uses: actions/checkout@v3

@@ -1,0 +1,215 @@
+grpcPort: 6150
+httpPort: 6180
+
+service:
+  type: ClusterIP
+  port: 6150
+
+metrics:
+  enabled: true
+  podAnnotations:
+    prometheus.io/scheme: "http"
+    prometheus.io/port: "8888"
+    prometheus.io/scrape: "true"
+affinity: {}
+affinityOverride: {}
+cronjobs:
+  check-enrollment-status-date:
+    cmd: usermgmt_cronjob_check_enrollment_status_date
+    schedule: "0 0 * * *"
+  cronjob-itee-download-data-file:
+    cmd: usermgmt_itee_download_data_file
+    schedule: "13 19 * * *"
+  cronjob-withus-download-data-file:
+    cmd: usermgmt_withus_download_data_file
+    schedule: "13 19 * * *"
+
+apiHttp:
+  - match:
+      - uri:
+          prefix: /usermgmt.v1.InternalService
+    route:
+      - destination:
+          host: usermgmt
+          port:
+            number: 6150
+    fault:
+      abort:
+        percentage:
+          value: 100
+        httpStatus: 403
+  - match:
+      - uri:
+          prefix: /usermgmt.v2
+    route:
+      - destination:
+          host: usermgmt
+          port:
+            number: 6150
+  - match:
+      - uri:
+          prefix: /api/user
+    route:
+      - destination:
+          host: usermgmt
+          port:
+            number: 6180
+
+webHttp:
+  - match:
+      - uri:
+          prefix: /usermgmt.v2
+    route:
+      - destination:
+          host: usermgmt
+          port:
+            number: 6150
+    corsPolicy:
+      allowOrigins:
+        - regex: ".*"
+      allowMethods:
+        - POST
+        - GET
+        - OPTIONS
+        - PUT
+        - DELETE
+      allowHeaders:
+        - grpc-timeout
+        - content-type
+        - keep-alive
+        - user-agent
+        - cache-control
+        - content-type
+        - content-transfer-encoding
+        - token
+        - x-accept-content-transfer-encoding
+        - x-accept-response-streaming
+        - x-user-agent
+        - x-grpc-web
+        - pkg
+        - version
+      maxAge: 100s
+      exposeHeaders:
+        - grpc-status
+        - grpc-message
+        - grpc-status-details-bin
+  - match:
+      - uri:
+          prefix: /api/user
+    route:
+      - destination:
+          host: usermgmt
+          port:
+            number: 6180
+    corsPolicy:
+      allowOrigins:
+        - regex: ".*"
+      allowMethods:
+        - POST
+        - GET
+        - OPTIONS
+        - PUT
+        - DELETE
+      allowHeaders:
+        - grpc-timeout
+        - content-type
+        - keep-alive
+        - user-agent
+        - cache-control
+        - content-type
+        - content-transfer-encoding
+        - token
+        - x-accept-content-transfer-encoding
+        - x-accept-response-streaming
+        - x-user-agent
+        - x-grpc-web
+        - pkg
+        - version
+        - JPREP-Signature
+        - CloudConvert-Signature
+      allowCredentials: true
+      maxAge: 100s
+
+pdb:
+  enabled: false
+
+jobs:
+
+  # Disabled, convert to gjob before enabling again
+  # increase-grade-of-students:
+  #   cmd: usermgmt_increase_grade_of_students
+
+  # Disabled, convert to gjob before enabling again
+  # migrate-add-default-usergroup-for-student-parent:
+  #   cmd: usermgmt_migrate_add_default_usergroup_for_student_parent
+
+  # Disabled, convert to gjob before enabling again
+  # migrate-assign-user-group-to-staff:
+  #   cmd: usermgmt_migrate_assign_user_group_to_specific_staff
+
+  # Disabled, convert to gjob before enabling again
+  # migrate-create-user-group:
+  #   cmd: usermgmt_migrate_create_user_group
+
+  # Disabled, convert to gjob before enabling again
+  # migrate-current-grade-to-grade-id:
+  #   cmd: usermgmt_migrate_current_grade_to_grade_id
+
+  # Disabled, convert to gjob before enabling again
+  # migrate-delete-student-location-org:
+  #   cmd: usermgmt_migrate_delete_student_location_org
+
+  # Disabled, convert to gjob before enabling again
+  # migrate-student-enrollment-original-status:
+  #   cmd: usermgmt_migrate_student_enrollment_original_status
+
+  # Disabled, convert to gjob before enabling again
+  # migrate-student-full-name-into-last-name:
+  #   cmd: usermgmt_migrate_student_full_name_to_last_name_and_first_name
+
+  # Disabled, convert to gjob before enabling again
+  # migrate-users-from-firebase:
+  #   cmd: usermgmt_migrate_users_from_firebase
+
+  # Disabled, convert to gjob before enabling again
+  # generate-api-keypair:
+  #   cmd: usermgmt_generate_api_keypair
+
+  # Disabled, convert to gjob before enabling again
+  # migrate-locations-for-users:
+  #   cmd: usermgmt_migrate_locations_for_users
+
+  # Disabled, convert to gjob before enabling again
+  # migrate-set-current-school-by-grade:
+  #   cmd: usermgmt_migrate_set_current_school_by_grade
+
+  # Disabled, convert to gjob before enabling again
+  # migrate-user-phone-number:
+  #   cmd: usermgmt_migrate_user_phone_number
+
+  check-enrollment-status-date:
+    cmd: usermgmt_cronjob_check_enrollment_status_date
+
+  cronjob-withus-download-data-file:
+    cmd: usermgmt_withus_download_data_file
+
+  cronjob-itee-download-data-file:
+    cmd: usermgmt_itee_download_data_file
+
+  withus-download-data-file:
+    cmd: usermgmt_withus_download_data_file
+
+  itee-download-data-file:
+    cmd: usermgmt_itee_download_data_file
+
+  migrate-kec-enrollment-status:
+    cmd: usermgmt_migrate_kec_enrollment_status
+
+  generate-api-keypair:
+    cmd: usermgmt_generate_api_keypair
+
+  migrate-bulk-insert-students:
+     cmd: usermgmt_migrate_bulk_insert_students
+
+  kec-create-staffs-from-bucket:
+     cmd: usermgmt_kec_create_staffs_from_bucket

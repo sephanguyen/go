@@ -1,0 +1,128 @@
+{
+	"schema": [
+		{
+			"column_name": "action",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "course_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "flow",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "student_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "student_package_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "student_package_log_id",
+			"data_type": "integer",
+			"column_default": "nextval('student_package_log_id_seq'::regclass)",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "student_package_object",
+			"data_type": "jsonb",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "user_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "student_package_log",
+			"policyname": "rls_student_package_log",
+			"qual": "permission_check(resource_path, 'student_package_log'::text)",
+			"with_check": "permission_check(resource_path, 'student_package_log'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "student_package_log",
+			"policyname": "rls_student_package_log_restrictive",
+			"qual": "permission_check(resource_path, 'student_package_log'::text)",
+			"with_check": "permission_check(resource_path, 'student_package_log'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "student_package_log_student_package_fk",
+			"column_name": "student_package_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "student_package_log_users_fk",
+			"column_name": "user_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "student_package_logs",
+			"column_name": "student_package_log_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "student_package_log",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

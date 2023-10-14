@@ -1,0 +1,394 @@
+syntax = "proto3";
+
+package syllabus.v1;
+
+import "syllabus/v1/study_plan.proto";
+import "syllabus/v1/enums.proto";
+import "syllabus/v1/common.proto";
+import "common/v1/requests.proto";
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/timestamp.proto";
+import "syllabus/v1/learning_material.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/syllabus/v1;sspb";
+
+// TODO: GetStudentAssignmentProgress think for learning_material in general
+message GetStudentAssignmentProgressRequest {
+    string master_study_plan_id = 1;
+    string student_id = 2;
+}
+  
+message GetStudentAssignmentProgressResponse {
+    int32 completed_assignments = 1;  // -> develop to completed_learning_material
+    int32 total_assignments = 2; // total_learning_materials
+}
+
+message StatisticsTodoItem {
+    StudyPlanToDoItem todo_item = 1;    
+    int32 completed_student = 2;        
+    int32 total_assigned_student = 3;
+}
+  
+message GetCourseProgressRequest {
+    string master_study_plan_id = 1;    //course_study_plan
+}
+  
+message GetCourseProgressResponse {
+    repeated StatisticsTodoItem statistics_items = 1;
+}
+
+message GetLearningMaterialProgressInClassRequest {
+    string class_id = 1;
+    StudyPlanItemIdentity master_study_plan_item_identity = 2;	
+}
+  
+message GetLearningMaterialProgressInClassResponse {
+    StatisticsTodoItem statistics_item = 1;
+}
+
+message LearningMaterialResult {
+    // no need to fill topic_id(optional)
+    LearningMaterialBase learning_material = 1;
+    bool is_completed = 2;
+    AchievementCrown crown = 3;
+}
+
+message StudentTopicStudyProgress {
+    string topic_id = 1;
+    google.protobuf.Int32Value completed_study_plan_item = 2;
+    google.protobuf.Int32Value total_study_plan_item = 3;
+    google.protobuf.Int32Value average_score = 4;
+    string topic_name = 5;
+    int32 display_order = 6;
+    string icon_url = 7;
+}
+
+message StudentChapterStudyProgress {
+    string chapter_id = 1;
+    google.protobuf.Int32Value average_score = 2;
+}
+message GetStudentProgressRequest {
+//    use study_plan_id and student_id
+    StudyPlanItemIdentity study_plan_item_identity = 1;
+    string course_id = 2;
+}
+
+message GetStudentProgressResponse {
+    message StudentStudyPlanProgress {
+        string study_plan_id = 1;
+        repeated StudentChapterStudyProgress chapter_progress = 2;
+        repeated StudentTopicStudyProgress topic_progress = 3;
+        repeated LearningMaterialResult learning_material_results = 4;
+        repeated StudyPlanTree study_plan_trees = 5;
+    }
+    
+    repeated StudentStudyPlanProgress student_study_plan_progresses = 1;
+}
+
+message GetStudyPlanItemEventLogsRequest {
+    repeated StudyPlanItemIdentity study_plan_item_identity = 1;
+}
+  
+message GetStudyPlanItemEventLogsResponse {
+    message StudyPlanItemLog {
+        StudyPlanItemIdentity study_plan_item_identity = 1;
+        string session_id = 2;
+        int32 learning_time = 3;
+        google.protobuf.Timestamp created_at = 4;
+        google.protobuf.Timestamp completed_at = 5;
+    }
+    repeated StudyPlanItemLog logs = 1;
+}
+
+message ListLOHighestScoresByStudyPlanItemIDsRequest {
+    StudyPlanItemIdentity study_plan_item_identity = 1;
+}
+  
+message ListLOHighestScoresByStudyPlanItemIDsResponse {
+    message LOHighestScore {
+        StudyPlanItemIdentity study_plan_item_identity = 1;
+        google.protobuf.Int32Value percentage = 2;
+    }  
+    repeated LOHighestScore lo_highest_scores = 1;
+}
+
+
+
+message GetStudentStatRequest {
+    string student_id = 1;
+}
+
+message StudentStatCrown {
+    AchievementCrown AchievementCrown = 1;
+    int32 total = 2;
+}
+
+message StudentStat {
+    int32 total_learning_time = 1;
+    int32 total_learning_material_finished = 2;
+    repeated StudentStatCrown crowns = 3;
+}
+
+message GetStudentStatResponse {
+    StudentStat student_statistics = 1;
+}
+
+message GetStudentQuestionSetTestsRequest {
+    repeated StudyPlanItemIdentity study_plan_item_identities = 1;
+    bool is_completed = 2;
+}
+// HighestQuestionScore converted from HighestQuizScore
+message HighestQuestionScore {
+    google.protobuf.Int32Value correct_question = 1; // if not yet do, null is suitable
+    int32 total_question = 2;
+}
+message QuestionSetTest {
+    string shuffle_question_set_id = 1; //shuffle_quiz_set_id current table -> for PHASE 3
+    google.protobuf.Int32Value total_correctness = 2;
+    int32 total_question = 3;
+    google.protobuf.Timestamp created_at = 4;
+    google.protobuf.Timestamp completed_at = 5;
+    int32 total_learning_time = 6;
+    bool is_retry = 7;
+}
+
+message StudyPlanItemQuestionSet {
+    StudyPlanItemIdentity study_plan_item_identity = 1;
+    QuestionSetTest question_set_test = 2;
+}
+  
+message GetStudentQuestionSetTestsResponse {
+    repeated StudyPlanItemQuestionSet list_study_plan_item_question_set = 1;
+    AchievementCrown highest_crown = 2;
+    int32 total_attempt = 3;    //only count for the origin attempts, not retry attempts
+    HighestQuestionScore highest_score = 4;
+}
+
+message ListSubmissionsRequest {
+    repeated StudyPlanItemIdentity study_plan_item_identities = 1;  
+}
+
+message Submission {
+    string submission_id = 1;
+    StudyPlanItemIdentity study_plan_item_identity = 2;  
+    string note = 3;
+    // array of media id
+    repeated SubmissionContent submission_content = 4;
+    google.protobuf.Timestamp created_at = 5;
+    google.protobuf.Timestamp updated_at = 6;
+    SubmissionStatus status = 7;
+    // empty if not grade yet
+    google.protobuf.StringValue submission_grade_id = 8;
+    string course_id = 9;
+    google.protobuf.Timestamp start_date = 10;
+    google.protobuf.Timestamp end_date = 11;
+    google.protobuf.Timestamp complete_date = 12;
+    int32 duration = 13;
+    google.protobuf.FloatValue correct_score = 14;
+    google.protobuf.FloatValue total_score = 15;
+    SubmissionUnderstandingLevel understanding_level = 16;
+}
+
+message ListSubmissionsResponse {
+    repeated Submission submissions = 1; // added StudyPlanItemIdentity to StudentSubmission 
+}
+
+message SearchSubmissionsRequest {
+    common.v1.Paging paging = 1;
+    google.protobuf.StringValue course_id = 2;
+    repeated string class_ids = 3;
+    repeated SubmissionStatus statuses = 4;
+    google.protobuf.Timestamp start = 5;
+    google.protobuf.Timestamp end = 6;
+    google.protobuf.StringValue learning_material_name = 7;
+}
+  
+message SearchSubmissionsResponse {
+    common.v1.Paging next_page = 1;
+    repeated Submission submissions = 2;
+}
+message SearchSubmissionsV2Request {
+    common.v1.Paging paging = 1;
+    google.protobuf.StringValue course_id = 2;
+    repeated string class_ids = 3;
+    repeated SubmissionStatus statuses = 4;
+    google.protobuf.Timestamp start = 5;  
+    google.protobuf.Timestamp end = 6;  
+    google.protobuf.StringValue learning_material_name = 7;
+    repeated string location_ids = 8;
+}
+    
+message SearchSubmissionsV2Response {  
+    common.v1.Paging next_page = 1;
+    repeated Submission submissions = 2; // added StudyPlanItemIdentity to StudentSubmission 
+}
+
+
+enum GradeBookSetting {
+    LATEST_SCORE = 0;
+    GRADE_TO_PASS_SCORE = 1;
+}
+
+message GradeBookRequest {
+    common.v1.Paging paging = 1;
+    repeated string course_ids = 2;
+    repeated string study_plan_ids = 3;
+    repeated int32 grades = 4;
+    repeated string student_ids = 5;
+    GradeBookSetting setting = 6;
+    string student_name = 7;
+    repeated string grade_ids = 8;
+    repeated string location_ids = 9;
+}
+
+message GradeBookResponse {
+    message ExamResult {
+        string lm_id = 1;
+        string lm_name = 2;
+        google.protobuf.UInt32Value total_point = 3;
+        google.protobuf.UInt32Value grade_point = 4;
+        uint32 total_attempts = 5;
+        bool failed = 6;
+        SubmissionStatus status = 7;
+        bool is_grade_to_pass = 8;
+        ExamLOReviewOption review_option = 9;
+        google.protobuf.Timestamp due_date = 10;
+        int32 chapterDisplayOrder = 11;
+        int32 topicDisplayOrder = 12;
+        int32 lmDisplayOrder = 13;
+    }
+
+    message StudentGradeItem {
+        string student_id = 1;
+        string student_name = 2;
+        google.protobuf.UInt32Value grade = 3;
+        string study_plan_id = 4;
+        string study_plan_name = 5;
+        string course_id = 6;
+        string course_name = 7;
+        google.protobuf.UInt32Value total_exam_los = 8;
+        google.protobuf.UInt32Value total_completed_exam_los = 9;
+        google.protobuf.UInt32Value total_grade_to_pass = 10; //Total Exam LOs have Grade To Pass setting
+        google.protobuf.UInt32Value total_passed = 11; //Total Exam LOs which student passed
+        repeated ExamResult results = 12;
+        string grade_id = 13;
+    }
+    repeated StudentGradeItem student_grade_items = 1;
+    common.v1.Paging next_page = 2;
+}
+
+message CourseStatisticRequest {   
+    string course_id = 1;
+    string study_plan_id = 2;
+    repeated string class_id = 3;
+
+
+    oneof school {
+        bool all_school = 4;
+        bool unassigned = 5;
+        string school_id = 6;
+    }
+
+    repeated string student_tag_ids = 7;
+    repeated string location_ids = 8;
+}
+
+message CourseStatisticResponse {
+  repeated TopicStatistic topic_statistic = 1;
+
+  message TopicStatistic {
+    string topic_id = 1;
+    int32 completed_student = 2;
+    int32 total_assigned_student = 3;
+    int32 average_score = 4;
+    repeated LearningMaterialStatistic learning_material_statistic = 5;
+
+    message LearningMaterialStatistic {
+      string learning_material_id = 1;
+      int32 completed_student = 2;
+      int32 total_assigned_student = 3;
+      int32 average_score = 4;
+    }
+  } 
+}
+
+message RetrieveLearningProgressRequest {
+  string student_id = 1;
+  string session_id = 2;
+  google.protobuf.Timestamp from = 3;
+  google.protobuf.Timestamp to = 4;
+}
+
+message RetrieveLearningProgressResponse {
+  message DailyLearningTime {
+    int64 total_time_spent_in_day = 1;
+    google.protobuf.Timestamp day = 2;
+  }
+  repeated DailyLearningTime dailies = 1;
+}
+
+message RetrieveSchoolHistoryByStudentInCourseRequest {
+    string course_id = 1;
+}
+
+message RetrieveSchoolHistoryByStudentInCourseResponse {
+    message School {
+        string school_id = 1;
+        string school_name = 2;
+    }
+
+    map<string, School> schools = 1;
+}
+
+message ListTagByStudentInCourseRequest {
+  string course_id = 1;
+}
+
+message ListTagByStudentInCourseResponse {
+  message StudentTag {
+    string tag_id = 1;
+    string tag_name = 2;
+  }
+
+  repeated StudentTag student_tags = 1;
+}
+
+service Statistics {
+    rpc GetStudentAssignmentProgress(GetStudentAssignmentProgressRequest) //RetrieveStudyPlanProgress
+        returns (GetStudentAssignmentProgressResponse);
+    rpc GetCourseProgress (GetCourseProgressRequest)
+        returns (GetCourseProgressResponse); //ListCourseTodo
+    rpc GetLearningMaterialProgressInClass(GetLearningMaterialProgressInClassRequest) //RetrieveStatisticAssignmentClass
+        returns (GetLearningMaterialProgressInClassResponse);
+    rpc GetStudentProgress(GetStudentProgressRequest) //GetStudentProgress
+        returns (GetStudentProgressResponse);
+    rpc GetStudyPlanItemEventLogs(GetStudyPlanItemEventLogsRequest)//RetrieveStudyPlanItemEventLogs
+        returns (GetStudyPlanItemEventLogsResponse);
+    rpc ListLOHighestScoresByStudyPlanItemIDs(ListLOHighestScoresByStudyPlanItemIDsRequest) //GetLOHighestScoresByStudyPlanItemIDs
+        returns (ListLOHighestScoresByStudyPlanItemIDsResponse);
+    rpc GetStudentStat(GetStudentStatRequest)
+        returns (GetStudentStatResponse); // RetrieveStat
+    //Grade Book service
+    rpc ListGradeBook(GradeBookRequest)
+        returns (GradeBookResponse);
+
+    // rpc InsertStudentEventLogs(InsertStudentEventLogsRequest) returns (InsertStudentEventLogsResponse); //TODO: define it
+    rpc GetStudentQuestionSetTests(GetStudentQuestionSetTestsRequest) // RetrieveQuizTests
+        returns (GetStudentQuestionSetTestsResponse);
+    rpc ListSubmissions(ListSubmissionsRequest) // RetrieveSubmissions
+        returns (ListSubmissionsResponse);
+    rpc SearchSubmissions(SearchSubmissionsRequest) //ListSubmissions
+        returns (SearchSubmissionsResponse);
+    rpc SearchSubmissionsV2(SearchSubmissionsV2Request) //ListSubmissionsV2
+        returns (SearchSubmissionsV2Response);   
+    rpc RetrieveCourseStatistic(CourseStatisticRequest) // RetrieveCourseStatistic
+        returns (CourseStatisticResponse);   
+    rpc RetrieveCourseStatisticV2(CourseStatisticRequest) // RetrieveCourseStatisticV2
+        returns (CourseStatisticResponse); 
+    rpc RetrieveLearningProgress(RetrieveLearningProgressRequest)
+        returns (RetrieveLearningProgressResponse);
+    rpc RetrieveSchoolHistoryByStudentInCourse(RetrieveSchoolHistoryByStudentInCourseRequest)
+        returns (RetrieveSchoolHistoryByStudentInCourseResponse);
+    rpc ListTagByStudentInCourse(ListTagByStudentInCourseRequest)
+        returns (ListTagByStudentInCourseResponse);
+}

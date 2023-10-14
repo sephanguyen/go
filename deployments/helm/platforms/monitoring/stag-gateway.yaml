@@ -1,0 +1,325 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: prometheus
+  namespace: istio-system
+spec:
+  commonName: prometheus.staging.manabie.io
+  dnsNames:
+    - prometheus.staging.manabie.io
+  issuerRef:
+    kind: ClusterIssuer
+    name: stag-manabie-gateway
+  secretName: cert-prometheus
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: prometheus-pushgateway
+  namespace: istio-system
+spec:
+  commonName: prometheus-pushgateway.staging.manabie.io
+  dnsNames:
+    - prometheus-pushgateway.staging.manabie.io
+  issuerRef:
+    kind: ClusterIssuer
+    name: stag-manabie-gateway
+  secretName: cert-prometheus-pushgateway
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: thanos-sidecar
+  namespace: istio-system
+spec:
+  commonName: thanos-sidecar.staging.manabie.io
+  dnsNames:
+    - thanos-sidecar.staging.manabie.io
+  issuerRef:
+    kind: ClusterIssuer
+    name: stag-manabie-gateway
+  secretName: cert-thanos-sidecar
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: alertmanager
+  namespace: istio-system
+spec:
+  commonName: alertmanager.staging.manabie.io
+  dnsNames:
+    - alertmanager.staging.manabie.io
+  issuerRef:
+    kind: ClusterIssuer
+    name: stag-manabie-gateway
+  secretName: cert-alertmanager
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: jaeger
+  namespace: istio-system
+spec:
+  commonName: jaeger.staging.manabie.io
+  dnsNames:
+    - jaeger.staging.manabie.io
+  issuerRef:
+    kind: ClusterIssuer
+    name: stag-manabie-gateway
+  secretName: cert-jaeger
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: kiali
+  namespace: istio-system
+spec:
+  commonName: kiali.staging.manabie.io
+  dnsNames:
+    - kiali.staging.manabie.io
+  issuerRef:
+    kind: ClusterIssuer
+    name: stag-manabie-gateway
+  secretName: cert-kiali
+---
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: monitoring
+  namespace: istio-system
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - hosts:
+    - prometheus.staging.manabie.io
+    port:
+      name: https-prometheus
+      number: 443
+      protocol: HTTPS
+    tls:
+      credentialName: cert-prometheus
+      mode: SIMPLE
+      privateKey: sds
+      serverCertificate: sds
+  - hosts:
+    - prometheus-pushgateway.staging.manabie.io
+    port:
+      name: https-prometheus-pushgateway
+      number: 443
+      protocol: HTTPS
+    tls:
+      credentialName: cert-prometheus-pushgateway
+      mode: SIMPLE
+      privateKey: sds
+      serverCertificate: sds
+  - hosts:
+    - thanos-sidecar.staging.manabie.io
+    port:
+      name: https-thanos-sidecar
+      number: 443
+      protocol: HTTPS
+    tls:
+      credentialName: cert-thanos-sidecar
+      mode: SIMPLE
+      privateKey: sds
+      serverCertificate: sds
+  - hosts:
+    - alertmanager.staging.manabie.io
+    port:
+      name: https-alertmanager
+      number: 443
+      protocol: HTTPS
+    tls:
+      credentialName: cert-alertmanager
+      mode: SIMPLE
+      privateKey: sds
+      serverCertificate: sds
+  - hosts:
+    - jaeger.staging.manabie.io
+    port:
+      name: https-jaeger
+      number: 443
+      protocol: HTTPS
+    tls:
+      credentialName: cert-jaeger
+      mode: SIMPLE
+      privateKey: sds
+      serverCertificate: sds
+  - hosts:
+    - kiali.staging.manabie.io
+    port:
+      name: https-kiali
+      number: 443
+      protocol: HTTPS
+    tls:
+      credentialName: cert-kiali
+      mode: SIMPLE
+      privateKey: sds
+      serverCertificate: sds
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: prometheus
+  namespace: monitoring
+spec:
+  exportTo:
+  - istio-system
+  gateways:
+  - istio-system/monitoring
+  hosts:
+  - prometheus.staging.manabie.io
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: prometheus-server
+        port:
+          number: 80
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: prometheus-pushgateway
+  namespace: monitoring
+spec:
+  exportTo:
+  - istio-system
+  gateways:
+  - istio-system/monitoring
+  hosts:
+  - prometheus-pushgateway.staging.manabie.io
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: prometheus-pushgateway
+        port:
+          number: 9091
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: thanos-sidecar
+  namespace: monitoring
+spec:
+  exportTo:
+  - istio-system
+  gateways:
+  - istio-system/monitoring
+  hosts:
+  - thanos-sidecar.staging.manabie.io
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: prometheus-server-thanos
+        port:
+          number: 10901
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: alertmanager
+  namespace: monitoring
+spec:
+  exportTo:
+  - istio-system
+  gateways:
+  - istio-system/monitoring
+  hosts:
+  - alertmanager.staging.manabie.io
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: prometheus-alertmanager
+        port:
+          number: 80
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: jaeger
+  namespace: monitoring
+spec:
+  exportTo:
+  - istio-system
+  gateways:
+  - istio-system/monitoring
+  hosts:
+  - jaeger.staging.manabie.io
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: jaeger-all-in-one
+        port:
+          number: 16686
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: kiali
+  namespace: istio-system
+spec:
+  exportTo:
+  - istio-system
+  gateways:
+  - istio-system/monitoring
+  hosts:
+  - kiali.staging.manabie.io
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: kiali
+        port:
+          number: 20001
+---
+apiVersion: security.istio.io/v1beta1
+kind: RequestAuthentication
+metadata:
+  name: jwt-x-manabie-auth
+  namespace: istio-system
+spec:
+  selector:
+    matchLabels:
+      istio: ingressgateway
+  jwtRules:
+  - issuer: "https://securetoken.google.com/staging-manabie-online"
+    jwksUri: "https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com"
+    fromHeaders:
+    - name: x-manabie-auth
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: jaeger-host
+  namespace: istio-system
+spec:
+  selector:
+    matchLabels:
+      istio: ingressgateway
+  action: DENY
+  rules:
+  - from:
+    - source:
+        notRequestPrincipals: ["*"]
+    to:
+    - operation:
+        hosts: ["jaeger.staging.manabie.io"]
+        notPaths: ["/.well-known/acme-challenge/*"]

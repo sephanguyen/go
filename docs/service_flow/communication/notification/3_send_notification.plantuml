@@ -1,0 +1,12 @@
+@startuml communication_simplified
+hide circle
+User   -> Yasuo:  Call "NotificationModifierService.SendNotification"
+activate Yasuo
+Yasuo -> DB: load notification data
+Yasuo -> eureka: findStudent by targetGroup, individualIds, schoolID
+Yasuo -> DB: save "UserInfoNotification" for all users
+Yasuo -> DB: load user's device tokens
+Yasuo -> FCM: push notifications using user's tokens
+Yasuo -> DB: update notification.status to SENT
+deactivate Yasuo
+@enduml

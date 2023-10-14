@@ -1,0 +1,23 @@
+{
+  "name": "uat_jprep_bob_to_lessonmgmt_lesson_room_states_sink_connector",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+    "tasks.max": "1",
+    "topics": "uat.jprep.bob.public.lesson_room_states",
+    "connection.url": "${file:/config/kafka-connect-config.properties:lessonmgmt_url}",
+    "auto.create": "false",
+    "insert.mode": "upsert",
+    "table.name.format": "lesson_room_states",
+    "fields.whitelist": "agora_room_id,created_at,current_material,current_polling,deleted_at,ended_at,lesson_id,lesson_room_state_id,recording,resource_path,session_time,spotlighted_user,streaming_attendees,updated_at,whiteboard_zoom_state",
+    "transforms": "unwrap,route",
+    "transforms.route.type": "org.apache.kafka.connect.transforms.RegexRouter",
+    "transforms.route.regex": "([^.]+).([^.]+).([^.]+).([^.]+).([^.]+)",
+    "transforms.route.replacement": "$5",
+    "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+    "delete.enabled": "false",
+    "pk.mode": "record_value",
+    "pk.fields": "lesson_room_state_id",
+    "transforms.unwrap.drop.tombstones": "true",
+    "transforms.unwrap.delete.handling.mode": "drop"
+  }
+}

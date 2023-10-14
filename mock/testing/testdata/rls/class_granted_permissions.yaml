@@ -1,0 +1,26 @@
+table:
+  schema: public
+  name: granted_permissions
+object_relationships:
+- name: class_location_permission
+  using:
+    manual_configuration:
+      remote_table:
+        schema: public
+        name: class
+      column_mapping:
+        location_id: location_id
+select_permissions:
+- role: MANABIE
+  permission:
+    columns:
+    - user_id
+    - permission_name
+    - location_id
+    - resource_path
+    filter:
+      _and:
+      - user_id:
+          _eq: X-Hasura-User-Id
+      - resource_path:
+          _eq: X-Hasura-Resource-Path

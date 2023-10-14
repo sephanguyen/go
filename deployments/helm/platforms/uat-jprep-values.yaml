@@ -1,0 +1,10 @@
+global:
+  sqlProxy:
+    connName: "staging-manabie-online:asia-southeast1:jprep-uat"
+  cloudSQLUsePublicIP: false
+  cloudSQLCommonInstance: "staging-manabie-online:asia-southeast1:jprep-uat"
+  cloudSQLLMSInstance: "staging-manabie-online:asia-southeast1:jprep-uat"
+serviceAccountEmailSuffix: "staging-manabie-online"
+cloudSQLUsePublicIP: false
+cloudSQLCommonInstance: "staging-manabie-online:asia-southeast1:jprep-uat"
+cloudSQLLMSInstance: "staging-manabie-online:asia-southeast1:jprep-uat"

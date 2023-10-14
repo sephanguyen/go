@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package syllabus.v1;
+
+import "google/protobuf/wrappers.proto";
+import "syllabus/v1/enums.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/syllabus/v1;sspb";
+
+// lm_type: only ListTodo need - 2022/11/14
+message BookTree {
+    string book_id = 1;
+    string chapter_id = 2;
+    int32 chapter_display_order = 3;
+    string topic_id = 4;
+    int32 topic_display_order = 5;
+    string learning_material_id = 6;
+    int32 lm_display_order = 7;
+    LearningMaterialType lm_type = 8; 
+}
+
+// LearningMaterialBase is a central or inheritance message to other learning material 
+// types can inherit. 
+message LearningMaterialBase {
+    //learning_material_id is generated learning material ULID
+    string learning_material_id = 1;
+    //topic_id is 1-1 mapped topic ULID
+    string topic_id = 2;
+    //name is learning material name
+    string name = 3;
+    //type is described at LearningMaterialType enum
+    string type = 4;
+    //display_order for LIST<...>
+    google.protobuf.Int32Value display_order = 5;
+    LearningMaterialVendorType vendor_type = 6;
+}

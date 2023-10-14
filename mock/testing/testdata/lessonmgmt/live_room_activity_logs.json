@@ -1,0 +1,111 @@
+{
+	"schema": [
+		{
+			"column_name": "action_type",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "activity_log_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "channel_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "user_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "live_room_activity_logs",
+			"policyname": "rls_live_room_activity_logs",
+			"qual": "permission_check(resource_path, 'live_room_activity_logs'::text)",
+			"with_check": "permission_check(resource_path, 'live_room_activity_logs'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "live_room_activity_logs",
+			"policyname": "rls_live_room_activity_logs_restrictive",
+			"qual": "permission_check(resource_path, 'live_room_activity_logs'::text)",
+			"with_check": "permission_check(resource_path, 'live_room_activity_logs'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "fk__live_room_activity_logs__channel_id",
+			"column_name": "channel_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "live_room_activity_logs_pkey",
+			"column_name": "activity_log_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "live_room_activity_logs",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

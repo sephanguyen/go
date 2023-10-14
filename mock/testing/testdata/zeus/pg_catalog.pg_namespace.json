@@ -1,0 +1,16 @@
+{
+  "comment": "This file is manually added. DO NOT REMOVE",
+  "schema": [
+    {
+      "column_name": "nspname",
+      "data_type": "name",
+      "column_default": null
+    },
+    {
+      "column_name": "nspacl",
+      "data_type": "ARRAY",
+      "column_default": null
+    }
+  ],
+  "table_name": "pg_catalog.pg_namespace"
+}

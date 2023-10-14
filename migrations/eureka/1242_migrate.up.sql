@@ -1,0 +1,1 @@
+CREATE INDEX CONCURRENTLY IF NOT EXISTS master_study_plan_id_idx ON study_plans(master_study_plan_id);

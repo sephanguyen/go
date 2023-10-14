@@ -1,0 +1,27 @@
+owners:
+  aphelios: platform
+  elasticsearch: platform
+  eureka: syllabus
+  fink: platform
+  hephaestus: platform
+  nats-jetstream: platform
+  unleash: automation
+  zeus: platform
+  calendar: calendar
+  mastermgmt: architecture
+  virtualclassroom: virtual-classroom
+  invoicemgmt: adobo
+  entryexitmgmt: adobo
+  payment: payment
+  shamir: auth
+  usermgmt: user-management
+  import-map-deployer: automation
+  graphql-mesh: automation
+  appsmith: architecture
+  lessonmgmt: lesson
+  mongodb: architecture
+  tom: communication
+  notificationmgmt: communication
+  discount: payment
+  bob: architecture
+  yasuo: architecture

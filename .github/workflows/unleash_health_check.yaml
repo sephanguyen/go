@@ -1,0 +1,78 @@
+name: unleash_health_check
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "00 01 * * 2" #08:00AM Tuesday
+
+env:
+  GITHUB_TOKEN: ${{ secrets.BUILD_GITHUB_TOKEN }}
+
+jobs:
+  unleash-health-check:
+    runs-on: ["self-hosted", "100m-400mi", "spot", "persistent"]
+    permissions:
+      contents: "read"
+      id-token: "write"
+    concurrency:
+      group: unleash
+      cancel-in-progress: false
+    strategy:
+      max-parallel: 1
+      matrix:
+        env: [stag, uat]
+        org: [manabie, jprep]
+        include:
+          - env: prod
+            org: "jprep"
+          - env: prod
+            org: "tokyo"
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Get unleash admin token
+        id: get-token
+        uses: ./.github/actions/unleash-auth
+        with:
+          organization: ${{ matrix.org }}
+          environment: ${{ matrix.env }}
+
+      - name: Get API URL
+        id: get-api-url
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const sub_domains = {
+              "stag": {
+                "manabie": "staging-green",
+                "jprep": "staging.jprep",
+              },
+              "uat": {
+                "manabie": "uat",
+                "jprep": "uat.jprep",
+              },
+              "prod": {
+                "tokyo": "prod.tokyo",
+                "jprep": "prod.jprep",
+              },
+            }
+            const sub_domain = sub_domains["${{ matrix.env }}"]["${{ matrix.org }}"]
+            const url = `https://admin.${sub_domain}.manabie.io/unleash/api/admin/projects/default/features`
+            
+            core.setOutput('url', url)
+
+      - id: report
+        with:
+          admin_token: ${{ steps.get-token.outputs.token }}
+          api_url: ${{ steps.get-api-url.outputs.url }}
+        uses: ./.github/actions/generate-unleash-health-report
+
+      - name: Adding markdown
+        run: |
+          echo -e "## ${{ matrix.env }} - ${{ matrix.org }}
+          <details>
+          <summary> ${{ steps.report.outputs.message }} </summary>
+          \n
+          ${{ steps.report.outputs.report }} 
+          </details>
+          \n" >> $GITHUB_STEP_SUMMARY

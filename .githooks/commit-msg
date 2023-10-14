@@ -1,0 +1,16 @@
+#!/bin/bash
+
+set -e
+
+root_dir=$(git rev-parse --show-toplevel)
+. ${root_dir}/.githooks/common.bash
+
+message_file_name=$1
+message=$(cat ${message_file_name})
+
+currentBranch=$(git rev-parse --abbrev-ref HEAD)
+if [[ $currentBranch == "hotfixes/202"* || $currentBranch == "hotfix/202"* ]]; then
+    echo "pre commit not check on hotfixes/202* or hotfix/202* branch"
+else
+    check_message "${message}"
+fi

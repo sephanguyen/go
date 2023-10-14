@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package tom.v1;
+
+import "tom/v1/conversations.proto";
+import "common/v1/requests.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/tom/v1;tpb";
+
+message ListConversationByUsersRequest{
+    repeated string conversation_ids = 1;
+    repeated string user_ids = 2;
+}
+message ListConversationByUsersResponse{
+    repeated Conversation items = 1;
+}
+
+message ListConversationIDsRequest{
+    common.v1.Paging paging = 1;
+}
+
+message ListConversationIDsResponse{
+    repeated string conversation_ids = 1;
+    common.v1.Paging next_page = 2;
+}
+message ListConversationByLessonsRequest{
+    repeated string lesson_ids=1;
+    string organization_id =2;
+}
+message ListConversationByLessonsResponse{
+  map<string, Conversation> conversations = 1;
+}
+// used for syncing only
+service ConversationReaderService {
+    rpc ListConversationByUsers (ListConversationByUsersRequest) returns (ListConversationByUsersResponse);
+    rpc ListConversationIDs (ListConversationIDsRequest) returns (ListConversationIDsResponse);
+    rpc ListConversationByLessons (ListConversationByLessonsRequest) returns (ListConversationByLessonsResponse);
+}

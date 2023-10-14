@@ -1,0 +1,29 @@
+{
+    "iss": "{{ or .IssuerPrefix "http://firebase.emulator.svc.cluster.local:40401" }}/{{ or .Audience "fake_aud" }}",
+    "aud": "{{ or .Audience "fake_aud" }}",
+    "auth_time": {{ .AuthTime }},
+    "user_id": "{{ .UserID }}",
+    "sub": "{{ .UserID }}",
+    "iat": {{ .IssueAt }},
+    "exp": {{ .Expiration }},
+    "phone_number": "+84{{ .PhoneNumber }}",
+    "firebase": {
+        "identities": {
+            "phone": [
+                "+84{{ .PhoneNumber }}"
+            ]
+        },
+        "sign_in_provider": "phone"
+    },
+    "https://hasura.io/jwt/claims": {
+        "x-hasura-allowed-roles": ["USER_GROUP_CONTENT_ADMIN"],
+        "x-hasura-default-role":  "USER_GROUP_CONTENT_ADMIN",
+        "x-hasura-user-id":       "{{ .UserID }}"
+    },
+     "manabie": {
+        "allowed_roles":           ["USER_GROUP_CONTENT_ADMIN"],
+        "default_role":             "USER_GROUP_CONTENT_ADMIN",
+        "user_id":                  "{{ .UserID }}",
+        "school_ids" : {{.ConvertSchoolIDsToHtml}}
+     }
+}

@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+package syllabus.v1;
+
+import "common/v1/requests.proto";
+import "common/v1/contents.proto";
+import "common/v1/question_group.proto";
+import "syllabus/v1/enums.proto";
+import "syllabus/v1/common.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/syllabus/v1;sspb";
+
+message ListSubmissionsV3Request {
+    common.v1.Paging paging = 1;
+    google.protobuf.StringValue course_id = 2;
+    repeated string class_ids = 3;
+    repeated SubmissionStatus statuses = 4;
+    google.protobuf.Timestamp start = 5;  
+    google.protobuf.Timestamp end = 6;  
+    google.protobuf.StringValue search_text = 7;
+    SearchType search_type = 8;
+    repeated string location_ids = 9;
+}
+
+message ListSubmissionsV3Response {  
+    common.v1.Paging next_page = 1;
+    repeated StudentSubmission items = 2;
+}
+
+message ListSubmissionsV4Request {
+    common.v1.Paging paging = 1;
+    google.protobuf.StringValue course_id = 2;
+    repeated string class_ids = 3;
+    repeated SubmissionStatus statuses = 4;
+    google.protobuf.Timestamp start = 5;  
+    google.protobuf.Timestamp end = 6;  
+    google.protobuf.StringValue search_text = 7;
+    SearchType search_type = 8;
+    repeated string location_ids = 9;
+    google.protobuf.StringValue student_name = 10;
+}
+
+message ListSubmissionsV4Response {  
+    common.v1.Paging next_page = 1;
+    repeated StudentSubmission items = 2;
+}
+
+message RetrieveSubmissionHistoryRequest {
+    string set_id = 1;
+    common.v1.Paging paging = 2;
+}
+  
+message RetrieveSubmissionHistoryResponse {
+    repeated common.v1.AnswerLog logs = 1;
+    common.v1.Paging next_page = 2;
+    repeated common.v1.QuestionGroup question_groups = 3;
+}
+
+service StudentSubmissionService {
+    rpc ListSubmissionsV3(ListSubmissionsV3Request) returns (ListSubmissionsV3Response);// TODO: x - PHASE 2
+    rpc ListSubmissionsV4(ListSubmissionsV4Request) returns (ListSubmissionsV4Response);// TODO: x - PHASE 2
+    rpc RetrieveSubmissionHistory(RetrieveSubmissionHistoryRequest) returns (RetrieveSubmissionHistoryResponse);
+}

@@ -1,0 +1,40 @@
+name: "Privileges check"
+description: |
+    A composite action for privileges check in UAT/PROD
+    Until we have isolated environments for each squad, we need to restrict
+    deployment to the squad-leader and platform members
+
+
+inputs:
+    actor: # github.actor
+        description: "The actor who triggered the workflow"
+        required: true
+        default: ${{ github.actor }}
+    github-token:
+        description: "The GitHub token"
+        required: true
+
+runs:
+    using: "composite"
+    steps:
+        - uses: actions/github-script@v6
+          with:
+              github-token: ${{ inputs.github-token }}
+              script: |
+                  const arrs = ["squad-release", "squad-platform", "merge-approval"];
+                  const username = "${{ inputs.actor }}";
+
+                  for (const teamSlug of arrs) {
+                    console.log(`Checking if ${username} is a member of ${teamSlug} team`);
+                    const { data } = await github.rest.teams.listMembersInOrg({
+                      org: "manabie-com",
+                      team_slug: teamSlug,
+                    });
+
+                    const exist = data.findIndex(user => user.login === username) >= 0;
+
+                    if(exist) {
+                      return core.info(`user ${username} is in team ${teamSlug}`);
+                    }
+                  };
+                  return core.setFailed("Until we have isolated environments for each squad, we need to restrict UAT/PROD deployment to the squad-leader and platform members. Please contact squad-leader or platform members to deploy");

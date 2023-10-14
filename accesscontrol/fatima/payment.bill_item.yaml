@@ -1,0 +1,14 @@
+- template: 1
+  tableName: bill_item
+  permissionPrefix: payment.bill_item
+  permissions:
+    postgres: []
+
+- template: 1.2
+  tableName: bill_item
+  useCustomPolicy: true
+  postgresPolicy:
+    - name: rls_bill_item_read_all
+      for: select
+      using: |
+        1 = 1

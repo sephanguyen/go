@@ -1,0 +1,175 @@
+{
+	"schema": [
+		{
+			"column_name": "code",
+			"data_type": "character varying",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "code_prefix",
+			"data_type": "character varying",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "country",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "expired_date",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "notes",
+			"data_type": "text",
+			"column_default": "''::text",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "owner_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "prefix_sequence_number",
+			"data_type": "integer",
+			"column_default": "1",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "promotion_id",
+			"data_type": "integer",
+			"column_default": "nextval('promotions_promotion_id_seq1'::regclass)",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "redemption_limit_per_code",
+			"data_type": "integer",
+			"column_default": "0",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "redemption_limit_per_user",
+			"data_type": "integer",
+			"column_default": "0",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "started_date",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "status",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "total_redemptions",
+			"data_type": "integer",
+			"column_default": "0",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "promotions",
+			"policyname": "rls_promotions",
+			"qual": "permission_check(resource_path, 'promotions'::text)",
+			"with_check": "permission_check(resource_path, 'promotions'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "promotions",
+			"policyname": "rls_promotions_restrictive",
+			"qual": "permission_check(resource_path, 'promotions'::text)",
+			"with_check": "permission_check(resource_path, 'promotions'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "promotions_owner_id_fk",
+			"column_name": "owner_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "promotions_pk",
+			"column_name": "promotion_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "promotions_un",
+			"column_name": "code",
+			"constraint_type": "UNIQUE"
+		},
+		{
+			"constraint_name": "promotions_un",
+			"column_name": "country",
+			"constraint_type": "UNIQUE"
+		}
+	],
+	"table_name": "promotions",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

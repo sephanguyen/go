@@ -1,0 +1,101 @@
+syntax = "proto3";
+
+package mastermgmt.v1;
+import "google/protobuf/timestamp.proto";
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/mastermgmt/v1;mpb";
+
+
+message ScheduleStudentClassRequest {
+  string student_id = 1;
+  string student_package_id = 2;
+  string class_id = 3;
+  google.protobuf.Timestamp start_time = 4;
+  google.protobuf.Timestamp end_time = 5;
+  string course_id = 6;
+  google.protobuf.Timestamp effective_date = 7;
+}
+  
+message ScheduleStudentClassResponse {
+  bool successful = 1;
+}
+
+message CancelScheduledStudentClassRequest {
+  string student_id = 1;
+  string student_package_id = 2;
+  string class_id = 3;
+  string course_id = 4;
+}
+
+message GetReserveClassesByEffectiveDateRequest {
+  string organization_id = 1;
+  google.protobuf.Timestamp effective_date = 2;
+}
+
+message GetReserveClassesByEffectiveDateResponse {
+  message ReserveClass {
+    string student_package_id = 1;
+    string student_id = 2;
+    string course_id = 3;
+    string class_id = 4;
+  }
+
+  repeated ReserveClass reserve_classes = 1;
+}
+
+message DeleteReserveClassByEffectiveDateRequest {
+  string organization_id = 1;
+  google.protobuf.Timestamp effective_date = 2;
+}
+
+message DeleteReserveClassByEffectiveDateResponse {
+  bool successful = 1;
+}
+
+message CancelScheduledStudentClassResponse {
+  bool successful = 1;
+}
+
+message RetrieveScheduledStudentClassRequest {
+  string student_id = 1;
+}
+
+message RetrieveScheduledStudentClassResponse {
+  message ClassInfo {
+    string class_id = 1;
+    string name = 2;
+  }
+
+  message ScheduledClassInfo {
+    string course_id = 1;
+    string course_name = 2;
+    ClassInfo current_class = 3;
+    ClassInfo scheduled_class = 4;
+    google.protobuf.Timestamp effective_date = 5;
+  }
+
+  repeated ScheduledClassInfo scheduled_classes = 1;
+}
+
+message BulkAssignStudentsToClassRequest {
+  message StudentInfo {
+    string student_id = 1;
+    string student_package_id = 2;
+    string course_id = 3;
+    google.protobuf.Timestamp start_time = 4;
+    google.protobuf.Timestamp end_time = 5;
+  }
+  repeated StudentInfo students = 1;
+  string class_id = 2;
+  google.protobuf.Timestamp effective_date = 3;
+}
+
+message BulkAssignStudentsToClassResponse {
+  bool successful = 1;
+}
+
+service ScheduleClassService {
+  rpc ScheduleStudentClass(ScheduleStudentClassRequest) returns (ScheduleStudentClassResponse);
+  rpc CancelScheduledStudentClass(CancelScheduledStudentClassRequest) returns (CancelScheduledStudentClassResponse);
+  rpc RetrieveScheduledStudentClass(RetrieveScheduledStudentClassRequest) returns (RetrieveScheduledStudentClassResponse);
+  rpc BulkAssignStudentsToClass(BulkAssignStudentsToClassRequest) returns (BulkAssignStudentsToClassResponse);
+}

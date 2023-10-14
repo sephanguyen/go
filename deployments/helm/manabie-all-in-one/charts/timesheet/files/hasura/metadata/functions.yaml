@@ -1,0 +1,12 @@
+- function:
+    schema: public
+    name: location_timesheets_non_confirmed_count_v2
+- function:
+    schema: public
+    name: get_timesheet_count
+- function:
+    schema: public
+    name: location_timesheets_non_confirmed_count_v3
+- function:
+    schema: public
+    name: get_non_confirmed_locations

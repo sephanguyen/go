@@ -1,0 +1,352 @@
+{
+	"schema": [
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "created_user_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "data",
+			"data_type": "jsonb",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "editor_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "event",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "excluded_generic_receiver_ids",
+			"data_type": "ARRAY",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "generic_receiver_ids",
+			"data_type": "ARRAY",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "is_important",
+			"data_type": "boolean",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "notification_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "notification_msg_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "owner",
+			"data_type": "integer",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "questionnaire_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "receiver_ids",
+			"data_type": "ARRAY",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "receiver_names",
+			"data_type": "ARRAY",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "scheduled_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "sent_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "status",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "target_groups",
+			"data_type": "jsonb",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "type",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "info_notifications",
+			"policyname": "rls_info_notifications_delete_location",
+			"qual": "(true \u003c= ( SELECT true AS bool\n   FROM (granted_permissions p\n     JOIN info_notifications_access_paths inap ON ((inap.location_id = p.location_id)))\n  WHERE ((p.user_id = current_setting('app.user_id'::text)) AND (p.permission_id = ( SELECT p2.permission_id\n           FROM permission p2\n          WHERE ((p2.permission_name = 'communication.notification.write'::text) AND (p2.resource_path = current_setting('permission.resource_path'::text))))) AND (inap.notification_id = info_notifications.notification_id) AND (inap.deleted_at IS NULL))\n LIMIT 1))",
+			"with_check": null,
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "info_notifications",
+			"policyname": "rls_info_notifications_delete_permission_v4",
+			"qual": "(created_user_id = current_setting('app.user_id'::text))",
+			"with_check": null,
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "info_notifications",
+			"policyname": "rls_info_notifications_insert_location",
+			"qual": null,
+			"with_check": "(1 = 1)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "info_notifications",
+			"policyname": "rls_info_notifications_insert_permission_v4",
+			"qual": null,
+			"with_check": "(1 = 1)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "info_notifications",
+			"policyname": "rls_info_notifications_restrictive",
+			"qual": "permission_check(resource_path, 'info_notifications'::text)",
+			"with_check": "permission_check(resource_path, 'info_notifications'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "info_notifications",
+			"policyname": "rls_info_notifications_select_location",
+			"qual": "(true \u003c= ( SELECT true AS bool\n   FROM (granted_permissions p\n     JOIN info_notifications_access_paths inap ON ((inap.location_id = p.location_id)))\n  WHERE ((p.user_id = current_setting('app.user_id'::text)) AND (p.permission_id = ( SELECT p2.permission_id\n           FROM permission p2\n          WHERE ((p2.permission_name = 'communication.notification.read'::text) AND (p2.resource_path = current_setting('permission.resource_path'::text))))) AND (inap.notification_id = info_notifications.notification_id) AND (inap.deleted_at IS NULL))\n LIMIT 1))",
+			"with_check": null,
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "info_notifications",
+			"policyname": "rls_info_notifications_select_permission_v4",
+			"qual": "(created_user_id = current_setting('app.user_id'::text))",
+			"with_check": null,
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "info_notifications",
+			"policyname": "rls_info_notifications_update_location",
+			"qual": "(true \u003c= ( SELECT true AS bool\n   FROM (granted_permissions p\n     JOIN info_notifications_access_paths inap ON ((inap.location_id = p.location_id)))\n  WHERE ((p.user_id = current_setting('app.user_id'::text)) AND (p.permission_id = ( SELECT p2.permission_id\n           FROM permission p2\n          WHERE ((p2.permission_name = 'communication.notification.read'::text) AND (p2.resource_path = current_setting('permission.resource_path'::text))))) AND (inap.notification_id = info_notifications.notification_id) AND (inap.deleted_at IS NULL))\n LIMIT 1))",
+			"with_check": "(true \u003c= ( SELECT true AS bool\n   FROM (granted_permissions p\n     JOIN info_notifications_access_paths inap ON ((inap.location_id = p.location_id)))\n  WHERE ((p.user_id = current_setting('app.user_id'::text)) AND (p.permission_id = ( SELECT p2.permission_id\n           FROM permission p2\n          WHERE ((p2.permission_name = 'communication.notification.write'::text) AND (p2.resource_path = current_setting('permission.resource_path'::text))))) AND (inap.notification_id = info_notifications.notification_id) AND (inap.deleted_at IS NULL))\n LIMIT 1))",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "info_notifications",
+			"policyname": "rls_info_notifications_update_permission_v4",
+			"qual": "(created_user_id = current_setting('app.user_id'::text))",
+			"with_check": "(created_user_id = current_setting('app.user_id'::text))",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "fk__info_notification__editor_id",
+			"column_name": "editor_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "fk__info_notifications__notification_msg_id",
+			"column_name": "notification_msg_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "fk__info_notification__questionnaire_id",
+			"column_name": "questionnaire_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "pk__info_notifications",
+			"column_name": "notification_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "info_notifications",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

@@ -1,0 +1,20 @@
+kafka:
+  heapOptions: "-Xms768M -Xmx768M"
+  cluster:
+    enabled: false
+    replicas: 1
+  resources:
+    requests:
+      cpu: 1000m
+      memory: 1024Mi
+    limits:
+      cpu: 2000m
+      memory: 1024Mi
+  imagePullSecrets:
+    - name: regcred
+kafkaExporter:
+  image:
+    repository: kind-reg.actions-runner-system.svc/danielqsj/kafka-exporter
+  imagePullSecrets:
+    - name: regcred
+postAclHook: true

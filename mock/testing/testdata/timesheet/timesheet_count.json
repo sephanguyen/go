@@ -1,0 +1,88 @@
+{
+	"schema": [
+		{
+			"column_name": "all_count",
+			"data_type": "bigint",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "approved_count",
+			"data_type": "bigint",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "confirmed_count",
+			"data_type": "bigint",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "draft_count",
+			"data_type": "bigint",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "submitted_count",
+			"data_type": "bigint",
+			"column_default": null,
+			"is_nullable": "YES"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "timesheet_count",
+			"policyname": "rls_timesheet_count",
+			"qual": "permission_check(resource_path, 'timesheet_count'::text)",
+			"with_check": "permission_check(resource_path, 'timesheet_count'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "timesheet_count",
+			"policyname": "rls_timesheet_count_restrictive",
+			"qual": "permission_check(resource_path, 'timesheet_count'::text)",
+			"with_check": "permission_check(resource_path, 'timesheet_count'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [],
+	"table_name": "timesheet_count",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

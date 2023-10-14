@@ -1,0 +1,83 @@
+table:
+  schema: public
+  name: lesson_report_details
+object_relationships:
+  - name: lesson_report
+    using:
+      foreign_key_constraint_on: lesson_report_id
+  - name: student
+    using:
+      foreign_key_constraint_on: student_id
+array_relationships:
+  - name: partner_dynamic_form_field_values
+    using:
+      foreign_key_constraint_on:
+        column: lesson_report_detail_id
+        table:
+          schema: public
+          name: partner_dynamic_form_field_values
+select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+        - lesson_report_id
+        - student_id
+        - created_at
+        - updated_at
+        - deleted_at
+        - resource_path
+        - lesson_report_detail_id
+      filter:
+        _and:
+          - resource_path:
+              _eq: X-Hasura-Resource-Path
+          - deleted_at:
+              _is_null: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+        - lesson_report_detail_id
+        - lesson_report_id
+        - resource_path
+        - student_id
+        - created_at
+        - deleted_at
+        - updated_at
+      filter:
+        _and:
+          - resource_path:
+              _eq: X-Hasura-Resource-Path
+          - deleted_at:
+              _is_null: true
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+        - lesson_report_detail_id
+        - lesson_report_id
+        - resource_path
+        - student_id
+        - created_at
+        - deleted_at
+        - updated_at
+      filter:
+        _and:
+          - resource_path:
+              _eq: X-Hasura-Resource-Path
+          - deleted_at:
+              _is_null: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+        - lesson_report_id
+        - student_id
+        - created_at
+        - updated_at
+        - deleted_at
+        - resource_path
+        - lesson_report_detail_id
+      filter:
+        _and:
+          - resource_path:
+              _eq: X-Hasura-Resource-Path
+          - deleted_at:
+              _is_null: true

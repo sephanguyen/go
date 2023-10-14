@@ -1,0 +1,104 @@
+- template: 1
+  tableName: locations
+  useCustomPolicy: true
+  postgresPolicy:
+    - name: rls_locations_location
+      for: all
+      using: |
+        location_id in (
+          select			
+            p.location_id
+          from
+                  granted_permissions p
+          where
+            p.user_id = current_setting('app.user_id')
+            and p.permission_id = (
+              select
+                p2.permission_id
+              from
+                "permission" p2
+              where
+                p2.permission_name = 'master.location.read'
+                and p2.resource_path = current_setting('permission.resource_path'))
+          )
+      withCheck: |
+        exists (
+          select			
+            true
+          from
+                  granted_permissions p
+          where
+            p.user_id = current_setting('app.user_id')
+            and p.permission_id = (
+              select
+                p2.permission_id
+              from
+                "permission" p2
+              where
+                p2.permission_name = 'master.location.write'
+                and p2.resource_path = current_setting('permission.resource_path'))
+          )
+  useCustomHasuraPolicy: true
+  hasuraPolicy:
+    selectPermission:
+    - name: MANABIE
+      filter:
+      - locations_location_permission:
+          _and:
+          - user_id:
+              _eq: X-Hasura-User-Id
+          - permission_name:
+              _eq: master.location.read
+    - name: USER_GROUP_ADMIN
+      filter:
+      - locations_location_permission:
+          _and:
+          - user_id:
+              _eq: X-Hasura-User-Id
+          - permission_name:
+              _eq: master.location.read
+    - name: USER_GROUP_SCHOOL_ADMIN
+      filter:
+      - locations_location_permission:
+          _and:
+          - user_id:
+              _eq: X-Hasura-User-Id
+          - permission_name:
+              _eq: master.location.read
+    - name: USER_GROUP_SCHOOL_STAFF
+      filter:
+      - locations_location_permission:
+          _and:
+          - user_id:
+              _eq: X-Hasura-User-Id
+          - permission_name:
+              _eq: master.location.read
+    - name: USER_GROUP_TEACHER
+      filter:
+      - locations_location_permission:
+          _and:
+          - user_id:
+              _eq: X-Hasura-User-Id
+          - permission_name:
+              _eq: master.location.read
+    objectCustomRelationship:
+    - tableName: locations
+      manualConfig:
+        name: locations_location_permission
+        using:
+          manual_configuration:
+            remote_table:
+              schema: public
+              name: granted_permissions
+            column_mapping:
+              location_id: location_id
+    - tableName: granted_permissions
+      manualConfig:
+        name: locations_location_permission
+        using:
+          manual_configuration:
+            remote_table:
+              schema: public
+              name: locations
+            column_mapping:
+              location_id: location_id

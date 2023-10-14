@@ -1,0 +1,1 @@
+ALTER TABLE IF EXISTS public.timesheet RENAME COLUMN time_sheet_status TO timesheet_status;

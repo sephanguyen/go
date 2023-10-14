@@ -1,0 +1,521 @@
+{
+    "dashboardFilters": [
+        {
+            "filterType": "RESOURCE_LABEL",
+            "labelKey": "resource_id",
+            "stringValue": "",
+            "templateVariable": "Instance_id"
+        },
+        {
+            "filterType": "RESOURCE_LABEL",
+            "labelKey": "database",
+            "templateVariable": "Database"
+        }
+    ],
+    "displayName": "Cloud SQL Query Insight Overview",
+    "labels": {},
+    "mosaicLayout": {
+        "columns": 48,
+        "tiles": [
+            {
+                "height": 16,
+                "widget": {
+                    "title": " Total execution time per database",
+                    "xyChart": {
+                        "chartOptions": {
+                            "mode": "COLOR"
+                        },
+                        "dataSets": [
+                            {
+                                "breakdowns": [],
+                                "dimensions": [],
+                                "measures": [],
+                                "minAlignmentPeriod": "300s",
+                                "plotType": "LINE",
+                                "targetAxis": "Y1",
+                                "timeSeriesQuery": {
+                                    "timeSeriesFilter": {
+                                        "aggregation": {
+                                            "alignmentPeriod": "300s",
+                                            "perSeriesAligner": "ALIGN_DELTA"
+                                        },
+                                        "filter": "metric.type=\"cloudsql.googleapis.com/database/postgresql/insights/aggregate/execution_time\" resource.type=\"cloudsql_instance_database\" ${Database} ${Instance_id}",
+                                        "secondaryAggregation": {
+                                            "alignmentPeriod": "300s",
+                                            "crossSeriesReducer": "REDUCE_PERCENTILE_99",
+                                            "groupByFields": [
+                                                "resource.label.\"database\""
+                                            ],
+                                            "perSeriesAligner": "ALIGN_MEAN"
+                                        }
+                                    }
+                                }
+                            }
+                        ],
+                        "thresholds": [],
+                        "timeshiftDuration": "0s",
+                        "yAxis": {
+                            "label": "",
+                            "scale": "LINEAR"
+                        }
+                    }
+                },
+                "width": 24
+            },
+            {
+                "height": 16,
+                "widget": {
+                    "title": "Total execution time per user",
+                    "xyChart": {
+                        "chartOptions": {
+                            "mode": "COLOR"
+                        },
+                        "dataSets": [
+                            {
+                                "breakdowns": [],
+                                "dimensions": [],
+                                "measures": [],
+                                "minAlignmentPeriod": "300s",
+                                "plotType": "LINE",
+                                "targetAxis": "Y1",
+                                "timeSeriesQuery": {
+                                    "timeSeriesFilter": {
+                                        "aggregation": {
+                                            "alignmentPeriod": "300s",
+                                            "crossSeriesReducer": "REDUCE_PERCENTILE_99",
+                                            "groupByFields": [
+                                                "metric.label.\"user\""
+                                            ],
+                                            "perSeriesAligner": "ALIGN_DELTA"
+                                        },
+                                        "filter": "metric.type=\"cloudsql.googleapis.com/database/postgresql/insights/aggregate/execution_time\" resource.type=\"cloudsql_instance_database\" metric.label.\"user\"!=monitoring.regex.full_match(\".+@manabie.com\") ${Database} ${Instance_id}",
+                                        "secondaryAggregation": {
+                                            "alignmentPeriod": "60s",
+                                            "perSeriesAligner": "ALIGN_NONE"
+                                        }
+                                    }
+                                }
+                            }
+                        ],
+                        "thresholds": [],
+                        "timeshiftDuration": "0s",
+                        "yAxis": {
+                            "label": "",
+                            "scale": "LINEAR"
+                        }
+                    }
+                },
+                "width": 24,
+                "xPos": 24
+            },
+            {
+                "height": 16,
+                "widget": {
+                    "title": "Execution times per query [99TH PERCENTILE]",
+                    "xyChart": {
+                        "chartOptions": {
+                            "mode": "COLOR"
+                        },
+                        "dataSets": [
+                            {
+                                "breakdowns": [],
+                                "dimensions": [],
+                                "measures": [],
+                                "minAlignmentPeriod": "300s",
+                                "plotType": "LINE",
+                                "targetAxis": "Y1",
+                                "timeSeriesQuery": {
+                                    "timeSeriesFilter": {
+                                        "aggregation": {
+                                            "alignmentPeriod": "300s",
+                                            "crossSeriesReducer": "REDUCE_PERCENTILE_99",
+                                            "groupByFields": [
+                                                "metric.label.\"querystring\""
+                                            ],
+                                            "perSeriesAligner": "ALIGN_DELTA"
+                                        },
+                                        "filter": "metric.type=\"cloudsql.googleapis.com/database/postgresql/insights/perquery/execution_time\" resource.type=\"cloudsql_instance_database\" metric.label.\"user\"!=monitoring.regex.full_match(\".+@manabie.com\") metric.label.\"user\"!=\"redash\" metric.label.\"user\"!=\"postgres\" ${Database} ${Instance_id}",
+                                        "pickTimeSeriesFilter": {
+                                            "direction": "TOP",
+                                            "numTimeSeries": 10,
+                                            "rankingMethod": "METHOD_MEAN"
+                                        },
+                                        "secondaryAggregation": {
+                                            "alignmentPeriod": "60s",
+                                            "perSeriesAligner": "ALIGN_NONE"
+                                        }
+                                    }
+                                }
+                            }
+                        ],
+                        "thresholds": [],
+                        "timeshiftDuration": "0s",
+                        "yAxis": {
+                            "label": "",
+                            "scale": "LINEAR"
+                        }
+                    }
+                },
+                "width": 24,
+                "yPos": 16
+            },
+            {
+                "height": 16,
+                "widget": {
+                    "title": "IO time per database",
+                    "xyChart": {
+                        "chartOptions": {
+                            "mode": "COLOR"
+                        },
+                        "dataSets": [
+                            {
+                                "breakdowns": [],
+                                "dimensions": [],
+                                "measures": [],
+                                "minAlignmentPeriod": "300s",
+                                "plotType": "LINE",
+                                "targetAxis": "Y1",
+                                "timeSeriesQuery": {
+                                    "timeSeriesFilter": {
+                                        "aggregation": {
+                                            "alignmentPeriod": "300s",
+                                            "crossSeriesReducer": "REDUCE_PERCENTILE_99",
+                                            "groupByFields": [
+                                                "metric.label.\"io_type\"",
+                                                "resource.label.\"database\""
+                                            ],
+                                            "perSeriesAligner": "ALIGN_DELTA"
+                                        },
+                                        "filter": "metric.type=\"cloudsql.googleapis.com/database/postgresql/insights/aggregate/io_time\" resource.type=\"cloudsql_instance_database\" ${Database} ${Instance_id}",
+                                        "secondaryAggregation": {
+                                            "alignmentPeriod": "60s",
+                                            "perSeriesAligner": "ALIGN_NONE"
+                                        }
+                                    }
+                                }
+                            }
+                        ],
+                        "thresholds": [],
+                        "timeshiftDuration": "0s",
+                        "yAxis": {
+                            "label": "",
+                            "scale": "LINEAR"
+                        }
+                    }
+                },
+                "width": 24,
+                "yPos": 64
+            },
+            {
+                "height": 16,
+                "widget": {
+                    "title": "Cached size per query [99TH PERCENTILE]",
+                    "xyChart": {
+                        "chartOptions": {
+                            "mode": "COLOR"
+                        },
+                        "dataSets": [
+                            {
+                                "breakdowns": [],
+                                "dimensions": [],
+                                "measures": [],
+                                "minAlignmentPeriod": "300s",
+                                "plotType": "LINE",
+                                "targetAxis": "Y1",
+                                "timeSeriesQuery": {
+                                    "timeSeriesFilter": {
+                                        "aggregation": {
+                                            "alignmentPeriod": "300s",
+                                            "crossSeriesReducer": "REDUCE_PERCENTILE_99",
+                                            "groupByFields": [
+                                                "metric.label.\"querystring\""
+                                            ],
+                                            "perSeriesAligner": "ALIGN_DELTA"
+                                        },
+                                        "filter": "metric.type=\"cloudsql.googleapis.com/database/postgresql/insights/perquery/shared_blk_access_count\" resource.type=\"cloudsql_instance_database\" ${Database} ${Instance_id}",
+                                        "pickTimeSeriesFilter": {
+                                            "direction": "TOP",
+                                            "numTimeSeries": 10,
+                                            "rankingMethod": "METHOD_MEAN"
+                                        },
+                                        "secondaryAggregation": {
+                                            "alignmentPeriod": "60s",
+                                            "perSeriesAligner": "ALIGN_NONE"
+                                        }
+                                    }
+                                }
+                            }
+                        ],
+                        "thresholds": [],
+                        "timeshiftDuration": "0s",
+                        "yAxis": {
+                            "label": "",
+                            "scale": "LINEAR"
+                        }
+                    }
+                },
+                "width": 24,
+                "yPos": 48
+            },
+            {
+                "height": 16,
+                "widget": {
+                    "title": "IO time per query (Top 30)",
+                    "xyChart": {
+                        "chartOptions": {
+                            "mode": "COLOR"
+                        },
+                        "dataSets": [
+                            {
+                                "breakdowns": [],
+                                "dimensions": [],
+                                "measures": [],
+                                "minAlignmentPeriod": "300s",
+                                "plotType": "LINE",
+                                "targetAxis": "Y1",
+                                "timeSeriesQuery": {
+                                    "timeSeriesFilter": {
+                                        "aggregation": {
+                                            "alignmentPeriod": "300s",
+                                            "crossSeriesReducer": "REDUCE_PERCENTILE_99",
+                                            "groupByFields": [
+                                                "metric.label.\"querystring\""
+                                            ],
+                                            "perSeriesAligner": "ALIGN_DELTA"
+                                        },
+                                        "filter": "metric.type=\"cloudsql.googleapis.com/database/postgresql/insights/perquery/io_time\" resource.type=\"cloudsql_instance_database\" ${Database} ${Instance_id}",
+                                        "pickTimeSeriesFilter": {
+                                            "direction": "TOP",
+                                            "numTimeSeries": 30,
+                                            "rankingMethod": "METHOD_MEAN"
+                                        },
+                                        "secondaryAggregation": {
+                                            "alignmentPeriod": "60s",
+                                            "perSeriesAligner": "ALIGN_NONE"
+                                        }
+                                    }
+                                }
+                            }
+                        ],
+                        "thresholds": [],
+                        "timeshiftDuration": "0s",
+                        "yAxis": {
+                            "label": "",
+                            "scale": "LINEAR"
+                        }
+                    }
+                },
+                "width": 24,
+                "xPos": 24,
+                "yPos": 64
+            },
+            {
+                "height": 16,
+                "widget": {
+                    "title": "Query latency [95TH PERCENTILE]",
+                    "xyChart": {
+                        "chartOptions": {
+                            "mode": "COLOR"
+                        },
+                        "dataSets": [
+                            {
+                                "breakdowns": [],
+                                "dimensions": [],
+                                "measures": [],
+                                "minAlignmentPeriod": "300s",
+                                "plotType": "LINE",
+                                "targetAxis": "Y1",
+                                "timeSeriesQuery": {
+                                    "timeSeriesFilter": {
+                                        "aggregation": {
+                                            "alignmentPeriod": "300s",
+                                            "crossSeriesReducer": "REDUCE_PERCENTILE_95",
+                                            "groupByFields": [
+                                                "metric.label.\"querystring\""
+                                            ],
+                                            "perSeriesAligner": "ALIGN_DELTA"
+                                        },
+                                        "filter": "metric.type=\"cloudsql.googleapis.com/database/postgresql/insights/perquery/latencies\" resource.type=\"cloudsql_instance_database\" ${Database} ${Instance_id}",
+                                        "pickTimeSeriesFilter": {
+                                            "direction": "TOP",
+                                            "numTimeSeries": 10,
+                                            "rankingMethod": "METHOD_MEAN"
+                                        },
+                                        "secondaryAggregation": {
+                                            "alignmentPeriod": "60s",
+                                            "perSeriesAligner": "ALIGN_NONE"
+                                        }
+                                    }
+                                }
+                            }
+                        ],
+                        "thresholds": [],
+                        "timeshiftDuration": "0s",
+                        "yAxis": {
+                            "label": "",
+                            "scale": "LINEAR"
+                        }
+                    }
+                },
+                "width": 24,
+                "yPos": 32
+            },
+            {
+                "height": 16,
+                "widget": {
+                    "title": "Query latency [99TH PERCENTILE]",
+                    "xyChart": {
+                        "chartOptions": {
+                            "mode": "COLOR"
+                        },
+                        "dataSets": [
+                            {
+                                "breakdowns": [],
+                                "dimensions": [],
+                                "measures": [],
+                                "minAlignmentPeriod": "300s",
+                                "plotType": "LINE",
+                                "targetAxis": "Y1",
+                                "timeSeriesQuery": {
+                                    "timeSeriesFilter": {
+                                        "aggregation": {
+                                            "alignmentPeriod": "300s",
+                                            "crossSeriesReducer": "REDUCE_PERCENTILE_99",
+                                            "groupByFields": [
+                                                "metric.label.\"querystring\""
+                                            ],
+                                            "perSeriesAligner": "ALIGN_DELTA"
+                                        },
+                                        "filter": "metric.type=\"cloudsql.googleapis.com/database/postgresql/insights/perquery/latencies\" resource.type=\"cloudsql_instance_database\" ${Database} ${Instance_id}",
+                                        "pickTimeSeriesFilter": {
+                                            "direction": "TOP",
+                                            "numTimeSeries": 10,
+                                            "rankingMethod": "METHOD_MEAN"
+                                        },
+                                        "secondaryAggregation": {
+                                            "alignmentPeriod": "60s",
+                                            "perSeriesAligner": "ALIGN_NONE"
+                                        }
+                                    }
+                                }
+                            }
+                        ],
+                        "thresholds": [],
+                        "timeshiftDuration": "0s",
+                        "yAxis": {
+                            "label": "",
+                            "scale": "LINEAR"
+                        }
+                    }
+                },
+                "width": 24,
+                "xPos": 24,
+                "yPos": 16
+            },
+            {
+                "height": 16,
+                "widget": {
+                    "title": "Query latency [50TH PERCENTILE]",
+                    "xyChart": {
+                        "chartOptions": {
+                            "mode": "COLOR"
+                        },
+                        "dataSets": [
+                            {
+                                "breakdowns": [],
+                                "dimensions": [],
+                                "measures": [],
+                                "minAlignmentPeriod": "300s",
+                                "plotType": "LINE",
+                                "targetAxis": "Y1",
+                                "timeSeriesQuery": {
+                                    "timeSeriesFilter": {
+                                        "aggregation": {
+                                            "alignmentPeriod": "300s",
+                                            "crossSeriesReducer": "REDUCE_PERCENTILE_50",
+                                            "groupByFields": [
+                                                "metric.label.\"querystring\""
+                                            ],
+                                            "perSeriesAligner": "ALIGN_DELTA"
+                                        },
+                                        "filter": "metric.type=\"cloudsql.googleapis.com/database/postgresql/insights/perquery/latencies\" resource.type=\"cloudsql_instance_database\" ${Database} ${Instance_id}",
+                                        "pickTimeSeriesFilter": {
+                                            "direction": "TOP",
+                                            "numTimeSeries": 10,
+                                            "rankingMethod": "METHOD_MEAN"
+                                        },
+                                        "secondaryAggregation": {
+                                            "alignmentPeriod": "60s",
+                                            "perSeriesAligner": "ALIGN_NONE"
+                                        }
+                                    }
+                                }
+                            }
+                        ],
+                        "thresholds": [],
+                        "timeshiftDuration": "0s",
+                        "yAxis": {
+                            "label": "",
+                            "scale": "LINEAR"
+                        }
+                    }
+                },
+                "width": 24,
+                "xPos": 24,
+                "yPos": 32
+            },
+            {
+                "height": 16,
+                "widget": {
+                    "title": "Query lock time [99TH PERCENTILE]",
+                    "xyChart": {
+                        "chartOptions": {
+                            "mode": "COLOR"
+                        },
+                        "dataSets": [
+                            {
+                                "breakdowns": [],
+                                "dimensions": [],
+                                "measures": [],
+                                "minAlignmentPeriod": "300s",
+                                "plotType": "LINE",
+                                "targetAxis": "Y1",
+                                "timeSeriesQuery": {
+                                    "timeSeriesFilter": {
+                                        "aggregation": {
+                                            "alignmentPeriod": "300s",
+                                            "crossSeriesReducer": "REDUCE_PERCENTILE_99",
+                                            "groupByFields": [
+                                                "metric.label.\"querystring\""
+                                            ],
+                                            "perSeriesAligner": "ALIGN_RATE"
+                                        },
+                                        "filter": "metric.type=\"cloudsql.googleapis.com/database/postgresql/insights/perquery/lock_time\" resource.type=\"cloudsql_instance_database\" ${Database} ${Instance_id}",
+                                        "pickTimeSeriesFilter": {
+                                            "direction": "TOP",
+                                            "numTimeSeries": 10,
+                                            "rankingMethod": "METHOD_MEAN"
+                                        },
+                                        "secondaryAggregation": {
+                                            "alignmentPeriod": "60s",
+                                            "perSeriesAligner": "ALIGN_NONE"
+                                        }
+                                    }
+                                }
+                            }
+                        ],
+                        "thresholds": [],
+                        "timeshiftDuration": "0s",
+                        "yAxis": {
+                            "label": "",
+                            "scale": "LINEAR"
+                        }
+                    }
+                },
+                "width": 24,
+                "xPos": 24,
+                "yPos": 48
+            }
+        ]
+    }
+}

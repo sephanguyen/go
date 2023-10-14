@@ -1,0 +1,1 @@
+ALTER TABLE ONLY public.users_info_notifications ADD COLUMN IF NOT EXISTS qn_submitted_at timestamp with time zone;

@@ -1,0 +1,60 @@
+apiVersion: skaffold/v4beta5
+kind: Config
+metadata:
+  name: istio
+profiles:
+  - name: istio
+    activation:
+      - kubeContext: ^staging-2$
+      - kubeContext: ^gke_staging-manabie-online_asia-southeast1-b_staging-2$
+    deploy:
+      helm:
+        releases:
+          - name: istio-base
+            namespace: istio-system
+            createNamespace: true
+            chartPath: deployments/helm/platforms/istio/base-1.18.0.tgz
+            skipBuildDependencies: true
+            wait: false
+            setValues:
+              defaultRevision: 1-18-0
+          - name: istiod
+            namespace: istio-system
+            createNamespace: true
+            chartPath: deployments/helm/platforms/istio/istiod-1.18.0.tgz
+            skipBuildDependencies: true
+            wait: false
+            setValues:
+              revision: 1-18-0
+          - name: istio-ingressgateway
+            namespace: istio-system
+            createNamespace: true
+            chartPath: deployments/helm/platforms/istio/gateway-1.18.0.tgz
+            skipBuildDependencies: true
+            wait: false
+            setValues:
+              revision: 1-18-0
+
+    patches:
+      - op: add
+        path: /deploy/helm/releases/1/valuesFiles
+        value:
+          - deployments/helm/platforms/istio/istiod-local-values.yaml
+      - op: add
+        path: /deploy/helm/releases/2/valuesFiles
+        value:
+          - deployments/helm/platforms/istio/gateway-local-values.yaml
+
+  - name: staging-2
+    activation:
+      - kubeContext: ^staging-2$
+      - kubeContext: ^gke_staging-manabie-online_asia-southeast1-b_staging-2$
+    patches:
+      - op: add
+        path: /deploy/helm/releases/1/valuesFiles
+        value:
+          - deployments/helm/platforms/istio/istiod-stag-values.yaml
+      - op: add
+        path: /deploy/helm/releases/2/valuesFiles
+        value:
+          - deployments/helm/platforms/istio/gateway-stag-values.yaml

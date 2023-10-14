@@ -1,0 +1,78 @@
+elasticsearch:
+  resources:
+    requests:
+      memory: 1024Mi
+      cpu: 50m
+  javaopts: "-Xms512m -Xmx512m"
+
+  affinityOverride:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: cloud.google.com/gke-spot
+            operator: In
+            values: ["true"]
+          - key: environment
+            operator: In
+            values: ["preproduction"]
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - podAffinityTerm:
+            topologyKey: kubernetes.io/hostname
+            labelSelector:
+              matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values: ["elasticsearch-dorp-jprep"]
+          weight: 1
+  tolerations:
+    - effect: NoSchedule
+      key: cloud.google.com/gke-spot
+      operator: Exists
+    - effect: NoSchedule
+      key: environment
+      operator: Equal
+      value: preproduction
+
+kibana:
+  affinityOverride:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: cloud.google.com/gke-spot
+            operator: In
+            values: ["true"]
+          - key: environment
+            operator: In
+            values: ["preproduction"]
+  tolerations:
+    - effect: NoSchedule
+      key: cloud.google.com/gke-spot
+      operator: Exists
+    - effect: NoSchedule
+      key: environment
+      operator: Equal
+      value: preproduction
+
+elasticsearch_exporter:
+  affinityOverride:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: cloud.google.com/gke-spot
+            operator: In
+            values: ["true"]
+          - key: environment
+            operator: In
+            values: ["preproduction"]
+  tolerations:
+    - effect: NoSchedule
+      key: cloud.google.com/gke-spot
+      operator: Exists
+    - effect: NoSchedule
+      key: environment
+      operator: Equal
+      value: preproduction

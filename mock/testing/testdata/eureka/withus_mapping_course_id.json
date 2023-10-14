@@ -1,0 +1,94 @@
+{
+	"schema": [
+		{
+			"column_name": "is_archived",
+			"data_type": "boolean",
+			"column_default": "false",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "last_updated_by",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "last_updated_date",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "manabie_course_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "withus_course_id",
+			"data_type": "text",
+			"column_default": "''::text",
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "withus_mapping_course_id",
+			"policyname": "rls_withus_mapping_course_id",
+			"qual": "permission_check(resource_path, 'withus_mapping_course_id'::text)",
+			"with_check": "permission_check(resource_path, 'withus_mapping_course_id'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "withus_mapping_course_id",
+			"policyname": "rls_withus_mapping_course_id_restrictive",
+			"qual": "permission_check(resource_path, 'withus_mapping_course_id'::text)",
+			"with_check": "permission_check(resource_path, 'withus_mapping_course_id'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "withus_mapping_course_id_pk",
+			"column_name": "manabie_course_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "withus_mapping_course_id",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

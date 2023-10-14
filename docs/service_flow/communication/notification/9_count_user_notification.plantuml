@@ -1,0 +1,7 @@
+@startuml communication_simplified
+hide circle
+User    -> Bob:  Call "NotificationReaderService.CountUserNotification"
+Bob     -> DB: count user notification by status
+DB      -> Bob: result
+Bob     -> User: result
+@enduml

@@ -1,0 +1,42 @@
+@startuml CreateLiveLesson
+actor Client as Client order 10
+participant Yasuo as Yasuo order 20
+participant NATS as NATS order 30
+participant Tom as Tom order 40
+
+Client -> Yasuo: Call "/manabie.yasuo.CourseService/CreateLiveLesson"
+activate Yasuo
+note over Yasuo
+ 1. select course in **bob.course** by req.CourseID
+ 2. **ExecInTx:**
+  * if course.PresetStudyPlanID == ""
+    upsert **bob.preset_study_plans**
+  * insert **bob.topics**
+  * insert or bulk upsert **bob.lessons**
+  * insert **bob.preset_study_plans_weekly**
+  * upsert **bob.courses**
+  * publish msg EvtLesson_CreateLessons_ on "lesson_event" 
+end note
+Yasuo -> NATS: Publish message EvtLesson_CreateLessons_\n on "lesson_event"
+Yasuo -> Client: Return CreateLiveLessonResponse{}
+deactivate Yasuo
+note right Yasuo
+ &pb_bob.EvtLesson{
+   Message: &pb_bob.EvtLesson_CreateLessons_{
+    CreateLessons: &pb_bob.EvtLesson_CreateLessons{
+     Lessons: pbLiveLessons,
+     },
+    },
+  }
+end note
+NATS -> Tom: Publish message EvtLesson_CreateLessons_ on\n "lesson_event"
+activate Tom
+note over Tom
+ Tom subscribe msg EvtLesson_CreateLessons_
+ subject "lesson_event"
+ ExecInTx
+ 1. upsert **tom.conversations**
+ 2. upsert **tom.conversation_lessons**
+end note
+deactivate Tom
+@enduml

@@ -1,0 +1,51 @@
+---
+# This is the internal user database
+# The hash value is a bcrypt hash and can be generated with /usr/share/elasticsearch/plugins/opendistro_security/tools/hash.sh -p <pwd>
+
+_meta:
+  type: "internalusers"
+  config_version: 2
+
+admin:
+  # tNRoG6pBw2iaukI9n4lCfYcf
+  # we're now using this pwd for Kibana, make sure it match the secrets config
+  hash: "$2y$12$A4ypGW42EYPsSxltsxOkVOVJbH2BoLNJhtzaEzu7NtZeb7bcYAlEG"
+  reserved: true
+  backend_roles:
+  - "admin"
+  description: admin user"
+
+kibanaserver:
+  # kqfIu/onbGGkpjCZQjQUNTkN
+  hash: "$2y$12$oskqoeLz6Fg4LjWQYAqG.OGdhRtNcmCx7oCWqvnbBc/EW7mFva7v."
+  reserved: true
+  description: "kibanaserver user"
+
+kibanaro:
+  # Gk0r93HxW6wNIbRG4Y7O0wyr
+  hash: "$2y$12$HQNKBQ27EzzuDq1CoQe8P.ErLQ5Rx.fWFWF7fMeYaHCJfbDZmUbn6"
+  reserved: false
+  backend_roles:
+  - "kibanauser"
+  - "readall"
+  attributes:
+    attribute1: "value1"
+    attribute2: "value2"
+    attribute3: "value3"
+  description: "kibanaro user"
+
+readall:
+  # j2bMiXVyUA900dDPDWHMpE/m
+  hash: "$2y$12$iJvzoa3mpo/.mjvbaMDjne.7XYEUGeVWI1Awy1mXrg4KBZb3nE2T."
+  reserved: false
+  backend_roles:
+  - "readall"
+  description: "readall user"
+
+snapshotrestore:
+  # 2qCpX5LwA5amV0Zi32eQJTgA
+  hash: "$2y$12$XC5T665pJ/g5kyMOZ84eyu.6Rahebh3TeM93lGWDcRmKuc7MnVh0."
+  reserved: false
+  backend_roles:
+  - "snapshotrestore"
+  description: "snapshotrestore user"

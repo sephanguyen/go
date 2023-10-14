@@ -1,0 +1,1 @@
+ALTER TABLE auto_create_flag_activity_log DROP CONSTRAINT fk__auto_create_flag_activity_log_staff_id__staff_staff_id;

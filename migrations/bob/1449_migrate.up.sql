@@ -1,0 +1,1 @@
+ALTER TABLE public.notification_student_courses DROP CONSTRAINT pk__notification_student_courses;

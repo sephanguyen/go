@@ -1,0 +1,446 @@
+syntax = "proto3";
+
+package invoicemgmt.v1;
+import "google/protobuf/timestamp.proto";
+import "invoicemgmt/v1/enums.proto";
+import "common/v1/requests.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/invoicemgmt/v1;invoice_pb";
+
+message IssueInvoiceRequest {
+  int32 invoice_id = 1 [deprecated = true];
+  PaymentMethod payment_method = 2;
+  google.protobuf.Timestamp due_date = 3;
+  google.protobuf.Timestamp expiry_date = 4;
+  string remarks = 5;
+  string invoice_id_string = 6;
+}
+
+message IssueInvoiceResponse {
+  bool successful = 1;
+}
+
+message RetrieveInvoiceRecordsRequest {
+  string student_id = 1;
+  common.v1.Paging paging = 2;
+}
+
+message InvoiceRecord {
+  int32 invoice_id = 1 [deprecated = true];
+  google.protobuf.Timestamp due_date = 2;
+  InvoiceStatus invoice_status = 3;
+  double total = 4;
+  string invoice_id_string = 5;
+}
+
+message RetrieveInvoiceRecordsResponse {
+  common.v1.Paging next_page = 1;
+  repeated InvoiceRecord invoice_records = 2;
+}
+
+message GenerateInvoicesRequest {
+	repeated GenerateInvoiceDetail invoices = 1;
+} 
+
+message GenerateInvoicesResponse {
+  message InvoicesData {
+    string invoice_id = 1;
+  }
+  message GenerateInvoiceResponseError {
+    GenerateInvoiceDetail invoice_detail = 1;
+    string error = 2;
+  }
+
+  bool successful = 1;
+  repeated GenerateInvoiceResponseError errors = 2;
+  repeated InvoicesData invoices_data = 3;
+}
+
+message GenerateInvoiceDetail {
+  string student_id = 1;
+  repeated int32 bill_item_ids = 2;
+  float sub_total = 3;
+  int32 total = 4;
+  InvoiceType invoice_type = 5;
+}
+
+message RetrieveInvoiceInfoRequest {
+    int32 invoice_id = 1 [deprecated = true];
+    string invoice_id_string = 2;
+
+}
+
+message RetrieveInvoiceInfoResponse {
+    bool successful = 1;
+    google.protobuf.Timestamp due_date = 2;
+    google.protobuf.Timestamp created_date = 3;
+    InvoiceStatus status = 4;
+    double sub_total = 5;
+    double total = 6;
+    repeated RetrieveInvoiceInfoBillItem bill_items = 7;
+}
+
+message RetrieveInvoiceInfoBillItem {
+    int32 bill_item_id = 1;
+    string description = 2;
+    string discount_amount_type = 3;
+    double discount_amount_value = 4;
+    double discount_amount = 5;
+    int32 tax_percentage = 6;
+    double tax_amount = 7;
+    double amount = 8;
+  }
+  
+  message VoidInvoiceRequest {
+    string invoice_id = 1;
+    string remarks = 2;
+}
+
+message VoidInvoiceResponse {
+    bool successful = 1;
+}
+
+message ApproveInvoicePaymentRequest 
+{
+  string invoice_id = 1;
+  google.protobuf.Timestamp payment_date = 2;
+  string remarks = 3;
+}
+
+message ApproveInvoicePaymentResponse {
+  bool successful = 1;
+}
+
+message CancelInvoicePaymentRequest {
+  string remarks = 1;
+  string invoice_id = 2;
+}
+
+message CancelInvoicePaymentResponse {
+  bool successful = 1;
+}
+
+
+message InvoiceScheduleCheckerRequest {
+  google.protobuf.Timestamp invoice_date = 1;
+  string organization_id = 2;
+}
+
+message InvoiceScheduleCheckerResponse {
+   bool successful = 1;
+}
+
+message BulkIssueInvoiceRequest {
+  repeated string invoice_ids = 1;
+  PaymentMethod payment_method = 2 [deprecated = true];
+  google.protobuf.Timestamp due_date = 3 [deprecated = true];
+  google.protobuf.Timestamp expiry_date = 4 [deprecated = true];
+  
+  message BulkIssueConvenieceStoreDates {
+    google.protobuf.Timestamp due_date = 1;
+    google.protobuf.Timestamp expiry_date = 2;
+  }
+
+  message BulkIssueDirectDebitDates {
+    google.protobuf.Timestamp due_date = 1;
+    google.protobuf.Timestamp expiry_date = 2;
+  }
+
+  BulkIssueConvenieceStoreDates convenience_store_dates = 5;
+  BulkIssueDirectDebitDates direct_debit_dates = 6;
+
+  BulkIssuePaymentMethod bulk_issue_payment_method = 7; //BULK_ISSUE_CONVENIENCE_STORE or BULK_ISSUE_DEFAULT_PAYMENT
+}
+
+message BulkIssueInvoiceResponse {
+  bool success = 1;
+}
+
+message CreatePaymentRequestRequest {
+  message ConvenieceStoreDates {
+    google.protobuf.Timestamp due_date_from = 1;
+    google.protobuf.Timestamp due_date_until = 2;
+  }
+
+  message DirectDebitDates {
+    google.protobuf.Timestamp due_date = 1;
+  }
+
+  PaymentMethod payment_method = 1;
+  repeated string payment_ids = 2;
+  ConvenieceStoreDates convenience_store_dates = 3;
+  DirectDebitDates direct_debit_dates = 4;
+}
+
+message CreatePaymentRequestResponse {
+  bool successful = 1;
+  string bulk_payment_request_id = 2;
+}
+
+message DownloadPaymentFileRequest {
+  string payment_request_file_id = 1;
+}
+
+message DownloadPaymentFileResponse {
+  bool successful = 1;
+  bytes data = 2;
+  FileType file_type = 3;
+}
+
+message ImportPaymentValidationDetail {
+  int32 payment_sequence_number = 1;
+  string result = 2;
+  double amount = 3;
+  string student_id = 4;
+  string student_name = 5;
+  PaymentMethod payment_method = 6;
+  int32 invoice_sequence_number = 7;
+  string invoice_id = 8;
+  string payment_status = 9;
+}
+
+message CreateBulkPaymentValidationRequest {
+  PaymentMethod payment_method = 1;
+  google.protobuf.Timestamp direct_debit_payment_date = 2;
+  bytes payload = 3;
+}
+
+message CreateBulkPaymentValidationResponse {
+  repeated ImportPaymentValidationDetail payment_validation_detail = 1;
+  bool successful = 2;
+  google.protobuf.Timestamp validation_date = 3;
+  int32 successful_payments = 4;
+  int32 pending_payments = 5;
+  int32 failed_payments = 6;
+}
+message DownloadBulkPaymentValidationsDetailRequest {
+  string bulk_payment_validations_id = 1;
+}
+
+message DownloadBulkPaymentValidationsDetailResponse {
+  repeated ImportPaymentValidationDetail payment_validation_detail = 1;
+  google.protobuf.Timestamp validation_date = 2;
+}
+
+message OrderDetail {
+  string order_id = 1;
+}
+
+message OrderInvoiceData {
+  string invoice_id = 1;
+  string order_id = 2;
+  string student_id = 3;
+}
+
+message CreateInvoiceFromOrderRequest {
+  repeated OrderDetail order_details = 1;
+  InvoiceType invoice_type = 2;
+} 
+
+message CreateInvoiceFromOrderResponse {
+  bool successful = 1;
+  repeated OrderInvoiceData order_invoice_data = 2;
+}
+
+message IssueInvoiceRequestV2 {
+  string invoice_id = 1;
+  string remarks = 2;
+  PaymentMethod payment_method = 3;
+  google.protobuf.Timestamp due_date = 4;
+  google.protobuf.Timestamp expiry_date = 5;
+  double amount = 6;
+}
+
+message IssueInvoiceResponseV2 {
+  bool successful = 1;
+}
+
+message VoidInvoiceRequestV2 {
+  string invoice_id = 1;
+  string remarks = 2;
+}
+
+message VoidInvoiceResponseV2 {
+  bool successful = 1;
+}
+
+message BulkIssueInvoiceRequestV2 {
+  repeated string invoice_ids = 1;
+  repeated InvoiceType invoice_type = 2;
+  message BulkIssueConvenienceStoreDates {
+    google.protobuf.Timestamp due_date = 1;
+    google.protobuf.Timestamp expiry_date = 2;
+  }
+
+  message BulkIssueDirectDebitDates {
+    google.protobuf.Timestamp due_date = 1;
+    google.protobuf.Timestamp expiry_date = 2;
+  }
+
+  BulkIssueConvenienceStoreDates convenience_store_dates = 3;
+  BulkIssueDirectDebitDates direct_debit_dates = 4;
+  BulkIssuePaymentMethod bulk_issue_payment_method = 5;
+}
+
+message BulkIssueInvoiceResponseV2 {
+  bool success = 1;
+}
+
+message InvoiceAdjustmentDetail {
+  string invoice_adjustment_id = 1;
+  string description = 2;
+  double amount = 3;
+  InvoiceAdjustmentAction invoice_adjustment_action = 4;
+}
+
+message UpsertInvoiceAdjustmentsRequest {
+  string invoice_id = 1;
+  double invoice_sub_total = 2;
+  double invoice_total = 3;
+  repeated InvoiceAdjustmentDetail invoice_adjustment_details = 4;
+}
+
+message UpsertInvoiceAdjustmentsResponse {
+  bool success = 1;
+}
+
+message RefundInvoiceRequest {
+  string invoice_id = 1;
+  RefundMethod refund_method = 2;
+  double amount = 3;
+  string remarks = 4;
+}
+  
+message RefundInvoiceResponse {
+  bool successful = 1;
+}
+
+message InvoiceDataForInvoiceFilter {
+  repeated InvoiceType invoice_types = 1;
+  string min_amount = 2;
+  string max_amount = 3;
+  google.protobuf.Timestamp created_date_from = 4;
+  google.protobuf.Timestamp created_date_until = 5;
+  InvoiceStatus invoice_status = 6;
+}
+message InvoiceDataForPaymentFilter {
+  repeated PaymentMethod payment_methods = 1;
+  google.protobuf.Timestamp due_date_from = 2;
+  google.protobuf.Timestamp due_date_until = 3;
+  google.protobuf.Timestamp expiry_date_from = 4;
+  google.protobuf.Timestamp expiry_date_until = 5;
+  repeated PaymentStatus payment_statuses = 6;
+  bool is_exported = 7;
+}
+
+message RetrieveInvoiceDataRequest {
+  string student_name = 1;
+  common.v1.Paging paging = 2;
+  InvoiceDataForInvoiceFilter invoice_filter = 3;
+  InvoiceDataForPaymentFilter payment_filter = 4;
+}
+
+message InvoiceData {
+  message InvoiceDataDetail {
+    string invoice_id = 1;
+    int32 invoice_sequence_number = 2;
+    InvoiceStatus invoice_status = 3;
+    string student_id = 4;
+    double sub_total = 5;
+    double total = 6;
+    double outstanding_balance = 7;
+    double amount_paid = 8;
+    InvoiceType invoice_type = 9;
+    google.protobuf.Timestamp created_at = 10;
+  }
+  message InvoiceDataPaymentDetail {
+    bool is_exported = 1;
+    google.protobuf.Timestamp payment_date = 2;
+    google.protobuf.Timestamp payment_due_date = 3;
+    google.protobuf.Timestamp payment_expiry_date = 4;
+    PaymentMethod payment_method = 5;
+    PaymentStatus payment_status = 6;
+    double amount = 7;
+    string payment_id = 8;
+    int32 payment_sequence_number = 9;
+  }
+
+  InvoiceDataDetail invoice_data_detail = 1;
+  InvoiceDataPaymentDetail invoice_data_payment_detail = 2;
+  string student_name = 3;
+}
+  
+message RetrieveInvoiceDataResponse {
+  common.v1.Paging next_page = 1;
+  common.v1.Paging previous_page = 2;
+  repeated InvoiceData invoice_data = 3; 
+}
+
+message RetrieveInvoiceStatusCountRequest {
+  string student_name = 1;
+  InvoiceDataForInvoiceFilter invoice_filter = 2;
+  InvoiceDataForPaymentFilter payment_filter = 3;
+}
+
+message RetrieveInvoiceStatusCountResponse {
+  int32 total_items = 1;
+  message InvoiceStatusCount {
+    int32 total_paid = 1;
+    int32 total_void = 2;
+    int32 total_issued = 3;
+    int32 total_draft = 4;
+    int32 total_refunded = 5;
+  }
+  InvoiceStatusCount invoice_status_count = 2;
+}
+
+service InvoiceService {
+    rpc IssueInvoice(IssueInvoiceRequest) 
+        returns (IssueInvoiceResponse);
+    rpc GenerateInvoices(GenerateInvoicesRequest) 
+        returns (GenerateInvoicesResponse);
+    rpc RetrieveInvoiceInfo(RetrieveInvoiceInfoRequest) 
+        returns (RetrieveInvoiceInfoResponse);
+    rpc RetrieveInvoiceRecords(RetrieveInvoiceRecordsRequest) 
+        returns (RetrieveInvoiceRecordsResponse);
+    rpc VoidInvoice(VoidInvoiceRequest)
+        returns (VoidInvoiceResponse);
+    rpc ApproveInvoicePayment(ApproveInvoicePaymentRequest)
+        returns (ApproveInvoicePaymentResponse);
+    rpc CancelInvoicePayment(CancelInvoicePaymentRequest)
+        returns (CancelInvoicePaymentResponse);
+    rpc InvoiceScheduleChecker(InvoiceScheduleCheckerRequest)
+        returns (InvoiceScheduleCheckerResponse);
+    rpc BulkIssueInvoice(BulkIssueInvoiceRequest)
+        returns (BulkIssueInvoiceResponse);
+    rpc CreatePaymentRequest(CreatePaymentRequestRequest)
+        returns (CreatePaymentRequestResponse);
+    rpc DownloadPaymentFile(DownloadPaymentFileRequest)
+      returns (DownloadPaymentFileResponse);
+    rpc CreateBulkPaymentValidation(CreateBulkPaymentValidationRequest)
+      returns (CreateBulkPaymentValidationResponse);
+    rpc DownloadBulkPaymentValidationsDetail(DownloadBulkPaymentValidationsDetailRequest)
+      returns (DownloadBulkPaymentValidationsDetailResponse);
+    rpc CreateInvoiceFromOrder(CreateInvoiceFromOrderRequest) 
+      returns (CreateInvoiceFromOrderResponse);
+    // Invoice Adjustment
+    rpc UpsertInvoiceAdjustments(UpsertInvoiceAdjustmentsRequest)
+      returns (UpsertInvoiceAdjustmentsResponse);
+
+    // version 2
+    rpc IssueInvoiceV2(IssueInvoiceRequestV2) 
+      returns (IssueInvoiceResponseV2);
+    rpc VoidInvoiceV2(VoidInvoiceRequestV2)
+      returns (VoidInvoiceResponseV2);
+    rpc BulkIssueInvoiceV2(BulkIssueInvoiceRequestV2)
+      returns (BulkIssueInvoiceResponseV2);
+
+    rpc RefundInvoice(RefundInvoiceRequest) 
+      returns (RefundInvoiceResponse);
+
+    // Retrieve Invoice Data for Invoice List Page
+    rpc RetrieveInvoiceData(RetrieveInvoiceDataRequest) 
+      returns (RetrieveInvoiceDataResponse);
+    rpc RetrieveInvoiceStatusCount(RetrieveInvoiceStatusCountRequest) 
+      returns (RetrieveInvoiceStatusCountResponse);
+}

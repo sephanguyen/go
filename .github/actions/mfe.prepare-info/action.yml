@@ -1,0 +1,106 @@
+name: "Prepare info MFE"
+description: "A composite action for MFE prepare info"
+
+inputs:
+  release_tag:
+    description: "FE Release Tag"
+    required: true
+  orgs:
+    description: "Organization to build eg: 'manabie, jprep'"
+    required: true
+  env:
+    description: "Environment"
+    required: true
+  squads:
+    description: "Squads eg: 'user, syllabus'"
+    default: ""
+  fragments:
+    description: "Services eg: 'user-main, user-auth'"
+    default: ""
+  auto_deploy:
+    description: "Auto deploy after build"
+  github-token:
+    description: "Github token"
+    required: true
+  context_ref:
+    description: "Trigger workflow from"
+    required: false
+  build_and_deploy_root_only:
+    description: "Option to build docker for root only"
+    required: false
+  workflow_type: 
+    description: "Workflow type: build, deploy"
+    required: false
+    default: "build"
+
+outputs:
+  mfe-root:
+    description: "MFE root"
+    value: ${{ steps.setup.outputs.mfe-root }}
+  mfe-teams:
+    description: "MFE mfe-teams"
+    value: ${{ steps.setup.outputs.mfe-teams }}
+  squads:
+    description: "MFE squads"
+    value: ${{ steps.setup.outputs.squads }}
+  fragments:
+    description: "MFE fragments"
+    value: ${{ steps.setup.outputs.fragments }}
+  orgs:
+    description: "MFE orgs, this is original inputs. Normally we only need to use backoffice_k8s_orgs"
+    value: ${{ steps.setup.outputs.orgs }}
+  env:
+    description: "Environment"
+    value: ${{ steps.setup.outputs.env }}
+  auto_deploy:
+    description: "Auto deploy after build"
+    value: ${{ steps.setup.outputs.auto_deploy }}
+  backoffice_k8s_orgs:
+    description: "Organizations for Back-office k8s build & deployment"
+    value: ${{ steps.setup.outputs.backoffice_k8s_orgs }}
+  release_tag:
+    description: "Release tag"
+    value: ${{ steps.setup.outputs.release_tag }}
+  context_ref:
+    description: "Trigger workflow from"
+    value: ${{ steps.setup.outputs.context_ref }}
+  build_and_deploy_root_only:
+    description: "Deploy root only"
+    value: ${{ steps.setup.outputs.build_and_deploy_root_only }}
+  mfe-team-names:
+    description: "MFE team names"
+    value: ${{ steps.setup.outputs.mfe-team-names }}
+  mfe-team-infos:
+    description: "MFE team infos"
+    value: ${{ steps.setup.outputs.mfe-team-infos }}
+  mfe-teams-args:
+    description: "MFE --teams args"
+    value: ${{ steps.setup.outputs.mfe-teams-args }}
+  mfe-fragments-args:
+    description: "MFE --fragments args"
+    value: ${{ steps.setup.outputs.mfe-fragments-args }}
+    
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v3
+      with:
+        persist-credentials: false
+        repository: ${{github.repository_owner}}/school-portal-admin
+        token: ${{ inputs.github-token }}
+        ref: ${{ steps.customize_input.outputs.release_tag }}
+        path: ${{github.workspace}}/school-portal-admin
+
+    - id: setup
+      uses: actions/github-script@v6
+      with:
+        github-token: ${{ inputs.github-token }}
+        script: |
+          const { setupMfeJob } = require("${{github.workspace}}/.github/actions/mfe.prepare-info/get-mfe-workspaces.js")
+
+          setupMfeJob({
+            rootPath: "${{github.workspace}}/school-portal-admin",
+            inputs: ${{ toJSON(inputs) }},
+            core,
+            context,
+          });

@@ -1,0 +1,163 @@
+@startuml live_lesson_simplified
+hide circle
+
+rectangle {
+    namespace LessonScheduling {
+        class Lesson <<entity>> {
+            name string
+            start_time datetime
+            end_time datetime
+            status string
+
+            lesson_group_id string
+            course_id string
+            teacher_id string
+
+            lesson_type string
+            end_at datetime
+            control_setting jsonb
+
+            room_id string
+            learner_ids []string
+            stream_learner_counter int4
+        }
+        note right of Lesson::status
+            LESSON_STATUS_NONE
+            **LESSON_STATUS_COMPLETED**
+            **LESSON_STATUS_IN_PROGRESS**
+            **LESSON_STATUS_NOT_STARTED**
+            LESSON_STATUS_DRAFT
+        end note
+
+        note right of Lesson::lesson_type
+            LESSON_TYPE_NONE
+            LESSON_TYPE_ONLINE
+            LESSON_TYPE_OFFLINE
+            LESSON_TYPE_HYBRID
+        end note
+
+        class LessonGroup <<entity>> {
+            course_id string
+            media_ids []string
+        }
+
+        class PresetStudyPlan <<entity>> #red{
+            name string
+            country string
+            grade int
+            subject string
+            start_date datetime
+        }
+
+        class PresetStudyPlanWeekly <<entity>> #red{
+            preset_study_plan_id string
+            lesson_id string
+            topic_id string
+            week int
+            start_date datetime
+            end_date datetime
+        }
+
+        class Topic <<entity>> #red{
+            name string
+            country string
+            grade int
+            subject string
+            topic_type string
+            status string
+            publish_at datetime
+            total_los int
+            chapter_id string
+            icon_url string
+            school_id int
+            attachment_names []string
+            attachment_url []string
+            instruction string
+            copied_topic_id string
+            essay_required bool
+
+        }
+
+        class LessonReport <<entity>>  #SkyBlue{
+            lesson_id string
+            student_id string
+            attendance_status string
+            attendance_reason string
+            homework_status jsonb
+            remark string
+            report_submitting_status string
+        }
+
+        note left of LessonReport::attendance_status
+            LESSON_REPORT_STATUS_SAVED
+            LESSON_REPORT_STATUS_SUBMITED
+            LESSON_REPORT_STATUS_APPROVED
+        end note
+
+        note left of LessonReport::report_submitting_status
+            LESSON_REPORT_ATTENDANCE_ATTEND
+            LESSON_REPORT_ATTENDANCE_ABSENCE
+            LESSON_REPORT_ATTENDANCE_LATE
+        end note
+
+        class StudentCourse <<value object>> {
+            start datetime
+            end datetime
+        }
+        note bottom: Copied from \nOrganization.StudentEnrollment
+
+        class Student <<value object>> {}
+        class Course <<value object>> {}
+        class Teacher <<value object>> {}
+        class Student <<value object>> {}
+
+        (Student, Course) .. StudentCourse
+
+        Lesson "many" -- "many" Course
+        Lesson "many" -- "many" Teacher : host
+        Lesson "many" -- "many" Student : join
+        Lesson "Many" -- "1" LessonGroup : use
+        Course "1" *-- "1" PresetStudyPlan
+        Topic "1" *-- "1" PresetStudyPlanWeekly
+        PresetStudyPlanWeekly "many" --* "1" PresetStudyPlan
+        PresetStudyPlanWeekly "1" *-- "1" Lesson
+        Lesson "1" *-up- "Many" LessonReport
+    }
+
+    namespace LiveLesson {
+        class AgoraToken<<service>> {
+            GenerateToken()
+        }
+
+        class Whiteboard<<service>> {
+            CreateRoom()
+            FetchRoomToken()
+        }
+    }
+
+    namespace LearnerApp{
+    }
+
+    namespace TeacherApp{
+    }
+
+    namespace ThirdParty #DDDDDD {
+        node Agora #DDD1DD [
+            **Agora**
+        ]
+        node Whiteboard #DDD1DD [
+            **Whiteboard**
+        ]
+    }
+
+    LessonScheduling.Lesson "1" *-- "1" LiveLesson.Whiteboard : scheduled
+
+    LiveLesson.Whiteboard <-up-> ThirdParty
+
+    TeacherApp <--> LiveLesson : JoinLesson
+    LearnerApp <--> LiveLesson : JoinLesson
+
+    TeacherApp <-up-> ThirdParty : Broadcast
+    LearnerApp <-up-> ThirdParty : Raisehand
+}
+@enduml

@@ -1,0 +1,5 @@
+tigera-operator:
+  installation:
+    registry: kind-reg.actions-runner-system.svc
+  tigeraOperator:
+    registry: kind-reg.actions-runner-system.svc/quay.io

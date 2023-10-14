@@ -1,0 +1,29 @@
+defaultHeartBeatQuery: SELECT 1
+customHeartbeatQuery: INSERT INTO public.debezium_heartbeat (id, updated_at) VALUES (1, NOW()) ON CONFLICT(id) DO UPDATE SET updated_at=EXCLUDED.updated_at
+dbUseCustomHeartBeat: [calendar]
+envs: [local, stag, uat, prod]
+orgs: [e2e, manabie, jprep, aic, ga, renseikai, synersia, tokyo]
+database: calendar
+schema: public
+preProductionEnabled: true
+datapipelines:
+- name: day_info
+  table: day_info
+  source:
+    deployEnv: [local, uat, stag, prod]
+    deployOrg: [e2e, manabie, aic, ga, renseikai, synersia, tokyo]
+  sinks:
+  - database: bob
+    deployEnv: [local, uat, stag, prod]
+    deployOrg: [e2e, manabie, aic, ga, renseikai, synersia, tokyo]
+  - database: lessonmgmt
+- name: scheduler
+  table: scheduler
+  source:
+    deployEnv: [local, uat, stag, prod]
+    deployOrg: [e2e, manabie, aic, ga, renseikai, synersia, tokyo]
+  sinks:
+  - database: bob
+    deployEnv: [local, uat, stag, prod]
+    deployOrg: [e2e, manabie, aic, ga, renseikai, synersia, tokyo]
+  - database: lessonmgmt

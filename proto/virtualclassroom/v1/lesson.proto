@@ -1,0 +1,142 @@
+syntax = "proto3";
+
+package virtualclassroom.v1;
+
+import "google/protobuf/timestamp.proto";
+import "common/v1/requests.proto";
+import "common/v1/contents.proto";
+import "common/v1/profiles.proto";
+import "common/v1/enums.proto";
+import "virtualclassroom/v1/enums.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/virtualclassroom/v1;vpb";
+
+service VirtualLessonReaderService {
+  rpc GetLiveLessonsByLocations (GetLiveLessonsByLocationsRequest) returns (GetLiveLessonsByLocationsResponse);
+  rpc GetLearnersByLessonID (GetLearnersByLessonIDRequest) returns (GetLearnersByLessonIDResponse);
+  rpc GetLearnersByLessonIDs (GetLearnersByLessonIDsRequest) returns (GetLearnersByLessonIDsResponse);
+  rpc GetLessons (GetLessonsRequest) returns (GetLessonsResponse);
+  rpc GetClassDoURL (GetClassDoURLRequest) returns (GetClassDoURLResponse);
+}
+
+message GetLiveLessonsByLocationsRequest {
+  repeated string course_ids = 1;
+  Pagination pagination = 2;
+
+  google.protobuf.Timestamp from = 3;
+  google.protobuf.Timestamp to = 4;
+  repeated string location_ids = 5;
+
+  repeated common.v1.LessonSchedulingStatus scheduling_status = 6;
+}
+
+message Pagination {
+  int32 limit = 1;
+  int32 page = 2;
+}
+
+message GetLiveLessonsByLocationsResponse {
+  repeated Lesson lessons = 1;
+  int32 total = 2;
+}
+  
+message Lesson {
+  string lesson_id = 1;
+  common.v1.Topic topic = 2;
+  google.protobuf.Timestamp start_time = 3;
+  google.protobuf.Timestamp end_time = 4;
+  string preset_study_plan_weekly_ids = 5;
+  common.v1.LessonStatus status = 6;
+  repeated common.v1.BasicProfile teacher = 7;
+  int32 total_learner = 8;
+  string course_id = 9;
+  string zoom_link = 10;
+  common.v1.LessonTeachingMedium teaching_medium = 11;
+}
+
+message GetLearnersByLessonIDRequest {
+  string lesson_id = 1;
+  common.v1.Paging paging = 2;
+}
+
+message LearnerInfo {
+  string learner_id = 1;
+  message EnrollmentStatusInfo {
+    string location_id = 1;
+    google.protobuf.Timestamp start_date = 2;
+    google.protobuf.Timestamp end_date = 3;
+  }
+  repeated EnrollmentStatusInfo enrollment_status_info = 2;
+}
+
+message GetLearnersByLessonIDResponse {
+  repeated LearnerInfo learners = 1;
+  common.v1.Paging next_page = 2;
+}
+
+message GetLearnersByLessonIDsRequest {
+  repeated string lesson_id = 1;
+}
+
+message GetLearnersByLessonIDsResponse {
+  message LessonLearners {
+    string lesson_id = 1;
+    message Learner {
+      string learner_id = 1;
+    }
+    repeated Learner learners = 2;
+  }
+  repeated LessonLearners lesson_learners = 1;
+}
+
+message GetLessonsFilter {
+  repeated string teacher_ids = 1;
+  repeated string student_ids = 2;
+  repeated string course_ids = 3;
+  repeated common.v1.LessonSchedulingStatus scheduling_status = 4;
+  LiveLessonStatus live_lesson_status = 5;
+  google.protobuf.Timestamp from_date = 6; // in UTC
+  google.protobuf.Timestamp to_date = 7; // in UTC
+}
+
+message GetLessonsRequest {
+  common.v1.Paging paging = 1; // required
+  google.protobuf.Timestamp current_time = 2; // required, in UTC
+  LessonTimeCompare lesson_time_compare = 3;
+  TimeLookup time_lookup = 4;
+  bool sort_asc = 5;
+  repeated string location_ids = 6; // location setting
+  GetLessonsFilter filter = 7;
+}
+
+message GetLessonsResponse {
+  message Lesson{
+    string id = 1;
+    string name = 2;
+    google.protobuf.Timestamp start_time = 3;
+    google.protobuf.Timestamp end_time = 4;
+    string center_id = 5;
+    repeated string teacher_ids = 6;
+    common.v1.LessonTeachingMethod teaching_method = 7;
+    common.v1.LessonTeachingMedium teaching_medium = 8;
+    string course_id = 9;
+    string class_id = 10;
+    common.v1.LessonSchedulingStatus scheduling_status = 11;
+    uint32 lesson_capacity = 12;
+    google.protobuf.Timestamp end_at = 13;
+    string zoom_link = 14;
+  }
+  repeated Lesson items = 1;
+  common.v1.Paging next_page = 2;
+  common.v1.Paging previous_page = 3;
+  uint32 total_lesson = 4;
+  uint32 total_items = 5;
+}
+
+message GetClassDoURLRequest {
+  string lesson_id = 1;
+}
+
+message GetClassDoURLResponse {
+  string classdo_link = 1;
+}

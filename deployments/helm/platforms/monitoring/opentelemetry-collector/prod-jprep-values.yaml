@@ -1,0 +1,2 @@
+nodeSelector:
+  cloud.google.com/gke-nodepool: n2d-custom-2-16

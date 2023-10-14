@@ -1,0 +1,164 @@
+{
+	"schema": [
+		{
+			"column_name": "bool_value",
+			"data_type": "boolean",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "dynamic_form_field_value_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "field_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "field_render_guide",
+			"data_type": "jsonb",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "int_array_value",
+			"data_type": "ARRAY",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "int_set_value",
+			"data_type": "ARRAY",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "int_value",
+			"data_type": "integer",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "lesson_report_detail_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "string_array_value",
+			"data_type": "ARRAY",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "string_set_value",
+			"data_type": "ARRAY",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "string_value",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "value_type",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "partner_dynamic_form_field_values",
+			"policyname": "rls_partner_dynamic_form_field_values",
+			"qual": "permission_check(resource_path, 'partner_dynamic_form_field_values'::text)",
+			"with_check": "permission_check(resource_path, 'partner_dynamic_form_field_values'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "partner_dynamic_form_field_values",
+			"policyname": "rls_partner_dynamic_form_field_values_restrictive",
+			"qual": "permission_check(resource_path, 'partner_dynamic_form_field_values'::text)",
+			"with_check": "permission_check(resource_path, 'partner_dynamic_form_field_values'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "partner_dynamic_form_field_values_pk",
+			"column_name": "dynamic_form_field_value_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "unique__lesson_report_detail_id__field_id",
+			"column_name": "field_id",
+			"constraint_type": "UNIQUE"
+		},
+		{
+			"constraint_name": "unique__lesson_report_detail_id__field_id",
+			"column_name": "lesson_report_detail_id",
+			"constraint_type": "UNIQUE"
+		}
+	],
+	"table_name": "partner_dynamic_form_field_values",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

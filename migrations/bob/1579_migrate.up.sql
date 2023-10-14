@@ -1,0 +1,2 @@
+ALTER PUBLICATION debezium_publication ADD TABLE public.lesson_polls;
+ALTER PUBLICATION debezium_publication ADD TABLE public.lesson_recorded_videos;

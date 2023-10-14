@@ -1,0 +1,14 @@
+@startuml communication_simplified
+hide circle
+
+User   -> notificationmgmt:  Call "NotificationModifierService.GetNotificationsByFilter"
+activate notificationmgmt
+notificationmgmt -> DB: get notifications
+note right DB
+    1. find notification_ids by title, tag, class, course, location if exists
+    2. count notifications by filter and status
+    3. combine result
+end note
+notificationmgmt -> User: return list notifications
+deactivate notificationmgmt
+@endumlstatus

@@ -1,0 +1,116 @@
+syntax = "proto3";
+
+package invoicemgmt.v1;
+import "google/protobuf/timestamp.proto";
+import "invoicemgmt/v1/enums.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/invoicemgmt/v1;invoice_pb";
+
+message CancelInvoicePaymentV2Request {
+    string invoice_id = 1;
+    string remarks = 2;
+}
+
+message CancelInvoicePaymentV2Response {
+    bool successful = 1;
+}
+
+message AddInvoicePaymentRequest {
+    string invoice_id = 1;
+    PaymentMethod payment_method = 2;
+    double amount = 3;
+    google.protobuf.Timestamp due_date = 4;
+    google.protobuf.Timestamp expiry_date = 5;
+    string remarks = 6;
+}
+
+message AddInvoicePaymentResponse {
+    bool successful = 1;
+}
+
+message ApproveInvoicePaymentV2Request {
+    string invoice_id = 1;
+    google.protobuf.Timestamp payment_date = 2;
+    string remarks = 3;
+}
+
+message ApproveInvoicePaymentV2Response {
+    bool successful = 1;
+}
+
+message RetrieveStudentPaymentMethodRequest {
+    string student_id = 1;
+    string organization_id = 2;
+    string current_user_id = 3;
+}
+  
+message RetrieveStudentPaymentMethodResponse {
+    bool successful = 1;
+    string student_id = 2;
+    PaymentMethod payment_method = 3;
+}
+
+
+message RetrieveBulkStudentPaymentMethodRequest {
+    repeated string student_ids = 1;
+}
+  
+message RetrieveBulkStudentPaymentMethodResponse {
+    bool successful = 1;
+    message StudentPaymentMethod{
+        string student_id = 1;
+        PaymentMethod payment_method = 2;
+    }
+    repeated StudentPaymentMethod student_payment_methods = 2;
+}
+
+message BulkAddConvenienceStoreDates {
+    google.protobuf.Timestamp due_date = 1;
+    google.protobuf.Timestamp expiry_date = 2;
+}
+
+message BulkAddDirectDebitDates {
+    google.protobuf.Timestamp due_date = 1;
+    google.protobuf.Timestamp expiry_date = 2;
+}
+
+message BulkAddPaymentRequest {
+    repeated string invoice_ids = 1;
+    BulkAddConvenienceStoreDates convenience_store_dates = 2;
+    BulkAddDirectDebitDates direct_debit_dates = 3;
+    message BulkAddPaymentDetails {
+      repeated PaymentStatus latest_payment_status = 1;
+      repeated InvoiceType invoice_type = 2;
+      BulkPaymentMethod bulk_payment_method = 3;
+    }
+    BulkAddPaymentDetails bulk_add_payment_details = 4;
+}
+  
+message BulkAddPaymentResponse {
+    bool successful = 1;
+}
+
+message BulkCancelPaymentRequest {
+    string bulk_payment_id = 1;
+  }
+  
+  message BulkCancelPaymentResponse{
+    bool successful = 1;
+  }
+
+service PaymentService {
+    rpc CancelInvoicePaymentV2(CancelInvoicePaymentV2Request) 
+      returns (CancelInvoicePaymentV2Response);
+    rpc AddInvoicePayment(AddInvoicePaymentRequest) 
+      returns (AddInvoicePaymentResponse);
+    rpc ApproveInvoicePaymentV2(ApproveInvoicePaymentV2Request) 
+      returns (ApproveInvoicePaymentV2Response);
+    rpc RetrieveStudentPaymentMethod(RetrieveStudentPaymentMethodRequest)
+      returns (RetrieveStudentPaymentMethodResponse);
+    rpc RetrieveBulkStudentPaymentMethod(RetrieveBulkStudentPaymentMethodRequest)
+      returns (RetrieveBulkStudentPaymentMethodResponse);
+    rpc BulkAddPayment(BulkAddPaymentRequest)
+      returns (BulkAddPaymentResponse);
+    rpc BulkCancelPayment(BulkCancelPaymentRequest) 
+        returns (BulkCancelPaymentResponse);
+}

@@ -1,0 +1,143 @@
+{{ if eq .Values.environment "stag" }}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: stag-{{ .Values.org }}-back-office-front-end
+  namespace: istio-system
+  labels:
+    {{- include "gateway.labels" . | nindent 4 }}
+spec:
+  commonName: "{{ .Values.org }}.backoffice.stag.manabie.net"
+  dnsNames:
+  - "{{ .Values.org }}.backoffice.stag.manabie.net"
+  issuerRef:
+    kind: ClusterIssuer
+    name: global-stag-gateway-cloudflare-dns01
+  secretName: stag-{{ .Values.org }}-back-office-front-end
+---
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: stag-{{ .Values.org }}-back-office-front-end
+  namespace: istio-system
+  labels:
+    {{- include "gateway.labels" . | nindent 4 }}
+spec:
+  selector:
+    istio: ingressgateway # use istio default controller
+  servers:
+  - port:
+      number: 80
+      name: front-end-https-redirect
+      protocol: HTTP
+    hosts:
+    - "{{ .Values.org }}.backoffice.stag.manabie.net"
+    tls:
+      httpsRedirect: true
+  - port:
+      number: 443
+      name: front-end
+      protocol: HTTPS
+    hosts:
+    - "{{ .Values.org }}.backoffice.stag.manabie.net"
+    tls:
+      credentialName: stag-{{ .Values.org }}-back-office-front-end
+      mode: SIMPLE
+      privateKey: sds
+      serverCertificate: sds
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: stag-{{ .Values.org }}-teacher-front-end
+  namespace: istio-system
+  labels:
+    {{- include "gateway.labels" . | nindent 4 }}
+spec:
+  commonName: "{{ .Values.org }}.teacher.stag.manabie.net"
+  dnsNames:
+  - "{{ .Values.org }}.teacher.stag.manabie.net"
+  issuerRef:
+    kind: ClusterIssuer
+    name: global-stag-gateway-cloudflare-dns01
+  secretName: stag-{{ .Values.org }}-teacher-front-end
+---
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: stag-{{ .Values.org }}-teacher-front-end
+  namespace: istio-system
+  labels:
+    {{- include "gateway.labels" . | nindent 4 }}
+spec:
+  selector:
+    istio: ingressgateway # use istio default controller
+  servers:
+  - port:
+      number: 80
+      name: front-end-https-redirect
+      protocol: HTTP
+    hosts:
+    - "{{ .Values.org }}.teacher.stag.manabie.net"
+    tls:
+      httpsRedirect: true
+  - port:
+      number: 443
+      name: front-end
+      protocol: HTTPS
+    hosts:
+    - "{{ .Values.org }}.teacher.stag.manabie.net"
+    tls:
+      credentialName: stag-{{ .Values.org }}-teacher-front-end
+      mode: SIMPLE
+      privateKey: sds
+      serverCertificate: sds
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: stag-{{ .Values.org }}-learner-front-end
+  namespace: istio-system
+  labels:
+    {{- include "gateway.labels" . | nindent 4 }}
+spec:
+  commonName: "{{ .Values.org }}.learner.stag.manabie.net"
+  dnsNames:
+  - "{{ .Values.org }}.learner.stag.manabie.net"
+  issuerRef:
+    kind: ClusterIssuer
+    name: global-stag-gateway-cloudflare-dns01
+  secretName: stag-{{ .Values.org }}-learner-front-end
+
+---
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: stag-{{ .Values.org }}-learner-front-end
+  namespace: istio-system
+  labels:
+    {{- include "gateway.labels" . | nindent 4 }}
+spec:
+  selector:
+    istio: ingressgateway # use istio default controller
+  servers:
+  - port:
+      number: 80
+      name: front-end-https-redirect
+      protocol: HTTP
+    hosts:
+    - "{{ .Values.org }}.learner.stag.manabie.net"
+    tls:
+      httpsRedirect: true
+  - port:
+      number: 443
+      name: front-end
+      protocol: HTTPS
+    hosts:
+    - "{{ .Values.org }}.learner.stag.manabie.net"
+    tls:
+      credentialName: stag-{{ .Values.org }}-learner-front-end
+      mode: SIMPLE
+      privateKey: sds
+      serverCertificate: sds
+{{ end }}

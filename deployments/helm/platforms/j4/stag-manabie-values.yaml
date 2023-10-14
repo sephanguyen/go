@@ -1,0 +1,14 @@
+global:
+  dbPrefix: ""
+  dbUserPrefix: "stag-"
+  serviceAccountEmailSuffix: "staging-manabie-online"
+  cloudSQLCommonInstance: "staging-manabie-online:asia-southeast1:manabie-common-88e1ee71"
+  sqlProxy:
+    enabled: true
+    connName: ""
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+image:
+  repository: asia.gcr.io/student-coach-e1e95/backend-j4
+  pullPolicy: IfNotPresent

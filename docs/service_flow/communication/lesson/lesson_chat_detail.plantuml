@@ -1,0 +1,18 @@
+
+@startuml lesson_chat_detail
+hide circle
+
+actor User as User order 10
+participant Tom as Tom order 40
+User -> Tom:  Call "LessonChatReader.LiveLessonConversationDetail"
+note over User,Tom
+request payload: lesson_id
+end note
+activate Tom
+note right Tom
+1. Find conversation by lesson_id
+2. Find conversation members by conversation_id
+3. Construct response and return
+end note
+deactivate Tom
+@enduml

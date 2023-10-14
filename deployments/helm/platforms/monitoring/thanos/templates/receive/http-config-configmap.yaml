@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "common.names.fullname" . }}-receive-http-config
+  namespace: {{ .Release.Namespace | quote }}
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
+    app.kubernetes.io/component: receive
+    {{- if .Values.commonLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+data:
+  http_config.yaml: |
+    basic_auth_users:
+      healthcheck: $2y$12$cgbP5CICwrjAp7kH2xaAkO20wMyWNd.6NLWjE.CpNk3prwu3EyB7i # b1b28109b5f2180a1598c74c
+      uat-manabie: $2y$12$Emg/1D0ks04xLQDsZwUteOQyg/x.yOj/max74YPjtfsUaBjrKAmC2 # e33409ca976582081744a823
+      stag-manabie: $2y$12$FAa2R7RKkqSvMP5P79tH3ennEye4RSl2BElDMswUdxQpxfcu5oNdi # fba3d26618537929c648f2b9
+      prod-manabie-vn: $2y$12$7ycD7tTFdzXRcPCjEjMYN.XIrOnMCrrOJadKw2OkbxcCU30RTVrTy # a235f42bae53e07ed8bfec49
+      prod-jprep: $2y$12$2SNKQNd2WASXEwVe/ydcxOpWx2JEZZoBztN91pShxQuI9q.RBHpPK # f4fd5610d3aaac40dbcff3bf
+      jp-partners: $2y$12$Y5JH6y7Zv.3q6O5xS1TywOYaho5jyQls7PDYEDWQbzmng6VroKyvW # a7f40e4d71a844231c445534
+      tokyo: $2y$12$4QKgM7yyGIljA/vdIF9ZO.AmFcXU0D2FyPGCzkA9cpT.Eya04dpmK # d68519d37c0678d35d174582

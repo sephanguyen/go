@@ -1,0 +1,111 @@
+name: "tbd"
+description: "Auto create tag"
+
+outputs:
+  tag_name:
+    description: "Tag name"
+    value: ${{ steps.tag_name.outputs.result }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Get branch name
+      id: branch_name
+      shell: bash
+      run: |
+        echo "branch_name=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
+
+    - name: Get current date
+      id: current_date
+      shell: bash
+      run: |
+        echo "current_date=$(date +%Y%m%d%H%M%S)" >> $GITHUB_OUTPUT
+
+    - name: Get commit sha
+      id: commit_sha
+      shell: bash
+      run: |
+        echo "commit_sha=$(git rev-parse --short "$GITHUB_SHA")" >> $GITHUB_OUTPUT
+
+    - name: Get tag name
+      id: tag_name
+      uses: actions/github-script@v6
+      with:
+        github-token: ${{ env.GITHUB_TOKEN }}
+        result-encoding: string
+        script: |
+          const commit_sha = "${{ steps.commit_sha.outputs.commit_sha }}"
+          const current_date = "${{ steps.current_date.outputs.current_date }}"
+
+          return current_date + "." + commit_sha
+
+    - uses: pkgdeps/git-tag-action@v2
+      with:
+        github_token: ${{ env.GITHUB_TOKEN }}
+        github_repo: ${{ github.repository }}
+        version: ${{ steps.tag_name.outputs.result }}
+        git_commit_sha: ${{ github.sha }}
+
+    - name: Determine if branch is hotfix
+      id: hotfix
+      uses: actions/github-script@v6
+      env:
+        CURRENT_BRANCH: ${{ steps.branch_name.outputs.branch_name }}
+      with:
+        script: |
+          const repo = context.repo.repo;
+          console.log('triggering repo is', repo)
+          core.setOutput('repo', repo)
+
+          const currentBranch = process.env.CURRENT_BRANCH;
+          if (currentBranch.startsWith('hotfixes/202') || currentBranch.startsWith('hotfix/202')) {
+            core.setOutput('isHotfix', 'true')
+            return
+          }
+
+          core.setOutput('isHotfix', 'false')
+
+    - name: Determine if branch is main branch
+      id: main
+      uses: actions/github-script@v6
+      env:
+        CURRENT_BRANCH: ${{ steps.branch_name.outputs.branch_name }}
+      with:
+        script: |
+          const currentBranch = process.env.CURRENT_BRANCH;
+          const isMainBranch = currentBranch == 'develop' || currentBranch == 'main' || currentBranch == 'master'
+          core.setOutput('isMainBranch', isMainBranch.toString())
+
+    - name: Create release
+      if: steps.main.outputs.isMainBranch == 'true' || steps.hotfix.outputs.isHotfix == 'true'
+      uses: actions/github-script@v6
+      env:
+        CURRENT_BRANCH: ${{ steps.branch_name.outputs.branch_name }}
+      with:
+        github-token: ${{ env.GITHUB_TOKEN }}
+        script: |
+          const make_latest = '${{ steps.main.outputs.isMainBranch }}' == 'true'
+
+          await github.rest.repos.createRelease({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            tag_name: "${{ steps.tag_name.outputs.result }}",
+            target_commitish: "${{ steps.branch_name.outputs.branch_name }}",
+            name: "${{ steps.tag_name.outputs.result }} | branch name: ${{ steps.branch_name.outputs.branch_name }}",
+            generate_release_notes: true,
+            make_latest: make_latest ? 'true' : 'false',
+          });
+
+    - name: Release UAT and Prod
+      if: steps.hotfix.outputs.isHotfix == 'true'
+      uses: ./.github/actions/tbd.release-uat-and-prod-on-merge
+      with:
+        current-branch: ${{ steps.branch_name.outputs.branch_name }}
+        github-token: ${{ env.GITHUB_TOKEN }}
+        tag-name: ${{ steps.tag_name.outputs.result }}
+        repo: ${{ steps.hotfix.outputs.repo }}
+
+    - name: Tag version
+      shell: bash
+      run: |
+        echo "New release tag: [${{ steps.tag_name.outputs.result }}](https://github.com/${{ github.repository }}/releases/tag/${{ steps.tag_name.outputs.result }})" >> $GITHUB_STEP_SUMMARY

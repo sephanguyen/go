@@ -1,0 +1,8 @@
+connect:
+  resources:
+    requests:
+      cpu: 300m
+      memory: 2592Mi
+    limits:
+      cpu: 2000m
+      memory: 6096Mi

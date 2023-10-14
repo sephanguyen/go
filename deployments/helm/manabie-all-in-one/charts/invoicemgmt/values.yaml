@@ -1,0 +1,191 @@
+service:
+  type: ClusterIP
+  port: 6650
+
+grpcPort: 6650
+httpPort: 6680
+
+resources:
+  requests:
+    memory: "120Mi"
+
+metrics:
+  enabled: true
+  podAnnotations:
+    prometheus.io/scheme: "http"
+    prometheus.io/port: "8888"
+    prometheus.io/scrape: "true"
+
+clientVersion: "v0.30.0"
+cronjobs:
+  import-invoice-checker:
+    cmd: invoicemgmt_import_invoice_checker
+    schedule: "0 15 * * *"
+
+apiHttp:
+  - match:
+    - uri:
+        prefix: /invoicemgmt.v1.InternalService
+    route:
+      - destination:
+          host: invoicemgmt
+          port:
+            number: 6650
+    fault:
+      abort:
+        percentage:
+          value: 100
+        httpStatus: 403
+  - match:
+    - uri:
+          prefix: /invoicemgmt.v1
+    - uri:
+          prefix: /manabie.invoicemgmt
+    route:
+      - destination:
+          host: invoicemgmt
+          port:
+            number: 6650
+  - match:
+    - uri:
+        prefix: /api/invoicemgmt
+    route:
+      - destination:
+          host: invoicemgmt
+          port:
+            number: 6680
+
+webHttp:
+  - match:
+    - uri:
+        prefix: /invoicemgmt.v1
+    route:
+    - destination:
+        host: invoicemgmt
+        port:
+          number: 6650
+    corsPolicy: &CORSPolicy
+      allowOrigins:
+        - regex: ".*"
+      allowMethods:
+        - POST
+        - GET
+        - OPTIONS
+        - PUT
+        - DELETE
+      allowHeaders:
+        - authorization
+        - grpc-timeout
+        - content-type
+        - keep-alive
+        - user-agent
+        - cache-control
+        - content-transfer-encoding
+        - token
+        - x-accept-content-transfer-encoding
+        - x-accept-response-streaming
+        - x-request-id
+        - x-user-agent
+        - x-graphql-mesh-authorization
+        - x-grpc-web
+        - if-none-match
+        - pkg
+        - version
+        - connect-timeout-ms
+        - connect-protocol-version
+        - connect-content-encoding
+        - connect-accept-encoding
+      maxAge: 100s
+      exposeHeaders:
+        - grpc-status
+        - grpc-message
+        - etag
+  - match:
+      - uri:
+          prefix: /api/invoicemgmt
+    route:
+      - destination:
+          host: invoicemgmt
+          port:
+            number: 6680
+    corsPolicy:
+      allowOrigins:
+        - regex: ".*"
+      allowMethods:
+        - POST
+        - GET
+        - OPTIONS
+        - PUT
+        - DELETE
+      allowHeaders:
+        - grpc-timeout
+        - content-type
+        - keep-alive
+        - user-agent
+        - cache-control
+        - content-type
+        - content-transfer-encoding
+        - token
+        - x-accept-content-transfer-encoding
+        - x-accept-response-streaming
+        - x-user-agent
+        - x-grpc-web
+        - pkg
+        - version
+        - JPREP-Signature
+        - CloudConvert-Signature
+      allowCredentials: true
+      maxAge: 100s
+
+adminHttp:
+  - match:
+    - uri:
+        prefix: /invoicemgmt/ # accessing hasura by /invoicemgmt/console path
+    rewrite:
+      uri: /
+    route:
+    - destination:
+        host: invoicemgmt-hasura
+        port:
+          number: 8080
+    corsPolicy: *CORSPolicy
+
+hasura:
+  enableConsole: true
+  enabledApis: "metadata,graphql"
+  image:
+    repository: hasura/graphql-engine
+    tag: v1.3.3.cli-migrations-v2
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8080
+  resources:
+    requests:
+      memory: 256Mi
+  pgConnections: 8
+  pgTimeout: 10
+  anonymous:
+    enabled: false
+
+nodeSelector: {}
+
+tolerations:
+
+affinity: {}
+affinityOverride: {}
+
+pdb:
+  enabled: false
+
+podAnnotations:
+  sidecar.istio.io/proxyCPU: "10m"
+  sidecar.istio.io/proxyMemory: "50Mi"
+
+jobs:
+  import-invoice-checker:
+    cmd: invoicemgmt_import_invoice_checker
+  upload-existing-payment-request-file:
+    cmd: invoicemgmt_upload_existing_payment_request_file
+  migrate-invoice-bill-item:
+    cmd: invoicemgmt_migrate_invoice_bill_item

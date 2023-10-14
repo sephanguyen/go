@@ -1,0 +1,52 @@
+name: "setup-k8s"
+description: "Setup gcloud and kubenetes"
+inputs:
+  organization:
+    description: "Organization (partner)"
+    required: true
+    default: "manabie"
+  environment:
+    description: "Environment (stag/staging, uat, prod/production)"
+    required: true
+    default: "stag"
+  platform:
+    description: "Platform service name. If provided, it checks if this env/org has this platform service enabled."
+    required: false
+    default: ""
+  workload_identity_provider: 
+    description: |
+      Workload identity provider to use. If not specified, the value inside 
+      `get-deployment-configuration.js` will be used.
+      Example: projects/456005132078/locations/global/workloadIdentityPools/gh-action-pool/providers/gh-action-provider
+    required: false
+    default: ""
+  service_account:
+    description: |
+      Google Cloud service account to use. If not specified, the service account (usually
+      the deploy bot) from `get-deployment-configuration.js` will be used.
+      Example: stag-deploy-bot@staging-manabie-online.iam.gserviceaccount.com
+    required: false
+    default: ""
+  
+
+runs:
+  using: "composite"
+  steps:
+    - name: Authenticate to Google Cloud by oidc
+      uses: ./.github/actions/auth-oidc
+      with:
+        organization: ${{ inputs.organization }}
+        environment: ${{ inputs.environment }}
+        platform: ${{ inputs.platform }}
+        workload_identity_provider: ${{ inputs.workload_identity_provider }}
+        service_account: ${{ inputs.service_account }}
+
+    - name: Get gke-credentials
+      uses: google-github-actions/get-gke-credentials@v1
+      with:
+        cluster_name: ${{ env.CLUSTER }}
+        location: ${{ env.LOCATION }}
+
+    - name: Sanity checks
+      shell: bash
+      run: .github/tests/k8s_cluster.test.bash

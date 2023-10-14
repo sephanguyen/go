@@ -1,0 +1,180 @@
+{
+	"schema": [
+		{
+			"column_name": "comment",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "end_date",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "enrollment_status",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "location_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "order_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "order_sequence_number",
+			"data_type": "integer",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "start_date",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "student_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "student_enrollment_status_history",
+			"policyname": "rls_student_enrollment_status_history",
+			"qual": "permission_check(resource_path, 'student_enrollment_status_history'::text)",
+			"with_check": "permission_check(resource_path, 'student_enrollment_status_history'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "student_enrollment_status_history",
+			"policyname": "rls_student_enrollment_status_history_restrictive",
+			"qual": "permission_check(resource_path, 'student_enrollment_status_history'::text)",
+			"with_check": "permission_check(resource_path, 'student_enrollment_status_history'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "student_enrollment_status_history__location_id__fk",
+			"column_name": "location_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "student_enrollment_status_history__student_id__fk",
+			"column_name": "student_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "pk__student_enrollment_status_history",
+			"column_name": "enrollment_status",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "pk__student_enrollment_status_history",
+			"column_name": "location_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "pk__student_enrollment_status_history",
+			"column_name": "start_date",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "pk__student_enrollment_status_history",
+			"column_name": "student_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "student_enrollment_status_his_student_id_location_id_enroll_key",
+			"column_name": "end_date",
+			"constraint_type": "UNIQUE"
+		},
+		{
+			"constraint_name": "student_enrollment_status_his_student_id_location_id_enroll_key",
+			"column_name": "enrollment_status",
+			"constraint_type": "UNIQUE"
+		},
+		{
+			"constraint_name": "student_enrollment_status_his_student_id_location_id_enroll_key",
+			"column_name": "location_id",
+			"constraint_type": "UNIQUE"
+		},
+		{
+			"constraint_name": "student_enrollment_status_his_student_id_location_id_enroll_key",
+			"column_name": "start_date",
+			"constraint_type": "UNIQUE"
+		},
+		{
+			"constraint_name": "student_enrollment_status_his_student_id_location_id_enroll_key",
+			"column_name": "student_id",
+			"constraint_type": "UNIQUE"
+		}
+	],
+	"table_name": "student_enrollment_status_history",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

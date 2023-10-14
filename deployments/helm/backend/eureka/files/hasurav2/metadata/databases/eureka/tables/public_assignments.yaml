@@ -1,0 +1,60 @@
+table:
+  schema: public
+  name: assignments
+array_relationships:
+  - name: assignment_study_plan_items
+    using:
+      foreign_key_constraint_on:
+        column: assignment_id
+        table:
+          schema: public
+          name: assignment_study_plan_items
+select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+        - assignment_id
+        - attachment
+        - check_list
+        - content
+        - created_at
+        - deleted_at
+        - display_order
+        - instruction
+        - is_required_grade
+        - max_grade
+        - name
+        - settings
+        - status
+        - type
+        - updated_at
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+        - assignment_id
+        - attachment
+        - check_list
+        - content
+        - created_at
+        - deleted_at
+        - display_order
+        - instruction
+        - is_required_grade
+        - max_grade
+        - name
+        - settings
+        - status
+        - type
+        - updated_at
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+          - resource_path:
+              _eq: X-Hasura-Resource-Path
+      allow_aggregations: true

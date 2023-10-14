@@ -1,0 +1,17 @@
+steps:
+  - name: '${_IMAGE_NAME}'
+    entrypoint: 'bash'
+    args: ['./scripts/ad-hoc/adhoc.bash']
+    env:
+      - 'ORG=${_ORG}'
+      - 'ENV=${_ENV}'
+      - 'RESOURCE=${_RESOURCE}'
+      - 'COMMAND=${_COMMAND}'
+      - 'DATABASE=${_DATABASE}'
+
+      # Some variables specific only to sql adhocs
+      - 'DB_HOST=localhost'
+      - 'DB_PORT=5432'
+      - 'DB_USER=${_DB_USER}'
+options:
+  logging: CLOUD_LOGGING_ONLY

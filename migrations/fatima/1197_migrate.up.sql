@@ -1,0 +1,1 @@
+ALTER TABLE public.location_types ADD COLUMN IF NOT EXISTS "level" INTEGER DEFAULT 0;

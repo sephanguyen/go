@@ -1,0 +1,1 @@
+DROP FUNCTION IF EXISTS public.get_lo_list_in_course(course_id text);

@@ -1,0 +1,554 @@
+unleash:
+  featureFlags:
+    virtual-classroom:
+      - name: VirtualClassroom_SpotlightForLearners
+        description: "A feature flag to enable spotlight user feature (LT-16248)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: VirtualClassroom_UndoRedo_Learner
+        description: "A feature flag to undo/redo for learner (LT-17833)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: VirtualClassroom_Preview_PDF_Teacher
+        description: "A feature flag to show preview feature for teacher (LT-18402)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: VirtualClassroom_Show_Annotated_PDF_After_Lesson_Learner
+        description: "A feature flag to show annotated pdf after lesson feature for learner (LT-18297)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: VirtualClassroom_EnableLiveLesson
+        description: "A feature flag to enable live lesson feature (LT-19221)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: VirtualClassroom_EnableMultiWhiteboard
+        description: "A feature flag to enable multi whiteboard feature in live lesson (LT-19221)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: VirtualClassroom_EnablePolling
+        description: "A feature flag to enable polling feature in live lesson (LT-19221)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: VirtualClassroom_EnableRecording
+        description: "A feature flag to enable recording feature in live lesson (LT-19221)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+      - name: VirtualClassroom_EnableChatLiveLesson
+        description: "A feature flag to enable chat feature in live lesson (LT-19221)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: VirtualClassroom_StudentView
+        description: "A feature flag to show a student view with new order (LT-20237)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: VirtualClassroom_Teacher_IdentifySpeackerEasily
+        description: "A feature flag to adding mic animation on student list, and accommodate more students in one page, user can identify speaker by mic UI more easily (LT-22066)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: VirtualClassroom_MicAndCameraSettingGuidance
+        description: "A feature flag to show setting guidance for mic and camera permission (LT-13986)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: VirtualClassroom_Zoom_Pdf_Feature
+        description: "A feature flag to enable zoom pdf in virtual classroom (LT-24194)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: VirtualClassroom_New_Annotation_Bar
+        description: "A feature flag to enable new annotation bar in virtual classroom (LT-23430)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: VirtualClassroom_View_Annotated_PDF_Teacher
+        description: "A feature flag to enable view annotated PDF for teacher (LT-23479)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: VirtualClassroom_Migrate_To_Virtual_Classroom_Service
+        description: "A feature flag to migrate to Virtual Classroom Service (LT-26687)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: VirtualClassroom_Identifier_Speaker_Enable
+        description: "A feature flag to enable identifier speaker for teacher (LT-27913)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LiveLesson_ScreenSharing
+        description: "A feature flag to enable screen sharing feature (LT-11489)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LiveLesson_Teacher_LocationFilter
+        description: "A feature flag to enable location filter feature on teacher app (LT-11595)"
+        type: release
+        project: default
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LiveLesson_Teacher_SearchCourse
+        description: "A feature flag to enable search course by name(LT-11459)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LiveLesson_Teacher_PinUser
+        description: "A feature flag to enable pin user feature (LT-12337)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LiveLesson_Learner_JoinLessonEvenWhenOutsideLessonTime
+        description: "A feature flag to enable student can joining lesson even when outside of the lesson time. (LT-13288)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: VirtualClassroom_Input_Text_Polling
+        description: "Teacher can input text for question and option polling (LT-25858)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: VirtualClassroom_Zoom_Interaction
+        description: "Teachers and learners use Zoom Application(LT-20718)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: VirtualClassroom_Private_Chat
+        description: "Teachers and learners use private chat (LT-28619)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+      - name: VirtualClassroom_Teacher_Display
+        description: "Improve display teacher on teacher web (LT-25860)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: VirtualClassroom_Refactored_Live_Lesson
+        description: "Refactored live lesson (LT-20364)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: VirtualClassroom_New_Share_Material_UI
+        description: "Material list UI improvement (LT-33412)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: VirtualClassroom_New_Student_Tag
+        description: "New student tag in the student list (LT-21193)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: VirtualClassroom_Control_Chat_Feature
+        description: "Control chat for learner in virtual classroom(LT-29937)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: VirtualClassroom_New_Zoom_Whiteboard_UI
+        description: "New zoom whiteboard in virtual classroom(LT-36045)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: VirtualClassroom_Integrate_Zego_Cloud
+        description: "Integrate New Service Zego Cloud(LT-36000)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "none"
+            constraints: []
+      - name: VirtualClassroom_Share_Audio
+        description: "Share audio and pdf at the same time (LT-35358)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: VirtualClassroom_Microphone_Indicator_User_List
+        description: "Microphone indicator in user list (LT-36917)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: VirtualClassroom_Draggable_Zoom_Controller
+        description: "Zoom controller improvement(LT-37886)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: VirtualClassroom_Navigate_On_Click_Live_Lesson_Notification
+        description: "Learner App/Parent App navigate to the lesson list when tap on the push notification (LT-29359)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: VirtualClassroom_Multiple_Client_Agora
+        description: "Multiple client for Agora (LT-38774)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: VirtualClassroom_Teacher_See_Student_Full_Name_Live_Lesson
+        description: "Unleash for teacher want to see full-name of students on Live lesson (LT-39946)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: VirtualClassroom_Whitelist_CourseIDs_Get_Live_Lesson
+        description: "Unleash for whitelist course IDs in configs table when fetching live lesson (LT-10071)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "none"
+            constraints: []
+      - name: VirtualClassroom_Delete_Chat
+        description: "Unleash for teacher want to delete chat on Live lesson (LT-28625)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: VirtualClassroom_Action_Bar_Improvement
+        description: "Unleash for action bar improvement (LT-41649)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: VirtualClassroom_Lesson_Cut
+        description: "Unleash for teacher want to use Lesson-cut Individual Study Plan (LT-40207)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: virtualClassroom_Live_Room_Service
+        description: "Unleash for using Live Room service (LT-40355)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "none"
+            constraints: []
+      - name: Virtual_Classroom_Raise_Hand_Teacher_Improvement
+        description: "Unleash for improvement of raise hand teacher side (LT-42395)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Virtual_Classroom_SwitchNewDBConnection_Switch_DB_To_LessonManagement
+        description: "A feature flag to switch database from bob to lessonmgmt (LT-38552)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Virtual_Classroom_Resume_Video
+        description: "A feature flag to enable resume video feature (LT-43283)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: VirtualClassroom_ClassDo_Integration
+        description: "A feature flag to enable Join ClassDo lesson (LT-44450)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: VirtualClassroom_Lesson_Cut_Improvement
+        description: "Unleash for teacher want to use Lesson-cut Individual Study Plan improvement (LT-45703)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+      - name: VirtualClassroom_Upgrade_Agora_RTC_Web_Version
+        description: "Unleash for upgrade agora RTC web version (LT-45290)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+      - name: VirtualClassroom_Get_Lessons_With_All_Scheduling_Statuses
+        description: "Unleash for get lessons with all lesson scheduling status (LT-46586)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "none"
+            constraints: []

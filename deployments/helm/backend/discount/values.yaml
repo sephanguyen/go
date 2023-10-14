@@ -1,0 +1,103 @@
+affinity: {}
+affinityOverride: {}
+apiHttp:
+    - fault:
+        abort:
+            httpStatus: 403
+            percentage:
+                value: 100
+      match:
+        - uri:
+            prefix: /discount.v1.InternalService
+      route:
+        - destination:
+            host: discount
+            port:
+                number: 7450
+    - match:
+        - uri:
+            prefix: /discount.v1
+        - uri:
+            prefix: /manabie.discount
+      route:
+        - destination:
+            host: discount
+            port:
+                number: 7450
+    - match:
+        - uri:
+            prefix: /api/discount
+      route:
+        - destination:
+            host: discount
+            port:
+                number: 7480
+clientVersion: v0.30.0
+cronjobs:
+    discount-srvc-highest-discount-automation:
+        cmd: discount_srvc_highest_discount_automation
+        schedule: 0 17 * * *
+grpcPort: 7450
+hasuraEnabled: false
+httpPort: 7480
+jobs:
+    discount-srvc-highest-discount-automation:
+        cmd: discount_srvc_highest_discount_automation
+metrics:
+    enabled: true
+    podAnnotations:
+        prometheus.io/port: "8888"
+        prometheus.io/scheme: http
+        prometheus.io/scrape: "true"
+migrationEnabled: false
+nodeSelector: {}
+podAnnotations:
+    sidecar.istio.io/proxyCPU: 10m
+    sidecar.istio.io/proxyMemory: 50Mi
+readinessProbe:
+    enabled: true
+resources:
+    requests:
+        memory: 120Mi
+service:
+    port: 7450
+    type: ClusterIP
+tolerations: null
+webHttp:
+    - corsPolicy:
+        allowHeaders:
+            - grpc-timeout
+            - content-type
+            - keep-alive
+            - user-agent
+            - cache-control
+            - content-type
+            - content-transfer-encoding
+            - token
+            - x-accept-content-transfer-encoding
+            - x-accept-response-streaming
+            - x-user-agent
+            - x-grpc-web
+            - pkg
+            - version
+        allowMethods:
+            - POST
+            - GET
+            - OPTIONS
+            - PUT
+            - DELETE
+        allowOrigins:
+            - regex: .*
+        exposeHeaders:
+            - grpc-status
+            - grpc-message
+            - grpc-status-details-bin
+        maxAge: 100s
+      match:
+        - uri:
+            prefix: /discount.v1
+      route:
+        - destination:
+            host: discount
+            port:
+                number: 7450

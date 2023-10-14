@@ -1,0 +1,15 @@
+apiVersion: "serving.kserve.io/v1beta1"
+kind: "InferenceService"
+metadata:
+  name: "answer-sheet"
+spec:
+  predictor:
+    serviceAccountName: stag-kserve 
+    containers:
+      - name: kserve-container
+        image: asia.gcr.io/student-coach-e1e95/answer_sheet_model:2022100301
+        env:
+        - name: STORAGE_URI
+          value: "gs://stag-manabie-backend/0/617ab8d4a0fe43aea3d2edd9dc34576c/artifacts/models"
+        - name: RAY_DISABLE_MEMORY_MONITOR
+          value: "1"

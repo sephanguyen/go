@@ -1,0 +1,141 @@
+{
+	"schema": [
+		{
+			"column_name": "address_tree",
+			"data_type": "ARRAY",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "cod_order_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "cod_secret_code",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "customer_address",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "customer_name",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "customer_phone_number",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "expected_delivery_time",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "status",
+			"data_type": "text",
+			"column_default": "'COD_ORDER_STATUS_NONE'::text",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "student_order_id",
+			"data_type": "integer",
+			"column_default": "nextval('cod_orders_student_order_id_seq'::regclass)",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "cod_orders",
+			"policyname": "rls_cod_orders",
+			"qual": "permission_check(resource_path, 'cod_orders'::text)",
+			"with_check": "permission_check(resource_path, 'cod_orders'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "cod_orders",
+			"policyname": "rls_cod_orders_restrictive",
+			"qual": "permission_check(resource_path, 'cod_orders'::text)",
+			"with_check": "permission_check(resource_path, 'cod_orders'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "cod_orders__student_orders_fk",
+			"column_name": "student_order_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "cod_orders_pk1",
+			"column_name": "cod_order_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "cod_orders",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

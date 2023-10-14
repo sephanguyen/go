@@ -1,0 +1,4 @@
+ALTER TABLE IF EXISTS public.info_notifications_access_paths DROP CONSTRAINT IF EXISTS notification_location_id_pk;
+ALTER TABLE IF EXISTS public.info_notifications_access_paths ADD CONSTRAINT pk__info_notifications_access_paths PRIMARY KEY (notification_id, location_id);
+ALTER TABLE public.info_notifications_access_paths ADD CONSTRAINT fk__info_notifications_access_paths__notification_id FOREIGN KEY (notification_id) REFERENCES info_notifications(notification_id);
+ALTER TABLE public.info_notifications_access_paths ADD CONSTRAINT fk__info_notifications_access_paths__location_id FOREIGN KEY (location_id) REFERENCES locations(location_id);

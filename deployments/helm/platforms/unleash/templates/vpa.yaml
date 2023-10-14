@@ -1,0 +1,31 @@
+{{- if .Capabilities.APIVersions.Has "autoscaling.k8s.io/v1" }}
+{{- if .Values.vpa }}
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: {{ include "unleash.fullname" . }}
+  labels:
+{{ include "unleash.labels" . | indent 4 }}
+spec:
+  targetRef:
+    apiVersion: "apps/v1"
+    kind: Deployment
+    name: {{ include "unleash.fullname" . }}
+  updatePolicy:
+    updateMode: {{ .Values.vpa.updateMode | quote }}
+---
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: {{ include "unleash.fullname" . }}-proxy
+  labels:
+{{ include "unleashProxy.labels" . | indent 4 }}
+spec:
+  targetRef:
+    apiVersion: "apps/v1"
+    kind: Deployment
+    name: {{ include "unleash.fullname" . }}-proxy
+  updatePolicy:
+    updateMode: {{ .Values.vpa.updateMode | quote }}
+{{- end }}
+{{- end }}

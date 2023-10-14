@@ -1,0 +1,10 @@
+global:
+  sqlProxy:
+    connName: "student-coach-e1e95:asia-northeast1:clone-prod-jprep-d995522c"
+  cloudSQLUsePublicIP: false
+  cloudSQLCommonInstance: "student-coach-e1e95:asia-northeast1:clone-jprep-6a98"
+  cloudSQLLMSInstance: "student-coach-e1e95:asia-northeast1:clone-jprep-6a98"
+serviceAccountEmailSuffix: "student-coach-e1e95"
+cloudSQLUsePublicIP: false
+cloudSQLCommonInstance: "student-coach-e1e95:asia-northeast1:clone-jprep-6a98"
+cloudSQLLMSInstance: "student-coach-e1e95:asia-northeast1:clone-jprep-6a98"

@@ -1,0 +1,1 @@
+ALTER TABLE timesheet.ts_transportation ALTER COLUMN timesheet_remark DROP NOT NULL;

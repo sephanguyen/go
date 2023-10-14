@@ -1,0 +1,14 @@
+- template: 1
+  tableName: order
+  permissionPrefix: payment.order
+  permissions:
+    postgres: []
+
+- template: 1.2
+  tableName: order
+  useCustomPolicy: true
+  postgresPolicy:
+    - name: rls_order_read_all
+      for: select
+      using: |
+        1 = 1

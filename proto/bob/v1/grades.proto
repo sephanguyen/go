@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package bob.v1;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/bob/v1;bpb";
+
+
+message ImportGradeRequest {
+  bytes payload = 1;
+}
+
+message ImportGradeResponse {
+  message ImportGradeError {
+    int32 row_number = 1;
+    string error = 2;
+  }
+  repeated ImportGradeError errors = 1;
+}
+
+message EventSyncGrade {
+  int32 id = 1;
+  string name = 2;
+  bool isArchived = 3;
+}
+
+service GradeManagementService {
+  rpc ImportGrade(ImportGradeRequest) returns (ImportGradeResponse);
+}

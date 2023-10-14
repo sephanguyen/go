@@ -1,0 +1,187 @@
+table:
+  schema: public
+  name: lessons
+object_relationships:
+  - name: course
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: courses
+        insertion_order: null
+        column_mapping:
+          course_id: course_id
+  - name: users
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: users
+        insertion_order: null
+        column_mapping:
+          teacher_id: user_id
+array_relationships:
+  - name: courses_classes
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: courses_classes
+        insertion_order: null
+        column_mapping:
+          course_id: course_id
+  - name: lesson_members
+    using:
+      foreign_key_constraint_on:
+        column: lesson_id
+        table:
+          schema: public
+          name: lesson_members
+  - name: lesson_reports
+    using:
+      foreign_key_constraint_on:
+        column: lesson_id
+        table:
+          schema: public
+          name: lesson_reports
+  - name: lessons_courses
+    using:
+      foreign_key_constraint_on:
+        column: lesson_id
+        table:
+          schema: public
+          name: lessons_courses
+  - name: lessons_teachers
+    using:
+      foreign_key_constraint_on:
+        column: lesson_id
+        table:
+          schema: public
+          name: lessons_teachers
+select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+        - center_id
+        - class_id
+        - control_settings
+        - course_id
+        - created_at
+        - deleted_at
+        - end_at
+        - end_time
+        - lesson_group_id
+        - lesson_id
+        - lesson_type
+        - name
+        - room_id
+        - scheduler_id
+        - scheduling_status
+        - start_time
+        - status
+        - teacher_id
+        - teaching_medium
+        - teaching_method
+        - teaching_model
+        - updated_at
+      filter:
+        deleted_at:
+          _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+        - center_id
+        - class_id
+        - control_settings
+        - course_id
+        - created_at
+        - deleted_at
+        - end_at
+        - end_time
+        - learner_ids
+        - lesson_group_id
+        - lesson_id
+        - lesson_type
+        - name
+        - room_id
+        - scheduler_id
+        - scheduling_status
+        - start_time
+        - status
+        - stream_learner_counter
+        - teacher_id
+        - teaching_medium
+        - teaching_method
+        - teaching_model
+        - updated_at
+      filter:
+        _and:
+          - resource_path:
+              _eq: X-Hasura-Resource-Path
+          - deleted_at:
+              _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+        - center_id
+        - class_id
+        - control_settings
+        - course_id
+        - created_at
+        - deleted_at
+        - end_at
+        - end_time
+        - lesson_group_id
+        - lesson_id
+        - lesson_type
+        - room_id
+        - scheduler_id
+        - scheduling_status
+        - start_time
+        - status
+        - teacher_id
+        - teaching_medium
+        - teaching_method
+        - teaching_model
+        - updated_at
+      filter:
+        _and:
+          - resource_path:
+              _eq: X-Hasura-Resource-Path
+          - deleted_at:
+              _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+        - center_id
+        - class_id
+        - control_settings
+        - course_id
+        - created_at
+        - deleted_at
+        - end_at
+        - end_time
+        - lesson_group_id
+        - lesson_id
+        - lesson_type
+        - name
+        - room_id
+        - scheduler_id
+        - scheduling_status
+        - start_time
+        - status
+        - teacher_id
+        - teaching_medium
+        - teaching_method
+        - teaching_model
+        - updated_at
+      filter:
+        _and:
+          - resource_path:
+              _eq: X-Hasura-Resource-Path
+          - deleted_at:
+              _is_null: true
+      allow_aggregations: true

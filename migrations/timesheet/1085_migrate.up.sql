@@ -1,0 +1,1 @@
+ALTER TABLE staff_transportation_expense DROP CONSTRAINT staff_transportation_expense__staff_id__fk;

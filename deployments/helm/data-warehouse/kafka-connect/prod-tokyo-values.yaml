@@ -1,0 +1,17 @@
+global:
+  sqlProxy:
+    lmsConnName: "student-coach-e1e95:asia-northeast1:prod-tokyo-lms-b2dc4508"
+
+connect:
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 1792Mi
+    limits:
+      cpu: 1000m
+      memory: 3096Mi
+
+alloydbProxy:
+  enabled: true
+  alloydbConnName: "projects/student-coach-e1e95/locations/asia-northeast1/clusters/prod-alloydb/instances/prod-alloydb-primary-01?port=6432"

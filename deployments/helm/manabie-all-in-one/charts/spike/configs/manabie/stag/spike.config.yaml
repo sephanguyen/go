@@ -1,0 +1,16 @@
+common:
+  google_cloud_project: staging-manabie-online
+postgres_v2:
+  notificationmgmt:
+    max_conns: 16
+issuers:
+  - issuer: manabie
+    audience: manabie-stag
+    jwks_endpoint: http://shamir:5680/.well-known/jwks.json
+  - issuer: https://securetoken.google.com/staging-manabie-online
+    audience: staging-manabie-online
+    jwks_endpoint: https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com
+email_webhook:
+  receive_from_all_tenant: true
+  #receive_only_from_tenant:
+  #  - ""

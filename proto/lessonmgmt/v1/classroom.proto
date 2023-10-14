@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package lessonmgmt.v1;
+
+import "common/v1/requests.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/lessonmgmt/v1;lpb";
+
+enum ClassroomStatus {
+  AVAILABLE = 0;
+  IN_USED = 1;
+}
+
+message Classroom {
+  string classroom_id = 1;
+  string classroom_name = 2;
+  string location_id = 3;
+  string room_area = 4;
+  uint32 seat_capacity = 5;
+  ClassroomStatus status = 6;
+  string remarks = 7;
+  bool is_archived = 8;
+}
+
+message RetrieveClassroomsByLocationIDRequest {
+  common.v1.Paging paging = 1; //required
+  string keyword = 2;
+  string location_id = 3; //required
+  repeated string location_ids = 4;
+  google.protobuf.Timestamp start_time = 5;
+  google.protobuf.Timestamp end_time = 6;
+  string time_zone = 7;
+  string lesson_id = 8; 
+}
+
+message RetrieveClassroomsByLocationIDResponse {
+  repeated Classroom items = 1;
+}
+
+service ClassroomReaderService {
+  rpc RetrieveClassroomsByLocationID(RetrieveClassroomsByLocationIDRequest) returns (RetrieveClassroomsByLocationIDResponse);
+}

@@ -1,0 +1,121 @@
+{
+	"schema": [
+		{
+			"column_name": "conversation_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "flatten_user_ids",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "latest_start_time",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "lesson_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "private_conversation_lesson",
+			"policyname": "rls_private_conversation_lesson",
+			"qual": "permission_check(resource_path, 'private_conversation_lesson'::text)",
+			"with_check": "permission_check(resource_path, 'private_conversation_lesson'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "private_conversation_lesson",
+			"policyname": "rls_private_conversation_lesson_restrictive",
+			"qual": "permission_check(resource_path, 'private_conversation_lesson'::text)",
+			"with_check": "permission_check(resource_path, 'private_conversation_lesson'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "private_conversation_lesson_fk",
+			"column_name": "conversation_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "private_conversation_lesson_pkey",
+			"column_name": "conversation_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "private_conversation_lesson_unique_lessonid_flatten_user_ids",
+			"column_name": "flatten_user_ids",
+			"constraint_type": "UNIQUE"
+		},
+		{
+			"constraint_name": "private_conversation_lesson_unique_lessonid_flatten_user_ids",
+			"column_name": "lesson_id",
+			"constraint_type": "UNIQUE"
+		}
+	],
+	"table_name": "private_conversation_lesson",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

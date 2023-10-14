@@ -1,0 +1,129 @@
+{
+	"schema": [
+		{
+			"column_name": "benefits",
+			"data_type": "ARRAY",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "country",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "description",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "is_purchasable",
+			"data_type": "boolean",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "plan_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "plan_privileges",
+			"data_type": "ARRAY",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "prioritize_level",
+			"data_type": "smallint",
+			"column_default": "0",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "plans",
+			"policyname": "rls_plans",
+			"qual": "permission_check(resource_path, 'plans'::text)",
+			"with_check": "permission_check(resource_path, 'plans'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "plans",
+			"policyname": "rls_plans_restrictive",
+			"qual": "permission_check(resource_path, 'plans'::text)",
+			"with_check": "permission_check(resource_path, 'plans'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "plans_pk",
+			"column_name": "country",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "plans_pk",
+			"column_name": "plan_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "plans",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

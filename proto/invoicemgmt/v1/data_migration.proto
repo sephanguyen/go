@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package invoicemgmt.v1;
+import "invoicemgmt/v1/enums.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/invoicemgmt/v1;invoice_pb";
+
+message ImportDataMigrationRequest {
+    bytes payload = 1;
+    DataMigrationEntityName entity_name = 2;
+}
+  
+message ImportDataMigrationResponse {
+    DataMigrationEntityName entity_name = 1;
+    message ImportMigrationDataError {
+        int32 row_number = 2;
+        string error = 3;
+    }
+    repeated ImportMigrationDataError errors = 2;
+}
+
+service DataMigrationService {
+    rpc ImportDataMigration(ImportDataMigrationRequest)
+        returns (ImportDataMigrationResponse);
+}

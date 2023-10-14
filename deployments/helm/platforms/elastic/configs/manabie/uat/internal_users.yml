@@ -1,0 +1,15 @@
+---
+# This is the internal user database
+# The hash value is a bcrypt hash and can be generated with /usr/share/elasticsearch/plugins/opendistro_security/tools/hash.sh -p <pwd>
+
+_meta:
+  type: "internalusers"
+  config_version: 2
+
+admin:
+  # we're now using this pwd for Kibana, make sure it match the secrets config
+  hash: "$2y$12$HocsX5pcqf/emTswOTaKVuD3sCAxhTBfXdJrX7CI2tOR5FtMO1bvO"
+  reserved: true
+  backend_roles:
+  - "admin"
+  description: admin user"

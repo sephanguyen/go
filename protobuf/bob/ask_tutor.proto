@@ -1,0 +1,116 @@
+syntax = "proto3";
+
+package manabie.bob;
+
+import "enum.proto";
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option (gogoproto.goproto_registration) = true;
+
+option go_package = "github.com/manabie-com/backend/pkg/genproto/bob;pb";
+
+message CreateQuestionRequest {
+  string quiz_id = 1;
+  string content = 2;
+  repeated string url_medias = 3;
+  Subject subject = 4;
+  string title = 5;
+}
+
+message CreateQuestionResponse {}
+
+message QuestionRemainRequest {}
+
+message QuestionRemainResponse {
+  int32 remain = 1;
+  int32 total = 2;
+  AskDuration duration = 3;
+}
+
+message GetStudentQuestionRequest { repeated string student_question_ids = 1; }
+
+message StudentQuestion {
+  string student_question_id = 1;
+  string quiz_id = 2;
+  string content = 3;
+  repeated string url_medias = 4;
+  QuestionStatus status = 5;
+  string lo_name = 6;
+  Subject subject = 7;
+  string rate = 8;
+  string topic_name = 9;
+  uint32 topic_display_order = 10;
+  string study_guide = 11;
+  string grade = 12;
+  string title = 13;
+}
+
+message GetStudentQuestionResponse {
+  repeated StudentQuestion student_questions = 1;
+}
+
+message TransitionStudentQuestionRequest {
+  message MarkedAsResolved { string student_question_id = 1; }
+  message MarkedAsInvalid { string student_question_id = 1; }
+  message AgreeInvalid {
+    string student_question_id = 1;
+    bool agree = 2;
+  }
+  message AgreeResolved {
+    string student_question_id = 1;
+    bool agree = 2;
+  }
+  message Rate {
+    string student_question_id = 1;
+    string rate = 2; // using enum codes in tom
+  }
+
+  oneof message {
+    MarkedAsResolved marked_as_resolved = 1;
+    MarkedAsInvalid marked_as_invalid = 2;
+    AgreeInvalid agree_invalid = 3;
+    AgreeResolved agree_resolved = 4;
+    Rate rate = 5;
+  }
+}
+
+message TransitionStudentQuestionResponse {
+  QuestionStatus student_question_status = 1;
+}
+
+message GetArchivedStudentQuestionRequest {
+  uint32 page = 1;
+  uint32 limit = 2;
+}
+
+message GetArchivedStudentQuestionResponse {
+  repeated StudentQuestion student_questions = 1;
+}
+
+message GetOpenStudentQuestionRequest {
+  uint32 page = 1;
+  uint32 limit = 2;
+}
+
+message GetOpenStudentQuestionResponse {
+  repeated StudentQuestion student_questions = 1;
+}
+
+message AllocateStudentQuestionRequest { string student_question_id = 1; }
+
+message AllocateStudentQuestionResponse {}
+
+service AskTutor {
+  rpc CreateQuestion(CreateQuestionRequest) returns (CreateQuestionResponse) {}
+  rpc QuestionRemain(QuestionRemainRequest) returns (QuestionRemainResponse) {}
+  rpc GetStudentQuestion(GetStudentQuestionRequest)
+      returns (GetStudentQuestionResponse) {}
+  rpc TransitionStudentQuestion(TransitionStudentQuestionRequest)
+      returns (TransitionStudentQuestionResponse) {}
+  rpc GetArchivedStudentQuestion(GetArchivedStudentQuestionRequest)
+      returns (GetArchivedStudentQuestionResponse) {}
+  rpc GetOpenStudentQuestion(GetOpenStudentQuestionRequest)
+      returns (GetOpenStudentQuestionResponse) {}
+  rpc AllocateStudentQuestion(AllocateStudentQuestionRequest)
+      returns (AllocateStudentQuestionResponse) {}
+}

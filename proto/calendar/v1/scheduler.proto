@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package calendar.v1;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/calendar/v1";
+
+import "google/protobuf/timestamp.proto";
+import "calendar/v1/enums.proto";
+
+message CreateSchedulerRequest {
+    google.protobuf.Timestamp start_date = 1;
+    google.protobuf.Timestamp end_date = 2;
+    calendar.v1.Frequency frequency = 3;
+}
+
+message CreateSchedulerResponse {
+    string scheduler_id = 1;
+}
+
+message UpdateSchedulerRequest {
+    string scheduler_id = 1;
+    google.protobuf.Timestamp end_date = 2;
+}
+
+message UpdateSchedulerResponse {}
+
+message CreateSchedulerWithIdentityRequest {
+    string identity = 1;
+    CreateSchedulerRequest request = 2;
+}
+
+message CreateManySchedulersRequest {
+    repeated CreateSchedulerWithIdentityRequest schedulers = 1;
+}
+
+message CreateManySchedulersResponse {
+    map<string, string> map_schedulers = 1;
+}
+
+service SchedulerModifierService {
+    rpc CreateScheduler (CreateSchedulerRequest) returns (CreateSchedulerResponse);
+    rpc UpdateScheduler (UpdateSchedulerRequest) returns (UpdateSchedulerResponse);
+    rpc CreateManySchedulers (CreateManySchedulersRequest) returns (CreateManySchedulersResponse);
+}

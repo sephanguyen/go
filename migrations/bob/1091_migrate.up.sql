@@ -1,0 +1,4 @@
+--  GRANT SELECT ON public.users TO shamir;
+--  GRANT SELECT ON public.teachers TO shamir;
+--  GRANT SELECT ON public.school_admins TO shamir;
+--  GRANT SELECT ON public.users_groups TO shamir;

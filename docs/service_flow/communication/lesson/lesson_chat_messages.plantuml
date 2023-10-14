@@ -1,0 +1,21 @@
+@startuml lesson_chat_messages
+hide circle
+
+actor User as User order 10
+participant Tom as Tom order 40
+User -> Tom:  Call "LessonChatReader.LiveLessonConversationMessages"
+note over User,Tom
+request payload: conversation_id
+end note
+activate Tom
+note right Tom
+1. Set limit = request paging limit or default 100
+2. Set end_at = request timestamp offset or default now() 
+3. Find messages by conversation_id:
+    - select conversation_lesson where conversation_id=req.conversation_id
+    - join messages using(conversation_id) select (*) 
+        where message.created_at > conversaton_lesson.latest_start_time
+        message.created_at < end_at
+end note
+deactivate Tom
+@enduml

@@ -1,0 +1,38 @@
+table:
+  schema: public
+  name: e2e_instances
+array_relationships:
+  - name: e2e_features
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: e2e_features
+        insertion_order: null
+        column_mapping:
+          instance_id: instance_id
+select_permissions:
+  - role: user
+    permission:
+      columns:
+        - instance_id
+        - metadata
+        - total_worker
+        - duration
+        - status
+        - message
+        - name
+        - status_statistics
+        - flavor
+        - tags
+        - created_at
+        - updated_at
+        - started_at
+        - ended_at
+        - deleted_at
+        - squad_tags
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+      allow_aggregations: true

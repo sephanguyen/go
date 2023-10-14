@@ -1,0 +1,90 @@
+{
+	"schema": [
+		{
+			"column_name": "country",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "domain_name",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "logo_url",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "name",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "organization_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "tenant_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "organizations",
+			"policyname": null,
+			"qual": null,
+			"with_check": null,
+			"relrowsecurity": null,
+			"relforcerowsecurity": null,
+			"permissive": null,
+			"roles": {
+				"Elements": null,
+				"Dimensions": null,
+				"Status": 1
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "organizations__pk",
+			"column_name": "organization_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "organizations",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

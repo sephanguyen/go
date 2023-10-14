@@ -1,0 +1,10 @@
+apiVersion: v2
+name: j4-all-in-one
+description: A Helm chart for j4 base
+type: application
+appVersion: "1.0"
+version: 0.1.0
+dependencies:
+  - name: util
+    version: 0.1.0
+    repository: file://../../../../libs/util

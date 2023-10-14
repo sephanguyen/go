@@ -1,0 +1,102 @@
+table:
+  schema: public
+  name: chapters
+object_relationships:
+  - name: book_chapters
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: books_chapters
+        insertion_order: null
+        column_mapping:
+          chapter_id: chapter_id
+array_relationships:
+  - name: topics
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: topics
+        insertion_order: null
+        column_mapping:
+          chapter_id: chapter_id
+select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+        - chapter_id
+        - country
+        - created_at
+        - deleted_at
+        - display_order
+        - grade
+        - name
+        - school_id
+        - subject
+        - updated_at
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+        - chapter_id
+        - country
+        - created_at
+        - deleted_at
+        - display_order
+        - grade
+        - name
+        - school_id
+        - subject
+        - updated_at
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+          - school_id:
+              _in: X-Hasura-School-Ids
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+        - chapter_id
+        - country
+        - created_at
+        - deleted_at
+        - display_order
+        - grade
+        - name
+        - school_id
+        - subject
+        - updated_at
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+          - school_id:
+              _in: X-Hasura-School-Ids
+      allow_aggregations: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+        - chapter_id
+        - country
+        - created_at
+        - deleted_at
+        - display_order
+        - grade
+        - name
+        - school_id
+        - subject
+        - updated_at
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+          - school_id:
+              _in: X-Hasura-School-Ids
+      allow_aggregations: true

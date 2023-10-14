@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package eureka.v1;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/eureka/v1;epb";
+
+message RetrieveStudentSubmissionHistoryByLoIDsRequest { 
+  repeated string lo_ids = 1; 
+}
+
+message RetrieveStudentSubmissionHistoryByLoIDsResponse {
+  message SubmissionHistory {
+    string lo_id = 1;
+
+    message SubmissionResult {
+      string question_id = 1;
+      bool correct = 2;
+    }
+
+    repeated SubmissionResult results = 2; // correspond with LearningObjective's ID
+    int32 total_question = 3;
+  }
+
+  repeated SubmissionHistory submissions = 1;
+}
+
+service StudentSubmissionReaderService {
+  rpc RetrieveStudentSubmissionHistoryByLoIDs(RetrieveStudentSubmissionHistoryByLoIDsRequest) 
+    returns (RetrieveStudentSubmissionHistoryByLoIDsResponse);
+}

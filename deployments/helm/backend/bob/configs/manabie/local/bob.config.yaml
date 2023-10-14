@@ -1,0 +1,56 @@
+common:
+  stats_enabled: false
+  remote_trace:
+    enabled: false
+  grpc:
+    client_name: bob
+    client_version: {{ .Values.clientVersion }}
+  google_cloud_project: dev-manabie-online
+  firebase_project: dev-manabie-online
+  identity_platform_project: dev-manabie-online
+issuers:
+  - issuer: http://firebase.emulator.svc.cluster.local:40401/fake_aud
+    audience: fake_aud
+    jwks_endpoint: http://firebase.emulator.svc.cluster.local:40401/jwkset
+  - issuer: manabie
+    audience: manabie-local
+    jwks_endpoint: http://shamir:5680/.well-known/jwks.json
+jwt_applicant: manabie-local
+storage:
+  endpoint: http://minio-infras.emulator.svc.cluster.local:9000
+  region: us-east-1
+  bucket: manabie
+  secure: false
+brightcove:
+  account_id: account-id
+  client_id: client-id
+fake_brightcove_server: http://gandalf:5889
+fake_apple_server: http://gandalf:5889/verifyReceipt
+whiteboard:
+  app_id: fake_id
+  endpoint: http://gandalf:5889
+  token_life_span: 5m
+agora:
+  maximum_learner_streamings: 13
+asiapay:
+  secret: ""
+  merchant_id: 74001088
+  currency: 704
+  endpoint: https://test.paydollar.com/b2cDemo/eng/payment/payForm.jsp
+check_client_versions:
+  - com.manabie.student_manabie_app:1.1.0
+  - com.manabie.studentManabieApp:1.1.0
+  - com.manabie.liz:1.0.0
+  - com.manabie.enigma:1.0.0
+  - com.renseikai.learner:1.0.0
+  - com.renseikai.teacher:1.0.0
+  - com.manabie.learner:2.0.20230509020728
+  - com.manabie.teacher:2.0.20230509020728
+  - jp.jprep.learner:2.0.20230509020728
+  - jp.jprep.teacher:2.0.20230509020728
+cloud_convert:
+  host: http://gandalf:5889
+partner:
+  domain_bo: "https://green-school-portal.web.app/"
+  domain_teacher: "https://manabie-teacher-staging.web.app/"
+  domain_learner: "https://manabie-learner-staging.web.app/"

@@ -1,0 +1,66 @@
+syntax = "proto3";
+
+package mastermgmt.v1;
+import "google/api/annotations.proto";
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/mastermgmt/v1;mpb";
+
+message ImportClassRequest {
+  bytes payload = 1;
+}
+
+message ImportClassResponse {
+  message ImportClassError {
+    int32 row_number = 1;
+    string error = 2;
+  }
+  repeated ImportClassError errors = 1;
+}
+
+message ExportClassesRequest {
+}
+
+message ExportClassesResponse {
+  bytes data = 1;
+}
+
+message UpdateClassRequest {
+  string class_id = 1;
+  string name = 2;
+}
+
+message UpdateClassResponse{}
+
+message DeleteClassRequest{
+  string class_id = 1;
+}
+
+message DeleteClassResponse{}
+
+service ClassService {
+  rpc ImportClass(ImportClassRequest) returns (ImportClassResponse){
+    option (google.api.http) = {
+        post: "/mastermgmt/api/v1/proxy/class",
+        body: "*"
+    };
+  };
+  rpc UpdateClass (UpdateClassRequest) returns (UpdateClassResponse);
+  rpc ExportClasses (ExportClassesRequest) returns (ExportClassesResponse) {
+    option (google.api.http) = {
+        get: "/mastermgmt/api/v1/proxy/class/export"
+    };
+  };
+  rpc DeleteClass (DeleteClassRequest) returns (DeleteClassResponse);
+  rpc RetrieveClassesByIDs (RetrieveClassByIDsRequest) returns (RetrieveClassByIDsResponse);
+}
+
+message RetrieveClassByIDsRequest{
+  repeated string class_ids = 1;
+}
+message RetrieveClassByIDsResponse{
+  message Class{
+    string class_id = 1;
+    string name = 2;
+    string location_id = 3;
+  }
+  repeated Class classes = 1;
+}

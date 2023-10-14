@@ -1,0 +1,46 @@
+{
+    "students": [
+        {
+            "external_user_id": "external-user-id-open-api-01",
+            "username": "username",
+            "last_name": "last-name-open-api",
+            "first_name": "first-name-open-api",
+            "last_name_phonetic": "last name phonetic",
+            "first_name_phonetic": "first name phonetic",
+            "email": "open-api-01@gmail.com",
+            "grade": "grade_01",
+            "birthday": "1999/01/12",
+            "gender": 1,
+            "tags": [],
+            "note": "note",
+            "phone_number": {
+                "student_phone_number": "81123456790",
+                "student_home_phone_number": "81123456792",
+                "contact_preference": 1
+            },
+            "address": {
+                "postal_code": "700000",
+                "prefecture": "01",
+                "city": "HCM",
+                "first_street": "first_street 1",
+                "second_street": "second_street 2"
+            },
+            "school_histories": [
+                {
+                    "school": "school_partner_id_1",
+                    "school_course": "school_course_partner_id_01"
+                }
+            ],
+            "enrollment_status_histories": [
+                {
+                    "enrollment_status": 1,
+                    "location": "location-id-2"
+                },
+                {
+                    "enrollment_status": 1,
+                    "location": "location-id-3"
+                }
+            ]
+        }
+    ]
+}

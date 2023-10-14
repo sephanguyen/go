@@ -1,0 +1,17 @@
+- template: 1.1
+  tableName: users
+  locationCol: location_id
+  accessPathTable:
+    name: user_access_paths
+    columnMapping:
+      user_id: user_id
+  permissionPrefix: user.user
+  permissions:
+    postgres: []
+    hasura: []
+- template: 4
+  tableName: users
+  ownerCol: user_id
+  permissions:
+    postgres: []
+    hasura: []

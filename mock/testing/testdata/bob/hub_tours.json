@@ -1,0 +1,126 @@
+{
+	"schema": [
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "hub_id",
+			"data_type": "integer",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "parent_phone_number",
+			"data_type": "character varying",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "status",
+			"data_type": "character varying",
+			"column_default": "'new'::character varying",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "student_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "hub_tours",
+			"policyname": "rls_hub_tours",
+			"qual": "permission_check(resource_path, 'hub_tours'::text)",
+			"with_check": "permission_check(resource_path, 'hub_tours'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "hub_tours",
+			"policyname": "rls_hub_tours_restrictive",
+			"qual": "permission_check(resource_path, 'hub_tours'::text)",
+			"with_check": "permission_check(resource_path, 'hub_tours'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "hub_id_fk",
+			"column_name": "hub_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "student_id_fk",
+			"column_name": "student_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "student_id_fk",
+			"column_name": "student_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "hub_tour_pk",
+			"column_name": "hub_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "hub_tour_pk",
+			"column_name": "student_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "hub_tours",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

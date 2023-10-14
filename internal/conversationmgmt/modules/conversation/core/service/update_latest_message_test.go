@@ -1,0 +1,77 @@
+package service
+
+import (
+	"context"
+	"testing"
+	"time"
+
+	"github.com/manabie-com/backend/internal/conversationmgmt/modules/conversation/core/domain"
+	mock_repositories "github.com/manabie-com/backend/mock/conversationmgmt/modules/conversation/infrastructure/postgres"
+	"github.com/manabie-com/backend/mock/testutil"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"go.uber.org/zap"
+)
+
+func TestConversationModifierService_UpdateLatestMessage(t *testing.T) {
+	t.Parallel()
+	mockDB := testutil.NewMockDB()
+	mockConversationRepo := &mock_repositories.MockConversationRepo{}
+	mockChatVendorUserRepo := &mock_repositories.MockAgoraUserRepo{}
+
+	svc := &conversationModifierServiceImpl{
+		DB:                 mockDB.DB,
+		Environment:        "local",
+		ConversationRepo:   mockConversationRepo,
+		ChatVendorUserRepo: mockChatVendorUserRepo,
+		Logger:             zap.NewExample(),
+	}
+
+	conversatiionID := "convo-id"
+	messageID := "message-id"
+	vendorUserID := "vendor-user-id"
+	userID := "user-id"
+	sentTime := time.Now()
+	message := &domain.Message{
+		ConversationID:  conversatiionID,
+		VendorMessageID: messageID,
+		VendorUserID:    vendorUserID,
+		Message:         "message",
+		UserID:          userID,
+		Type:            domain.MessageTypeText,
+		SentTime:        sentTime,
+		IsDeleted:       false,
+		Media:           []domain.MessageMedia{},
+	}
+
+	testCases := []struct {
+		Name  string
+		Err   error
+		Req   *domain.Message
+		Setup func(ctx context.Context, req *domain.Message)
+	}{
+		{
+			Name: "happy case",
+			Err:  nil,
+			Req:  message,
+			Setup: func(ctx context.Context, req *domain.Message) {
+				mockConversationRepo.On("UpdateLatestMessage", mock.Anything, mock.Anything, req).Once().Return(nil)
+			},
+		},
+	}
+
+	ctx := context.Background()
+	for _, testCase := range testCases {
+		t.Run(testCase.Name, func(t *testing.T) {
+			testCase.Setup(ctx, testCase.Req)
+			err := svc.UpdateLatestMessage(ctx, testCase.Req)
+			assert.Nil(t, testCase.Err)
+			if testCase.Err != nil {
+				assert.Equal(t, testCase.Err, err)
+			} else {
+				assert.Nil(t, err)
+			}
+		})
+	}
+}

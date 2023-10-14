@@ -1,0 +1,54 @@
+name: "gcs-cache"
+description: "Google Cloud Storage Cache Action"
+inputs:
+  workload_identity_provider:
+    description: "workload identity provider"
+    required: true
+  service_account:
+    description: "service account"
+    required: true
+  bucket_name:
+    description: "Bucket name"
+    required: true
+  key:
+    description: "key"
+    required: true
+  restore-keys:
+    description: "restore-keys"
+    required: true
+  paths:
+    description: "Path lists"
+    required: true
+  check-cache-exists:
+    description: "check-cache-exists"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Check cache exists
+      id: check-cache-exists
+      run: |
+        ./deployments/check_cache_exists.sh ${{inputs.check-cache-exists}}
+      shell: bash
+
+    - name: Authenticate to Google Cloud
+      id: google-auth
+      if: steps.check-cache-exists.outputs.is-cache-exist == 'false'
+      uses: google-github-actions/auth@v0
+      with:
+        workload_identity_provider: ${{ inputs.workload_identity_provider }}
+        service_account: ${{ inputs.service_account }}
+
+    - name: Cache go libs
+      if: steps.check-cache-exists.outputs.is-cache-exist == 'false'
+      id: go-libs-cache
+      uses: mansagroup/gcs-cache-action@v1.0.3
+      continue-on-error: true
+      with:
+        bucket: ${{inputs.bucket_name}}
+        path: ${{inputs.paths}}
+        key: ${{inputs.key}}
+        restore-keys: |
+          ${{inputs.restore-keys}}
+      env:
+        GOOGLE_APPLICATION_CREDENTIALS: '${{ steps.google-auth.outputs.credentials_file_path }}'

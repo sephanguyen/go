@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package calendar.v1;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/calendar/v1";
+
+message StaffInfo {
+  string id = 1;
+  string name = 2;
+  string email = 3;
+}
+
+message GetStaffsByLocationRequest {
+    string location_id = 1;
+}
+  
+message GetStaffsByLocationResponse {
+  message StaffInfo {
+    string id = 1;
+    string name = 2;
+    string email = 3;
+  }
+    repeated StaffInfo staffs = 1;
+}
+
+message GetStaffsByLocationIDsAndNameOrEmailRequest{
+  repeated string location_ids = 1;
+  string keyword = 2;
+  repeated string filtered_teacher_ids = 3;
+  uint32 limit = 4;
+}
+
+message GetStaffsByLocationIDsAndNameOrEmailResponse{
+  repeated StaffInfo staffs = 1;
+}
+
+service UserReaderService {
+    rpc GetStaffsByLocationIDsAndNameOrEmail(GetStaffsByLocationIDsAndNameOrEmailRequest) returns (GetStaffsByLocationIDsAndNameOrEmailResponse);
+    rpc GetStaffsByLocation(GetStaffsByLocationRequest) returns (GetStaffsByLocationResponse);
+}

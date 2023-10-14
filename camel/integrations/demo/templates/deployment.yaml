@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "demo.fullname" . }}
+  labels:
+    {{- include "demo.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "demo.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "demo.selectorLabels" . | nindent 8 }}
+      annotations:
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+        sidecar.istio.io/inject: "false"
+        rand: "{{ randNumeric 3 }}"
+    spec:
+      serviceAccountName: camel-k-demo-runner
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ include "util.fullname" . }}
+        {{- if eq "local" (include "util.environment" .) }}
+        - name: service-credential
+          secret:
+            secretName: {{ include "util.fullname" . }}-local-service-credential
+        {{- end }}
+      containers:
+        - name: "{{ include "util.fullname" . }}"
+          image: "{{ .Values.global.image.repository }}:{{ .Values.global.image.tag }}"
+          imagePullPolicy: "{{ .Values.global.image.pullPolicy }}"
+          command:
+            - java
+            - -javaagent:opentelemetry-javaagent.jar
+            - -Dotel.service.name=camel-demo
+            - -Dotel.exporter.otlp.endpoint=http://opentelemetry-collector.monitoring.svc:4317
+            - -jar
+            - target/demo-1.0-SNAPSHOT-executable-jar.jar
+            - -propertiesLocation
+            - file:///configs/demo.config.properties
+            - -trace
+          volumeMounts:
+            - name: config-volume
+              mountPath: /configs/
+              readOnly: true
+          {{- if eq "local" (include "util.environment" .) }}
+            - name: service-credential
+              mountPath: /service-credential/
+              readOnly: true
+          env:
+          - name: GOOGLE_APPLICATION_CREDENTIALS
+            value: "/service-credential/service_credential.json"
+          {{- end }}
+      {{- with .Values.global.affinity }}
+      affinity: {{- . | toYaml | nindent 8 }}
+      {{- end }}
+      {{- with .Values.global.tolerations }}
+      tolerations: {{- . |toYaml | nindent 8 }}
+      {{- end }}

@@ -1,0 +1,105 @@
+{
+	"schema": [
+		{
+			"column_name": "course_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "course_weight",
+			"data_type": "integer",
+			"column_default": "1",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "mandatory_flag",
+			"data_type": "boolean",
+			"column_default": "false",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "max_slots_per_course",
+			"data_type": "integer",
+			"column_default": "1",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "package_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "YES"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "package_course",
+			"policyname": "rls_package_course",
+			"qual": "permission_check(resource_path, 'package_course'::text)",
+			"with_check": "permission_check(resource_path, 'package_course'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "package_course",
+			"policyname": "rls_package_course_restrictive",
+			"qual": "permission_check(resource_path, 'package_course'::text)",
+			"with_check": "permission_check(resource_path, 'package_course'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "pk__package_course",
+			"column_name": "course_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "pk__package_course",
+			"column_name": "package_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "package_course",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

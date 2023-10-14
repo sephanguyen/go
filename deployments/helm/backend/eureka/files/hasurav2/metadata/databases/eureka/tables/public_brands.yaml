@@ -1,0 +1,56 @@
+table:
+  schema: public
+  name: brands
+array_relationships:
+  - name: centers
+    using:
+      foreign_key_constraint_on:
+        column: brand_id
+        table:
+          schema: public
+          name: centers
+  - name: scheduler_items
+    using:
+      foreign_key_constraint_on:
+        column: brand_id
+        table:
+          schema: public
+          name: scheduler_items
+  - name: scheduler_patterns
+    using:
+      foreign_key_constraint_on:
+        column: brand_id
+        table:
+          schema: public
+          name: scheduler_patterns
+select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+        - brand_id
+        - name
+        - org_id
+        - created_at
+        - updated_at
+        - deleted_at
+        - owner
+        - time_zone
+        - academic_year_beginning
+        - academic_year_end
+        - scheduler_release_status
+      filter: {}
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+        - brand_id
+        - name
+        - org_id
+        - owner
+        - scheduler_release_status
+        - time_zone
+        - academic_year_beginning
+        - academic_year_end
+        - created_at
+        - deleted_at
+        - updated_at
+      filter: {}

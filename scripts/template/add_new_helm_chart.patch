@@ -1,0 +1,261 @@
+diff --git a/cmd/server/main.go b/cmd/server/main.go
+index 4a384f3bca..ef06e51e73 100644
+--- a/cmd/server/main.go
++++ b/cmd/server/main.go
+@@ -1,6 +1,8 @@
+ package main
+ 
+ import (
++	_ "github.com/manabie-com/backend/cmd/server/yournewservicename"
++
+ 	"context"
+ 	"fmt"
+ 	"log"
+diff --git a/cmd/server/yournewservicename/gserver.go b/cmd/server/yournewservicename/gserver.go
+new file mode 100644
+index 0000000000..80f57eeb42
+--- /dev/null
++++ b/cmd/server/yournewservicename/gserver.go
+@@ -0,0 +1,51 @@
++package yournewservicename
++
++import (
++	"context"
++
++	"github.com/manabie-com/backend/internal/golibs/bootstrap"
++	"github.com/manabie-com/backend/internal/yournewservicename/configurations"
++
++	"go.opencensus.io/plugin/ocgrpc"
++	"google.golang.org/grpc"
++)
++
++func init() {
++	s := &server{}
++	bootstrap.
++		WithGRPC[configurations.Config](s).
++		WithMonitorServicer(s).
++		Register(s)
++}
++
++type server struct {
++	bootstrap.DefaultMonitorService[configurations.Config]
++}
++
++func (s *server) WithUnaryServerInterceptors(c configurations.Config, rsc *bootstrap.Resources) []grpc.UnaryServerInterceptor {
++	return nil
++}
++
++func (s *server) WithStreamServerInterceptors(c configurations.Config, rsc *bootstrap.Resources) []grpc.StreamServerInterceptor {
++	return nil
++}
++
++func (s *server) WithServerOptions() []grpc.ServerOption {
++	return []grpc.ServerOption{
++		grpc.StatsHandler(&ocgrpc.ServerHandler{}),
++	}
++}
++
++func (*server) ServerName() string {
++	return "yournewservicename"
++}
++
++func (s *server) InitDependencies(c configurations.Config, rsc *bootstrap.Resources) error {
++	return nil
++}
++
++func (s *server) SetupGRPC(ctx context.Context, grpcserver *grpc.Server, c configurations.Config, rsc *bootstrap.Resources) error {
++	return nil
++}
++
++func (*server) GracefulShutdown(context.Context) {}
+diff --git a/deployments/helm/manabie-all-in-one/Chart.yaml b/deployments/helm/manabie-all-in-one/Chart.yaml
+index 401bf9f30b..a7c1e28daa 100644
+--- a/deployments/helm/manabie-all-in-one/Chart.yaml
++++ b/deployments/helm/manabie-all-in-one/Chart.yaml
+@@ -75,6 +75,10 @@ dependencies:
+     version: 0.1.0
+     condition: global.invoicemgmt.enabled
+ 
++  - name: yournewservicename
++    version: 0.1.0
++    condition: global.yournewservicename.enabled
++
+   - name: discount
+     version: 0.1.0
+     condition: global.discount.enabled
+diff --git a/deployments/helm/manabie-all-in-one/charts/yournewservicename/.helmignore b/deployments/helm/manabie-all-in-one/charts/yournewservicename/.helmignore
+new file mode 100644
+index 0000000000..0e8a0eb36f
+--- /dev/null
++++ b/deployments/helm/manabie-all-in-one/charts/yournewservicename/.helmignore
+@@ -0,0 +1,23 @@
++# Patterns to ignore when building packages.
++# This supports shell glob matching, relative path matching, and
++# negation (prefixed with !). Only one pattern per line.
++.DS_Store
++# Common VCS dirs
++.git/
++.gitignore
++.bzr/
++.bzrignore
++.hg/
++.hgignore
++.svn/
++# Common backup files
++*.swp
++*.bak
++*.tmp
++*.orig
++*~
++# Various IDEs
++.project
++.idea/
++*.tmproj
++.vscode/
+diff --git a/deployments/helm/manabie-all-in-one/charts/yournewservicename/Chart.yaml b/deployments/helm/manabie-all-in-one/charts/yournewservicename/Chart.yaml
+new file mode 100644
+index 0000000000..d246443a37
+--- /dev/null
++++ b/deployments/helm/manabie-all-in-one/charts/yournewservicename/Chart.yaml
+@@ -0,0 +1,25 @@
++apiVersion: v2
++name: yournewservicename
++description: A Helm chart for Kubernetes
++
++# A chart can be either an 'application' or a 'library' chart.
++#
++# Application charts are a collection of templates that can be packaged into versioned archives
++# to be deployed.
++#
++# Library charts provide useful utilities or functions for the chart developer. They're included as
++# a dependency of application charts to inject those utilities and functions into the rendering
++# pipeline. Library charts do not define any templates and therefore cannot be deployed.
++type: application
++
++# This is the chart version. This version number should be incremented each time you make changes
++# to the chart and its templates, including the app version.
++# Versions are expected to follow Semantic Versioning (https://semver.org/)
++version: 0.1.0
++
++# This is the version number of the application being deployed. This version number should be
++# incremented each time you make changes to the application. Versions are not expected to
++# follow Semantic Versioning. TheyserviceCredential should reflect the version the application is using.
++# It is recommended to use it with quotes.
++appVersion: "1.16.0"
++
+diff --git a/deployments/helm/manabie-all-in-one/charts/yournewservicename/configs/manabie/local/yournewservicename.config.yaml b/deployments/helm/manabie-all-in-one/charts/yournewservicename/configs/manabie/local/yournewservicename.config.yaml
+new file mode 100644
+index 0000000000..d03aa288cb
+--- /dev/null
++++ b/deployments/helm/manabie-all-in-one/charts/yournewservicename/configs/manabie/local/yournewservicename.config.yaml
+@@ -0,0 +1,10 @@
++common:
++  environment: local
++  log:
++    app_level: {{ default "debug" .Values.global.localLogLevel }}
++  stats_enabled: false
++  remote_trace:
++    enabled: true
++  grpc:
++    client_name: "yournewservicename"
++  google_cloud_project: "dev-manabie-online"
+diff --git a/deployments/helm/manabie-all-in-one/charts/yournewservicename/configs/yournewservicename.common.config.yaml b/deployments/helm/manabie-all-in-one/charts/yournewservicename/configs/yournewservicename.common.config.yaml
+new file mode 100644
+index 0000000000..561c0730db
+--- /dev/null
++++ b/deployments/helm/manabie-all-in-one/charts/yournewservicename/configs/yournewservicename.common.config.yaml
+@@ -0,0 +1,21 @@
++common:
++  name: yournewservicename
++  sa_email: {{ include "util.serviceAccountEmail" . }}
++  log:
++    app_level: debug
++    db_level: debug
++    log_payload: true
++  stats_enabled: true
++  remote_trace:
++    enabled: true
++    otel_collector_receiver: http://opentelemetry-collector.monitoring.svc.cluster.local:14268/api/traces
++  grpc:
++    trace_enabled: true
++    handler_timeout_v2:
++      default: 5s
++    handler_timeout_v2_enabled: true
++    client_name: com.manabie.yournewservicename
++    client_version: {{ .Values.clientVersion }}
++  image_tag: {{ include "util.imageTag" . }}
++  listener:
++    grpc: :696969
+diff --git a/deployments/helm/manabie-all-in-one/charts/yournewservicename/secrets/manabie/local/yournewservicename.secrets.encrypted.yaml b/deployments/helm/manabie-all-in-one/charts/yournewservicename/secrets/manabie/local/yournewservicename.secrets.encrypted.yaml
+new file mode 100644
+index 0000000000..06ad0e3a63
+--- /dev/null
++++ b/deployments/helm/manabie-all-in-one/charts/yournewservicename/secrets/manabie/local/yournewservicename.secrets.encrypted.yaml
+@@ -0,0 +1,15 @@
++data: null
++sops:
++    kms: []
++    gcp_kms:
++        - resource_id: projects/dev-manabie-online/locations/global/keyRings/deployments/cryptoKeys/github-actions
++          created_at: "2023-06-21T13:28:22Z"
++          enc: CiUA/2lHjQWJGW6N2+J8MWsW0Ak2yvQl//bJSxuCMW5bBdvJJoyMEkkAoA9PKJKKxVj2aAYHby4ZTmQDZoWwlaje34LDLnwioUj1JK5tcoayvx384sE+/ZlXf3nO4shEon0ufADIMgKP5TMCaeXhDhWI
++    azure_kv: []
++    hc_vault: []
++    age: []
++    lastmodified: "2023-06-21T13:28:23Z"
++    mac: ENC[AES256_GCM,data:PmbFmLZX/1rIZgQh6qLHT8sZ9IU4lq2EIz+t2qooKoY9ToKQvrLE9vXhCnGwPRMWRppVsnwcLiDDl+Q+qpd3YFIxaL8NaavDZ/nLN80OmV5S+pkYVka8mpj2bJFDzmCmoXtiu1SduQ4PPN0eJDFcOYmIgb4dFE5p8tfpX+wZDxo=,iv:LZBjUwaZpXcEzAZa2Z2+KfywrjiJZHRrcNgUm4zCkro=,tag:r12WmALwx2q9/woF5ZMtEQ==,type:str]
++    pgp: []
++    unencrypted_suffix: _unencrypted
++    version: 3.7.3
+diff --git a/deployments/helm/manabie-all-in-one/charts/yournewservicename/secrets/manabie/local/yournewservicename_migrate.secrets.encrypted.yaml b/deployments/helm/manabie-all-in-one/charts/yournewservicename/secrets/manabie/local/yournewservicename_migrate.secrets.encrypted.yaml
+new file mode 100644
+index 0000000000..cfc76fb9d1
+--- /dev/null
++++ b/deployments/helm/manabie-all-in-one/charts/yournewservicename/secrets/manabie/local/yournewservicename_migrate.secrets.encrypted.yaml
+@@ -0,0 +1,17 @@
++postgres_migrate:
++    database:
++        password: ENC[AES256_GCM,data:lykDGyIQcw==,iv:37Thkce4V4mlZRl+gqANdY0ync9e/nJVQb+3/sLCPiA=,tag:ggJeXEulJ6AH15y/BUcAbw==,type:str]
++sops:
++    kms: []
++    gcp_kms:
++        - resource_id: projects/dev-manabie-online/locations/global/keyRings/deployments/cryptoKeys/github-actions
++          created_at: "2023-06-21T13:28:01Z"
++          enc: CiUA/2lHjXPpoK5Uii0qrrnDbaYbhgauCdtCtgDOKmPOc+hScuy4EkkAoA9PKKI/p9DI1kOIBMsYw7NEOgkf0cp+ndE31uEuT9iKgy7HlPdTHk3eg7HBB75/lED0lrJr+PEUOPZFDWAGkViYjNO71M9S
++    azure_kv: []
++    hc_vault: []
++    age: []
++    lastmodified: "2023-06-21T13:28:02Z"
++    mac: ENC[AES256_GCM,data:5mHMEEgHwOtI5HxtKhu+TVB6g+TFRMtPLRg9P6H2hjmRPcoRU/McazAWO0nB6fsvwbi833esEAaPzdpPDLO7lxkw0cd29slVR1CGGIEC1lJZQmejXq9aaYCtdfhNQSxQPsuuWh4oBpOf3hXYYpNv5S4LeWU01Lldvk+poXfdqes=,iv:hiachoNHGFsuOWs0HtVaKHOMKQKjz3jtd2px8Wj7fGg=,tag:GocYnt7Ttb51GXIP+mnMvQ==,type:str]
++    pgp: []
++    unencrypted_suffix: _unencrypted
++    version: 3.7.3
+diff --git a/deployments/helm/manabie-all-in-one/charts/yournewservicename/templates/app.yaml b/deployments/helm/manabie-all-in-one/charts/yournewservicename/templates/app.yaml
+new file mode 100644
+index 0000000000..d8c031110f
+--- /dev/null
++++ b/deployments/helm/manabie-all-in-one/charts/yournewservicename/templates/app.yaml
+@@ -0,0 +1 @@
++{{ include "util.app" . }}
+diff --git a/deployments/helm/manabie-all-in-one/charts/yournewservicename/values.yaml b/deployments/helm/manabie-all-in-one/charts/yournewservicename/values.yaml
+new file mode 100644
+index 0000000000..0780647fc5
+--- /dev/null
++++ b/deployments/helm/manabie-all-in-one/charts/yournewservicename/values.yaml
+@@ -0,0 +1 @@
++grpcPort: 696969
+diff --git a/internal/yournewservicename/configurations/cfg.go b/internal/yournewservicename/configurations/cfg.go
+new file mode 100644
+index 0000000000..1ff01e2306
+--- /dev/null
++++ b/internal/yournewservicename/configurations/cfg.go
+@@ -0,0 +1,9 @@
++package configurations
++
++import (
++	"github.com/manabie-com/backend/internal/golibs/configs"
++)
++
++type Config struct {
++	Common configs.CommonConfig
++}

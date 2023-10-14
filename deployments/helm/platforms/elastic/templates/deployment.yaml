@@ -1,0 +1,132 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kibana-{{ include "elastic.fullname" . }}
+  labels:
+    app.kubernetes.io/name: kibana-{{ include "elastic.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: kibana
+    {{- include "elastic.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kibana-{{ include "elastic.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: kibana
+  template:
+    metadata:
+      annotations:
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+        checksum/root-ca.pem.encrypted.yaml: {{ printf "secrets/%s/%s/root-ca.pem.encrypted.yaml" .Values.vendor .Values.environment | .Files.Get | sha256sum }}
+        checksum/kibana.encrypted.yaml: {{ printf "secrets/%s/%s/kibana.encrypted.yaml" .Values.vendor .Values.environment | .Files.Get | sha256sum }}
+        checksum/root-ca_v2.pem.encrypted.yaml: {{ printf "secrets/%s/%s/root-ca_v2.pem.encrypted.yaml" .Values.vendor .Values.environment | .Files.Get | sha256sum }}
+        checksum/kibana_v2.encrypted.yaml: {{ printf "secrets/%s/%s/kibana_v2.encrypted.yaml" .Values.vendor .Values.environment | .Files.Get | sha256sum }}
+      labels:
+        app.kubernetes.io/name: kibana-{{ include "elastic.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: kibana
+    spec:
+      {{- with .Values.kibana.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "elastic.serviceAccountName" . }}
+      volumes:
+      - name: config-volume
+        emptyDir: {}
+      - name: secrets-volume
+        secret:
+          secretName: kibana-{{ include "elastic.fullname" . }}
+          items:
+{{- if eq "local" .Values.environment }}
+          - key: service_credential.json
+            path: service_credential.json
+{{- end }}
+          - key: root-ca.pem.encrypted.yaml
+            path: root-ca.pem.encrypted.yaml
+          - key: kibana.encrypted.yaml
+            path: kibana.encrypted.yaml
+          - key: root-ca_v2.pem.encrypted.yaml
+            path: root-ca_v2.pem.encrypted.yaml
+          - key: kibana_v2.encrypted.yaml
+            path: kibana_v2.encrypted.yaml
+      initContainers:
+      - name: kibana-decrypt-secret
+        image: "{{ .Values.decryptorImage.repository }}:{{ .Values.decryptorImage.legacyTag }}"
+        imagePullPolicy: IfNotPresent
+        command:
+          - /bin/sh
+          - -c
+          - |
+
+            set -eu
+          {{- if eq "local" .Values.environment }}
+            gcloud auth activate-service-account --key-file /configs/service_credential.json
+          {{- end }}
+
+            code=0
+            sops --decrypt --output-type binary --output /usr/share/kibana/config/root-ca.pem /usr/share/kibana/config/root-ca_v2.pem.encrypted.yaml || code=$?
+            if [ "$code" -ne 0 ]; then
+              sops --decrypt --output-type binary /usr/share/kibana/config/root-ca.pem.encrypted.yaml > /usr/share/kibana/config/root-ca.pem
+              echo "============= decrypt old secret file: root-ca.pem.encrypted.yaml"
+            fi
+
+            code=0
+            sops --decrypt --output /usr/share/kibana/config/kibana.yml /usr/share/kibana/config/kibana_v2.encrypted.yaml || code=$?
+            if [ "$code" -ne 0 ]; then 
+              sops --decrypt /usr/share/kibana/config/kibana.encrypted.yaml > /usr/share/kibana/config/kibana.yml
+              echo "============= decrypt old secret file: kibana.encrypted.yaml"
+            fi
+
+        volumeMounts:
+        - name: config-volume
+          mountPath: /usr/share/kibana/config/
+        - name: secrets-volume
+          mountPath: /usr/share/kibana/config/root-ca.pem.encrypted.yaml
+          subPath: root-ca.pem.encrypted.yaml
+          readOnly: true
+        - name: secrets-volume
+          mountPath: /usr/share/kibana/config/kibana.encrypted.yaml
+          subPath: kibana.encrypted.yaml
+          readOnly: true
+        - name: secrets-volume
+          mountPath: /usr/share/kibana/config/root-ca_v2.pem.encrypted.yaml
+          subPath: root-ca_v2.pem.encrypted.yaml
+          readOnly: true
+        - name: secrets-volume
+          mountPath: /usr/share/kibana/config/kibana_v2.encrypted.yaml
+          subPath: kibana_v2.encrypted.yaml
+          readOnly: true
+{{- if eq "local" .Values.environment }}
+        - name: secrets-volume
+          mountPath: /configs/service_credential.json
+          subPath: service_credential.json
+          readOnly: true
+        env:
+          - name: GOOGLE_APPLICATION_CREDENTIALS
+            value: "/configs/service_credential.json"
+{{- end }}
+      containers:
+      - name: kibana-{{ .Chart.Name }}
+        image: "{{ .Values.kibana.image.repository }}:{{ .Values.kibana.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: {{ .Values.kibana.image.pullPolicy }}
+        env:
+          - name: XPACK_SECURITY_ENABLED
+            value: 'true'
+          - name: ELASTICSEARCH_HOSTS
+            value: https://elasticsearch-{{ include "elastic.name" . }}:9200
+          - name: ELASTICSEARCH_URL
+            value: https://elasticsearch-{{ include "elastic.name" . }}:9200
+        ports:
+          - containerPort: 5601
+            name: http
+        volumeMounts:
+        - name: config-volume
+          mountPath: /usr/share/kibana/config/
+        resources:
+          {{- toYaml .Values.kibana.resources | nindent 12 }}
+      {{- with .Values.kibana }}
+      {{- $context := (mustMerge (deepCopy .) $) }}
+      affinity: {{- include "util.affinityNew" $context | nindent 8 }}
+      tolerations: {{- include "util.tolerations" $context | nindent 8 }}
+      {{- end }}

@@ -1,0 +1,3 @@
+ALTER TABLE entryexit_queue DROP CONSTRAINT IF EXISTS entryexit_queue_id__students__fk;
+ALTER TABLE student_entryexit_records DROP CONSTRAINT IF EXISTS student_entryexit_records_students_fk;
+ALTER TABLE student_qr DROP CONSTRAINT IF EXISTS student_qr_students_fk;

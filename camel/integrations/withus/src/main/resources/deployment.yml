@@ -1,0 +1,17 @@
+containers:
+  - name: integration
+    env:
+    - name: TEST_VARIABLE
+      value: "hello from the template"
+    volumeMounts:
+    - name: service-credential
+      mountPath: /etc/camel/resources/service_credential.json
+      subPath: service_credential.json
+      readOnly: true
+volumes:
+  - name: service-credential
+    secret:
+      secretName: camel-k-resource
+      items:
+      - key: service_credential.json
+        path: service_credential.json

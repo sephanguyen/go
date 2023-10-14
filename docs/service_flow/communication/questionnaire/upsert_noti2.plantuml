@@ -1,0 +1,23 @@
+@startuml AddNewNotification
+hide circle
+
+actor User as User order 10
+participant Yasuo as Yasuo order 40
+User -> Yasuo:  Call "NotificationModifier.UpsertNotification"
+note over User,Yasuo
+request payload: 
+    notification{
+        questionnaire optional
+    }
+end note
+activate Yasuo
+note right Yasuo
+1. old logic of Upserting notification (TODO)
+2.  If action is inserting and has empty questionnaire, do nothing
+    else upserting questionnaire,qn_question
+    If action is upserting:
+        if questionnaire is empty: soft delete current questionaire of current noti (if any)
+        else upserting questionnaire,qn_question
+end note
+deactivate Yasuo
+@enduml

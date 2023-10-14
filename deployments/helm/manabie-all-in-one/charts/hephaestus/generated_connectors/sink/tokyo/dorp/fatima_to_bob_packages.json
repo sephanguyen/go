@@ -1,0 +1,23 @@
+{
+  "name": "dorp_tokyo_fatima_to_bob_packages_sink_connector",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+    "tasks.max": "1",
+    "topics": "dorp.tokyo.fatima.public.packages",
+    "connection.url": "${file:/config/kafka-connect-config.properties:bob_url}",
+    "auto.create": "false",
+    "insert.mode": "upsert",
+    "table.name.format": "packages",
+    "fields.whitelist": "country,created_at,deleted_at,descriptions,discounted_price,duration,end_at,is_active,is_recommended,name,package_id,price,prioritize_level,properties,resource_path,start_at,updated_at",
+    "transforms": "unwrap,route",
+    "transforms.route.type": "org.apache.kafka.connect.transforms.RegexRouter",
+    "transforms.route.regex": "([^.]+).([^.]+).([^.]+).([^.]+).([^.]+)",
+    "transforms.route.replacement": "$5",
+    "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+    "delete.enabled": "false",
+    "pk.mode": "record_value",
+    "pk.fields": "package_id",
+    "transforms.unwrap.drop.tombstones": "true",
+    "transforms.unwrap.delete.handling.mode": "drop"
+  }
+}

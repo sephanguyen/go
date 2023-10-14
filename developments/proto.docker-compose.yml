@@ -1,0 +1,203 @@
+version: "3.4"
+
+services:
+  generate_go:
+    image: v20221224-go
+    build:
+      args: ["GO_VERSION"]
+      context: .
+      target: protoc_gen_go
+      dockerfile: ./proto.Dockerfile
+    working_dir: /proto/
+    volumes:
+      - "../proto/:/proto/"
+      - "../pkg/:/pkg/"
+    entrypoint: /proto/gen_go.sh
+  generate_ts:
+    image: v20210414-ts
+    build:
+      args: ["GO_VERSION"]
+      context: .
+      target: protoc_gen_ts
+      dockerfile: ./proto.Dockerfile
+    working_dir: /proto/
+    volumes:
+      - "../proto/:/proto/"
+      - "../pkg/:/pkg/"
+    entrypoint: /proto/gen_ts.sh
+  generate_ts_v2:
+    image: v20210414-ts
+    build:
+      args: ["GO_VERSION"]
+      context: .
+      target: protoc_gen_ts
+      dockerfile: ./proto.Dockerfile
+    working_dir: /proto/
+    volumes:
+      - "../proto/:/proto/"
+      - "../pkg/:/pkg/"
+    environment:
+      PROTO_DIR: ${PROTO_DIR}
+      OUT_DIR: ${OUT_DIR}
+      TEAM: ${TEAM}
+    entrypoint: /proto/gen_proto_ts_v2.sh
+  generate_dart:
+    image: v20220713-dart
+    build:
+      args: ["GO_VERSION"]
+      context: .
+      target: protoc_gen_dart
+      dockerfile: ./proto.Dockerfile
+    working_dir: /proto/
+    volumes:
+      - "../proto/:/proto/"
+      - "../pkg/:/pkg/"
+    entrypoint: /proto/gen_dart.sh
+
+  generate_py:
+    image: v20220616-py
+    build:
+      args: ["GO_VERSION"]
+      context: .
+      target: protoc_gen_py
+      dockerfile: ./proto.Dockerfile
+    working_dir: /proto/
+    volumes:
+      - "../proto/:/proto/"
+      - "../pkg/:/pkg/"
+    entrypoint: /proto/gen_py.sh
+  check_lint:
+    build:
+      args: ["GO_VERSION"]
+      context: .
+      target: protoc_gen_go
+      dockerfile: ./proto.Dockerfile
+    working_dir: /proto/
+    volumes:
+      - "../proto/:/proto/"
+      - "../pkg:/pkg/"
+    entrypoint: buf check lint
+  check_breaking:
+    build:
+      args: ["GO_VERSION"]
+      context: .
+      target: protoc_gen_go
+      dockerfile: ./proto.Dockerfile
+    working_dir: /proto/
+    volumes:
+      - "../proto/:/proto/"
+      - "../pkg/:/pkg/"
+    entrypoint: buf check breaking --against-input .git#branch=develop
+
+  gen_old_go:
+    build:
+      args: ["GO_VERSION"]
+      context: .
+      dockerfile: ./old-proto.Dockerfile
+      target: protoc_gen_go_and_web
+    image: protoc_gen_go_and_web
+    environment:
+      GENPROTO_OUT: ${GENPROTO_OUT}
+    working_dir: /protobuf
+    volumes:
+      - "../scripts/:/scripts/"
+      - "../protobuf/:/protobuf/"
+      - "../pkg/genproto/:/pkg/genproto/"
+    entrypoint: /scripts/gen_go.sh
+  gen_old_web:
+    build:
+      args: ["GO_VERSION"]
+      context: .
+      dockerfile: ./old-proto.Dockerfile
+      target: protoc_gen_go_and_web
+    image: protoc_gen_go_and_web
+    environment:
+      GENPROTO_OUT: ${GENPROTO_OUT}
+    working_dir: /protobuf
+    volumes:
+      - "../scripts/:/scripts/"
+      - "../protobuf/:/protobuf/"
+      - "../pkg/genproto/:/pkg/genproto/"
+    entrypoint: /scripts/gen_web.sh
+  gen_old_dart:
+    build:
+      args: ["GO_VERSION"]
+      context: .
+      dockerfile: ./old-proto.Dockerfile
+      target: protoc_gen_dart
+    image: protoc_gen_dart
+    environment:
+      GENPROTO_OUT: ${GENPROTO_OUT}
+    working_dir: /protobuf
+    volumes:
+      - "../scripts/:/scripts/"
+      - "../protobuf/:/protobuf/"
+      - "../pkg/genproto/:${GENPROTO_OUT}/"
+    entrypoint: /scripts/gen_dart.sh
+  syllabus_generate_go:
+    image: v20230526-go
+    build:
+      args: ["GO_VERSION"]
+      context: .
+      target: protoc_gen_go
+      dockerfile: ./syllabus.proto.Dockerfile
+    working_dir: /proto/
+    volumes:
+      - "../proto/:/proto/"
+      - "../pkg/manabuf/syllabus/:/pkg/manabuf/syllabus/"
+      - "../docs/html/:/docs/html/"
+      - "../internal/eureka/entities/:/internal/eureka/entities/"
+      - "../developments/protoc-gen-syllabus/:/developments/protoc-gen-syllabus/"
+    entrypoint: /proto/syllabus_gen_go.sh
+  syllabus_generate_ts:
+    image: v20210414-ts
+    build:
+      args: ["GO_VERSION"]
+      context: .
+      target: protoc_gen_ts
+      dockerfile: ./syllabus.proto.Dockerfile
+    working_dir: /proto/
+    volumes:
+      - "../proto/:/proto/"
+      - "../pkg/:/pkg/"
+    entrypoint: /proto/syllabus_gen_ts.sh
+  syllabus_generate_ts_v2:
+    image: v20210414-ts
+    build:
+      args: ["GO_VERSION"]
+      context: .
+      target: protoc_gen_ts
+      dockerfile: ./syllabus.proto.Dockerfile
+    working_dir: /proto/
+    volumes:
+      - "../proto/:/proto/"
+      - "../pkg/:/pkg/"
+    environment:
+      PROTO_DIR: ${PROTO_DIR}
+      OUT_DIR: ${OUT_DIR}
+      TEAM: ${TEAM}
+    entrypoint: /proto/gen_proto_ts_v2.sh
+  syllabus_generate_dart:
+    image: v20220713-dart
+    build:
+      args: ["GO_VERSION"]
+      context: .
+      target: protoc_gen_dart
+      dockerfile: ./syllabus.proto.Dockerfile
+    working_dir: /proto/
+    volumes:
+      - "../proto/:/proto/"
+      - "../pkg/:/pkg/"
+    entrypoint: /proto/syllabus_gen_dart.sh
+  generate_connect_bufbuild:
+    image: bufbuild:0.0.4
+    volumes:
+      - "../proto/:/bufbuild/proto/"
+      - "../pkg/:/bufbuild/pkg/"
+    environment:
+      PROTO_DIR: $PROTO_DIR
+      TEAM: $TEAM
+      GITHUB_TOKEN: $GITHUB_TOKEN
+      TRANSPORT_PATH: $TRANSPORT_PATH
+      GRPC_BUFBUILD_OPTIONS: $GRPC_BUFBUILD_OPTIONS
+    command: sh -c "sh ./scripts/gen.sh"

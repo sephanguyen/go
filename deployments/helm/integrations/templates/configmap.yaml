@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "integrations.fullname" . }}
+  labels: {{ include "integrations.labels" . | nindent 4 }}
+data:
+  application.properties: |
+{{ printf "configs/%s/%s/application.properties" (include "util.vendor" .) (include "util.environment" .) | .Files.Get | indent 4 }}

@@ -1,0 +1,221 @@
+syntax = "proto3";
+
+package yasuo.v1;
+
+import "common/v1/enums.proto";
+import "common/v1/profiles.proto";
+import "yasuo/v1/enums.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/yasuo/v1;ypb";
+
+message UpdateUserProfileRequest {
+  string id = 1;
+  string name = 2; //last name
+  int32 grade = 3; //student
+}
+
+message UpdateUserProfileResponse {
+  common.v1.BasicProfile user = 1;
+}
+
+message CreateUserProfile {
+  string name = 1;
+  common.v1.Country country = 2;
+  string phone_number = 3;
+  string email = 4;
+  string avatar = 5;
+  string given_name = 6; //create student
+  int32 grade = 7; //create student
+}
+
+message CreateUserRequest {
+  repeated CreateUserProfile users = 1;
+  common.v1.UserGroup user_group = 2;
+  int64 school_id = 3;
+  string organization = 4; //for create school admin only
+}
+
+message CreateUserResponse {
+  repeated common.v1.BasicProfile users = 1;
+}
+
+message AssignToParentRequest {
+  message AssignParent{
+    string student_id = 1;
+    string parent_id = 2;
+    FamilyRelationship relationship = 3;
+  }
+  repeated AssignParent assign_parents = 1;
+}
+
+message AssignToParentResponse {
+  bool successful = 1;
+}
+
+message OverrideUserPasswordRequest {
+  string user_id = 1;
+  string new_password = 2;
+}
+
+message OverrideUserPasswordResponse {
+  bool successful = 1;
+}
+
+message UserProfile {
+  string user_id = 1;
+  string email = 2;
+  string name = 3;
+  string avatar = 4;
+  common.v1.UserGroup group = 5;
+  string phone_number = 6;
+  string facebook_id = 7;
+  string apple_user_id = 8;
+  string given_name = 9;
+  common.v1.Country country_code = 10;
+}
+
+message Student {
+  reserved 4;
+  reserved "status";
+  UserProfile user_profile = 1;
+  int32 grade = 2;
+  int32 school_id = 3;
+  // common.v1.StudentStatus status = 4;
+  common.v1.StudentEnrollmentStatus enrollment_status = 5;
+  string student_external_id = 6;
+  string student_note = 7;
+  string email = 8;
+}
+
+message Parent {
+  UserProfile user_profile = 1;
+  int32 school_id = 2;
+}
+
+message StudentFamily {
+  Parent parent_profile = 1;
+  FamilyRelationship relationship = 2;
+}
+
+message StudentPackage {
+  string student_package_id = 1;
+  google.protobuf.Timestamp start = 2;
+  google.protobuf.Timestamp end = 3;
+}
+
+message CreateStudentRequest {
+  int32 school_id = 1;
+  StudentProfile student_profile = 2;
+  repeated ParentProfile parent_profiles = 3;
+  repeated StudentPackageProfile student_package_profiles = 4;
+
+  message StudentProfile {
+    reserved 7;
+    reserved "status";
+    string email = 1;
+    string password = 2;
+    string name = 3;
+    string phone_number = 4;
+    common.v1.Country country_code = 5;
+    int32 grade = 6;
+    // common.v1.StudentStatus status = 7;
+    common.v1.StudentEnrollmentStatus enrollment_status = 8;
+    string student_external_id = 9;
+    string student_note = 10;
+  }
+  message ParentProfile {
+    string id = 1;
+    string email = 2;
+    string password = 3;
+    string name = 4;
+    string phone_number = 5;
+    common.v1.Country country_code = 6;
+    FamilyRelationship relationship = 7;
+  }
+  message StudentPackageProfile {
+    string course_id = 1;
+    google.protobuf.Timestamp start = 2;
+    google.protobuf.Timestamp end = 3;
+  }
+}
+
+message CreateStudentResponse {
+  StudentProfile student_profile = 1;
+  repeated ParentProfile parent_profiles = 2;
+  repeated StudentPackageProfile student_package_profiles = 3;
+
+  message StudentProfile {
+    Student student = 1;
+    string student_password = 2;
+  }
+  message ParentProfile {
+    Parent parent = 1;
+    string parent_password = 2;
+    FamilyRelationship relationship = 3;
+  }
+  message StudentPackageProfile {
+    string student_package_id = 1;
+    google.protobuf.Timestamp start = 2;
+    google.protobuf.Timestamp end = 3;
+  }
+}
+
+message UpdateStudentRequest {
+  int32 school_id = 1;
+  StudentProfile student_profile = 2;
+  repeated ParentProfile parent_profiles = 3;
+  repeated StudentPackageProfile student_package_profiles = 4;
+
+  message StudentProfile {
+    string id = 1;
+    string name = 2;
+    int32 grade = 3;
+    common.v1.StudentEnrollmentStatus enrollment_status = 4;
+    string student_external_id = 5;
+    string student_note = 6;
+    string email = 7;
+  }
+  message ParentProfile {
+    string id = 1;
+    string email = 2;
+    string password = 3;
+    string name = 4;
+    string phone_number = 5;
+    common.v1.Country country_code = 6;
+    FamilyRelationship relationship = 7;
+  }
+  message StudentPackageProfile {
+    oneof id {
+      string course_id = 1;
+      string student_package_id = 2;
+    }
+    google.protobuf.Timestamp start_time = 3;
+    google.protobuf.Timestamp end_time = 4;
+  }
+}
+
+message UpdateStudentResponse {
+  Student student_profile = 1;
+  repeated ParentProfile parent_profiles = 2;
+  repeated StudentPackageProfile student_package_profiles = 3;
+
+  message ParentProfile {
+    Parent parent = 1;
+    string parent_password = 2;
+    FamilyRelationship relationship = 3;
+  }
+  message StudentPackageProfile {
+    string student_package_id = 1;
+  }
+}
+
+service UserModifierService {
+  rpc UpdateUserProfile(UpdateUserProfileRequest)
+      returns (UpdateUserProfileResponse);
+  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
+  rpc CreateStudent(CreateStudentRequest) returns (CreateStudentResponse);
+  rpc UpdateStudent(UpdateStudentRequest) returns (UpdateStudentResponse);
+  rpc AssignToParent(AssignToParentRequest) returns (AssignToParentResponse);
+  rpc OverrideUserPassword(OverrideUserPasswordRequest) returns (OverrideUserPasswordResponse);
+}

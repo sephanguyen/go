@@ -1,0 +1,2 @@
+ALTER TABLE IF EXISTS public.locations DROP CONSTRAINT IF EXISTS fk__locations_parent_location_id;
+ALTER TABLE IF EXISTS public.location_types DROP CONSTRAINT IF EXISTS fk__location_types__location_type_id;

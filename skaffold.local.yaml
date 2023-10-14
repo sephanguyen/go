@@ -1,0 +1,24 @@
+# skaffold.local.yaml is the skaffold entrypoint for local environment.
+# It defines all the docker builds & helm deployments in local.
+apiVersion: skaffold/v2beta28
+kind: Config
+metadata:
+  name: local
+requires:
+  - path: skaffold.emulator.yaml
+  - path: skaffold.backbone.yaml
+  - path: skaffold.cp-ksql-server.yaml
+  - path: skaffold.data-warehouse.yaml
+  - path: skaffold.manaverse.yaml
+  - path: skaffold.ml-service.yaml
+  - path: skaffold.machinelearning.yaml
+  - path: skaffold.model.yaml
+  - path: skaffold.gateway.yaml
+  - path: skaffold.appsmith.yaml
+  - path: skaffold.monitoring.yaml
+  - path: skaffold.frontend.yaml
+  - path: skaffold.mobile.yaml
+build:
+  local:
+    push: false
+    useDockerCLI: true

@@ -1,0 +1,147 @@
+{
+	"schema": [
+		{
+			"column_name": "book_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "course_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "grades",
+			"data_type": "ARRAY",
+			"column_default": "'{}'::integer[]",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "master_study_plan_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "name",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "school_id",
+			"data_type": "integer",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "status",
+			"data_type": "text",
+			"column_default": "'STUDY_PLAN_STATUS_ACTIVE'::text",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "study_plan_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "study_plan_type",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "track_school_progress",
+			"data_type": "boolean",
+			"column_default": "false",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "study_plans",
+			"policyname": "rls_study_plans",
+			"qual": "permission_check(resource_path, 'study_plans'::text)",
+			"with_check": "permission_check(resource_path, 'study_plans'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "study_plans",
+			"policyname": "rls_study_plans_restrictive",
+			"qual": "permission_check(resource_path, 'study_plans'::text)",
+			"with_check": "permission_check(resource_path, 'study_plans'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "study_plans_master_study_plan_id_fkey",
+			"column_name": "master_study_plan_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "study_plans_pk",
+			"column_name": "study_plan_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "study_plans",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

@@ -1,0 +1,23 @@
+{
+  "name": "uat_manabie_invoicemgmt_to_bob_bank_account_sink_connector",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+    "tasks.max": "1",
+    "topics": "uat.manabie.invoicemgmt.public.bank_account",
+    "connection.url": "${file:/config/kafka-connect-config.properties:bob_url}",
+    "auto.create": "false",
+    "insert.mode": "upsert",
+    "table.name.format": "bank_account",
+    "fields.whitelist": "bank_account_holder,bank_account_id,bank_account_number,bank_account_type,bank_branch_id,bank_id,created_at,deleted_at,is_verified,resource_path,student_id,student_payment_detail_id,updated_at",
+    "transforms": "unwrap,route",
+    "transforms.route.type": "org.apache.kafka.connect.transforms.RegexRouter",
+    "transforms.route.regex": "([^.]+).([^.]+).([^.]+).([^.]+).([^.]+)",
+    "transforms.route.replacement": "$5",
+    "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+    "delete.enabled": "false",
+    "pk.mode": "record_value",
+    "pk.fields": "bank_account_id",
+    "transforms.unwrap.drop.tombstones": "true",
+    "transforms.unwrap.delete.handling.mode": "drop"
+  }
+}

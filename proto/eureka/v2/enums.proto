@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package eureka.v2;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/eureka/v2;epb";
+
+enum AssessmentSessionStatus {
+  ASSESSMENT_SESSION_STATUS_NONE = 0;
+  ASSESSMENT_SESSION_STATUS_INCOMPLETE = 1;
+  ASSESSMENT_SESSION_STATUS_COMPLETED = 2;
+}
+
+enum GradingStatus {
+  GRADING_STATUS_NOT_MARKED = 0;
+  GRADING_STATUS_IN_PROGRESS = 1;
+  GRADING_STATUS_MARKED = 2;
+  GRADING_STATUS_RETURNED = 3;
+  // DOES NOT STORE, JUST STATUS OF A COMPLETED SESSION
+  GRADING_STATUS_NONE = 4;
+}
+
+// use for filtering & search
+enum GradingStatusFilter {
+  GRADING_STATUS_FILTER_ALL = 0;
+  GRADING_STATUS_FILTER_NOT_MARKED = 1;
+  GRADING_STATUS_FILTER_IN_PROGRESS = 2;
+  GRADING_STATUS_FILTER_MARKED = 3;
+  GRADING_STATUS_FILTER_RETURNED = 4;
+}
+
+enum StudyPlanStatus {
+  STUDY_PLAN_STATUS_NONE = 0;
+  STUDY_PLAN_STATUS_ACTIVE = 1;
+  STUDY_PLAN_STATUS_ARCHIVED = 2;
+}

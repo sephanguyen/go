@@ -1,0 +1,75 @@
+{
+	"schema": [
+		{
+			"column_name": "notification_id",
+			"data_type": "text",
+			"column_default": null
+		},
+		{
+			"column_name": "title",
+			"data_type": "text",
+			"column_default": null
+		},
+		{
+			"column_name": "description",
+			"data_type": "text",
+			"column_default": null
+		},
+		{
+			"column_name": "type",
+			"data_type": "text",
+			"column_default": null
+		},
+		{
+			"column_name": "data",
+			"data_type": "jsonb",
+			"column_default": null
+		},
+		{
+			"column_name": "target",
+			"data_type": "text",
+			"column_default": null
+		},
+		{
+			"column_name": "schedule_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null
+		},
+		{
+			"column_name": "event",
+			"data_type": "text",
+			"column_default": "'NOTIFICATION_EVENT_NONE'::text"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "notifications",
+			"policyname": "rls_notifications",
+			"qual": "permission_check(resource_path, 'notifications'::text)",
+			"with_check": "permission_check(resource_path, 'notifications'::text)",
+			"relrowsecurity": false,
+			"relforcerowsecurity": false
+		}
+	],
+	"table_name": "notifications"
+}

@@ -1,0 +1,164 @@
+{
+	"schema": [
+		{
+			"column_name": "allocated_marker_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "assessment_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "completed_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "graded_score",
+			"data_type": "integer",
+			"column_default": "0",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "grading_status",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "marked_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "marked_by",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "max_score",
+			"data_type": "integer",
+			"column_default": "0",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "session_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "student_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "study_plan_assessment_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "assessment_submission",
+			"policyname": "rls_assessment_submission",
+			"qual": "permission_check(resource_path, 'assessment_submission'::text)",
+			"with_check": "permission_check(resource_path, 'assessment_submission'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "assessment_submission",
+			"policyname": "rls_assessment_submission_restrictive",
+			"qual": "permission_check(resource_path, 'assessment_submission'::text)",
+			"with_check": "permission_check(resource_path, 'assessment_submission'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "assessment_submission_fk",
+			"column_name": "session_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "assessment_submission_pk",
+			"column_name": "id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "session_id_un",
+			"column_name": "session_id",
+			"constraint_type": "UNIQUE"
+		}
+	],
+	"table_name": "assessment_submission",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

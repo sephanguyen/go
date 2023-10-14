@@ -1,0 +1,118 @@
+{
+	"schema": [
+		{
+			"column_name": "available_or_not",
+			"data_type": "boolean",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "grade_div",
+			"data_type": "integer",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "id",
+			"data_type": "integer",
+			"column_default": "nextval('teacher_subject_id_seq'::regclass)",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "run_time_id",
+			"data_type": "character varying",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "subject_id",
+			"data_type": "integer",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "teacher_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "teacher_subject",
+			"policyname": "rls_teacher_subject",
+			"qual": "permission_check(resource_path, 'teacher_subject'::text)",
+			"with_check": "permission_check(resource_path, 'teacher_subject'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "teacher_subject",
+			"policyname": "rls_teacher_subject_restrictive",
+			"qual": "permission_check(resource_path, 'teacher_subject'::text)",
+			"with_check": "permission_check(resource_path, 'teacher_subject'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "teacher_subject_pk",
+			"column_name": "id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "teacher_subject",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

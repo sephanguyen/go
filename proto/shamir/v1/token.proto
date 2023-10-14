@@ -1,0 +1,86 @@
+syntax = "proto3";
+
+package shamir.v1;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/shamir/v1;spb";
+
+message VerifyTokenRequest {
+  string original_token = 1;
+}
+
+message VerifyTokenResponse {
+  string user_id = 1;
+  string tenant_id = 2;
+}
+
+message ExchangeTokenRequest {
+  message TokenInfo {
+    string applicant = 1;
+    string user_id = 2;
+    repeated int64 school_ids = 3;
+    string default_role = 4;
+    repeated string allowed_roles = 5;
+  }
+
+  TokenInfo new_token_info = 1;
+  string original_token = 2;
+}
+
+message ExchangeTokenResponse {
+  string new_token = 1;
+}
+
+message GetAuthInfoRequest {
+  string username = 1;
+  string domain_name = 2;
+}
+message GetAuthInfoResponse {
+  string login_email = 1;
+  string tenant_id = 2;
+  string email = 3;
+  string organization_id = 4;
+  string user_id = 5;
+}
+
+message ExchangeSalesforceTokenRequest {
+  string user_id = 1;
+  string organization_id = 2;
+}
+
+message ExchangeSalesforceTokenResponse {
+  string token = 1;
+}
+
+service TokenReaderService {
+  rpc VerifyToken(VerifyTokenRequest) returns (VerifyTokenResponse);
+  rpc ExchangeToken(ExchangeTokenRequest) returns (ExchangeTokenResponse);
+  rpc VerifyTokenV2(VerifyTokenRequest) returns (VerifyTokenResponse);
+  rpc VerifySignature(VerifySignatureRequest) returns (VerifySignatureResponse);
+  rpc GetAuthInfo(GetAuthInfoRequest) returns (GetAuthInfoResponse);
+  rpc ExchangeSalesforceToken(ExchangeSalesforceTokenRequest) returns (ExchangeSalesforceTokenResponse);
+}
+
+message VerifySignatureRequest {
+  string public_key = 1;
+  string signature = 2;
+  bytes body = 3;
+}
+
+message VerifySignatureResponse {
+  string user_id = 1;
+  string organization_id = 2;
+}
+
+message GenerateFakeTokenRequest{
+ string user_id = 1;
+ string school_id = 2;
+ string project_id = 3;
+ string tenant_id = 4;
+}
+message GenerateFakeTokenResponse{
+   string token = 1;
+}
+
+service InternalService {
+  rpc GenerateFakeToken(GenerateFakeTokenRequest) returns (GenerateFakeTokenResponse);
+}

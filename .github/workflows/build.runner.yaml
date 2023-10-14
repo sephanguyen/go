@@ -1,0 +1,113 @@
+# This is a common workflow to build and push custom runner docker images used in action runner controller:
+name: build.runner
+
+on:
+  workflow_dispatch:
+    inputs:
+      runner-tag-name:
+        description: "Image tag"
+        type: string
+        default: "latest"
+      runner-version:
+        description: "Version of Github runner to build from"
+        type: string
+        default: "2.304.0"
+      runner-hook-version:
+        description: "Version of runner's hook"
+        type: string
+        default: "0.2.0"
+      docker-version:
+        description: "Version of Docker"
+        type: string
+        default: "20.10.18"
+
+env:
+  GITHUB_TOKEN: ${{ secrets.BUILD_GITHUB_TOKEN }}
+  REPO_OWNER: ${{ github.repository_owner }}
+  CUSTOM_RUNNER_REPO: "custom-actions-runner"
+  CUSTOM_RUNNER_REGISTRY: "asia-docker.pkg.dev/student-coach-e1e95/manaverse"
+  RUNNER_TAG: ${{ inputs.runner-tag-name }}
+  RUNNER_VERSION: ${{ inputs.runner-version }}
+  DOCKER_VERSION: ${{ inputs.docker-version }}
+  RUNNER_CONTAINER_HOOKS_VERSION: ${{ inputs.runner-hook-version }}
+
+jobs:
+  build-runners:
+    name: Build ${{ matrix.name }}-${{ matrix.os-name }}-${{ matrix.os-version }}
+    runs-on: ["self-hosted", "8-32-non-persistent-large-runner"]
+    permissions:
+      contents: "read"
+      id-token: "write"
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: actions-runner
+            os-name: ubuntu
+            os-version: 20.04
+          - name: actions-runner-dind
+            os-name: ubuntu
+            os-version: 20.04
+          - name: actions-runner-dind-rootless
+            os-name: ubuntu
+            os-version: 20.04
+          - name: actions-runner
+            os-name: ubuntu
+            os-version: 22.04
+          - name: actions-runner-dind
+            os-name: ubuntu
+            os-version: 22.04
+          - name: actions-runner-dind-rootless
+            os-name: ubuntu
+            os-version: 22.04
+    steps:
+      - name: Checkout runner source
+        uses: actions/checkout@v3
+        timeout-minutes: 5
+        with:
+          repository: ${{ env.REPO_OWNER }}/${{ env.CUSTOM_RUNNER_REPO }}
+          ref: main
+          token: ${{ secrets.BUILD_GITHUB_TOKEN }}
+
+      - name: Authenticate to Google Cloud using Workload Identity Federation
+        id: auth
+        uses: google-github-actions/auth@v1
+        with:
+          token_format: access_token
+          workload_identity_provider: 'projects/418860883682/locations/global/workloadIdentityPools/gh-action-pool/providers/build-bot-provider'
+          service_account: 'prod-build-bot@student-coach-e1e95.iam.gserviceaccount.com'
+
+      - name: Login to AR
+        uses: docker/login-action@v2
+        with:
+          registry: asia-docker.pkg.dev
+          username: 'oauth2accesstoken'
+          password: '${{ steps.auth.outputs.access_token }}'
+
+      - name: Set up Docker Context for Buildx
+        id: buildx-context
+        run: |
+          docker context create builders
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v2
+        with:
+          version: latest
+          endpoint: builders
+      - name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: ./${{ matrix.name }}.${{ matrix.os-name }}-${{ matrix.os-version }}.dockerfile
+          builder: ${{ steps.buildx.outputs.name }}
+          platforms: linux/amd64
+          push: true
+          build-args: |
+            RUNNER_VERSION=${{ env.RUNNER_VERSION }}
+            DOCKER_VERSION=${{ env.DOCKER_VERSION }}
+            RUNNER_CONTAINER_HOOKS_VERSION=${{ env.RUNNER_CONTAINER_HOOKS_VERSION }}
+          tags: |
+            ${{ env.CUSTOM_RUNNER_REGISTRY }}/${{ matrix.name }}:v${{ env.RUNNER_VERSION }}-${{ matrix.os-name }}-${{ matrix.os-version }}
+            ${{ env.CUSTOM_RUNNER_REGISTRY }}/${{ matrix.name }}:${{env.RUNNER_TAG}}
+          cache-from: type=registry,ref=${{ env.CUSTOM_RUNNER_REGISTRY }}/${{ matrix.name }}:buildcache
+          cache-to: type=registry,ref=${{ env.CUSTOM_RUNNER_REGISTRY }}/${{ matrix.name }}:buildcache,mode=max

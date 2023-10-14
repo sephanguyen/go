@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package nats.v1;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/nats/v1;npb";
+
+import "google/protobuf/any.proto";
+
+message WrapperMsg {
+  google.protobuf.Any message = 1;
+  B3TraceInfo trace_info = 2;
+}
+
+// Follow B3 format
+//  1. Single Header:
+//    b3: {TraceId}-{SpanId}-{SamplingState}-{ParentSpanId}
+//  2. Multiple Headers:
+//    x-b3-traceid: {TraceId}
+//    x-b3-parentspanid: {ParentSpanId}
+//    x-b3-spanid: {SpanId}
+//    x-b3-sampled: {SamplingState}
+//    x-b3-flags: {DebugFlag
+message B3TraceInfo {
+  message Multiples {
+    string trace_id = 1;
+    string parent_span_id = 2;
+    string span_id = 3;
+    string sampled = 4;
+    string flags = 5;
+  }
+  oneof Header {
+    string single = 1;
+    Multiples multiples = 2;
+  }
+}

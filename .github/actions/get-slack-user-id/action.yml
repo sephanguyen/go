@@ -1,0 +1,71 @@
+name: "get-slack-user-id"
+description: "Get Slack user ID from triggering actor"
+
+inputs:
+  actor:
+    required: false
+    description: github username of user that trigger the workflow
+  release_repo:
+    required: false
+    description: repo used to find the commit's info
+  release_tag:
+    required: false
+    description: the owner of this tag will be alerted
+  SLACK_TOKEN:
+    required: true
+    description: Slack API Token
+
+outputs:
+  userId:
+    description: Slack user ID of the release tag owner
+    value: ${{ steps.find-slack-user.outputs.member-id }}
+
+runs:
+  using: composite
+  steps:
+    - id: get-commit
+      if: inputs.release_tag != ''
+      run: |
+        IFS='.' read -ra SHA <<< "${{ inputs.release_tag }}"
+        echo "result=${SHA[1]}" >> $GITHUB_OUTPUT
+      shell: bash
+
+    - id: get-github-username
+      if: inputs.release_tag != ''
+      uses: actions/github-script@v6
+      env:
+        COMMIT_SHA: ${{ steps.get-commit.outputs.result }}
+      with:
+        github-token: ${{ env.GITHUB_TOKEN }}
+        script: |
+          const { data } = await github.rest.repos.getCommit({
+              owner: context.repo.owner,
+              repo: '${{ inputs.release_repo }}',
+              ref: process.env.COMMIT_SHA,
+          });
+          core.setOutput('username', data.author.login)
+
+    - name: Install dependency
+      run: |
+        npm install glob
+        npm install js-hcl-parser
+      shell: bash
+
+    - id: get-email
+      uses: actions/github-script@v6
+      env:
+        GITHUB_USERNAME: ${{ steps.get-github-username.outputs.username }}
+      with:
+        github-token: ${{ env.GITHUB_TOKEN }}
+        script: |
+          const { findEmail } = require('./.github/scripts/get_manabie_email.js');
+          const actor = process.env.GITHUB_USERNAME || "${{ inputs.actor }}"
+          var email = await findEmail(actor);
+          if (!email) email = 'quanghuy.hoang@manabie.com';
+          core.setOutput('email', email)
+
+    - id: find-slack-user
+      uses: scribd/find-slack-user-action@v1.0.3
+      with:
+        email: ${{ steps.get-email.outputs.email }}
+        slack-token: ${{ inputs.SLACK_TOKEN }}

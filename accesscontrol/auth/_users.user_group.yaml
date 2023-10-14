@@ -1,0 +1,5 @@
+- template: 3
+  tableName: user_group
+  permissionPrefix: user.usergroup
+  permissions:
+    postgres: []

@@ -1,0 +1,10 @@
+ALTER TABLE books
+ADD COLUMN IF NOT EXISTS book_type TEXT DEFAULT 'BOOK_TYPE_GENERAL'::TEXT,
+ADD CONSTRAINT book_type_check CHECK (book_type = ANY (ARRAY[
+        'BOOK_TYPE_NONE',
+        'BOOK_TYPE_GENERAL',
+        'BOOK_TYPE_ADHOC'
+]::text[]));
+
+UPDATE books
+SET book_type = 'BOOK_TYPE_GENERAL'::TEXT;

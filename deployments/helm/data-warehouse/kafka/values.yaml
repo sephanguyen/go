@@ -1,0 +1,158 @@
+kafka:
+  image:
+    repository: asia.gcr.io/student-coach-e1e95/customized_debezium_kafka
+    pullPolicy: IfNotPresent
+    tag: "1.9.0"
+
+  service:
+    type: ClusterIP
+    clientPort: 9092
+    clusterPort: 9093
+
+  fileStorage:
+    accessModes:
+      - ReadWriteOnce
+    storageDirectory: /kafka/data
+    size: 10Gi
+    storageClassName: standard
+
+  cluster:
+    enabled: false
+    replicas: 1
+
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 1
+        podAffinityTerm:
+          topologyKey: kubernetes.io/hostname
+          labelSelector:
+            matchExpressions:
+            - key: app.kubernetes.io/name
+              operator: In
+              values: ["kafka"]
+
+  bootstrapServers:
+    host: dwh-kafka-svc
+    port: 9092
+
+kafkaExporter:
+  image:
+    repository: danielqsj/kafka-exporter
+    tag: latest
+    pullPolicy: IfNotPresent
+
+  replicaCount: 1
+
+  kafka:
+    servers:
+      - dwh-kafka-svc:9092
+    version: "3.0.0"
+
+  sasl:
+    enabled: true
+    handshake: true
+    username: ""
+    password: ""
+    mechanism: "plain"
+
+  tls:
+    enabled: false
+    insecureSkipTlsVerify: false
+    caFile: ""
+    certFile: ""
+    keyFile: ""
+
+  log:
+    verbosity: 0
+    enableSarama: false
+
+  service:
+    type: ClusterIP
+    port: 9308
+
+  podAnnotations:
+    prometheus.io/scheme: "http"
+    prometheus.io/port: "9308"
+    prometheus.io/scrape: "true"
+    cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+
+  labels: {}
+  podLabels: {}
+  resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  podAffinityIdentifier: kafka-exporter-kafka
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 1
+        podAffinityTerm:
+          topologyKey: kubernetes.io/hostname
+          labelSelector:
+            matchExpressions:
+            - key: app.kubernetes.io/name
+              operator: In
+              values: ["kafka-exporter-kafka"]
+
+imagePullSecrets: []
+
+securityContext:
+  fsGroup: 1000
+  runAsUser: 1000
+  runAsGroup: 1000
+
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "5555"
+  cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+    - weight: 1
+      podAffinityTerm:
+        topologyKey: kubernetes.io/hostname
+        labelSelector:
+          matchExpressions:
+          - key: app.kubernetes.io/name
+            operator: In
+            values:
+            - kafka
+
+postAclHook: false
+
+sopsImage:
+  repository: mozilla/sops
+  tag: v3.7.3-alpine
+decryptorImage:
+  repository: asia.gcr.io/student-coach-e1e95/decrypt-secret
+  tag: "20220517"
+
+aclImage:
+  image:
+    repository: asia.gcr.io/student-coach-e1e95/customized_debezium_connect
+    tag: 1.9.6
+    pullPolicy: IfNotPresent
+
+  groupID: "1"
+
+  bootstrapServers:
+    host: dwh-kafka-svc
+    port: 9092
+
+enableAC: false
+createACL: false

@@ -1,0 +1,23 @@
+resources:
+  limits: {}
+  requests:
+    cpu: 200m
+    memory: 1000Mi
+
+sqlProxy:
+  enabled: false
+  dbConnName: ""
+serviceAccountEmailSuffix: production-renseikai
+
+applicationConfig:
+  APPSMITH_ENCRYPTION_PASSWORD: "hyFuflDDW7cUc"
+  APPSMITH_ENCRYPTION_SALT: "h00t4uRmAQmMf"
+  APPSMITH_MAIL_ENABLED: true
+  APPSMITH_MAIL_HOST: "smtp.gmail.com"
+  APPSMITH_MAIL_PORT: 587
+  APPSMITH_MAIL_SMTP_TLS_ENABLED: true
+  APPSMITH_MAIL_SMTP_AUTH: true
+  APPSMITH_MAIL_USERNAME: "bot.manabie@manabie.com"
+  APPSMITH_MAIL_FROM: "bot.manabie@manabie.com"
+  APPSMITH_REPLY_TO: "bot.manabie@manabie.com"
+  APPSMITH_OAUTH2_GOOGLE_CLIENT_ID: "418860883682-p8bvda157tna5977sma470v379cddgob.apps.googleusercontent.com"

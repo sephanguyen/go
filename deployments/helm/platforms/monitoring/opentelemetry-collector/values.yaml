@@ -1,0 +1,137 @@
+mode: "deployment"
+
+replicaCount: 1
+
+config:
+  receivers:
+    jaeger:
+      protocols:
+        thrift_http:
+          endpoint: 0.0.0.0:14268
+
+    zipkin:
+      endpoint: 0.0.0.0:9411
+
+    otlp:
+      protocols:
+        grpc:
+          endpoint: 0.0.0.0:4317
+
+  processors:
+    tail_sampling:
+      policies:
+        [
+          {
+            name: ignore-http-requests,
+            type: string_attribute,
+            string_attribute: { key: upstream_cluster, values: [hasura, sorry-cypress, grafana], enabled_regex_matching: true, invert_match: true }
+          },
+          {
+            name: ignore-grpc-stream-requests,
+            type: string_attribute,
+            string_attribute: { key: grpc.path, values: [\/Subscribe*], enabled_regex_matching: true, invert_match: true }
+          },
+          {
+            name: slow-requests,
+            type: latency,
+            latency: { threshold_ms: 800 }
+          },
+          {
+            name: grpc-timeout-requests,
+            type: string_attribute,
+            string_attribute: { key: x-timed-out, values: ["true"] }
+          },
+          {
+            name: http-error-requests,
+            type: string_attribute,
+            string_attribute: { key: http.status_code, values: ["500", "501", "502", "503", "504"] }
+          },
+          {
+            name: grpc-error-requests,
+            type: string_attribute,
+            string_attribute: { key: grpc.status_code, values: ["2", "4", "8", "10", "11", "12", "13", "14", "15"] }
+          },
+          {
+            name: error-requests,
+            type: status_code,
+            status_code: { status_codes: [ERROR] }
+          },
+        ]
+
+  exporters:
+    jaeger:
+      endpoint: jaeger-all-in-one.monitoring.svc.cluster.local:14250
+      tls:
+        insecure: true
+
+  extensions:
+    health_check: {}
+
+  service:
+    extensions:
+      - health_check
+    pipelines:
+      traces:
+        receivers:
+          - jaeger
+          - zipkin
+          - otlp
+        processors:
+          - tail_sampling
+        exporters:
+          - jaeger
+
+image:
+  repository: otel/opentelemetry-collector-contrib
+
+command:
+  name: otelcol-contrib
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+
+tolerations:
+  - effect: NoSchedule
+    key: monitoring
+    operator: Exists
+
+podAnnotations:
+  cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+
+# Configuration for ports
+ports:
+  otlp:
+    enabled: false
+    containerPort: 4317
+    servicePort: 4317
+    hostPort: 4317
+    protocol: TCP
+  grpc-otlp:
+    enabled: true
+    containerPort: 4317
+    servicePort: 4317
+    hostPort: 4317
+    protocol: TCP
+  jaeger-thrift:
+    enabled: true
+    containerPort: 14268
+    servicePort: 14268
+    hostPort: 14268
+    protocol: TCP
+  jaeger-grpc:
+    enabled: true
+    containerPort: 14250
+    servicePort: 14250
+    hostPort: 14250
+    protocol: TCP
+  zipkin:
+    enabled: true
+    containerPort: 9411
+    servicePort: 9411
+    hostPort: 9411
+    protocol: TCP

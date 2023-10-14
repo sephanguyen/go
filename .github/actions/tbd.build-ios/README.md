@@ -1,0 +1,84 @@
+# Build IOS
+
+Build IOS step action
+
+### Environment variables input
+
+|Name|Type|Description|Require|
+|--|--|--|--|
+|GITHUB_TOKEN|string|github token|true|
+|REPO|string|repository|true|
+|RELEASE_TAG|string|get tag from [student-app](https://github.com/manabie-com/student-app/tags)|true|
+|ORGANIZATION|string||true|
+|ENVIRONMENT|string||true|
+|APP|string|learner|true|
+|MANABIE_P12_BASE64|string||true|
+|MANABIE_P12_PASS|string||true|
+|MANABIE_MOBILEPROVISION_BASE64|string||true|
+|MANABIE_APP_STORE_MOBILEPROVISION_BASE64|string||true|
+|JPREP_P12_BASE64|string||true|
+|JPREP_P12_PASS|string||true|
+|JPREP_MOBILEPROVISION_BASE64|string||true|
+|JPREP_APP_STORE_MOBILEPROVISION_BASE64|string||true|
+|SYNERSIA_P12_BASE64|string||true|
+|SYNERSIA_P12_PASS|string||true|
+|SYNERSIA_MOBILEPROVISION_BASE64|string||true|
+|SYNERSIA_APP_STORE_MOBILEPROVISION_BASE64|string||true|
+|RENSEIKAI_P12_BASE64|string||true|
+|RENSEIKAI_P12_PASS|string||true|
+|RENSEIKAI_MOBILEPROVISION_BASE64|string||true|
+|RENSEIKAI_APP_STORE_MOBILEPROVISION_BASE64|string||true|
+|GA_P12_BASE64|string||true|
+|GA_P12_PASS|string||true|
+|GA_MOBILEPROVISION_BASE64|string||true|
+|GA_APP_STORE_MOBILEPROVISION_BASE64|string||true|
+
+example:
+
+```yaml
+name: example
+
+on:
+  pull_request:
+    types: [synchronize]
+
+env:
+  GITHUB_TOKEN: ${{ secrets.BUILD_GITHUB_TOKEN }}
+  REPO: 'student-app'
+  RELEASE_TAG: 'develop'
+  ORGANIZATION: 'manabie'
+  ENVIRONMENT: 'staging'
+  APP: "learner"
+
+  MANABIE_P12_BASE64: ${{secrets.MANABIE_P12_BASE64}}
+  MANABIE_P12_PASS: ${{secrets.MANABIE_P12_PASS}}
+  MANABIE_MOBILEPROVISION_BASE64: ${{secrets.MANABIE_MOBILEPROVISION_BASE64}}
+  MANABIE_APP_STORE_MOBILEPROVISION_BASE64: ${{secrets.MANABIE_APP_STORE_MOBILEPROVISION_BASE64}}
+
+  JPREP_P12_BASE64: ${{secrets.JPREP_P12_BASE64}}
+  JPREP_P12_PASS: ${{secrets.JPREP_P12_PASS}}
+  JPREP_MOBILEPROVISION_BASE64: ${{secrets.JPREP_MOBILEPROVISION_BASE64}}
+  JPREP_APP_STORE_MOBILEPROVISION_BASE64: ${{secrets.JPREP_APP_STORE_MOBILEPROVISION_BASE64}}
+
+  SYNERSIA_P12_BASE64: ${{secrets.SYNERSIA_P12_BASE64}}
+  SYNERSIA_P12_PASS: ${{secrets.SYNERSIA_P12_PASS}}
+  SYNERSIA_MOBILEPROVISION_BASE64: ${{secrets.SYNERSIA_MOBILEPROVISION_BASE64}}
+  SYNERSIA_APP_STORE_MOBILEPROVISION_BASE64: ${{secrets.SYNERSIA_APP_STORE_MOBILEPROVISION_BASE64}}
+
+  RENSEIKAI_P12_BASE64: ${{secrets.RENSEIKAI_P12_BASE64}}
+  RENSEIKAI_P12_PASS: ${{secrets.RENSEIKAI_P12_PASS}}
+  RENSEIKAI_MOBILEPROVISION_BASE64: ${{secrets.RENSEIKAI_MOBILEPROVISION_BASE64}}
+  RENSEIKAI_APP_STORE_MOBILEPROVISION_BASE64: ${{secrets.RENSEIKAI_APP_STORE_MOBILEPROVISION_BASE64}}
+
+  GA_P12_BASE64: ${{secrets.GA_P12_BASE64}}
+  GA_P12_PASS: ${{secrets.GA_P12_PASS}}
+  GA_MOBILEPROVISION_BASE64: ${{secrets.GA_MOBILEPROVISION_BASE64}}
+  AIC_MOBILEPROVISION_BASE64: ${{ secrets.AIC_MOBILEPROVISION_BASE64 }}
+  AIC_APP_STORE_MOBILEPROVISION_BASE64: ${{ secrets.AIC_APP_STORE_MOBILEPROVISION_BASE64 }}
+
+jobs:
+  example:
+    runs-on: [self-hosted, macos]
+    steps:
+      - uses: manabie-com/backend/.github/actions/build-ios@develop
+```

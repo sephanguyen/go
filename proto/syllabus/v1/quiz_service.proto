@@ -1,0 +1,103 @@
+syntax = "proto3";
+
+package syllabus.v1;
+
+import "common/v1/contents.proto";
+import "common/v1/requests.proto";
+import "common/v1/question_group.proto";
+import "google/protobuf/wrappers.proto";
+import "syllabus/v1/study_plan.proto";
+import "syllabus/v1/enums.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/syllabus/v1;sspb";
+
+message CreateQuizTestV2Request {
+  StudyPlanItemIdentity study_plan_item_identity = 1;
+  google.protobuf.StringValue shuffle_quiz_set_id = 2; // old is set_id
+  common.v1.Paging paging = 3;
+  string session_id = 4;
+  bool keep_order = 5;
+}
+
+message CreateQuizTestV2Response {
+  common.v1.Paging next_page = 1;
+  repeated common.v1.Quiz quizzes = 2; // old is items
+  string shuffle_quiz_set_id = 3; // old is set_id
+  repeated common.v1.QuestionGroup question_groups = 4;
+}
+
+message CreateRetryQuizTestV2Request {
+  StudyPlanItemIdentity study_plan_item_identity = 1;
+  google.protobuf.StringValue shuffle_quiz_set_id = 2; // old is set_id
+  common.v1.Paging paging = 3;
+  string session_id = 4;
+  bool keep_order = 5;
+  google.protobuf.StringValue retry_shuffle_quiz_id = 6;
+}
+
+message CreateRetryQuizTestV2Response {
+  common.v1.Paging next_page = 1;
+  repeated common.v1.Quiz quizzes = 2; // old is items
+  string shuffle_quiz_set_id = 3; // old is quizzes_id
+  repeated common.v1.QuestionGroup question_groups = 4;
+}
+
+message RetrieveQuizTestV2Request {
+  repeated StudyPlanItemIdentity study_plan_item_identities = 1;
+  bool is_completed = 2;
+}
+
+message RetrieveQuizTestV2Response {
+  repeated item items = 1;
+  AchievementCrown highest_crown = 2;
+  int32 total_attempts = 3;    //only count for the origin attempts, not retry attempts
+  common.v1.HighestQuizScore highest_score = 4;
+
+  message item {
+    StudyPlanItemIdentity study_plan_item_identity = 1;
+    common.v1.QuizTests quiz_test = 2;
+  }
+}
+
+message UpsertFlashcardContentRequest {
+  string flashcard_id = 1;
+  repeated common.v1.QuizCore  quizzes = 2;
+  common.v1.QuizType kind = 3;
+}
+
+message UpsertFlashcardContentResponse {
+  repeated common.v1.QuizCore quizzes = 1;
+}
+
+message Answer {
+  oneof format {
+    uint32 selected_index = 1;
+    string filled_text = 2;
+    string submitted_key = 3;
+  }
+}
+
+message CheckQuizCorrectnessRequest {
+  string shuffled_quiz_set_id = 1;
+  string quiz_id = 2;
+  repeated Answer answer = 3;
+  LearningMaterialType lm_type = 4;
+}
+
+message CheckQuizCorrectnessResponse {
+  repeated bool correctness = 1;
+  bool is_correct_all = 2;
+  repeated string filled_texts = 3;
+  repeated string correct_texts = 4;
+  oneof result {
+    common.v1.OrderingResult ordering_result = 5;
+  }
+}
+
+service Quiz {
+  rpc CreateQuizTestV2(CreateQuizTestV2Request) returns (CreateQuizTestV2Response);
+  rpc CreateRetryQuizTestV2(CreateRetryQuizTestV2Request) returns (CreateRetryQuizTestV2Response);
+  rpc RetrieveQuizTestsV2(RetrieveQuizTestV2Request) returns (RetrieveQuizTestV2Response);
+  rpc UpsertFlashcardContent(UpsertFlashcardContentRequest) returns (UpsertFlashcardContentResponse);
+  rpc CheckQuizCorrectness(CheckQuizCorrectnessRequest) returns (CheckQuizCorrectnessResponse);
+}

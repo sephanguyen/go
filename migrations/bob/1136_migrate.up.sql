@@ -1,0 +1,4 @@
+ALTER TABLE public.users
+    ADD COLUMN IF NOT EXISTS birthday DATE NULL;
+ALTER TABLE public.users
+    ADD COLUMN IF NOT EXISTS gender TEXT NULL;

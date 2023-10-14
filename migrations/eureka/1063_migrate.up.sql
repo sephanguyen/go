@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS topics_learning_objectives_lo_id_idx ON public.topics_learning_objectives(lo_id);

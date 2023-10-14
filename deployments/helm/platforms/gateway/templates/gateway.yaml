@@ -1,0 +1,320 @@
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: {{ include "gateway.fullname" . }}
+  labels:
+    {{- include "gateway.labels" . | nindent 4 }}
+spec:
+  selector:
+    istio: ingressgateway # use istio default controller
+  servers:
+# begin web-api domain
+  - port:
+      number: 31400
+      name: grpc-web-api
+      protocol: HTTPS
+    hosts:
+{{ toYaml .Values.dnsNames.webApi | indent 4 }}
+    tls:
+      credentialName: cert-web-api-{{ include "gateway.fullname" . }}
+      mode: SIMPLE
+      privateKey: sds
+      serverCertificate: sds
+  - port:
+{{- if eq "local" .Values.environment }}
+      number: 15443
+{{ else }}
+      number: 443
+{{- end }}
+      name: grpc-web-api-443
+      protocol: HTTPS
+    hosts:
+{{ toYaml .Values.dnsNames.webApi | indent 4 }}
+    tls:
+      credentialName: cert-web-api-{{ include "gateway.fullname" . }}
+      mode: SIMPLE
+      privateKey: sds
+      serverCertificate: sds
+# end web-api domain
+
+# begin grpc-api domain
+  - port:
+      number: 31500
+      name: grpc-api
+      protocol: HTTPS
+    hosts:
+{{ toYaml .Values.dnsNames.api | indent 4 }}
+    tls:
+      credentialName: cert-api-{{ include "gateway.fullname" . }}
+      mode: SIMPLE
+      privateKey: sds
+      serverCertificate: sds
+  - port:
+{{- if eq "local" .Values.environment }}
+      number: 15443
+{{ else }}
+      number: 443
+{{- end }}
+      name: grpc-api-443
+      protocol: HTTPS
+    hosts:
+{{ toYaml .Values.dnsNames.api | indent 4 }}
+    tls:
+      credentialName: cert-api-{{ include "gateway.fullname" . }}
+      mode: SIMPLE
+      privateKey: sds
+      serverCertificate: sds
+# end grpc-api domain
+
+# begin admin domain
+  - port:
+      number: 31600
+      name: https-admin
+      protocol: HTTPS
+    hosts:
+{{ toYaml .Values.dnsNames.admin | indent 4 }}
+    tls:
+      credentialName: cert-admin-{{ include "gateway.fullname" . }}
+      mode: SIMPLE
+      privateKey: sds
+      serverCertificate: sds
+  - port:
+{{- if eq "local" .Values.environment }}
+      number: 15443
+{{ else }}
+      number: 443
+{{- end }}
+      name: https-admin-443
+      protocol: HTTPS
+    hosts:
+{{ toYaml .Values.dnsNames.admin | indent 4 }}
+    tls:
+      credentialName: cert-admin-{{ include "gateway.fullname" . }}
+      mode: SIMPLE
+      privateKey: sds
+      serverCertificate: sds
+# end admin domain
+
+# start backoffice
+{{- if .Values.dnsNames.backoffice }}
+  - port:
+{{- if eq "local" .Values.environment }}
+      number: 31600
+{{ else }}
+      number: 443
+{{- end }}
+      name: https-backoffice
+      protocol: HTTPS
+    hosts:
+{{ toYaml .Values.dnsNames.backoffice | indent 4 }}
+    tls:
+      credentialName: cert-backoffice-{{ include "gateway.fullname" . }}
+      mode: SIMPLE
+      privateKey: sds
+      serverCertificate: sds
+{{- end }}
+
+{{- if .Values.dnsNames.backofficeMfe }}
+  - port:
+{{- if eq "local" .Values.environment }}
+      number: 31600
+{{ else }}
+      number: 443
+{{- end }}
+      name: https-backoffice-mfe
+      protocol: HTTPS
+    hosts:
+{{ toYaml .Values.dnsNames.backofficeMfe | indent 4 }}
+    tls:
+      credentialName: cert-backoffice-mfe-{{ include "gateway.fullname" . }}
+      mode: SIMPLE
+      privateKey: sds
+      serverCertificate: sds
+{{- end }}
+# end backoffice
+
+{{- if .Values.dnsNames.teacher }}
+  - port:
+{{- if eq "local" .Values.environment }}
+      number: 31600
+{{ else }}
+      number: 443
+{{- end }}
+      name: https-teacher
+      protocol: HTTPS
+    hosts:
+{{ toYaml .Values.dnsNames.teacher | indent 4 }}
+    tls:
+      credentialName: cert-teacher-{{ include "gateway.fullname" . }}
+      mode: SIMPLE
+      privateKey: sds
+      serverCertificate: sds
+{{- end }}
+{{- if .Values.dnsNames.learner }}
+  - port:
+{{- if eq "local" .Values.environment }}
+      number: 31600
+{{ else }}
+      number: 443
+{{- end }}
+      name: https-learner
+      protocol: HTTPS
+    hosts:
+{{ toYaml .Values.dnsNames.learner | indent 4 }}
+    tls:
+      credentialName: cert-learner-{{ include "gateway.fullname" . }}
+      mode: SIMPLE
+      privateKey: sds
+      serverCertificate: sds
+{{- end }}
+
+{{- if .Values.dnsNames.grafana }}
+  - port:
+      number: 443
+      name: https-grafana
+      protocol: HTTPS
+    hosts:
+{{ toYaml .Values.dnsNames.grafana | indent 4 }}
+    tls:
+      credentialName: cert-grafana-{{ include "gateway.fullname" . }}
+      mode: SIMPLE
+      privateKey: sds
+      serverCertificate: sds
+{{- end }}
+{{- if .Values.dnsNames.redash }}
+  - port:
+{{- if eq "local" .Values.environment }}
+      number: 31600
+{{ else }}
+      number: 443
+{{- end }}
+      name: https-redash
+      protocol: HTTPS
+    hosts:
+{{ toYaml .Values.dnsNames.redash | indent 4 }}
+    tls:
+      credentialName: cert-redash-{{ include "gateway.fullname" . }}
+      mode: SIMPLE
+      privateKey: sds
+      serverCertificate: sds
+{{- end }}
+{{- if eq "local" .Values.environment }}
+{{- if .Values.dnsNames.kiali }}
+  - port:
+      number: 31600
+      name: https-kiali
+      protocol: HTTPS
+    hosts:
+{{ toYaml .Values.dnsNames.kiali | indent 4 }}
+    tls:
+      credentialName: cert-kiali-{{ include "gateway.fullname" . }}
+      mode: SIMPLE
+      privateKey: sds
+      serverCertificate: sds
+{{- end }}
+{{- end }}
+
+{{- if .Values.dnsNames.appsmith }}
+  - port:
+{{- if eq "local" .Values.environment }}
+      number: 31600
+{{ else }}
+      number: 443
+{{- end }}
+      name: https-appsmith
+      protocol: HTTPS
+    hosts:
+{{ toYaml .Values.dnsNames.appsmith | indent 4 }}
+    tls:
+      credentialName: cert-appsmith-{{ include "gateway.fullname" . }}
+      mode: SIMPLE
+      privateKey: sds
+      serverCertificate: sds
+{{- end }}
+
+{{- if eq "local" .Values.environment }}
+{{- if .Values.dnsNames.minio }}
+  - port:
+      number: 31600
+      name: https-minio
+      protocol: HTTPS
+    hosts:
+{{ toYaml .Values.dnsNames.minio | indent 4 }}
+    tls:
+      credentialName: cert-minio-{{ include "gateway.fullname" . }}
+      mode: SIMPLE
+      privateKey: sds
+      serverCertificate: sds
+{{- end }}
+{{- end }}
+
+{{- if .Values.dnsNames.learnosityWebView }}
+  - port:
+{{- if eq "local" .Values.environment }}
+      number: 31600
+{{ else }}
+      number: 443
+{{- end }}
+      name: https-learnosity-web-view
+      protocol: HTTPS
+    hosts:
+{{ toYaml .Values.dnsNames.learnosityWebView | indent 4 }}
+    tls:
+      credentialName: cert-learnosity-web-view-{{ include "gateway.fullname" . }}
+      mode: SIMPLE
+      privateKey: sds
+      serverCertificate: sds
+{{- end }}
+
+{{- if .Values.dnsNames.internal }}
+  - port:
+{{- if eq "local" .Values.environment }}
+      number: 31600
+{{ else }}
+      number: 443
+{{- end }}
+      name: https-internal
+      protocol: HTTPS
+    hosts:
+{{ toYaml .Values.dnsNames.internal | indent 4 }}
+    tls:
+      credentialName: cert-internal-{{ include "gateway.fullname" . }}
+      mode: SIMPLE
+      privateKey: sds
+      serverCertificate: sds
+{{- end }}
+
+{{- if .Values.dnsNames.uatInternal }}
+  - port:
+{{- if eq "local" .Values.environment }}
+      number: 31600
+{{ else }}
+      number: 443
+{{- end }}
+      name: https-uat-internal
+      protocol: HTTPS
+    hosts:
+{{ toYaml .Values.dnsNames.uatInternal | indent 4 }}
+    tls:
+      credentialName: cert-uat-internal-{{ include "gateway.fullname" . }}
+      mode: SIMPLE
+      privateKey: sds
+      serverCertificate: sds
+{{- end }}
+{{- if .Values.dnsNames.internalTool }}
+  - port:
+{{- if eq "local" .Values.environment }}
+      number: 31600
+{{ else }}
+      number: 443
+{{- end }}
+      name: https-prod-internaltool
+      protocol: HTTPS
+    hosts:
+{{ toYaml .Values.dnsNames.internalTool | indent 4 }}
+    tls:
+      credentialName: cert-prod-internaltool-{{ include "gateway.fullname" . }}
+      mode: SIMPLE
+      privateKey: sds
+      serverCertificate: sds
+{{- end }}

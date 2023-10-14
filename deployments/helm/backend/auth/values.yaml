@@ -1,0 +1,114 @@
+adminHttp:
+    - corsPolicy:
+        allowHeaders:
+            - authorization
+            - grpc-timeout
+            - content-type
+            - keep-alive
+            - user-agent
+            - cache-control
+            - content-transfer-encoding
+            - token
+            - x-accept-content-transfer-encoding
+            - x-accept-response-streaming
+            - x-request-id
+            - x-user-agent
+            - x-graphql-mesh-authorization
+            - x-grpc-web
+            - if-none-match
+            - pkg
+            - version
+            - connect-timeout-ms
+            - connect-protocol-version
+            - connect-content-encoding
+            - connect-accept-encoding
+        allowMethods:
+            - POST
+            - GET
+            - OPTIONS
+            - PUT
+            - DELETE
+        allowOrigins:
+            - regex: .*
+        exposeHeaders:
+            - grpc-status
+            - grpc-message
+            - etag
+        maxAge: 100s
+      match:
+        - uri:
+            prefix: /auth/
+      rewrite:
+        uri: /
+      route:
+        - destination:
+            host: auth-hasura
+            port:
+                number: 8080
+affinity: {}
+affinityOverride: {}
+grpcPort: 7550
+hasura:
+    anonymous:
+        enabled: true
+    enableConsole: true
+    enabledApis: metadata,graphql
+    pgConnections: 8
+    pgTimeout: 10
+    resources:
+        requests:
+            memory: 150Mi
+    service:
+        port: 8080
+        type: ClusterIP
+hasuraEnabled: false
+metrics:
+    enabled: true
+    podAnnotations:
+        prometheus.io/port: "8888"
+        prometheus.io/scheme: http
+        prometheus.io/scrape: "true"
+migrationEnabled: false
+readinessProbe:
+    enabled: true
+service:
+    port: 7550
+    type: ClusterIP
+webHttp:
+    - corsPolicy:
+        allowHeaders:
+            - grpc-timeout
+            - content-type
+            - keep-alive
+            - user-agent
+            - cache-control
+            - content-type
+            - content-transfer-encoding
+            - token
+            - x-accept-content-transfer-encoding
+            - x-accept-response-streaming
+            - x-user-agent
+            - x-grpc-web
+            - pkg
+            - version
+        allowMethods:
+            - POST
+            - GET
+            - OPTIONS
+            - PUT
+            - DELETE
+        allowOrigins:
+            - regex: .*
+        exposeHeaders:
+            - grpc-status
+            - grpc-message
+            - grpc-status-details-bin
+        maxAge: 100s
+      match:
+        - uri:
+            prefix: /auth.v1
+      route:
+        - destination:
+            host: auth
+            port:
+                number: 7550

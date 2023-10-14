@@ -1,0 +1,52 @@
+table:
+  schema: public
+  name: conversion_tasks
+select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+        - task_uuid
+        - resource_url
+        - status
+        - conversion_response
+        - created_at
+        - updated_at
+      filter: {}
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+        - conversion_response
+        - resource_url
+        - task_uuid
+        - created_at
+        - updated_at
+        - status
+      filter: {}
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+        - task_uuid
+        - resource_url
+        - status
+        - conversion_response
+        - created_at
+        - updated_at
+        - resource_path
+      filter:
+        resource_path:
+          _eq: X-Hasura-Resource-Path
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+        - conversion_response
+        - resource_path
+        - resource_url
+        - task_uuid
+        - created_at
+        - updated_at
+        - status
+      filter:
+        resource_path:
+          _eq: X-Hasura-Resource-Path

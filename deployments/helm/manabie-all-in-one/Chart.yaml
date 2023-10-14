@@ -1,0 +1,118 @@
+apiVersion: v2
+name: manabie-all-in-one
+description: A Helm chart for Kubernetes
+
+# A chart can be either an 'application' or a 'library' chart.
+#
+# Application charts are a collection of templates that can be packaged into versioned archives
+# to be deployed.
+#
+# Library charts provide useful utilities or functions for the chart developer. They're included as
+# a dependency of application charts to inject those utilities and functions into the rendering
+# pipeline. Library charts do not define any templates and therefore cannot be deployed.
+type: application
+
+# This is the chart version. This version number should be incremented each time you make changes
+# to the chart and its templates, including the app version.
+# Versions are expected to follow Semantic Versioning (https://semver.org/)
+version: 0.1.0
+
+# This is the version number of the application being deployed. This version number should be
+# incremented each time you make changes to the application. Versions are not expected to
+# follow Semantic Versioning. They should reflect the version the application is using.
+# It is recommended to use it with quotes.
+appVersion: "1.16.0"
+dependencies:
+  - name: auth
+    version: 0.1.0
+    condition: global.auth.enabled
+  - name: bob
+    version: 0.1.0
+    condition: global.bob.enabled
+  - name: draft
+    version: 0.1.0
+    condition: global.draft.enabled
+  - name: enigma
+    version: 0.1.0
+    condition: global.enigma.enabled
+  - name: entryexitmgmt
+    version: 0.1.0
+    condition: global.entryexitmgmt.enabled
+  - name: eureka
+    version: 0.1.0
+    condition: global.eureka.enabled
+  - name: fatima
+    version: 0.1.0
+    condition: global.fatima.enabled
+  - name: gandalf
+    version: 0.1.0
+    condition: global.gandalf.enabled
+  - name: shamir
+    version: 0.1.0
+    condition: global.shamir.enabled
+  - name: tom
+    version: 0.1.0
+    condition: global.tom.enabled
+  - name: yasuo
+    version: 0.1.0
+    condition: global.yasuo.enabled
+  - name: zeus
+    version: 0.1.0
+    condition: global.zeus.enabled
+  - name: usermgmt
+    version: 0.1.0
+    condition: global.usermgmt.enabled
+  - name: mastermgmt
+    version: 0.1.0
+    condition: global.mastermgmt.enabled
+  - name: payment
+    version: 0.1.0
+    condition: global.payment.enabled
+  - name: lessonmgmt
+    version: 0.1.0
+    condition: global.lessonmgmt.enabled
+  - name: invoicemgmt
+    version: 0.1.0
+    condition: global.invoicemgmt.enabled
+
+  - name: discount
+    version: 0.1.0
+    condition: global.discount.enabled
+
+  - name: conversationmgmt
+    version: 0.1.0
+    condition: global.conversationmgmt.enabled
+
+  - name: fink
+    version: 0.1.0
+    condition: global.fink.enabled
+
+  - name: hephaestus
+    version: 0.1.0
+    condition: global.hephaestus.enabled
+
+  - name: calendar
+    version: 0.1.0
+    condition: global.calendar.enabled
+
+  - name: notificationmgmt
+    version: 0.1.0
+    condition: global.notificationmgmt.enabled
+
+  - name: spike
+    version: 0.1.0
+    condition: global.spike.enabled
+
+  - name: timesheet
+    version: 0.1.0
+    condition: global.timesheet.enabled
+  - name: virtualclassroom
+    version: 0.1.0
+    condition: global.virtualclassroom.enabled
+  - name: jerry
+    version: 0.1.0
+    condition: global.jerry.enabled
+
+  - name: util
+    version: 0.1.0
+    repository: file://../libs/util

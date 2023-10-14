@@ -1,0 +1,192 @@
+syntax = "proto3";
+
+package bob.v1;
+
+import "bob/v1/schools.proto";
+import "common/v1/enums.proto";
+import "common/v1/profiles.proto";
+import "common/v1/requests.proto";
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/bob/v1;bpb";
+
+message UpdateUserDeviceTokenRequest {
+  string user_id = 1;
+  string device_token = 2;
+  bool allow_notification = 3;
+}
+
+message UpdateUserDeviceTokenResponse {
+  bool successful = 1;
+}
+
+message UserProfile {
+  string id = 1;
+  string name = 2;
+  common.v1.Country country = 3;
+  string phone_number = 4;
+  string email = 5;
+  string avatar = 6;
+  string device_token = 7;
+  string user_group = 8;
+  google.protobuf.Timestamp created_at = 9;
+  google.protobuf.Timestamp updated_at = 10;
+}
+
+message UpdateUserProfileRequest {
+  UserProfile profile = 1;
+}
+
+message UpdateUserProfileResponse {
+  bool successful = 1;
+}
+
+message GetCurrentUserProfileRequest {}
+
+message GetCurrentUserProfileResponse {
+  UserProfile profile = 1;
+}
+
+message ClaimsUserAuthRequest {}
+
+message ClaimsUserAuthResponse {
+  bool successful = 1;
+}
+
+message GetCoachProfilesRequest {
+  repeated string profile_ids = 1;
+}
+
+message GetCoachProfilesResponse {
+  repeated UserProfile profiles = 1;
+}
+
+message TeacherProfile {
+  string id = 1;
+  string name = 2;
+  common.v1.Country country = 3;
+  string phone_number = 4;
+  string email = 5;
+  string avatar = 6;
+  string device_token = 7;
+  string user_group = 8;
+  repeated int32 school_ids = 9;
+  google.protobuf.Timestamp created_at = 10;
+  google.protobuf.Timestamp updated_at = 11;
+}
+
+message RetrieveTeacherProfilesRequest {
+  repeated string ids = 1;
+}
+
+message RetrieveTeacherProfilesResponse {
+  repeated TeacherProfile profiles = 1;
+}
+
+message RetrieveBasicProfileRequest {
+  repeated string user_ids = 1;
+}
+message SearchBasicProfileRequest{
+  repeated string user_ids = 1;
+  google.protobuf.StringValue search_text = 2;
+  common.v1.Paging paging = 3;
+}
+message SearchBasicProfileResponse{
+  repeated common.v1.BasicProfile profiles = 1;
+  common.v1.Paging next_page = 2;
+}
+
+message RetrieveBasicProfileResponse {
+  repeated common.v1.BasicProfile profiles = 1;
+}
+
+message CheckProfileRequest {
+  oneof filter {
+    string email = 1;
+    string phone = 2;
+  }
+}
+
+message CheckProfileResponse {
+  bool found = 1;
+  common.v1.BasicProfile profile = 2;
+}
+
+message RegisterRequest {
+  message LearnerRegisterRequest {
+    common.v1.Country country = 1;
+    string name = 2;
+    string phone = 3;
+    int32 grade = 4;
+    google.protobuf.StringValue email = 5;
+    google.protobuf.StringValue code = 6;
+    School school = 7;
+  }
+
+  message TeacherRegisterRequest {
+    common.v1.Country country = 1;
+    string name = 2;
+    string email = 3;
+    string school_name = 4;
+  }
+
+  oneof request {
+    LearnerRegisterRequest learner = 1;
+    TeacherRegisterRequest teacher = 2;
+  }
+  string original_token = 3;
+}
+
+message RegisterResponse {
+  string new_token = 1;
+}
+
+message UpdateUserLastLoginDateRequest {
+  google.protobuf.Timestamp last_login_date = 1;
+}
+
+message UpdateUserLastLoginDateResponse {
+  bool successful = 1;
+}
+
+service UserModifierService {
+  rpc UpdateUserProfile(UpdateUserProfileRequest)
+      returns (UpdateUserProfileResponse);
+  rpc UpdateUserDeviceToken(UpdateUserDeviceTokenRequest)
+      returns (UpdateUserDeviceTokenResponse);
+  rpc ExchangeToken(ExchangeTokenRequest) returns (ExchangeTokenResponse);
+  rpc Register(RegisterRequest) returns (RegisterResponse);
+  rpc ExchangeCustomToken(ExchangeCustomTokenRequest)
+      returns (ExchangeCustomTokenResponse);
+  rpc UpdateUserLastLoginDate(UpdateUserLastLoginDateRequest)
+      returns (UpdateUserLastLoginDateResponse);
+}
+
+message ExchangeTokenRequest {
+  string token = 1;
+}
+
+message ExchangeTokenResponse {
+  string token = 1;
+}
+
+message ExchangeCustomTokenRequest {
+  string token = 1;
+}
+
+message ExchangeCustomTokenResponse {
+  string custom_token = 1;
+}
+
+service UserReaderService {
+  rpc GetCurrentUserProfile(GetCurrentUserProfileRequest)
+      returns (GetCurrentUserProfileResponse);
+  rpc RetrieveTeacherProfiles(RetrieveTeacherProfilesRequest)
+      returns (RetrieveTeacherProfilesResponse);
+  rpc RetrieveBasicProfile(RetrieveBasicProfileRequest)
+      returns (RetrieveBasicProfileResponse);
+  rpc SearchBasicProfile(SearchBasicProfileRequest)
+      returns (SearchBasicProfileResponse);
+  rpc CheckProfile(CheckProfileRequest) returns (CheckProfileResponse);
+}

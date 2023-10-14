@@ -1,0 +1,210 @@
+table:
+  schema: public
+  name: users
+object_relationships:
+  - name: parent
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: parents
+        insertion_order: null
+        column_mapping:
+          user_id: parent_id
+  - name: school_admin
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: school_admins
+        insertion_order: null
+        column_mapping:
+          user_id: school_admin_id
+  - name: student
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: students
+        insertion_order: null
+        column_mapping:
+          user_id: student_id
+  - name: student_parent
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: student_parents
+        insertion_order: null
+        column_mapping:
+          user_id: student_id
+  - name: teacher_by_school_id
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: teacher_by_school_id
+        insertion_order: null
+        column_mapping:
+          user_id: teacher_id
+array_relationships:
+  - name: apple_users
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: apple_users
+  - name: class_members
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: class_members
+  - name: info_notifications
+    using:
+      foreign_key_constraint_on:
+        column: editor_id
+        table:
+          schema: public
+          name: info_notifications
+  - name: lesson_members
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: lesson_members
+  - name: promotions
+    using:
+      foreign_key_constraint_on:
+        column: owner_id
+        table:
+          schema: public
+          name: promotions
+  - name: teachers
+    using:
+      foreign_key_constraint_on:
+        column: teacher_id
+        table:
+          schema: public
+          name: teachers
+  - name: user_access_paths
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: user_access_paths
+  - name: user_group_members
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: user_group_member
+  - name: user_phone_numbers
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: user_phone_number
+  - name: users_info_notifications
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          schema: public
+          name: users_info_notifications
+select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+        - allow_notification
+        - avatar
+        - country
+        - created_at
+        - deleted_at
+        - device_token
+        - email
+        - email_verified
+        - facebook_id
+        - given_name
+        - is_tester
+        - name
+        - phone_number
+        - phone_verified
+        - platform
+        - updated_at
+        - user_group
+        - user_id
+        - last_login_date
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+        - allow_notification
+        - avatar
+        - country
+        - created_at
+        - deleted_at
+        - device_token
+        - email
+        - email_verified
+        - facebook_id
+        - given_name
+        - is_tester
+        - name
+        - phone_number
+        - phone_verified
+        - platform
+        - updated_at
+        - user_group
+        - user_id
+        - last_login_date
+        - gender
+        - birthday
+        - resource_path
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+          - resource_path:
+              _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+        - avatar
+        - created_at
+        - deleted_at
+        - email
+        - given_name
+        - name
+        - updated_at
+        - user_group
+        - user_id
+      filter:
+        _or:
+          - teacher_by_school_id:
+              school_id:
+                _in: X-Hasura-School-Ids
+          - student:
+              school_id:
+                _in: X-Hasura-School-Ids
+          - school_admin:
+              school_id:
+                _in: X-Hasura-School-Ids
+          - class_members:
+              class:
+                school_id:
+                  _in: X-Hasura-School-Ids
+          - parent:
+              school_id:
+                _in: X-Hasura-School-Ids

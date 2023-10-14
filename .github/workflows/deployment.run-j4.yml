@@ -1,0 +1,118 @@
+name: deployment.run_j4
+on:
+  workflow_dispatch:
+    inputs:
+      scenario_name:
+        description: "Enter machine name of scenario"
+        required: true
+      branch:
+        description: "Choose a branch to get configurations"
+        required: true
+        default: "develop"
+      image_tag:
+        description: "Name of the j4 image you have built, check workflow build.j4"
+        required: true
+        default: "locally"
+      environment:
+        type: choice
+        description: "Choose an environment to deploy"
+        options:
+          - staging
+          - preproduction
+        required: true
+      organization:
+        type: choice
+        description: "Choose an organization to deploy"
+        required: true
+        options:
+          - manabie
+          - tokyo
+      delete_existing_job:
+        type: boolean
+        description: "Delete existing job before deploy"
+        required: false
+        default: false
+      dryrun:
+        type: boolean
+        description: "Dry run, don't deploy"
+        required: false
+        default: false
+      j4_replicas:
+        type: number
+        description: "Number of j4 instances"
+        required: false
+        default: 3
+
+jobs:
+  deploy-job:
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    runs-on: ["self-hosted", "100m-400mi", "spot", "persistent"]
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v3
+        timeout-minutes: 5
+        with:
+          ref: ${{ github.event.inputs.branch }}
+
+      - name: Get deployment configuration
+        uses: actions/github-script@v6
+        env:
+          ORG: ${{ github.event.inputs.organization }}
+          ENV: ${{ github.event.inputs.environment }}
+        with:
+          script: |
+            const environment = '${{ env.ENV }}';
+            const organization = '${{ env.ORG }}';
+            const getDeploymentConfiguration = require('./.github/scripts/get-deployment-configuration.js');
+            const configuration = await getDeploymentConfiguration({ organization, environment });
+            if (configuration) {
+              core.exportVariable('projectId', configuration.projectId);
+              core.exportVariable('cluster', configuration.cluster);
+              core.exportVariable('region', configuration.region);
+              core.exportVariable('environment', configuration.environment);
+              core.exportVariable('organization', configuration.organization);
+              core.exportVariable('serviceAccountEmailSuffix', configuration.serviceAccountEmailSuffix);
+              core.exportVariable('namespace', configuration.namespace);
+              core.exportVariable('sqlProxyConnectionName', configuration.sqlProxyConnectionName);
+            }
+
+      - name: Setup Kubernetes for ${{ github.event.inputs.environment }}.${{ github.event.inputs.organization }}
+        uses: ./.github/actions/setup-k8s
+        with:
+          organization: ${{ github.event.inputs.organization }}
+          environment: ${{ github.event.inputs.environment }}
+
+      - name: Install Skaffold
+        run: |
+            required_version="v1.39.2"
+            echo "Installing skaffold $required_version"
+            curl -fLo "./skaffold" "https://github.com/GoogleContainerTools/skaffold/releases/download/${required_version}/skaffold-linux-amd64"
+            chmod +x "./skaffold"
+            echo -e "skaffold $required_version has been installed"
+
+
+      - name: Deploy J4
+        if: github.event.inputs.dryrun == 'false'
+        env:
+          ENV: ${{ env.environment }}
+          ORG: ${{ env.organization }}
+          SQL_PROXY_CONN_NAME: ${{ env.sqlProxyConnectionName }}
+          NAMESPACE: ${{ env.namespace }}
+          SCENARIO_NAME: ${{ github.event.inputs.scenario_name }}
+          DELETE_EXISTING_JOB: ${{ github.event.inputs.delete_existing_job }}
+          J4_REPLICAS: ${{ github.event.inputs.j4_replicas }}
+          IMAGE_TAG: ${{ github.event.inputs.image_tag }}
+        run: |
+            set -eu
+
+            export ENV=${ENV:-local}
+            export ORG=${ORG:-manabie}
+            export NAMESPACE=${NAMESPACE:-backend}
+            export SCENARIO_NAME=${SCENARIO_NAME:-tom}
+            export J4_REPLICAS=${J4_REPLICAS:-3}
+            export IMAGE_NAME=${IMAGE_NAME:-asia.gcr.io/student-coach-e1e95/backend-j4}
+            export IMAGE_TAG=${IMAGE_TAG:-locally}
+            export SQL_PROXY_CONN_NAME=${SQL_PROXY_CONN_NAME:-"staging-manabie-online:asia-southeast1:manabie-59fd"}
+            ./skaffold run -f ./skaffold.j4.yaml

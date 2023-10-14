@@ -1,0 +1,1 @@
+ALTER TABLE partner_form_configs REPLICA IDENTITY FULL;

@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package manabie.bob;
+
+import "enum.proto";
+import "google/protobuf/timestamp.proto";
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option (gogoproto.goproto_registration) = true;
+option go_package = "github.com/manabie-com/backend/pkg/genproto/bob;pb";
+
+message Notification {
+  string id = 1;
+  string title = 2;
+  string description = 3;
+  string data = 4;
+  NotificationType type = 5;
+  google.protobuf.Timestamp created_at = 6;
+  UserNotificationStatus status = 7;
+  NotificationEvent event = 8;
+}
+
+message NotificationStatsRequest {}
+
+message NotificationStatsResponse { int32 new = 1; }
+
+message MarkNotificationsAsReadRequest { repeated string notifications = 1; }
+
+message MarkNotificationsAsReadResponse { bool success = 1; }
+
+message MarkNotificationsAsSeenRequest { repeated string notification_ids = 1; }
+
+message MarkNotificationsAsSeenResponse { bool success = 1; }
+
+message RetrieveNotificationRequest {
+  NotificationType type = 1;
+  int32 page = 2;
+  int32 limit = 3;
+}
+
+message RetrieveNotificationResponse {
+  repeated Notification notifications = 1;
+}
+
+service NotificationService {
+  rpc RetrieveNotificationStats(NotificationStatsRequest)
+      returns (NotificationStatsResponse);
+  rpc RetrieveNotifications(RetrieveNotificationRequest)
+      returns (RetrieveNotificationResponse);
+  rpc MarkNotificationsAsRead(MarkNotificationsAsReadRequest)
+      returns (MarkNotificationsAsReadResponse);
+  rpc MarkNotificationsAsSeen(MarkNotificationsAsSeenRequest)
+      returns (MarkNotificationsAsSeenResponse);
+}

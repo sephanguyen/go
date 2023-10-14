@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package usermgmt.v2;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/usermgmt/v2;upb";
+
+message ExchangeCustomTokenRequest {
+  string token = 1;
+}
+message ExchangeCustomTokenResponse {
+  string custom_token = 1;
+}
+
+message ValidateUserIPRequest {}
+message ValidateUserIPResponse {
+  bool allow = 1;
+}
+
+message GetAuthInfoRequest {
+  string username = 1;
+  string domain_name = 2;
+}
+message GetAuthInfoResponse {
+  string login_email = 1;
+  string tenant_id = 2;
+}
+
+message ResetPasswordRequest {
+  string username = 1;
+  string domain_name = 2;
+  string language_code = 3;
+}
+message ResetPasswordResponse {}
+
+service AuthService {
+  rpc ExchangeCustomToken(ExchangeCustomTokenRequest) returns (ExchangeCustomTokenResponse);
+  rpc ValidateUserIP(ValidateUserIPRequest) returns (ValidateUserIPResponse);
+  rpc GetAuthInfo(GetAuthInfoRequest) returns (GetAuthInfoResponse);
+  rpc ResetPassword(ResetPasswordRequest) returns (ResetPasswordResponse);
+}

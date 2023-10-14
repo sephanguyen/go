@@ -1,0 +1,582 @@
+@startuml syllabus_simplified
+hide circle
+
+namespace Syllabus {
+    class Book <<entity>> {
+        book_id string
+        name string
+        copied_from string
+        school_id int
+        current_chapter_display_order int
+        ' updated_at: timestamptztz
+        ' created_at: timestamptztz
+        ' deleted_at: timestamptztz
+    }
+    note right of Book::subject
+    one of 
+    * SUBJECT_NONE
+    * SUBJECT_MATHS
+    * SUBJECT_BIOLOGY
+    * SUBJECT_PHYSICS
+    * SUBJECT_CHEMISTRY
+    * SUBJECT_GEOGRAPHY
+    * SUBJECT_ENGLISH
+    * SUBJECT_ENGLISH_2
+    * SUBJECT_JAPANESE
+    * SUBJECT_SCIENCE
+    * SUBJECT_SOCIAL_STUDIES
+    * SUBJECT_LITERATURE
+    end note
+
+    class Chapter <<entitiy>>{
+        chapter_id string
+        name string
+        display_order int
+        school_id int
+        copied_from string
+        current_topic_display_order int
+        ' updated_at: timestamptztz
+        ' created_at: timestamptztz
+        ' deleted_at: timestamptztz
+
+    }
+    note right of Chapter::copied_from
+    when duplicated chapter
+    end note
+
+    class BookChapter <<value object>>{
+
+    }
+
+    class Topic <<entity>>{
+        topic_id string
+        name string
+        topic_type string
+        status string
+        display_order int
+        copied_topic_id string
+        lo_display_counter int
+        ' updated_at: timestamptztz
+        ' created_at: timestamptztz
+        ' deleted_at: timestamptztz
+
+    }
+    
+
+    class LearningObjective <<entity>>  {
+        name string
+        grade int
+        subject string
+        topic_id string
+        master_lo_id string
+        prerequisites []string
+        video string
+        study_guide string
+        video_script string
+        copied_from string
+        display_order int
+        type string
+        school_id string
+        ' updated_at: timestamptz
+        ' created_at: timestamptz
+        ' deleted_at: timestamptz
+    }
+    note right of LearningObjective::type
+    one of
+    * LEARNING_OBJECTIVE_TYPE_NONE
+    * LEARNING_OBJECTIVE_TYPE_LEARNING
+    * LEARNING_OBJECTIVE_TYPE_FLASH_CARD
+    * LEARNING_OBJECTIVE_TYPE_OFFLINE_LEARNING
+    end note
+
+    class Topic_LearningObjective <<value object>> {
+        topic_id string
+        lo_id string
+        display_order int
+    }
+    
+    class FlashCard <<entity>>  {
+    }
+    note right of FlashCard
+    Flashcard is a LearningObjective
+    end note
+
+    class Assignment <<entity>>  {
+        name string
+        content jsonb
+        attachment []string
+        settings jsonb
+        max_grade int
+        check_list jsonb
+        instruction string
+        type string
+        original_topic string
+        display_order int
+        is_required_grade bool
+        ' display_order int
+        ' updated_at: timestamptz
+        ' created_at: timestamptz
+        ' deleted_at: timestamptz
+    }
+
+    note right of Assignment::type
+    one of
+    * ASSIGNMENT_TYPE_NONE
+    * ASSIGNMENT_TYPE_TOPIC
+    * ASSIGNMENT_TYPE_LEARNING_OBJECTIVE
+    end note
+    
+    class Topic_Assignment <<value object>> {
+        topic_id string
+        assignment_id string
+        display_order int
+    }
+
+    class StudyPlan <<entity>>  {
+        study_plan_id string
+        name string
+        master_study_plan_id string
+        name string
+        study_plan_type string
+        course_id string
+        ' updated_at: timestamptz
+        ' created_at: timestamptz
+        ' deleted_at: timestamptz
+        book_id string
+        status string
+        track_school_progress bool
+        grades []int
+
+    }
+    note right of StudyPlan::study_plan_type
+    one of 
+    * STUDY_PLAN_TYPE_NONE
+    * STUDY_PLAN_TYPE_COURSE
+    * STUDY_PLAN_TYPE_INDIVIDUAL
+    end note
+
+    class CourseStudyPlan <<value object>>{
+        study_plan_id string
+        student_id string
+    }
+     class StudentStudyPlan <<value object>>{
+        study_plan_id string
+        student_id string
+    }
+
+    class StudyPlanItem <<entity>>  {
+        study_plan_item_id string
+        study_plan_id string
+        available_from datetime
+        available_to dateimte
+        start_date datetime
+        end_date dateimte
+        copy_study_plan_item_id string
+        content_structure jsonb
+        content_structure_flatten string
+        completed_at timestamptz
+        ' updated_at: timestamptz
+        ' created_at: timestamptz
+        ' deleted_at: timestamptz
+        status string
+        school_date
+    }
+
+    class LO_StudyPlanItem <<value object>>{
+        lo_id string
+        study_plan_item_id string
+    }
+    class Assignment_StudyPlanItem <<value object>>{
+        assignment_id string
+        study_plan_item_id string
+    }
+
+    class Course <<value object>> {
+        assignStudyPlanForStudent(students []Student)
+    }
+
+    
+
+    class Quiz <<entity>> {
+        external_id string
+        kind string
+        question jsonb
+        explanation jsonb
+        options jsonb
+        tagges_los []string
+        difficulty_level int
+        approved_by string
+        status string
+        school_id int
+        country string
+        lo_ids []string
+        ' updated_at: timestamptz
+        ' created_at: timestamptz
+        ' deleted_at: timestamptz
+    }
+    note left of Quiz::kind
+    one of 
+    * QUIZ_TYPE_MCQ
+    * QUIZ_TYPE_FIB
+    * QUIZ_TYPE_POW
+    * QUIZ_TYPE_TAD
+    * QUIZ_TYPE_MIQ
+    * QUIZ_TYPE_MAQ
+    end note
+     note left of Quiz::status
+    one of 
+    * QUIZ_STATUS_NEW
+    * QUIZ_STATUS_APPROVED
+    * QUIZ_STATUS_DELETED
+    end note
+
+    class Quiz_Sets <<entitiy>>{
+        quiz_set_id string
+        lo_id string
+        quiz_external_ids []string
+        status string
+        ' updated_at: timestamptz
+        ' created_at: timestamptz
+        ' deleted_at: timestamptz
+    }
+
+    class ShuffledQuizSet <<entity>>{
+        shuffled_quiz_set string 
+        original_quiz_set_id string
+        quiz_external_ids []string
+        status string
+        random_seed string
+        student_id string
+        study_plan_item_id string
+        total_correctness int
+        submission_history jsonb
+        session_id string
+        original_shuffle_quiz_set_id string
+    }
+    note left of ShuffledQuizSet::origin_shuffle_quiz_set_id
+    use in retry mode
+
+    class StudentEventLogs {
+        student_id string
+        type string
+        payload jsonb
+        ' updated_at: timestamptz
+        ' created_at: timestamptz
+        ' deleted_at: timestamptz
+    }
+    note left of StudentEventLogs::type
+    one of 
+    * quiz_finished
+    * learning_objective
+    * quiz_answer_selected
+    * completed_active_topic
+    * completed_overdue_topic
+    * video_finished
+    * study_guide_finished
+    end note
+
+    class StudentLearningObjectiveCompleteless <<entity>>{
+        student_id string
+        lo_id string
+        first_attempt_score int
+        is_finished_quiz bool
+        is_finished_video bool
+        is_finished_study_guide bool
+        first_quiz_correctness real 
+        finished_quiz_at timestamptz
+        highest_quiz_score real 
+        ' updated_at: timestamptz
+        ' created_at: timestamptz
+        ' deleted_at: timestamptz
+    }
+
+    class StudentLearningObjectiveRecord <<entity>>{
+        record_id string
+        student_id string
+        lo_id string
+        study_plan_item_id string
+        accuracy real 
+        learning_time int
+        completed_at timestamptz
+        is_offline bool
+        ' updated_at: timestamptz
+        ' created_at: timestamptz
+        ' deleted_at: timestamptz
+    }
+
+    class FlashCardSpeeches <<entity>>{
+        speech_id string
+        sentence string
+        link string
+        type string
+        quiz_id string
+        created_by string
+        settings jsonb
+    }
+
+    class FlashCardProgressions<<entitiy>>{
+        study_set_id string
+        original_study_set_id string
+        student_id string
+        study_plan_item_id string
+        lo_id string
+        quiz_external_ids []string
+        studying_index int
+        skipped_question_ids []string
+        remembered_question_ids []string
+        completed_at timestamptz
+        original_quiz_set_id string
+    }
+
+    class StudentSubmissionGrade <<entity>>{
+        student_submission_grade_id string
+        student_submission_id string
+        grade numeric(10,2)
+        grade_content jsonb
+        grader_id string
+        grader_comment string
+        status string
+        editor_id string
+    }
+
+    class StudentSubmission <<entity>>{
+        student_submission_id string
+        study_plan_item_id string
+        assignment_id string
+        student_id string
+        submission_content jsonb
+        check_list jsonb
+        status string
+        note string
+        student_submission_grade_id string
+        editor_id string
+        deleted_by string
+    }
+
+    class StudentLatestSubmission <<entity>>{
+        study_plan_item_id string
+        assignment_id string
+        student_id string
+        student_submission_id string
+        submission_content jsonb
+        check_list jsonb
+        status string 
+        note string
+        editor_id string
+        student_submission_grade_id string
+        deleted_by string
+    }
+
+    class AssignStudyPlanTask <<entity>>{
+        id string 
+        study_plan_ids []string
+        status string
+        course_id string
+        error_detail string
+    }
+    note right of AssignStudyPlanTask
+    use for async import study plan 
+    end note
+    class CourseStudent <<value object>> {
+        course_student_id string
+        course_id string
+        student_id string
+        start_at timestamptz
+        end_at timestamptz
+    }
+
+    class Course(yasuo) <<service>>{
+        UpsertBooks()
+        DeleteBook()
+        RemoveBook()
+        AddBooks()
+        UpsertChapter()
+        DeleteChapters()
+        <color:#red>ListTopic()
+        DeleteTopics()
+        DeleteLos()
+        AssignLosToQuiz()
+        <color:#red>AssignLosToQuiz()
+    }
+
+    class CourseModifier(yasuo) <<service>>{
+        DeleteQuiz()
+        RemoveQuizFromLO()
+        UpdateDisplayOrderOfQuizSet()
+        UpsertQuizV2()
+    }
+    class Course(bob) <<service>>{
+        <color:#red>ListTopics()
+        UpsertTopics()
+        RetrieveLO()
+        UpsertLOs()
+        UpsertQuiz()
+    }
+    class CourseModifier(bob) <<service>> {
+        DuplicateBook()
+        AssignTopicItems()
+        FinishFlashCardStudyProgress()
+        UpdateFlashCardStudyProgress()
+        CreateOfflineLearningRecords()
+        CheckQuizCorrectness()
+        CreateQuizTest()
+        CreateRetryQuizTest()
+        CreateFlashCardStudy()
+        RetrieveSubmissionHistory()
+        RetrieveTotalQuizLOs()
+        RetrieveQuizTests()
+        
+    }
+    class CourseReader(bob) <<service>>{
+        ListOfflineLearningRecords()
+        ListQuizzesOfLO()
+    }
+
+    class CourseReader(bob) <<service>> {
+        ListBooks()
+        ListChapters()
+    }
+
+    class Student <<service>>{
+        <color:#red>RetrieveStudyAheadTopics()
+        <color:#red>RetrieveTotalLOsFinished()
+        <color:#red>RetrieveArchivedTopics()
+        <color:#red>RetrieveOverdueTopic()
+        <color:#red>RetrieveCompletedTopicWeeklies()
+        CountTotalLOsFinished()
+        RetrieveLearningProgress()
+        RetrieveStat()
+        <color:#red> ListSubmissions()
+        <color:#red>SubmitAssignment()
+    }
+
+    class CourseReaderService(eureka) <<service>>{
+        ListStudentByCourse()
+        ListStudentIDsByCourse()
+        ListCourseIDsByStudents()
+        ListStudentIDsByCourseV2()
+    }
+
+    class CourseModifier(eureka) <<service>>{
+        CompleteStudyPlanItem()
+        UpdateDisplayOrdersOfLOsAndAssignments()
+        UpsertLOsAndAssignments()
+        DuplicateBook()(bob call)
+    }
+    note right of CourseModifier::DuplicateBook
+    in nature, it DuplicateAssigment
+    end note
+
+    
+    class StudyPlanModifier <<service>> {
+        DeleteStudyPlanBelongsToACourse()
+        UpsertStudyPlanV2()
+        UpsertStudyPlanItemV2()
+        UpdateStudyPlanItemsSchoolDate()        
+    }
+
+    note right of StudyPlanModifier
+    the origin services, one of:
+    * StudyPlanModifierService 
+    * ImportService
+    * StudentSubmissionWriterService
+    end note
+
+    class Import <<service>> {
+        ImportStudyPlan()
+    }
+
+    class StudentSubmissionWriter <<service>>{
+        DeleteStudentSubmission()
+    }
+    class StudentAssignmentWrite <<service>>{
+        SubmitAssignment()
+        UpdateStudentSubmissionsStatus()
+        GradeStudentSubmission()
+
+    }
+    class StudyPlanReaderService <<service>> {
+        ListStudyPlanByCourse()
+        GetBookIDsBelongsToStudentStudyPlan()
+    }
+
+    class AssignmentModifier <<service>> {
+        
+        AssignAssignmentsToTopic()
+        UpsertStudyPlans()
+        ScheduleStudyPlan()
+
+    }
+
+    class StudentAssignmentReaderService <<service>>{
+        RetrieveSubmissions()
+        RetrieveSubmissionGrades()
+        ListSubmissions()
+    }
+    class AssignmentReader(eureka) <<service>> {
+        ListCourseTodo()
+        RetrieveAssignments()
+        RetrieveStatisticAssignmentClass()
+        RetrieveStudyPlanProgress()
+        ListStudentAvailableContents()
+        ListStudentToDoItems()
+        ListStudyPlans()
+        GetChildStudyPlanItems()
+
+    }
+
+    class EurekaInternalModifier <<service>>{
+        DeleteLOStudyPlanItems()
+        UpsertAssignmentsData()
+    }
+
+    class QuestionService <<service>> #red{
+        UpsertQuestions()
+    }
+
+
+    class Evt <<event>>{
+        SubjectLearningObjectivesCreated
+        SubjectAssignmentsCreated
+	    SubjectAssignStudyPlanEventNats   
+
+    }
+    note left of Evt::SubjectLearningObjectivesCreated
+    Published to "subject_learning_objectives_created" when upsert learning objectives (bob)
+    end note
+    note left of Evt::SubjectAssignmentsCreated
+    Published to "subject_assignments_created" when upsert assignment
+    end note
+    note left of Evt::SubjectAssignStudyPlanEventNats
+    Published to "subject_assign_study_plan" when import study plan
+    end note
+    
+    Student "many" *-- "many" Course : join
+    Student "many" *-- "many" StudyPlanItem : assigned by course
+    FlashCard --|> LearningObjective
+    Book "1" *-- "n" Chapter
+    Chapter "1" *-- "many" Topic
+    Book "1" *-- "many" LearningObjective
+    Book "1" *-- "many" Assignment
+    Book "1" -- "many" StudyPlan : syllabus
+    StudyPlan "1" -- "1" Book
+    StudyPlan "1" *--  "many" StudyPlanItem : groups
+    LearningObjective "many" *-- "many" Quiz : available
+    LearningObjective "1" *-- "1" Quiz_Set : available
+    Quiz_Set "1" -- "many" ShuffledQuizSet: available
+    Assignment "1" *-- "many" StudyPlanItem : available
+    LearningObjective "many" *-- "1" StudyPlanItem : available
+    Course "many" o-- "many" Book : use
+    (Student, StudyPlanItem) .. LearningStats : log
+}
+
+class Syllabus.Question #red {}
+class Syllabus.Assignment(bob) #red {}
+class Syllabus.StudentAssignment(bob) #red{}
+class Syllabus.StudentQuestion(bob) #red{}
+class Syllabus.StudentsStudyPlanWeekly(bob) #red{}
+class Syllabus.StudentsTopicsOverdue(bob) #red{}
+class Syllabus.Course(bob) <<entity>> #red {}
+class Syllabus.Quizsets(bob) <<entity>> #red {}
+class Syllabus.StudentTopicsCompleteness(bob) <<entitiy>> #red{}
+@enduml

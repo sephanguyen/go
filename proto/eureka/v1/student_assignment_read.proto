@@ -1,0 +1,78 @@
+syntax = "proto3";
+
+package eureka.v1;
+
+import "eureka/v1/assignments.proto";
+import "common/v1/requests.proto";
+import "eureka/v1/enums.proto";
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/eureka/v1;epb";
+
+message ListSubmissionsRequest {
+  common.v1.Paging paging = 1;
+
+  google.protobuf.StringValue course_id = 2;
+  repeated string class_ids = 3;
+  repeated SubmissionStatus statuses = 4;
+  google.protobuf.Timestamp start = 5;
+  google.protobuf.Timestamp end = 6;
+  google.protobuf.StringValue search_text = 7;
+  SearchType search_type = 8;
+}
+
+message ListSubmissionsResponse {
+  common.v1.Paging next_page = 1;
+  repeated StudentSubmission items = 2;
+}
+
+message RetrieveSubmissionsRequest {
+  repeated string study_plan_item_ids = 1;
+
+}
+
+message RetrieveSubmissionsResponse {
+  repeated StudentSubmission items = 1; 
+}
+
+message RetrieveSubmissionGradesRequest {
+  repeated string submission_grade_ids = 1;
+}
+
+message RetrieveSubmissionGradesRespose {
+  message Grade {
+    string submission_grade_id = 1;
+    SubmissionGrade grade = 2;
+  }
+
+  repeated Grade grades = 1;
+}
+
+message ListSubmissionsV2Request {
+  common.v1.Paging paging = 1;
+  google.protobuf.StringValue course_id = 2;
+  repeated string class_ids = 3;
+  repeated SubmissionStatus statuses = 4;
+  google.protobuf.Timestamp start = 5;  
+  google.protobuf.Timestamp end = 6;  
+  google.protobuf.StringValue search_text = 7;
+  SearchType search_type = 8;
+  repeated string location_ids = 9;
+  google.protobuf.StringValue student_name = 10;
+}
+  
+message ListSubmissionsV2Response {  
+  common.v1.Paging next_page = 1;
+  repeated StudentSubmission items = 2;
+}
+
+service StudentAssignmentReaderService {
+  rpc ListSubmissions(ListSubmissionsRequest) returns (ListSubmissionsResponse);//TODO: x  -  PHASE 2
+  rpc RetrieveSubmissions(RetrieveSubmissionsRequest) //TODO: x 
+      returns (RetrieveSubmissionsResponse);
+  rpc RetrieveSubmissionGrades(RetrieveSubmissionGradesRequest)
+      returns (RetrieveSubmissionGradesRespose);
+  rpc ListSubmissionsV2(ListSubmissionsV2Request) returns (ListSubmissionsV2Response);// TODO: x - PHASE 2
+}
+

@@ -1,0 +1,82 @@
+table:
+  schema: public
+  name: courses_books
+object_relationships:
+  - name: books
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: books
+        insertion_order: null
+        column_mapping:
+          book_id: book_id
+select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+        - book_id
+        - course_id
+        - updated_at
+        - created_at
+        - deleted_at
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+          - books:
+              _and:
+                - deleted_at:
+                    _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+        - book_id
+        - course_id
+        - created_at
+        - deleted_at
+        - updated_at
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+          - books:
+              _and:
+                - school_id:
+                    _in: X-Hasura-School-Ids
+                - deleted_at:
+                    _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+        - book_id
+        - course_id
+        - created_at
+        - deleted_at
+        - updated_at
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+          - books:
+              _and:
+                - school_id:
+                    _in: X-Hasura-School-Ids
+                - deleted_at:
+                    _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+        - book_id
+        - course_id
+        - created_at
+        - deleted_at
+        - updated_at
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+      allow_aggregations: true

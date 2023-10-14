@@ -1,0 +1,1 @@
+ALTER TABLE public.student_product DROP COLUMN amount;

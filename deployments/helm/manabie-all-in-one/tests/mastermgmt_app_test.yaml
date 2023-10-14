@@ -1,0 +1,219 @@
+suite: mastermgmt app yaml file
+templates:
+  - charts/mastermgmt/templates/app.yaml
+values:
+  - ../charts/mastermgmt/values.yaml
+  - ../values.yaml
+  - ../local-manabie-values.yaml
+  - ../../platforms/gateway/local-manabie-values.yaml
+tests:
+  - it: first template should be ConfigMap
+    set:
+      global.mastermgmt.enabled: true
+      global.mastermgmt.sops.enabled: true
+      global.environment: local
+      global.vendor: manabie
+      global.image.repository: local
+      mastermgmt.image.tag: v1
+      mastermgmt.service.port: 1234
+      global.sqlProxy.enabled: true
+    documentIndex: 0
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - isNotNull:
+          path: data.[mastermgmt.common.config.yaml]
+      - isNotNull:
+          path: data.[mastermgmt.config.yaml]
+
+  - it: second template should be Secret
+    set:
+      global.mastermgmt.enabled: true
+      global.mastermgmt.sops.enabled: true
+      global.environment: local
+      global.vendor: manabie
+      global.image.repository: local
+      mastermgmt.image.tag: v1
+      mastermgmt.service.port: 1234
+      global.sqlProxy.enabled: true
+    documentIndex: 1
+    asserts:
+      - isKind:
+          of: Secret
+      - isNotNull:
+          path: data.[service_credential.json]
+      - isNotNull:
+          path: data.[mastermgmt.secrets.encrypted.yaml]
+      - isNotNull:
+          path: data.[hasura.secrets.encrypted.yaml]
+
+  - it: third template should be PodDisruptionBudget
+    set:
+      global.mastermgmt.enabled: true
+      global.mastermgmt.sops.enabled: true
+      global.environment: local
+      global.vendor: manabie
+      global.image.repository: local
+      mastermgmt.image.tag: v1
+      mastermgmt.service.port: 1234
+      global.sqlProxy.enabled: true
+    documentIndex: 2
+    asserts:
+      - isKind:
+          of: PodDisruptionBudget
+      - equal:
+          path: spec.maxUnavailable
+          value: 1
+
+  - it: fourth template should be ServiceAccount
+    set:
+      global.mastermgmt.enabled: true
+      global.mastermgmt.sops.enabled: true
+      global.environment: local
+      global.vendor: manabie
+      global.image.repository: local
+      mastermgmt.image.tag: v1
+      mastermgmt.service.port: 1234
+      global.sqlProxy.enabled: true
+    documentIndex: 3
+    asserts:
+      - isKind:
+          of: ServiceAccount
+      - equal:
+          path: metadata.name
+          value: local-mastermgmt
+
+  - it: fifth template should be Deployment
+    set:
+      global.mastermgmt.enabled: true
+      global.mastermgmt.sops.enabled: true
+      global.environment: local
+      global.vendor: manabie
+      global.image.repository: local
+      mastermgmt.image.tag: v1
+      global.sqlProxy.enabled: true
+    documentIndex: 4
+    asserts:
+      - isKind:
+          of: Deployment
+
+      # init containers
+      - equal:
+          path: spec.template.spec.initContainers[0].name
+          value: wait-for-shamir
+    # migration disabled
+    #   - equal:
+    #       path: spec.template.spec.initContainers[1].name
+    #       value: mastermgmt-migrate
+    #   - equal:
+    #       path: spec.template.spec.initContainers[1].volumeMounts[0].mountPath
+    #       value: /configs/mastermgmt.common.config.yaml
+    #   - equal:
+    #       path: spec.template.spec.initContainers[1].volumeMounts[1].mountPath
+    #       value: /configs/mastermgmt.config.yaml
+    #   - equal:
+    #       path: spec.template.spec.initContainers[1].volumeMounts[2].mountPath
+    #       value: /configs/mastermgmt_migrate.secrets.encrypted.yaml
+    #   - equal:
+    #       path: spec.template.spec.initContainers[1].volumeMounts[3].mountPath
+    #       value: /configs/service_credential.json
+
+      # metadata
+      - equal:
+          path: spec.template.metadata.labels.[app.kubernetes.io/name]
+          value: "mastermgmt"
+      - equal:
+          path: spec.template.metadata.annotations.[sidecar.istio.io/proxyCPU]
+          value: "5m"
+      - isNotEmpty:
+          path: spec.template.metadata.annotations.[checksum/mastermgmt.config.yaml]
+      - isNotEmpty:
+          path: spec.template.metadata.annotations.[checksum/mastermgmt.secrets.encrypted.yaml]
+    # migration disabled
+    #   - isNotEmpty:
+    #       path: spec.template.metadata.annotations.[checksum/mastermgmt_migrate.secrets.encrypted.yaml]
+
+      # containers
+      - equal:
+          path: spec.template.spec.containers[0].name
+          value: mastermgmt
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: local:v1
+      - equal:
+          path: spec.template.spec.containers[0].command
+          value:
+            - /bin/sh
+            - -c
+            - |
+              #!/bin/bash
+              set -eu
+              cat <<EOF > modd.conf
+              /server {
+                daemon +sigterm: /server \\
+                  gserver \\
+                  mastermgmt \\
+                  --commonConfigPath=/configs/mastermgmt.common.config.yaml \\
+                  --configPath=/configs/mastermgmt.config.yaml \\
+                  --secretsPath=/configs/mastermgmt.secrets.encrypted.yaml
+              }
+              EOF
+              exec modd
+      - contains:
+          path: spec.template.spec.containers[0].ports
+          content:
+            name: grpc
+            containerPort: 6450
+            protocol: TCP
+      - matchRegex:
+          path: spec.template.spec.containers[0].readinessProbe.exec.command[2]
+          pattern: .*localhost:6450.*
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.periodSeconds
+          value: 10
+
+      # volumes
+      - equal:
+          path: spec.template.spec.volumes[0].secret.secretName
+          value: mastermgmt
+      - equal:
+          path: spec.template.spec.volumes[0].secret.items[0].key
+          value: mastermgmt.secrets.encrypted.yaml
+    # migrate disabled
+    #   - equal:
+    #       path: spec.template.spec.volumes[0].secret.items[1].key
+    #       value: mastermgmt_migrate.secrets.encrypted.yaml
+      - equal:
+          path: spec.template.spec.volumes[1].name
+          value: hasura-secrets-decrypted-volume
+      - equal:
+          path: spec.template.spec.volumes[2].configMap.name
+          value: mastermgmt-hasura-metadata
+      - equal:
+          path: spec.template.spec.volumes[3].name
+          value: service-credential
+      - equal:
+          path: spec.template.spec.volumes[4].configMap.name
+          value: mastermgmt
+
+  - it: sixth template should be Service
+    set:
+      global.mastermgmt.enabled: true
+      global.mastermgmt.sops.enabled: true
+      global.environment: local
+      global.vendor: manabie
+      global.image.repository: local
+      mastermgmt.image.tag: v1
+      mastermgmt.service.port: 1234
+      global.sqlProxy.enabled: true
+    documentIndex: 5
+    asserts:
+      - isKind:
+          of: Service
+      - contains:
+          path: spec.ports
+          content:
+            name: grpc-web-port
+            protocol: TCP
+            targetPort: grpc
+            port: 6450

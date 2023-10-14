@@ -1,0 +1,137 @@
+name: tbd.unleash
+
+on:
+  push:
+    branches:
+      - develop
+    paths:
+      - "feature_flags/**"
+      - "developments/unleash-import/**"
+      - "deployments/terraform/live/workspace/access-control/**"
+  workflow_dispatch:
+    inputs:
+      dorp:
+        type: boolean
+        description: "Run for preproduction (dorp) only?"
+        default: false
+      dry_run:
+        type: boolean
+        description: "Dry run?"
+        default: false
+
+env:
+  GITHUB_TOKEN: ${{ secrets.BUILD_GITHUB_TOKEN }}
+
+jobs:
+  import-unleash:
+    runs-on: ["self-hosted", "100m-400mi", "spot", "persistent"]
+    permissions:
+      contents: "read"
+      id-token: "write"
+    concurrency:
+      group: unleash
+      cancel-in-progress: false
+    strategy:
+      max-parallel: 1
+      matrix:
+        env:
+          - stag
+          - uat
+          - prod
+          - dorp
+        include:
+          - env: stag
+            orgs: "manabie jprep"
+            ENABLE_CONSTRAINT: true
+            channel: C04G7PN2SMB #unleash-stag-alerts
+            enabled: ${{ github.event.inputs.dorp != 'true' }}
+
+          - env: uat
+            orgs: "manabie jprep"
+            ENABLE_CONSTRAINT: true
+            channel: C04G1B9PAJK #unleash-uat-alerts
+            enabled: ${{ github.event.inputs.dorp != 'true' }}
+
+          - env: prod
+            orgs: "jprep tokyo"
+            ENABLE_CONSTRAINT: true
+            channel: C04GU5WPXUM #unleash-prod-tokyo-alerts
+            enabled: ${{ github.event.inputs.dorp != 'true' }}
+
+          - env: dorp
+            orgs: "tokyo"
+            ENABLE_CONSTRAINT: true
+            channel: C05FSC1KN65 #unleash-prep-tokyo-alerts
+            enabled: ${{ github.event.inputs.dorp == 'true' }}
+
+    steps:
+      - id: checkout
+        if: matrix.enabled == true
+        uses: actions/checkout@v3
+
+      - name: Get unleash admin token
+        id: get-token
+        if: matrix.enabled == true
+        uses: ./.github/actions/unleash-auth
+        with:
+          get_plain_token: "false"
+          organization: ${{ matrix.orgs }}
+          environment: ${{ matrix.env }}
+
+      - id: setup
+        working-directory: ./developments/unleash-import
+        if: matrix.enabled == true
+        run: |
+          npm install
+
+      - name: update feature flags in ${{ matrix.env }}
+        id: update-flags
+        if: matrix.enabled == true
+        shell: bash
+        run: |
+          for ORG in ${{ matrix.orgs }}; do
+            export ADMIN_TOKEN=$(echo '${{ steps.get-token.outputs.obj-token }}' | jq -r '.["'${ORG}'"]')
+            export ORG=${ORG}
+
+            node "developments/unleash-import/index.js" --trace-warnings
+          done
+
+        env:
+          ENABLE_CONSTRAINT: ${{ matrix.ENABLE_CONSTRAINT }}
+          ENV: ${{ matrix.env }}
+          DRY_RUN: ${{ github.event.inputs.dry_run }}
+
+      - name: create unleash's account in ${{ matrix.env }}
+        id: create-accounts
+        if: matrix.enabled == true && matrix.env != 'dorp'
+        shell: bash
+        run: |
+          for ORG in ${{ matrix.orgs }}; do
+            export ADMIN_TOKEN=$(echo '${{ steps.get-token.outputs.obj-token }}' | jq -r '.["'${ORG}'"]')
+            export ORG=${ORG}
+
+            node "developments/unleash-import/index.js" --trace-warnings
+          done
+
+        env:
+          ENABLE_CONSTRAINT: ${{ matrix.ENABLE_CONSTRAINT }}
+          IS_CREATE_ACCOUNT: true
+          ENV: ${{ matrix.env }}
+          SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
+
+      - name: Send message
+        if: ${{ matrix.enabled == true && !cancelled() && contains(steps.*.outcome, 'failure') }}
+        uses: archive/github-actions-slack@master
+        with:
+          slack-bot-user-oauth-access-token: ${{ secrets.SLACK_TOKEN }}
+          slack-channel: ${{ matrix.channel }}
+          slack-blocks: >-
+            [
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "Hi @tech-func-automation, an Unleash import has failed.\n Please check the issue here <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|#${{ github.run_id }}>"
+                }
+              }
+            ]

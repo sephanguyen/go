@@ -1,0 +1,23 @@
+{
+  "name": "uat_manabie_bob_to_eureka_users_sink_connector",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+    "tasks.max": "1",
+    "topics": "uat.manabie.bob.public.users",
+    "connection.url": "${file:/config/kafka-connect-config.properties:eureka_url}",
+    "auto.create": "false",
+    "insert.mode": "upsert",
+    "table.name.format": "users",
+    "fields.whitelist": "allow_notification,avatar,birthday,country,created_at,deleted_at,device_token,email,email_verified,facebook_id,first_name,first_name_phonetic,full_name_phonetic,gender,given_name,is_tester,last_login_date,last_name,last_name_phonetic,name,phone_number,phone_verified,platform,resource_path,updated_at,user_group,user_id",
+    "transforms": "unwrap,route",
+    "transforms.route.type": "org.apache.kafka.connect.transforms.RegexRouter",
+    "transforms.route.regex": "([^.]+).([^.]+).([^.]+).([^.]+).([^.]+)",
+    "transforms.route.replacement": "$5",
+    "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+    "delete.enabled": "false",
+    "pk.mode": "record_value",
+    "pk.fields": "user_id",
+    "transforms.unwrap.drop.tombstones": "true",
+    "transforms.unwrap.delete.handling.mode": "drop"
+  }
+}

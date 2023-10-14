@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package common.v1;
+
+import "common/v1/enums.proto";
+import "google/protobuf/timestamp.proto";
+
+option java_package = "com.manabie.libs.proto.common.v1";
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/common/v1;cpb";
+
+message Paging {
+  message Combined {
+    string offset_string = 1;
+    google.protobuf.Timestamp offset_time = 2;
+    int64 offset_integer = 3;
+  }
+  message MultipleCombined {
+    repeated Combined combined = 1;
+  }
+
+  uint32 limit = 1;
+  oneof offset {
+    int64 offset_integer = 2;
+    string offset_string = 3;
+    google.protobuf.Timestamp offset_time = 4;
+    Combined offset_combined = 5;
+    MultipleCombined offset_multiple_combined = 6;
+  }
+}
+
+message CommonFilter {
+  Country country = 1;
+  Subject subject = 2;
+  int32 grade = 3;
+  int32 school_id = 4;
+  repeated string ids = 5;
+}

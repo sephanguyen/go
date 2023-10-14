@@ -1,0 +1,53 @@
+global:
+  dbPrefix: ""
+  dbUserPrefix: "prod-jprep-"
+  serviceAccountEmailSuffix: "student-coach-e1e95"
+  replicaCount: 1
+  cloudSQLCommonInstance: "student-coach-e1e95:asia-northeast1:clone-jprep-6a98"
+  cloudSQLLMSInstance: "student-coach-e1e95:asia-northeast1:clone-jprep-6a98"
+  hasura:
+    replicaCount: 1
+    affinityOverride:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: cloud.google.com/gke-spot
+              operator: In
+              values: ["true"]
+            - key: environment
+              operator: In
+              values: ["preproduction"]
+    tolerations:
+      - effect: NoSchedule
+        key: cloud.google.com/gke-spot
+        operator: Exists
+      - effect: NoSchedule
+        key: environment
+        operator: Equal
+        value: preproduction
+
+  affinityOverride:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: cloud.google.com/gke-spot
+            operator: In
+            values: ["true"]
+          - key: environment
+            operator: In
+            values: ["preproduction"]
+  tolerations:
+    - effect: NoSchedule
+      key: cloud.google.com/gke-spot
+      operator: Exists
+    - effect: NoSchedule
+      key: environment
+      operator: Equal
+      value: preproduction
+
+  entryexitmgmt:
+    enabled: false
+  calendar:
+    enabled: false

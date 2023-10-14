@@ -1,0 +1,77 @@
+syntax = "proto3";
+
+package lessonmgmt.v1;
+
+import "google/protobuf/timestamp.proto";
+import "common/v1/requests.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/lessonmgmt/v1;lpb";
+
+message GetUserGroupRequest {
+  string user_id = 1; // required
+}
+
+message GetUserGroupResponse {
+  string user_group = 1;
+}
+
+message GetTeachersRequest {
+  repeated string teacher_ids = 1;
+}
+
+message GetTeachersResponse {
+  message TeacherInfo {
+    string id = 1;
+    string name = 2;
+    google.protobuf.Timestamp created_at = 3;
+    google.protobuf.Timestamp updated_at = 4;
+  }
+  repeated TeacherInfo teachers = 1;
+  int32 total = 2;
+}
+
+message GetTeachersSameGrantedLocationRequest {
+  string keyword = 1;
+  string location_id = 2;
+  bool is_all_teacher = 3;
+  common.v1.Paging paging = 4; //required
+}
+
+message GetTeachersSameGrantedLocationResponse {
+  message TeacherInfo {
+    string id = 1;
+    string name = 2;
+    string first_name = 3;
+    string last_name = 4;
+    string full_name_phonetic = 5;
+    string first_name_phonetic = 6;
+    string last_name_phonetic = 7;
+    string email = 8;
+    google.protobuf.Timestamp created_at = 9;
+    google.protobuf.Timestamp updated_at = 10;
+  }
+  repeated TeacherInfo teachers = 1;
+  uint32 total = 2;
+}
+
+message GetStudentsManyReferenceByNameOrEmailRequest {
+  string keyword = 1;
+  uint32 limit = 2;
+  uint32 offset = 3;
+}
+message GetStudentsManyReferenceByNameOrEmailResponse {
+  message StudentInfo {
+    string user_id = 1;
+    string name = 2;
+    string email = 3;
+  }
+
+  repeated StudentInfo students = 1;
+}
+
+service UserService {
+  rpc GetStudentsManyReferenceByNameOrEmail(GetStudentsManyReferenceByNameOrEmailRequest) returns (GetStudentsManyReferenceByNameOrEmailResponse);
+  rpc GetUserGroup(GetUserGroupRequest) returns (GetUserGroupResponse);
+  rpc GetTeachers(GetTeachersRequest) returns (GetTeachersResponse);
+  rpc GetTeachersSameGrantedLocation(GetTeachersSameGrantedLocationRequest) returns (GetTeachersSameGrantedLocationResponse);
+}

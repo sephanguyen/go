@@ -1,0 +1,1 @@
+ALTER TABLE "bill_item"  ALTER COLUMN resource_path SET NOT NULL

@@ -1,0 +1,23 @@
+common:
+  sa_email: ""
+  google_cloud_project: production-renseikai
+  firebase_project: production-renseikai
+  identity_platform_project: student-coach-e1e95
+issuers:
+  - issuer: manabie
+    audience: prod-renseikai
+    jwks_endpoint: http://shamir:5680/.well-known/jwks.json
+brightcove:
+  account_id: 6248889468001
+  client_id: 79ceb2e7-7b44-408d-a765-58edb5a1ae20
+  profile: multi-platform-standard-dynamic
+jwt_applicant: prod-renseikai
+storage:
+  bucket: renseikai-backend
+question_bucket: renseikai-questions-content
+elasticsearch:
+  addresses:
+    - https://elasticsearch-elastic.prod-renseikai-elastic.svc.cluster.local:9200
+postgres_v2:
+  bob:
+    shard_id: 4

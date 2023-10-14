@@ -1,0 +1,1 @@
+ALTER TABLE public.package_course RENAME COLUMN max_slot TO max_slots_per_course;

@@ -1,0 +1,578 @@
+prometheus-node-exporter:
+  enabled: false
+
+prometheus-pushgateway:
+  enabled: false
+
+server:
+  image:
+    tag: v2.43.1-stringlabels
+  persistentVolume:
+    storageClass: premium-rwo
+
+default_slack_config: &default_slack_config
+  api_url: https://hooks.slack.com/services/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
+  send_resolved: true
+  title: |-
+    [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }}{{ if .CommonLabels.job }} for {{ .CommonLabels.job }}{{ end }}
+  text: >-
+    {{ with index .Alerts 0 -}}
+      {{- if .Annotations.runbook }}   :notebook: *<{{ .Annotations.runbook }}|Runbook>*{{ end }}
+    {{ end }}
+
+    *Alert details*:
+
+    {{ range .Alerts -}}
+      *Alert:* {{ .Annotations.summary }}
+      {{ if .Labels.severity }} - `Severity: {{ .Labels.severity }}`{{ end }} {{ if .Labels.namespace }} - `Namespace: {{ .Labels.namespace }}`{{ end }}
+    *Description:* {{ .Annotations.description }}
+    *Details:*
+      {{ range .Labels.SortedPairs }} • *{{ .Name }}:* `{{ .Value }}`
+      {{ end }}
+    {{ end }}
+
+default_opsgenie_config: &default_opsgenie_config
+  send_resolved: true
+  message: '{{ .CommonLabels.alertname }} for {{ .CommonLabels.job }}'
+  description:  '{{ template "opsgenie.default.description" . }}'
+  source:  '{{ template "opsgenie.default.source" . }}'
+
+alertmanager:
+  enabled: true
+
+  # ========= New configs in Prometheus Helm >= v21.0.0 =========
+  service:
+    port: 80
+
+  configmapReload:
+    enabled: false
+
+  config:
+    route:
+      group_by: [alertname, job]
+      receiver: prod-monitoring-slack
+      routes:
+        - matchers:
+          - app=~"(nats|nats-jetstream)"
+          receiver: grafana-oncall-platform
+          continue: true
+          routes:
+            # NATSJetStreamTooManyPendingAckMessages, NATSJetStreamTooManyPendingMessages, NATSJetStreamNewRedeliveredMessages
+            - matchers:
+              - consumer_name=~"(durable-assign-study-plan|durable-assignments-created|durable-eureka-student-event-created|durable-learning-objectives-created|durable-student-event-logs-created)"
+              receiver: grafana-oncall-syllabus
+
+            - matchers:
+              - consumer_name=~"(durable-class-upserted|durable-sync-live-lesson|durable-sync-user-course|durable-synclocationtype|durable-synclocation|durable-sync-student-subscription|durable-student-subscription-lesson-member|durable-create-live-lesson-room)"
+              receiver: grafana-oncall-lesson
+
+            - matchers:
+              - consumer_name=~"(durable-sync-staff|durable-sync-student|durable-synclocation)"
+              receiver: grafana-oncall-user
+
+            - matchers:
+              - consumer_name=~"(durable-notification|durable_chat_chat_message_created_elastic|durable_chat_chat_members_updated_elastic|durable_chat_chat_created_elastic|durable_chat_chat_updated_elastic|durable-esconversation-course-student-elastic|durable-chat-message-created|durable-sync-lesson-chat|durable-lesson|durable_chat_migrate_tom|durable-sync-student-lessons-conversations|durable-user-device-token-updated|durable-user-updated-tom|durable-user-created)"
+              receiver: grafana-oncall-communication
+
+            - matchers:
+              - consumer_name=~"(durable-student-package|durable-sync-academic-year|durable-sync-class|durable-sync-class-member|durable-sync-course|durable-sync-course-academic|durable-sync-course-class|durable-sync-staff|durable-sync-student|durable-sync-student-package|durable-sync-student-package-fatima|durable-sync-student-package-eureka)"
+              receiver: grafana-oncall-payment-nats
+
+            - matchers:
+              - consumer_name=~"(durable-entryexit-user-created)"
+              receiver: grafana-oncall-adobo
+
+            # NATSJetStreamConsumerFailToProcessMessages
+            - matchers:
+              - jetstream_queue_name=~"(queue-assign-study-plan|queue-assignments-created|queue-eureka-student-event-created|queue-learning-objectives-created|queue-student-event-logs-created)"
+              receiver: grafana-oncall-syllabus
+
+            - matchers:
+              - jetstream_queue_name=~"(queue-class-upserted|queue-internal-lesson-created|queue-sync-live-lesson|queue-sync-user-course|queue-synclocationtype|queue-synclocation|queue-sync-student-subscription|queue-student-subscription-lesson|queue-student-subscription-lesson-member)"
+              receiver: grafana-oncall-lesson
+
+            - matchers:
+              - jetstream_queue_name=~"(queue-sync-staff|queue-sync-student|queue-synclocation)"
+              receiver: grafana-oncall-user
+
+            - matchers:
+              - jetstream_queue_name=~"(queue-notification|group.chat.chat.message.created.elastic|group.chat.chat.members.updated.elastic|group.chat.chat.created.elastic|group.chat.chat.updated.elastic|queue-esconversation-course-student-elastic|queue-chat-message-created|queue-sync-lesson-chat|queue-lesson|queue.chat_migrate.tom|queue-sync-student-lessons-conversations|queue-user-device-token-updated|queue-user-updated-tom|queue-user-created|queue-notification-sync-student-package-v2)"
+              receiver: grafana-oncall-communication
+
+            - matchers:
+              - jetstream_queue_name=~"(queue-student-package|queue-sync-academic-year|queue-sync-class|queue-sync-class-member|queue-sync-course|queue-sync-course-academic|queue-sync-course-class|queue-sync-staff|queue-sync-student|queue-sync-student-package|queue-sync-student-package-eureka|queue-sync-student-package-fatima|queue-order-event-log-created)"
+              receiver: grafana-oncall-payment-nats
+
+            - matchers:
+              - jetstream_queue_name=~"(queue-entryexit-user-created)"
+              receiver: grafana-oncall-adobo
+
+            - matchers:
+              - jetstream_queue_name=~"(queue-timesheet-lesson)"
+              receiver: grafana-oncall-timesheet
+
+        - matchers:
+          - app=~"(notification|spike)"
+          receiver: grafana-oncall-communication
+          continue: true
+
+        - matchers:
+          - app=~"(istio|backend)"
+          receiver: grafana-oncall-tse
+          continue: true
+          routes:
+            #HighNumberOfUnimplementedGrpcRequests, HighNumberOfUnavailableGrpcRequests, HighNumberOfFailedHttpRequests, HighNumberOfSlowHasuraRequests
+            - matchers:
+              - destination_service_name=~"(jaeger.+|opentelemetry.+|prometheus.+|redash|jerry)"
+              receiver: grafana-oncall-platform
+
+            - matchers:
+              - destination_service_name=~"(draft|draft.+|graphql.+|import-map.+|unleash|unleash.+)"
+              receiver: grafana-oncall-automation
+
+            - matchers:
+              - destination_service_name=~"(invoicemgmt|invoicemgmt.+|entryexitmgmt|entryexitmgmt.+)"
+              receiver: grafana-oncall-adobo
+
+            - matchers:
+              - destination_service_name=~"(appsmith|bob|bob.+|mastermgmt|mastermgmt.+|yasuo)"
+              receiver: grafana-oncall-architecture
+
+            - matchers:
+              - destination_service_name=~"(notificationmgmt|tom|yasuo)"
+              receiver: grafana-oncall-communication
+
+            - matchers:
+              - destination_service_name=~"(calendar|calendar.+)"
+              receiver: grafana-oncall-calendar
+
+            - matchers:
+              - destination_service_name=~"(lessonmgmt)"
+              receiver: grafana-oncall-lesson
+
+            - matchers:
+              - destination_service_name=~"(virtualclassroom)"
+              receiver: grafana-oncall-virtual-classroom
+
+            - matchers:
+              - destination_service_name=~"(fatima|fatima.+|payment)"
+              receiver: grafana-oncall-payment
+
+            - matchers:
+              - destination_service_name=~"(eureka|eureka.+)"
+              receiver: grafana-oncall-syllabus
+
+            - matchers:
+              - destination_service_name=~"(timesheet|timesheet.+)"
+              receiver: grafana-oncall-timesheet
+
+            - matchers:
+              - destination_service_name=~"(fatima|fatima.+|shamir|usermgmt)"
+              receiver: grafana-oncall-user
+
+            #HighNumberOfFailedGrpcRequests, HighNumberOfSlowGrpcRequests
+            - matchers:
+              - grpc_server_method=~"(entryexitmgmt.+|invoicemgmt.+)"
+              receiver: grafana-oncall-adobo
+
+            - matchers:
+              - grpc_server_method=~"(bob.v1.Class.+|bob.v1.Course.+|bob.v1.Master.+|bob.v1.UploadService.+|manabie.bob.Class.+|manabie.bob.Course.+|manabie.bob.Student.+|mastermgmt.+|manabie.yasuo.Course.+|yasuo.v1.Brightcove.+|yasuo.v1.Course.+|yasuo.v1.Upload.+)"
+              receiver: grafana-oncall-architecture
+
+            - matchers:
+              - grpc_server_method=~"(bob.v1.Notification.+|notificationmgmt.+|tom.+|manabie.tom.+|yasuo.v1.Notification.+)"
+              receiver: grafana-oncall-communication
+
+            - matchers:
+              - grpc_server_method=~"(calendar.+)"
+              receiver: grafana-oncall-calendar
+
+            - matchers:
+              - grpc_server_method=~"(bob.v1.Lesson.+|lessonmgmt.+)"
+              receiver: grafana-oncall-lesson
+
+            - matchers:
+              - grpc_server_method=~"(virtualclassroom.+)"
+              receiver: grafana-oncall-virtual-classroom
+
+            - matchers:
+              - grpc_server_method=~"(fatima.+|payment.+)"
+              receiver: grafana-oncall-payment
+
+            - matchers:
+              - grpc_server_method=~"(eureka.+|syllabus.+)"
+              receiver: grafana-oncall-syllabus
+
+            - matchers:
+              - grpc_server_method=~"(timesheet.+)"
+              receiver: grafana-oncall-timesheet
+
+            - matchers:
+              - grpc_server_method=~"(bob.v1.Student.+|bob.v1.User.+|manabie.bob.User.+|shamir.+|usermgmt.+|manabie.yasuo.User.+)"
+              receiver: grafana-oncall-user
+
+        - matchers:
+          - app=~"(kubernetes)"
+          receiver: grafana-oncall-platform
+          continue: true
+          routes:
+            #KubernetesPodCrashLooping, KubernetesPodNotReady, HighMemoryUsageContainer
+            - matchers:
+              - pod=~"(draft.+|graphql.+|import-map.+|unleash.+)"
+              receiver: grafana-oncall-automation
+
+            - matchers:
+              - pod=~"(invoicemgmt.+|entryexitmgmt.+)"
+              receiver: grafana-oncall-adobo
+
+            - matchers:
+              - pod=~"(appsmith.+|bob.+|mastermgmt.+|yasuo.+)"
+              receiver: grafana-oncall-architecture
+
+            - matchers:
+              - pod=~"(notificationmgmt.+|tom.+|yasuo.+)"
+              receiver: grafana-oncall-communication
+
+            - matchers:
+              - pod=~"(calendar.+)"
+              receiver: grafana-oncall-calendar
+
+            - matchers:
+              - pod=~"(lessonmgmt.+)"
+              receiver: grafana-oncall-lesson
+
+            - matchers:
+              - pod=~"(virtualclassroom.+)"
+              receiver: grafana-oncall-virtual-classroom
+
+            - matchers:
+              - pod=~"(fatima.+|payment.+)"
+              receiver: grafana-oncall-payment
+
+            - matchers:
+              - pod=~"(eureka.+)"
+              receiver: grafana-oncall-syllabus
+
+            - matchers:
+              - pod=~"(timesheet.+)"
+              receiver: grafana-oncall-timesheet
+
+            - matchers:
+              - pod=~"(fatima.+|shamir.+|usermgmt.+)"
+              receiver: grafana-oncall-user
+
+            #KubernetesDeploymentReplicasMismatch
+            - matchers:
+              - deployment=~"(draft|draft.+|graphql.+|import-map.+|unleash|unleash.+)"
+              receiver: grafana-oncall-automation
+
+            - matchers:
+              - deployment=~"(invoicemgmt|invoicemgmt.+|entryexitmgmt|entryexitmgmt.+)"
+              receiver: grafana-oncall-adobo
+
+            - matchers:
+              - deployment=~"(bob|bob.+|mastermgmt|mastermgmt.+|yasuo)"
+              receiver: grafana-oncall-architecture
+
+            - matchers:
+              - deployment=~"(notificationmgmt|yasuo)"
+              receiver: grafana-oncall-communication
+
+            - matchers:
+              - deployment=~"(calendar|calendar.+)"
+              receiver: grafana-oncall-calendar
+
+            - matchers:
+              - deployment=~"(lessonmgmt|lessonmgmt.+)"
+              receiver: grafana-oncall-lesson
+
+            - matchers:
+              - deployment=~"(virtualclassroom)"
+              receiver: grafana-oncall-virtual-classroom
+
+            - matchers:
+              - deployment=~"(fatima|fatima.+|payment)"
+              receiver: grafana-oncall-payment
+
+            - matchers:
+              - deployment=~"(eureka|eureka.+)"
+              receiver: grafana-oncall-syllabus
+
+            - matchers:
+              - deployment=~"(timesheet|timesheet.+)"
+              receiver: grafana-oncall-timesheet
+
+            - matchers:
+              - deployment=~"(fatima|fatima.+|shamir|usermgmt)"
+              receiver: grafana-oncall-user
+
+            #KubernetesStatefulSetReplicasMismatch
+            - matchers:
+              - statefulset=~"(tom)"
+              receiver: grafana-oncall-communication
+
+        - matchers:
+          - app=~"(elastic|elastic-cluster|kafka)"
+          receiver: grafana-oncall-platform
+          continue: true
+
+        - matchers:
+          - app=~"(kafka-connect)"
+          receiver: grafana-oncall-platform
+          continue: true
+          routes:
+            - matchers:
+              - connector=~"(.+bob.+)"
+              receiver: grafana-oncall-kafka
+
+    global:
+      slack_api_url: https://hooks.slack.com/services/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
+      opsgenie_api_key: 7fbeb3bf-46ef-46d8-b2b6-70fe59e6663d # platform team
+
+    receivers:
+    - name: prod-monitoring-slack
+      slack_configs:
+      - channel: '#prod-monitoring'
+        <<: *default_slack_config
+
+    - name: adobo-slack
+      slack_configs:
+      - channel: '#squad-adobo'
+        <<: *default_slack_config
+
+    - name: lesson-slack
+      slack_configs:
+      - channel: 'squad-lesson-feature'
+        <<: *default_slack_config
+
+    - name: lesson-alert-slack
+      slack_configs:
+      - channel: '#lesson-alert'
+        <<: *default_slack_config
+
+    - name: platform-slack
+      slack_configs:
+      - channel: '#squad-platform'
+        <<: *default_slack_config
+
+    - name: syllabus-slack
+      slack_configs:
+      - channel: '#squad-syllabus'
+        <<: *default_slack_config
+
+    - name: user-management-slack
+      slack_configs:
+      - channel: '#squad-user_management-feature'
+        <<: *default_slack_config
+
+    - name: payment-alert-slack
+      slack_configs:
+      - channel: '#squad-payment-nats-alert'
+        <<: *default_slack_config
+
+    - name: communication-alert-slack
+      slack_configs:
+      - channel: '#squad-communication-alerts'
+        <<: *default_slack_config
+
+    - name: syllabus-alert-slack
+      slack_configs:
+      - channel: '#squad-syllabus-alerts'
+        <<: *default_slack_config
+
+    - name: user-alert-slack
+      slack_configs:
+      - channel: '#squad-user-alerts'
+        <<: *default_slack_config
+
+    - name: adobo-alert-slack
+      slack_configs:
+      - channel: '#squad-adobo-alerts'
+        <<: *default_slack_config
+
+    - name: platform-kafka-slack
+      slack_configs:
+      - channel: '#squad-platform-kafka-alerts'
+        <<: *default_slack_config
+
+    - name: func-automation-pager
+      opsgenie_configs:
+      - <<: *default_opsgenie_config
+        responders:
+          - name: "func-automation"
+            type: team
+
+    - name: func-backend-pager
+      opsgenie_configs:
+      - <<: *default_opsgenie_config
+        responders:
+          - name: "func-backend"
+            type: team
+
+    - name: func-mobile-pager
+      opsgenie_configs:
+      - <<: *default_opsgenie_config
+        responders:
+          - name: "func-mobile"
+            type: team
+
+    - name: func-pdm-pager
+      opsgenie_configs:
+      - <<: *default_opsgenie_config
+        responders:
+          - name: "func-pdm"
+            type: team
+
+    - name: func-qa-pager
+      opsgenie_configs:
+      - <<: *default_opsgenie_config
+        responders:
+          - name: "func-qa"
+            type: team
+
+    - name: func-web-pager
+      opsgenie_configs:
+      - <<: *default_opsgenie_config
+        responders:
+          - name: "func-web"
+            type: team
+
+    - name: squad-admin-pager
+      opsgenie_configs:
+      - <<: *default_opsgenie_config
+        responders:
+          - name: "squad-admin"
+            type: team
+
+    - name: squad-communication-pager
+      opsgenie_configs:
+      - <<: *default_opsgenie_config
+        responders:
+          - name: "squad-communication"
+            type: team
+
+    - name: squad-ddd-pager
+      opsgenie_configs:
+      - <<: *default_opsgenie_config
+        responders:
+          - name: "squad-ddd"
+            type: team
+
+    - name: squad-adobo-pager
+      opsgenie_configs:
+      - <<: *default_opsgenie_config
+        responders:
+          - name: "squad-adobo"
+            type: team
+
+    - name: squad-lesson-pager
+      opsgenie_configs:
+      - <<: *default_opsgenie_config
+        responders:
+          - name: "squad-lesson"
+            type: team
+        api_key: 6307e108-bc53-4c55-b99e-749e210b4312
+
+    - name: squad-platform-pager
+      opsgenie_configs:
+      - <<: *default_opsgenie_config
+        responders:
+          - name: "squad-platform"
+            type: team
+        api_key: 7fbeb3bf-46ef-46d8-b2b6-70fe59e6663d
+
+    - name: squad-release-pager
+      opsgenie_configs:
+      - <<: *default_opsgenie_config
+        responders:
+          - name: "squad-release"
+            type: team
+
+    - name: squad-syllabus-pager
+      opsgenie_configs:
+      - <<: *default_opsgenie_config
+        responders:
+          - name: "squad-syllabus"
+            type: team
+
+    - name: squad-user-management-pager
+      opsgenie_configs:
+      - <<: *default_opsgenie_config
+        responders:
+          - name: "squad-user-management"
+            type: team
+
+    - name: grafana-oncall-platform
+      webhook_configs:
+      - url: https://oncall.manabie.io/integrations/v1/alertmanager/j3bQE4jGQiX1HuGzMSSq56HsL/
+        send_resolved: true
+
+    - name: grafana-oncall-automation
+      webhook_configs:
+      - url: https://oncall.manabie.io/integrations/v1/alertmanager/0ed7jdlM8tBeSUpBnlgDO8upK/
+        send_resolved: true
+
+    - name: grafana-oncall-tse
+      webhook_configs:
+      - url: https://oncall.manabie.io/integrations/v1/alertmanager/YnkIEuoQNXFqJ6LeSYXEG9tYe/
+        send_resolved: true
+
+    - name: grafana-oncall-adobo
+      webhook_configs:
+      - url: https://oncall.manabie.io/integrations/v1/alertmanager/eUeGSw7hzo8rIxVhIQHD0h91R/
+        send_resolved: true
+
+    - name: grafana-oncall-architecture
+      webhook_configs:
+      - url: https://oncall.manabie.io/integrations/v1/alertmanager/4PmtgSm9O8VHiiEgaP2DjLstk/
+        send_resolved: true
+
+    - name: grafana-oncall-communication
+      webhook_configs:
+      - url: https://oncall.manabie.io/integrations/v1/alertmanager/vg0BQ1FBf9qZik4QGlmPvcI42/
+        send_resolved: true
+
+    - name: grafana-oncall-calendar
+      webhook_configs:
+      - url: https://oncall.manabie.io/integrations/v1/alertmanager/Ci9yFl4Wrt3z6G4mfp3Vp73tG/
+        send_resolved: true
+
+    - name: grafana-oncall-lesson
+      webhook_configs:
+      - url: https://oncall.manabie.io/integrations/v1/alertmanager/WNwb1szQQhwh2QHMGs6jZkkIO/
+        send_resolved: true
+
+    - name: grafana-oncall-virtual-classroom
+      webhook_configs:
+      - url: https://oncall.manabie.io/integrations/v1/alertmanager/P4jes3IaSaCM1YteS4UjvhHw7/
+        send_resolved: true
+
+    - name: grafana-oncall-payment
+      webhook_configs:
+      - url: https://oncall.manabie.io/integrations/v1/alertmanager/QXJMOLGLIlCvg5sTOSZQXs1Ro/
+        send_resolved: true
+
+    - name: grafana-oncall-payment-nats
+      webhook_configs:
+      - url: https://oncall.manabie.io/integrations/v1/alertmanager/SGJxJzz6BUmWyRTJzSz2LFVj0/
+        send_resolved: true
+
+    - name: grafana-oncall-syllabus
+      webhook_configs:
+      - url: https://oncall.manabie.io/integrations/v1/alertmanager/FSjMJGw5lIYYalaIGKKLvR3Eq/
+        send_resolved: true
+
+    - name: grafana-oncall-timesheet
+      webhook_configs:
+      - url: https://oncall.manabie.io/integrations/v1/alertmanager/8QNq7hJTmgwXMGHXRov8FkYUk/
+        send_resolved: true
+
+    - name: grafana-oncall-user
+      webhook_configs:
+      - url: https://oncall.manabie.io/integrations/v1/alertmanager/CWmi0cMhVCkknBSZLnrfDrjcG/
+        send_resolved: true
+
+    - name: grafana-oncall-kafka
+      webhook_configs:
+      - url: https://oncall.manabie.io/integrations/v1/alertmanager/tObtpRcixBOaefpYoXkE4xb7M/
+        send_resolved: true

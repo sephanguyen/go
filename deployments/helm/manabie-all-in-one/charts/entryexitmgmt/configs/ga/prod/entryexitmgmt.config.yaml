@@ -1,0 +1,10 @@
+common:
+  google_cloud_project: student-coach-e1e95
+  firebase_project: production-ga
+  identity_platform_project: student-coach-e1e95
+issuers:
+  - issuer: manabie
+    audience: prod-ga
+    jwks_endpoint: http://shamir:5680/.well-known/jwks.json
+storage:
+  bucket: jp-partners-backend

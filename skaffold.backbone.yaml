@@ -1,0 +1,239 @@
+apiVersion: skaffold/v2beta29
+kind: Config
+metadata:
+  name: backbone
+deploy:
+  helm:
+    releases:
+      # [0] nats-jetstream
+      - name: nats-jetstream
+        chartPath: deployments/helm/platforms/nats-jetstream
+        namespace: '{{.ENV}}-{{.ORG}}-nats-jetstream'
+        createNamespace: true
+        skipBuildDependencies: true
+        valuesFiles:
+          - 'deployments/helm/platforms/nats-jetstream/{{.ENV}}-{{.ORG}}-values.yaml'
+        setValueTemplates:
+          vendor: '{{.ORG}}'
+          environment: '{{.ENV}}'
+          serviceAccountEmailSuffix: '{{.SERVICE_ACCOUNT_EMAIL_SUFFIX}}'
+
+      # [1] elasticsearch
+      - name: 'elastic'
+        chartPath: deployments/helm/platforms/elastic
+        namespace: '{{.ENV}}-{{.ORG}}-elastic'
+        valuesFiles:
+          - 'deployments/helm/platforms/{{.ENV}}-{{.ORG}}-values.yaml'
+          - 'deployments/helm/platforms/elastic/{{.ENV}}-{{.ORG}}-values.yaml'
+        createNamespace: true
+        skipBuildDependencies: true
+        setValueTemplates:
+          vendor: '{{.ORG}}'
+          environment: '{{.ENV}}'
+
+      # [2] kafka
+      - name: kafka
+        chartPath: deployments/helm/platforms/kafka
+        namespace: '{{.ENV}}-{{.ORG}}-kafka'
+        valuesFiles:
+          - 'deployments/helm/platforms/kafka/{{.ENV}}-{{.ORG}}-values.yaml'
+        createNamespace: true
+        skipBuildDependencies: true
+        setValueTemplates:
+          vendor: '{{.ORG}}'
+          environment: '{{.ENV}}'
+
+      # [3] cp-schema-registry
+      - name: cp-schema-registry
+        chartPath: deployments/helm/platforms/cp-schema-registry
+        namespace: '{{.ENV}}-{{.ORG}}-kafka'
+        createNamespace: true
+        skipBuildDependencies: true
+        valuesFiles:
+          - 'deployments/helm/platforms/cp-schema-registry/{{.ENV}}-{{.ORG}}-values.yaml'
+
+      # [4] unleash
+      - name: unleash
+        chartPath: deployments/helm/platforms/unleash
+        namespace: '{{.ENV}}-{{.ORG}}-unleash'
+        createNamespace: true
+        skipBuildDependencies: true
+        valuesFiles:
+          - deployments/helm/platforms/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/platforms/gateway/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/platforms/unleash/{{.ENV}}-{{.ORG}}-values.yaml
+          - feature_flags/adobo/{{if eq "jprep" .ORG}}jprep-{{end}}feature-values.yaml
+          - feature_flags/architecture/{{if eq "jprep" .ORG}}jprep-{{end}}feature-values.yaml
+          - feature_flags/calendar/{{if eq "jprep" .ORG}}jprep-{{end}}feature-values.yaml
+          - feature_flags/communication/{{if eq "jprep" .ORG}}jprep-{{end}}feature-values.yaml
+          - feature_flags/lesson/{{if eq "jprep" .ORG}}jprep-{{end}}feature-values.yaml
+          - feature_flags/payment/{{if eq "jprep" .ORG}}jprep-{{end}}feature-values.yaml
+          - feature_flags/platform/{{if eq "jprep" .ORG}}jprep-{{end}}feature-values.yaml
+          - feature_flags/syllabus/{{if eq "jprep" .ORG}}jprep-{{end}}feature-values.yaml
+          - feature_flags/timesheet/{{if eq "jprep" .ORG}}jprep-{{end}}feature-values.yaml
+          - feature_flags/user/{{if eq "jprep" .ORG}}jprep-{{end}}feature-values.yaml
+          - feature_flags/virtual-classroom/{{if eq "jprep" .ORG}}jprep-{{end}}feature-values.yaml
+        setValueTemplates:
+          serviceAccountEmailSuffix: '{{.SERVICE_ACCOUNT_EMAIL_SUFFIX}}'
+          global:
+            vendor: '{{.ORG}}'
+            environment: '{{.ENV}}'
+
+      # [5] kafka-connect
+      - name: kafka-connect
+        chartPath: deployments/helm/platforms/kafka-connect
+        namespace: '{{.ENV}}-{{.ORG}}-kafka'
+        createNamespace: true
+        skipBuildDependencies: true
+        valuesFiles:
+          - deployments/helm/platforms/{{.ENV}}-{{.ORG}}-values.yaml
+          - 'deployments/helm/platforms/kafka-connect/{{.ENV}}-{{.ORG}}-values.yaml'
+        setValueTemplates:
+          global:
+            vendor: '{{.ORG}}'
+            environment: '{{.ENV}}'
+            serviceAccountEmailSuffix: '{{.SERVICE_ACCOUNT_EMAIL_SUFFIX}}'
+            sqlProxy:
+              enabled: '{{if ne "local" .ENV}}true{{else}}false{{end}}'
+              usePublicIP: '{{if or (eq "renseikai" .ORG) (eq "synersia" .ORG)}}true{{else}}false{{end}}'
+
+profiles:
+  - name: local
+    activation:
+      - env: ENV=local
+    patches:
+      - op: add
+        path: /deploy/kubeContext
+        value: kind-kind
+      - op: add
+        path: /deploy/helm/releases/-
+        value:
+          name: kafka-ui
+          chartPath: deployments/helm/platforms/kafka-ui
+          namespace: '{{.ENV}}-{{.ORG}}-kafka'
+          createNamespace: true
+          setValueTemplates:
+            envs.config.KAFKA_CLUSTERS_0_NAME: '{{.ENV}}-{{.ORG}}'
+
+  # If on CI, we revert the previous block: don't deploy kafka-ui
+  - name: ci
+    activation:
+      - env: CI=true
+        kubeContext: kind-kind
+    patches:
+      - op: remove
+        path: /deploy/helm/releases/6
+
+  # TODO @anhpngt: local profile adding unleash release, causing this nats-only
+  # profile to break in local.
+  - name: nats-only
+    patches:
+      - op: remove
+        path: /deploy/helm/releases/5
+      - op: remove
+        path: /deploy/helm/releases/4
+      - op: remove
+        path: /deploy/helm/releases/3
+      - op: remove
+        path: /deploy/helm/releases/2
+      - op: remove
+        path: /deploy/helm/releases/1
+
+  - name: elastic-only
+    patches:
+      - op: remove
+        path: /deploy/helm/releases/5
+      - op: remove
+        path: /deploy/helm/releases/4
+      - op: remove
+        path: /deploy/helm/releases/3
+      - op: remove
+        path: /deploy/helm/releases/2
+      - op: remove
+        path: /deploy/helm/releases/0
+
+  # its purpose to upgrade kafka-only,
+  # documentation: https://manabie.atlassian.net/wiki/spaces/TECH/pages/609779820/Upgrade+kafka+version#Upgrading-kafka-version
+  - name: kafka-only
+    patches:
+      - op: remove
+        path: /deploy/helm/releases/5
+      - op: remove
+        path: /deploy/helm/releases/4
+      - op: remove
+        path: /deploy/helm/releases/3
+      - op: remove
+        path: /deploy/helm/releases/1
+      - op: remove
+        path: /deploy/helm/releases/0
+
+  - name: kafka-connect-only
+    patches:
+      - op: remove
+        path: /deploy/helm/releases/4
+      - op: remove
+        path: /deploy/helm/releases/3
+      - op: remove
+        path: /deploy/helm/releases/2
+      - op: remove
+        path: /deploy/helm/releases/1
+      - op: remove
+        path: /deploy/helm/releases/0
+
+  - name: cp-schema-registry-only
+    patches:
+      - op: remove
+        path: /deploy/helm/releases/5
+      - op: remove
+        path: /deploy/helm/releases/4
+      - op: remove
+        path: /deploy/helm/releases/2
+      - op: remove
+        path: /deploy/helm/releases/1
+      - op: remove
+        path: /deploy/helm/releases/0
+
+  - name: no-kafka
+    patches:
+      - op: remove
+        path: /deploy/helm/releases/5 # kafka-connect
+      - op: remove
+        path: /deploy/helm/releases/3 # cp-schema-registry
+      - op: remove
+        path: /deploy/helm/releases/2 # kafka
+
+  - name: unleash-only
+    patches:
+      - op: remove
+        path: /deploy/helm/releases/5
+      - op: remove
+        path: /deploy/helm/releases/3
+      - op: remove
+        path: /deploy/helm/releases/2
+      - op: remove
+        path: /deploy/helm/releases/1
+      - op: remove
+        path: /deploy/helm/releases/0
+
+  - name: dorp-synersia
+    patches:
+      - op: remove
+        path: /deploy/helm/releases/5
+      - op: remove
+        path: /deploy/helm/releases/3
+      - op: remove
+        path: /deploy/helm/releases/2
+
+  - name: dorp-tokyo
+    patches:
+      - op: remove
+        path: /deploy/helm/releases/1
+
+  - name: new-replication-namespace
+    patches:
+      - op: remove
+        path: /deploy/helm/releases/4
+      - op: remove
+        path: /deploy/helm/releases/1
+      - op: remove
+        path: /deploy/helm/releases/0

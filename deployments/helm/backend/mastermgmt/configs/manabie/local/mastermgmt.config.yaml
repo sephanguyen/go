@@ -1,0 +1,29 @@
+common:
+  grpc:
+    client_name: mastermgmt
+  google_cloud_project: dev-manabie-online
+  firebase_project: dev-manabie-online
+  identity_platform_project: dev-manabie-online
+postgres_v2:
+  bob:
+    max_conns: 16
+issuers:
+  - issuer: http://firebase.emulator.svc.cluster.local:40401/fake_aud
+    audience: fake_aud
+    jwks_endpoint: http://firebase.emulator.svc.cluster.local:40401/jwkset
+  - issuer: manabie
+    audience: manabie-local
+    jwks_endpoint: http://shamir:5680/.well-known/jwks.json
+jwt_applicant: manabie-local
+check_client_versions:
+  - com.manabie.student_manabie_app:1.5.20220923020330
+  - com.manabie.studentManabieApp:1.5.0
+  - com.manabie.liz:1.0.0
+  - com.manabie.lms_manabie_app:1.0.0
+  - com.manabie.lmsManabieApp:1.0.0
+  - com.manabie.enigma:1.0.0
+  - com.synersia.learner:1.0.0
+  - com.manabie.learner:2.0.20230509020728
+  - com.manabie.teacher:2.0.20230509020728
+  - jp.jprep.learner:2.0.20230509020728
+  - jp.jprep.teacher:2.0.20230509020728

@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS idx__student_packages__properties__can_do_quiz ON public.student_packages USING gin ((properties->'can_do_quiz'));

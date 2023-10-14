@@ -1,0 +1,71 @@
+syntax = "proto3";
+
+package lessonmgmt.v1;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/lessonmgmt/v1;lpb";
+
+enum MediaType {
+  MEDIA_TYPE_NONE = 0;
+  MEDIA_TYPE_VIDEO = 1;
+  MEDIA_TYPE_IMAGE = 2;
+  MEDIA_TYPE_PDF = 3;
+  MEDIA_TYPE_AUDIO = 4;
+  MEDIA_TYPE_RECORDING_VIDEO = 5;
+}
+
+enum CreateLessonSavingMethod {
+  CREATE_LESSON_SAVING_METHOD_ONE_TIME = 0;
+  CREATE_LESSON_SAVING_METHOD_RECURRENCE = 1;
+}
+
+enum AssignedStudentStatus {
+  STUDENT_STATUS_UNDER_ASSIGNED = 0;
+  STUDENT_STATUS_JUST_ASSIGNED = 1;
+  STUDENT_STATUS_OVER_ASSIGNED = 2;
+}
+
+enum PurchaseMethod {
+  PURCHASE_METHOD_SLOT = 0;
+  PURCHASE_METHOD_RECURRING = 1;
+}
+
+enum LessonStatus {
+  LESSON_SCHEDULING_STATUS_PUBLISHED = 0;
+  LESSON_SCHEDULING_STATUS_DRAFT = 1;
+  LESSON_SCHEDULING_STATUS_COMPLETED = 2;
+  LESSON_SCHEDULING_STATUS_CANCELED = 3;
+}
+
+enum SavingType {
+  THIS_ONE = 0;
+  THIS_AND_FOLLOWING = 1;
+}
+
+enum StudentAttendanceNotice {
+  NOTICE_EMPTY = 0;
+  IN_ADVANCE = 1;
+  ON_THE_DAY = 2;
+  NO_CONTACT = 3;
+}
+
+enum StudentAttendanceReason {
+  REASON_EMPTY = 0;
+  PHYSICAL_CONDITION = 1;
+  SCHOOL_EVENT = 2;
+  FAMILY_REASON = 3;
+  REASON_OTHER = 4;
+}
+
+enum CalendarView {
+  DAILY = 0;
+  WEEKLY = 1;
+  MONTHLY = 2;
+}
+
+enum PackageTypeSchedule {
+  PACKAGE_TYPE_NONE = 0;
+  PACKAGE_TYPE_ONE_TIME = 1;
+  PACKAGE_TYPE_SLOT_BASED = 2;
+  PACKAGE_TYPE_FREQUENCY = 3;
+  PACKAGE_TYPE_SCHEDULED = 4;
+}

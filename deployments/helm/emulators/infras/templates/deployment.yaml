@@ -1,0 +1,330 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: minio-{{ include "infras.fullname" . }}
+  labels:
+    app.kubernetes.io/name: minio-{{ include "infras.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "infras.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: minio-{{ include "infras.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: minio-{{ include "infras.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      {{- with .Values.minio.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: minio-{{ .Chart.Name }}
+          image: "{{ .Values.minio.image.repository }}:{{ .Values.minio.image.tag | default .Chart.AppVersion }}"
+          command:
+          - /bin/bash
+          - -c
+          args:
+          - minio server /data
+          imagePullPolicy: {{ .Values.minio.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 9000
+              protocol: TCP
+          env:
+          - name: MINIO_ACCESS_KEY
+            value: {{ .Values.minio.config.accessKey }}
+          - name: MINIO_SECRET_KEY
+            value: {{ .Values.minio.config.secretKey }}
+          - name: MINIO_REGION
+            value: {{ .Values.minio.config.region }}
+          resources:
+            {{- toYaml .Values.minio.resources | nindent 12 }}
+---
+{{ if .Values.postgresqlPersistentEnabled }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres-{{ include "infras.fullname" . }}
+  labels:
+    app.kubernetes.io/name: postgres-{{ include "infras.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "infras.labels" . | nindent 4 }}
+spec:
+  serviceName: postgres-headless-svc
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: postgres-{{ include "infras.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      annotations:
+        checksum/init.sql: {{ (.Files.Glob "migrations/*.sql").AsConfig | sha256sum }}
+      labels:
+        app.kubernetes.io/name: postgres-{{ include "infras.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      {{- with .Values.postgres.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+      - name: init-sql
+        configMap:
+          name: postgres-{{ include "infras.fullname" . }}
+
+      initContainers:
+        - name: ubuntu
+          image: ubuntu:20.04
+          command:
+            - /bin/bash
+            - -c
+            - |
+              echo "sleeping 30s before exiting..."
+              sleep 30
+      containers:
+        - name: postgres-{{ .Chart.Name }}
+          image: "{{ .Values.postgres.image.repository }}:{{ .Values.postgres.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.postgres.image.pullPolicy }}
+          volumeMounts:
+          - name: init-sql
+            mountPath: /docker-entrypoint-initdb.d/
+            readOnly: true
+          - name: postgres-{{ include "infras.fullname" . }}
+            mountPath: /data
+          ports:
+            - name: tcp
+              containerPort: 5432
+              protocol: TCP
+          env:
+          - name: POSTGRES_PASSWORD
+            value: {{ .Values.postgres.config.password }}
+          - name: PGDATA
+            value: /data/pgdata
+          args:
+          - "-c"
+          - "wal_level=logical"
+          - "-c"
+          - "max_connections=400"
+          - "-c"
+          - "shared_buffers=6GB"
+          - "-c"
+          - "effective_cache_size=18GB"
+          - "-c"
+          - "maintenance_work_mem=536MB"
+          - "-c"
+          - "checkpoint_completion_target=0.9"
+          - "-c"
+          - "wal_buffers=16MB"
+          - "-c"
+          - "default_statistics_target=100"
+          - "-c"
+          - "random_page_cost=4"
+          - "-c"
+          - "effective_io_concurrency=2"
+          - "-c"
+          - "work_mem=10485kB"
+          - "-c"
+          - "min_wal_size=2GB"
+          - "-c"
+          - "max_wal_size=8GB"
+          - "-c"
+          - "max_worker_processes=8"
+          - "-c"
+          - "max_parallel_workers_per_gather=4"
+          - "-c"
+          - "max_parallel_workers=8"
+          - "-c"
+          - "max_parallel_maintenance_workers=4"
+          - "-c"
+          - "max_wal_senders=20"
+          - "-c"
+          - "max_replication_slots=20"
+          resources:
+            {{- toYaml .Values.postgres.resources | nindent 12 }}
+  volumeClaimTemplates:
+    - metadata:
+        name: postgres-{{ include "infras.fullname" . }}
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 10Gi
+        storageClassName: standard
+{{ else }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-{{ include "infras.fullname" . }}
+  labels:
+    app.kubernetes.io/name: postgres-{{ include "infras.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "infras.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: postgres-{{ include "infras.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      annotations:
+        checksum/init.sql: {{ (.Files.Glob "migrations/*.sql").AsConfig | sha256sum }}
+      labels:
+        app.kubernetes.io/name: postgres-{{ include "infras.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      {{- with .Values.postgres.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+      - name: init-sql
+        configMap:
+          name: postgres-{{ include "infras.fullname" . }}
+      containers:
+        - name: postgres-{{ .Chart.Name }}
+          image: "{{ .Values.postgres.image.repository }}:{{ .Values.postgres.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.postgres.image.pullPolicy }}
+          volumeMounts:
+          - name: init-sql
+            mountPath: /docker-entrypoint-initdb.d/
+            readOnly: true
+          ports:
+            - name: tcp
+              containerPort: 5432
+              protocol: TCP
+          env:
+          - name: POSTGRES_PASSWORD
+            value: {{ .Values.postgres.config.password }}
+          args:
+          - "-c"
+          - "wal_level=logical"
+          - "-c"
+          - "max_connections=400"
+          - "-c"
+          - "shared_buffers=6GB"
+          - "-c"
+          - "effective_cache_size=18GB"
+          - "-c"
+          - "maintenance_work_mem=536MB"
+          - "-c"
+          - "checkpoint_completion_target=0.9"
+          - "-c"
+          - "wal_buffers=16MB"
+          - "-c"
+          - "default_statistics_target=100"
+          - "-c"
+          - "random_page_cost=4"
+          - "-c"
+          - "effective_io_concurrency=2"
+          - "-c"
+          - "work_mem=10485kB"
+          - "-c"
+          - "min_wal_size=2GB"
+          - "-c"
+          - "max_wal_size=8GB"
+          - "-c"
+          - "max_worker_processes=8"
+          - "-c"
+          - "max_parallel_workers_per_gather=4"
+          - "-c"
+          - "max_parallel_workers=8"
+          - "-c"
+          - "max_parallel_maintenance_workers=4"
+          - "-c"
+          - "max_wal_senders=20"
+          - "-c"
+          - "max_replication_slots=20"
+          resources:
+            {{- toYaml .Values.postgres.resources | nindent 12 }}
+{{ end }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alloydb-{{ include "infras.fullname" . }}
+  labels:
+    app.kubernetes.io/name: alloydb-{{ include "infras.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "infras.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: alloydb-{{ include "infras.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      annotations:
+        checksum/init.sql: {{ (.Files.Glob "alloyDb/*.sql").AsConfig | sha256sum }}
+      labels:
+        app.kubernetes.io/name: alloydb-{{ include "infras.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      {{- with .Values.postgres.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        - name: init-sql
+          configMap:
+            name: alloydb-{{ include "infras.fullname" . }}
+      containers:
+        - name: alloydb-{{ .Chart.Name }}
+          image: "{{ .Values.postgres.image.repository }}:{{ .Values.postgres.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.postgres.image.pullPolicy }}
+          volumeMounts:
+            - name: init-sql
+              mountPath: /docker-entrypoint-initdb.d/
+              readOnly: true
+          ports:
+            - name: tcp
+              containerPort: 5432
+              protocol: TCP
+          env:
+            - name: POSTGRES_PASSWORD
+              value: {{ .Values.postgres.config.password }}
+          args:
+            - "-c"
+            - "wal_level=logical"
+            - "-c"
+            - "max_connections=400"
+            - "-c"
+            - "shared_buffers=6GB"
+            - "-c"
+            - "effective_cache_size=18GB"
+            - "-c"
+            - "maintenance_work_mem=536MB"
+            - "-c"
+            - "checkpoint_completion_target=0.9"
+            - "-c"
+            - "wal_buffers=16MB"
+            - "-c"
+            - "default_statistics_target=100"
+            - "-c"
+            - "random_page_cost=4"
+            - "-c"
+            - "effective_io_concurrency=2"
+            - "-c"
+            - "work_mem=10485kB"
+            - "-c"
+            - "min_wal_size=2GB"
+            - "-c"
+            - "max_wal_size=8GB"
+            - "-c"
+            - "max_worker_processes=8"
+            - "-c"
+            - "max_parallel_workers_per_gather=4"
+            - "-c"
+            - "max_parallel_workers=8"
+            - "-c"
+            - "max_parallel_maintenance_workers=4"
+            - "-c"
+            - "max_wal_senders=20"
+            - "-c"
+            - "max_replication_slots=20"
+          resources:
+            {{- toYaml .Values.postgres.resources | nindent 12 }}

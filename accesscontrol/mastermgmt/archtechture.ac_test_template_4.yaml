@@ -1,0 +1,6 @@
+- template: 4
+  tableName: ac_test_template_4
+  ownerCol: owners 
+  permissions:
+    postgres: []
+    hasura: []

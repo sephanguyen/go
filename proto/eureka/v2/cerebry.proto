@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package eureka.v2;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/eureka/v2;epb";
+
+import "eureka/v2/enums.proto";
+import "google/protobuf/timestamp.proto";
+import "common/v1/requests.proto";
+
+
+service CerebryService {
+  rpc GetCerebryUserToken(GetCerebryUserTokenRequest) returns (GetCerebryUserTokenResponse);
+}
+
+message GetCerebryUserTokenRequest {
+}
+
+message GetCerebryUserTokenResponse {
+  string token = 1;
+}

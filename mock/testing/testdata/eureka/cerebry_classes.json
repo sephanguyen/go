@@ -1,0 +1,105 @@
+{
+	"schema": [
+		{
+			"column_name": "class_code",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "class_name",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "cerebry_classes",
+			"policyname": "rls_cerebry_classes",
+			"qual": "permission_check(resource_path, 'cerebry_classes'::text)",
+			"with_check": "permission_check(resource_path, 'cerebry_classes'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "cerebry_classes",
+			"policyname": "rls_cerebry_classes_restrictive",
+			"qual": "permission_check(resource_path, 'cerebry_classes'::text)",
+			"with_check": "permission_check(resource_path, 'cerebry_classes'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "cerebry_classes_pk",
+			"column_name": "id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "cerebry_classes_name_un",
+			"column_name": "class_code",
+			"constraint_type": "UNIQUE"
+		}
+	],
+	"table_name": "cerebry_classes",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

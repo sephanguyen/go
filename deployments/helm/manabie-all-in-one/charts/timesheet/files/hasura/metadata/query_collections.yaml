@@ -1,0 +1,1020 @@
+- name: allowed-queries
+  definition:
+    queries:
+      - name: Timesheet_TimesheetList
+        query: |
+          query Timesheet_TimesheetList($limit: Int = 10, $offset: Int = 0) {
+            timesheet(limit: $limit, offset: $offset, order_by: {created_at: desc}) {
+              staff_id
+              timesheet_date
+              timesheet_id
+              location_id
+              timesheet_status
+            }
+            timesheet_aggregate {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: Timesheet_TimesheetOne
+        query: |
+          query Timesheet_TimesheetOne($timesheet_id: String!) {
+            timesheet(
+              where: {timesheet_id: {_eq: $timesheet_id}, _or: [{other_working_hours: {}}, {timesheet_lesson_hours: {}}, {transportation_expenses: {}}]}
+            ) {
+              staff_id
+              timesheet_date
+              timesheet_id
+              location_id
+              timesheet_status
+              remark
+              timesheet_lesson_hours {
+                lessons {
+                  scheduling_status
+                  start_time
+                  end_time
+                  teaching_method
+                  lesson_id
+                }
+              }
+              other_working_hours {
+                start_time
+                end_time
+                total_hour
+                remarks
+                other_working_hours_id
+                timesheet_config {
+                  timesheet_config_id
+                  config_value
+                  config_type
+                }
+              }
+              transportation_expenses {
+                cost_amount
+                remarks
+                round_trip
+                transportation_from
+                transportation_to
+                transportation_type
+                transportation_expense_id
+              }
+            }
+          }
+      - name: Timesheet_TimesheetManyReference
+        query: >
+          query Timesheet_TimesheetManyReference($location_id: String!,
+          $staff_id: String!, $from_date: timestamptz!, $to_date: timestamptz!)
+          {
+            timesheet(
+              where: {_and: {location_id: {_eq: $location_id}, staff_id: {_eq: $staff_id}, timesheet_date: {_gte: $from_date, _lte: $to_date}, _or: [{other_working_hours: {}}, {timesheet_lesson_hours: {}}, {transportation_expenses: {}}, {_and: [{remark: {_is_null: false}}, {remark: {_neq: ""}}]}]}}
+              order_by: {created_at: desc}
+            ) {
+              timesheet_date
+              timesheet_id
+            }
+          }
+      - name: Timesheet_TimesheetListV2
+        query: >
+          query Timesheet_TimesheetListV2($staff_id: String = null, $limit: Int
+          = 10, $offset: Int = 0) {
+            timesheet(
+              limit: $limit
+              offset: $offset
+              order_by: {created_at: desc}
+              where: {staff_id: {_eq: $staff_id}}
+            ) {
+              staff_id
+              timesheet_date
+              timesheet_id
+              location_id
+              timesheet_status
+            }
+            timesheet_aggregate(where: {staff_id: {_eq: $staff_id}}) {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: Timesheet_OtherWorkingHoursByTimesheetId
+        query: >
+          query Timesheet_OtherWorkingHoursByTimesheetId($timesheet_id: String!)
+          {
+            other_working_hours(where: {timesheet_id: {_eq: $timesheet_id}}) {
+              other_working_hours_id
+              timesheet_id
+              timesheet_config_id
+              start_time
+              end_time
+              total_hour
+              remarks
+            }
+          }
+      - name: Timesheet_OtherWorkingHoursListByTimesheetIds
+        query: >
+          query Timesheet_OtherWorkingHoursListByTimesheetIds($timesheet_ids:
+          [String!] = []) {
+            other_working_hours(where: {timesheet_id: {_in: $timesheet_ids}}) {
+              other_working_hours_id
+              timesheet_id
+              total_hour
+            }
+          }
+      - name: Timesheet_TimesheetConfigListByKey
+        query: |
+          query Timesheet_TimesheetConfigListByKey($config_type: String) {
+            timesheet_config(where: {config_type: {_eq: $config_type}}) {
+              timesheet_config_id
+              config_type
+              config_value
+            }
+          }
+      - name: Timesheet_LessonHoursByTimesheetIds
+        query: >
+          query Timesheet_LessonHoursByTimesheetIds($timesheet_ids: [String!] =
+          []) {
+            timesheet_lesson_hours(where: {timesheet_id: {_in: $timesheet_ids}}) {
+              timesheet_id
+              lesson_id
+            }
+          }
+      - name: Timesheet_LessonListByLessonIds
+        query: |
+          query Timesheet_LessonListByLessonIds($lesson_ids: [String!] = []) {
+            lessons(where: {lesson_id: {_in: $lesson_ids}}) {
+              lesson_id
+              start_time
+              end_time
+              scheduling_status
+              teaching_method
+            }
+          }
+      - name: Timesheet_ImportTimesheetConfigs
+        query: >
+          mutation Timesheet_ImportTimesheetConfigs($data:
+          [timesheet_config_insert_input!]!) {
+            insert_timesheet_config(
+              objects: $data
+              on_conflict: {constraint: timesheet_config__pk, update_columns: [config_type, config_value, is_archived, updated_at]}
+            ) {
+              affected_rows
+            }
+          }
+      - name: Timesheet_CountTimesheetConfigByIds
+        query: >
+          query Timesheet_CountTimesheetConfigByIds($timesheetConfigIds:
+          [String!]!) {
+            timesheet_config_aggregate(
+              where: {timesheet_config_id: {_in: $timesheetConfigIds}}
+            ) {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: Timesheet_TimesheetListStaff
+        query: >
+          query Timesheet_TimesheetListStaff($from_date: timestamptz!, $to_date:
+          timestamptz!, $staff_id: String!, $timesheet_status: String, $limit:
+          Int = 10, $offset: Int = 0) {
+            timesheet(
+              limit: $limit
+              offset: $offset
+              where: {staff_id: {_eq: $staff_id}, timesheet_date: {_gte: $from_date, _lte: $to_date}, timesheet_status: {_eq: $timesheet_status}, _or: [{other_working_hours: {}}, {timesheet_lesson_hours: {}}, {transportation_expenses: {}}, {_and: [{remark: {_is_null: false}}, {remark: {_neq: ""}}]}]}
+              order_by: {timesheet_date: desc}
+            ) {
+              staff_id
+              timesheet_date
+              timesheet_id
+              location_id
+              timesheet_status
+            }
+            timesheet_aggregate(
+              where: {staff_id: {_eq: $staff_id}, timesheet_date: {_gte: $from_date, _lte: $to_date}, timesheet_status: {_eq: $timesheet_status}, _or: [{other_working_hours: {}}, {timesheet_lesson_hours: {}}, {transportation_expenses: {}}, {_and: [{remark: {_is_null: false}}, {remark: {_neq: ""}}]}]}
+            ) {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: Timesheet_CountTimesheetStaff
+        query: >
+          query Timesheet_CountTimesheetStaff($from_date: timestamptz!,
+          $to_date: timestamptz!, $staff_id: String!) {
+            all_count: timesheet_aggregate(
+              where: {staff_id: {_eq: $staff_id}, timesheet_date: {_gte: $from_date, _lte: $to_date}, _or: [{other_working_hours: {}}, {timesheet_lesson_hours: {}}, {transportation_expenses: {}}, {_and: [{remark: {_is_null: false}}, {remark: {_neq: ""}}]}]}
+            ) {
+              aggregate {
+                count
+              }
+            }
+            draff_count: timesheet_aggregate(
+              where: {staff_id: {_eq: $staff_id}, timesheet_date: {_gte: $from_date, _lte: $to_date}, timesheet_status: {_eq: "TIMESHEET_STATUS_DRAFT"}, _or: [{other_working_hours: {}}, {timesheet_lesson_hours: {}}, {transportation_expenses: {}}, {_and: [{remark: {_is_null: false}}, {remark: {_neq: ""}}]}]}
+            ) {
+              aggregate {
+                count
+              }
+            }
+            submitted_count: timesheet_aggregate(
+              where: {staff_id: {_eq: $staff_id}, timesheet_date: {_gte: $from_date, _lte: $to_date}, timesheet_status: {_eq: "TIMESHEET_STATUS_SUBMITTED"}, _or: [{other_working_hours: {}}, {timesheet_lesson_hours: {}}, {transportation_expenses: {}}, {_and: [{remark: {_is_null: false}}, {remark: {_neq: ""}}]}]}
+            ) {
+              aggregate {
+                count
+              }
+            }
+            approved_count: timesheet_aggregate(
+              where: {staff_id: {_eq: $staff_id}, timesheet_date: {_gte: $from_date, _lte: $to_date}, timesheet_status: {_eq: "TIMESHEET_STATUS_APPROVED"}, _or: [{other_working_hours: {}}, {timesheet_lesson_hours: {}}, {transportation_expenses: {}}, {_and: [{remark: {_is_null: false}}, {remark: {_neq: ""}}]}]}
+            ) {
+              aggregate {
+                count
+              }
+            }
+            confirmed_count: timesheet_aggregate(
+              where: {staff_id: {_eq: $staff_id}, timesheet_date: {_gte: $from_date, _lte: $to_date}, timesheet_status: {_eq: "TIMESHEET_STATUS_CONFIRMED"}, _or: [{other_working_hours: {}}, {timesheet_lesson_hours: {}}, {transportation_expenses: {}}, {_and: [{remark: {_is_null: false}}, {remark: {_neq: ""}}]}]}
+            ) {
+              aggregate {
+                count
+              }
+            }
+            rejected_count: timesheet_aggregate(
+              where: {staff_id: {_eq: $staff_id}, timesheet_date: {_gte: $from_date, _lte: $to_date}, timesheet_status: {_eq: "TIMESHEET_STATUS_REJECTED"}, _or: [{other_working_hours: {}}, {timesheet_lesson_hours: {}}, {transportation_expenses: {}}, {_and: [{remark: {_is_null: false}}, {remark: {_neq: ""}}]}]}
+            ) {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: Timesheet_TimesheetListAdmin
+        query: >
+          query Timesheet_TimesheetListAdmin($from_date: timestamptz!, $to_date:
+          timestamptz!, $timesheet_status: String, $location_id: String,
+          $keyword: String, $limit: Int = 10, $offset: Int = 0) {
+            timesheet(
+              limit: $limit
+              offset: $offset
+              where: {timesheet_date: {_gte: $from_date, _lte: $to_date}, location_id: {_eq: $location_id}, timesheet_status: {_eq: $timesheet_status}, users: {name: {_ilike: $keyword}}, _or: [{other_working_hours: {}}, {timesheet_lesson_hours: {}}, {transportation_expenses: {}}, {_and: [{remark: {_is_null: false}}, {remark: {_neq: ""}}]}]}
+              order_by: {timesheet_date: desc, timesheet_id: desc}
+              distinct_on: [timesheet_date, timesheet_id]
+            ) {
+              timesheet_date
+              timesheet_id
+              timesheet_status
+              user: users {
+                user_id
+                name
+                email
+              }
+              timesheet_lesson_hours {
+                lesson: lessons {
+                  start_time
+                  end_time
+                  scheduling_status
+                }
+              }
+              other_working_hours {
+                total_hour
+              }
+              location {
+                location_id
+                name
+              }
+              transportation_expenses {
+                cost_amount
+                round_trip
+              }
+            }
+            timesheet_aggregate(
+              where: {timesheet_date: {_gte: $from_date, _lte: $to_date}, location_id: {_eq: $location_id}, timesheet_status: {_eq: $timesheet_status}, users: {name: {_ilike: $keyword}}, _or: [{other_working_hours: {}}, {timesheet_lesson_hours: {}}, {transportation_expenses: {}}, {_and: [{remark: {_is_null: false}}, {remark: {_neq: ""}}]}]}
+            ) {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: Timesheet_TransportationExpensesByTimesheetIds
+        query: >-
+          query Timesheet_TransportationExpensesByTimesheetIds($timesheet_ids:
+          [String!] = []) {
+              transportation_expense(where: { timesheet_id: { _in: $timesheet_ids } }) {
+                  transportation_expense_id
+                  timesheet_id
+                  transportation_type
+                  transportation_to
+                  transportation_from
+                  cost_amount
+                  round_trip
+                  remarks
+              }
+          }
+      - name: Timesheet_AutoCreateTimesheetConfig
+        query: |
+          query Timesheet_AutoCreateTimesheetConfig($staff_id: String!) {
+            auto_create_timesheet_flag(where: {staff_id: {_eq: $staff_id}}) {
+              staff_id
+              flag_on
+            }
+          }
+      - name: Timesheet_CountTimesheetAdmin
+        query: >
+          query Timesheet_CountTimesheetAdmin($from_date: timestamptz!,
+          $to_date: timestamptz!, $keyword: String, $location_id: String) {
+            all_count: timesheet_aggregate(
+              where: {location_id: {_eq: $location_id}, timesheet_date: {_gte: $from_date, _lte: $to_date}, users: {name: {_ilike: $keyword}}, _or: [{other_working_hours: {}}, {timesheet_lesson_hours: {}}, {transportation_expenses: {}}, {_and: [{remark: {_is_null: false}}, {remark: {_neq: ""}}]}]}
+            ) {
+              aggregate {
+                count
+              }
+            }
+            draff_count: timesheet_aggregate(
+              where: {location_id: {_eq: $location_id}, users: {name: {_ilike: $keyword}}, timesheet_date: {_gte: $from_date, _lte: $to_date}, timesheet_status: {_eq: "TIMESHEET_STATUS_DRAFT"}, _or: [{other_working_hours: {}}, {timesheet_lesson_hours: {}}, {transportation_expenses: {}}, {_and: [{remark: {_is_null: false}}, {remark: {_neq: ""}}]}]}
+            ) {
+              aggregate {
+                count
+              }
+            }
+            submitted_count: timesheet_aggregate(
+              where: {location_id: {_eq: $location_id}, users: {name: {_ilike: $keyword}}, timesheet_date: {_gte: $from_date, _lte: $to_date}, timesheet_status: {_eq: "TIMESHEET_STATUS_SUBMITTED"}, _or: [{other_working_hours: {}}, {timesheet_lesson_hours: {}}, {transportation_expenses: {}}, {_and: [{remark: {_is_null: false}}, {remark: {_neq: ""}}]}]}
+            ) {
+              aggregate {
+                count
+              }
+            }
+            approved_count: timesheet_aggregate(
+              where: {location_id: {_eq: $location_id}, users: {name: {_ilike: $keyword}}, timesheet_date: {_gte: $from_date, _lte: $to_date}, timesheet_status: {_eq: "TIMESHEET_STATUS_APPROVED"}, _or: [{other_working_hours: {}}, {timesheet_lesson_hours: {}}, {transportation_expenses: {}}, {_and: [{remark: {_is_null: false}}, {remark: {_neq: ""}}]}]}
+            ) {
+              aggregate {
+                count
+              }
+            }
+            confirmed_count: timesheet_aggregate(
+              where: {location_id: {_eq: $location_id}, users: {name: {_ilike: $keyword}}, timesheet_date: {_gte: $from_date, _lte: $to_date}, timesheet_status: {_eq: "TIMESHEET_STATUS_CONFIRMED"}, _or: [{other_working_hours: {}}, {timesheet_lesson_hours: {}}, {transportation_expenses: {}}, {_and: [{remark: {_is_null: false}}, {remark: {_neq: ""}}]}]}
+            ) {
+              aggregate {
+                count
+              }
+            }
+            rejected_count: timesheet_aggregate(
+              where: {location_id: {_eq: $location_id}, users: {name: {_ilike: $keyword}}, timesheet_date: {_gte: $from_date, _lte: $to_date}, timesheet_status: {_eq: "TIMESHEET_STATUS_REJECTED"}, _or: [{other_working_hours: {}}, {timesheet_lesson_hours: {}}, {transportation_expenses: {}}, {_and: [{remark: {_is_null: false}}, {remark: {_neq: ""}}]}]}
+            ) {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: Timesheet_TransportationExpensesByTimesheetId
+        query: >
+          query Timesheet_TransportationExpensesByTimesheetId($timesheet_id:
+          String!) {
+            transportation_expense(where: {timesheet_id: {_eq: $timesheet_id}}) {
+              transportation_expense_id
+              timesheet_id
+              transportation_type
+              transportation_to
+              transportation_from
+              cost_amount
+              round_trip
+              remarks
+            }
+          }
+      - name: Timesheet_LocationsListConfirmer
+        query: >
+          query Timesheet_LocationsListConfirmer($keyword: String, $from_date:
+          timestamptz!, $to_date: timestamptz!, $limit: Int = 10, $offset: Int =
+          0) {
+            locations: location_timesheets_non_confirmed_count_v2(
+              args: {from_date: $from_date, to_date: $to_date, keyword: $keyword}
+              limit: $limit
+              offset: $offset
+              order_by: { count: desc, location_id: desc }
+              distinct_on: [count, location_id]
+            ) {
+              location_id
+              name
+              non_confirmed_timesheets: count
+            }
+            locations_aggregate(where: {name: {_ilike: $keyword}}) {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: Timesheet_TimesheetNonConfirmedCount
+        query: >
+          query Timesheet_TimesheetNonConfirmedCount($locations: [String!] = [],
+          $from_date: timestamptz!, $to_date: timestamptz!) {
+            locations(where: {location_id: {_in: $locations}}) {
+              location_id
+              draft_count: timesheets_aggregate(
+                where: {timesheet_status: {_eq: "TIMESHEET_STATUS_DRAFT"}, timesheet_date: {_gte: $from_date, _lte: $to_date}, _or: [{other_working_hours: {}}, {timesheet_lesson_hours: {}}, {transportation_expenses: {}}, {_and: [{remark: {_is_null: false}}, {remark: {_neq: ""}}]}]}
+              ) {
+                aggregate {
+                  count
+                }
+              }
+              submitted_count: timesheets_aggregate(
+                where: {timesheet_status: {_eq: "TIMESHEET_STATUS_SUBMITTED"}, timesheet_date: {_gte: $from_date, _lte: $to_date}, _or: [{other_working_hours: {}}, {timesheet_lesson_hours: {}}, {transportation_expenses: {}}, {_and: [{remark: {_is_null: false}}, {remark: {_neq: ""}}]}]}
+              ) {
+                aggregate {
+                  count
+                }
+              }
+              approved_count: timesheets_aggregate(
+                where: {timesheet_status: {_eq: "TIMESHEET_STATUS_APPROVED"}, timesheet_date: {_gte: $from_date, _lte: $to_date}, _or: [{other_working_hours: {}}, {timesheet_lesson_hours: {}}, {transportation_expenses: {}}, {_and: [{remark: {_is_null: false}}, {remark: {_neq: ""}}]}]}
+              ) {
+                aggregate {
+                  count
+                }
+              }
+            }
+          }
+      - name: Timesheet_TimesheetIdsByLocations
+        query: >
+          query Timesheet_TimesheetIdsByLocations($location_ids: [String!] = [],
+          $from_date: timestamptz!, $to_date: timestamptz!, $timesheet_status:
+          String) {
+            timesheet(
+              where: {location_id: {_in: $location_ids}, timesheet_date: {_gte: $from_date, _lte: $to_date}, timesheet_status: {_eq: $timesheet_status}, _or: [{other_working_hours: {}}, {timesheet_lesson_hours: {}}, {transportation_expenses: {}}, {_and: [{remark: {_is_null: false}}, {remark: {_neq: ""}}]}]}
+            ) {
+              location_id
+              timesheet_id
+            }
+          }
+      - name: Timesheet_LocationListByIds
+        query: |
+          query Timesheet_LocationListByIds($location_ids: [String!] = []) {
+            locations(where: {location_id: {_in: $location_ids}}) {
+              ...Timesheet_LocationAttrs
+            }
+          }
+
+          fragment Timesheet_LocationAttrs on locations {
+            location_id
+            name
+          }
+      - name: Timesheet_LocationOne
+        query: |
+          query Timesheet_LocationOne($location_id: String!) {
+            locations(where: {location_id: {_eq: $location_id}}) {
+              ...Timesheet_LocationAttrs
+            }
+          }
+
+          fragment Timesheet_LocationAttrs on locations {
+            location_id
+            name
+          }
+      - name: Timesheet_LocationList
+        query: >
+          query Timesheet_LocationList($name: String, $limit: Int = 10, $offset:
+          Int = 0) {
+            locations(
+              limit: $limit
+              offset: $offset
+              order_by: {created_at: desc, name: asc}
+              where: {name: {_ilike: $name}}
+            ) {
+              ...Timesheet_LocationAttrs
+            }
+          }
+
+
+          fragment Timesheet_LocationAttrs on locations {
+            location_id
+            name
+          }
+      - name: Timesheet_StaffListByIds
+        query: |
+          query Timesheet_StaffListByIds($staff_ids: [String!] = []) {
+            users(where: {user_id: {_in: $staff_ids}}) {
+              ...Timesheet_StaffAttrs
+            }
+          }
+
+          fragment Timesheet_StaffAttrs on users {
+            user_id
+            name
+            email
+          }
+      - name: Timesheet_StaffOne
+        query: |
+          query Timesheet_StaffOne($staff_id: String!) {
+            users(where: {user_id: {_eq: $staff_id}}) {
+              ...Timesheet_StaffAttrs
+            }
+          }
+
+          fragment Timesheet_StaffAttrs on users {
+            user_id
+            name
+            email
+          }
+      - name: Timesheet_StaffList
+        query: >
+          query Timesheet_StaffList($email: String, $name: String, $limit: Int =
+          10, $offset: Int = 0) {
+            users(
+              limit: $limit
+              offset: $offset
+              where: {_and: [{_or: [{email: {_ilike: $email}}, {name: {_ilike: $name}}]}]}
+            ) {
+              ...Timesheet_StaffAttrs
+            }
+          }
+
+
+          fragment Timesheet_StaffAttrs on users {
+            user_id
+            name
+            email
+          }
+      - name: Timesheet_StaffListV2
+        query: >
+          query Timesheet_StaffListV2($keyword: String, $limit: Int = 10,
+          $offset: Int = 0) {
+            staff(
+              limit: $limit
+              offset: $offset
+              where: {user: {_or: [{email: {_ilike: $keyword}}, {name: {_ilike: $keyword}}]}}
+            ) {
+              user {
+                name
+                email
+              }
+              staff_id
+            }
+          }
+      - name: Timesheet_StaffTransportationExpensesByStaffId
+        query: >
+          query Timesheet_StaffTransportationExpensesByStaffId($staff_id:
+          String!) {
+            staff_transportation_expense(where: {staff_id: {_eq: $staff_id}}) {
+              id
+              staff_id
+              transportation_type
+              transportation_from
+              transportation_to
+              cost_amount
+              round_trip
+              remarks
+              location {
+                location_id
+                name
+              }
+            }
+          }
+      - name: Timesheet_StaffTransportationExpenseListByStaffId
+        query: >
+          query Timesheet_StaffTransportationExpenseListByStaffId($staff_id:
+          String!, $limit: Int = 5, $offset: Int = 0) {
+            staff_transportation_expense(
+              limit: $limit
+              offset: $offset
+              where: {staff_id: {_eq: $staff_id}}
+            ) {
+              id
+              staff_id
+              transportation_type
+              transportation_from
+              transportation_to
+              cost_amount
+              round_trip
+              remarks
+              location {
+                location_id
+                name
+              }
+            }
+            staff_transportation_expense_aggregate(where: {staff_id: {_eq: $staff_id}}) {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: Timesheet_TimesheetListAdminV2
+        query: >
+          query Timesheet_TimesheetListAdminV2($from_date: timestamptz!,
+          $to_date: timestamptz!, $timesheet_status: String, $location_id:
+          String, $keyword: String, $limit: Int = 10, $offset: Int = 0) {
+            timesheet(
+              limit: $limit
+              offset: $offset
+              where: {timesheet_date: {_gte: $from_date, _lte: $to_date}, location_id: {_eq: $location_id}, timesheet_status: {_eq: $timesheet_status}, users: {name: {_ilike: $keyword}}, _or: [{other_working_hours: {}}, {timesheet_lesson_hours: {}}, {transportation_expenses: {}}, {_and: [{remark: {_is_null: false}}, {remark: {_neq: ""}}]}]}
+              order_by: {timesheet_date: desc, timesheet_id: desc}
+            ) {
+              timesheet_date
+              timesheet_id
+              timesheet_status
+              user: users {
+                user_id
+                name
+                email
+              }
+              timesheet_lesson_hours {
+                lesson: lessons {
+                  start_time
+                  end_time
+                  scheduling_status
+                }
+              }
+              other_working_hours {
+                total_hour
+              }
+              location {
+                location_id
+                name
+              }
+              transportation_expenses {
+                cost_amount
+                round_trip
+              }
+            }
+            timesheet_aggregate(
+              where: {timesheet_date: {_gte: $from_date, _lte: $to_date}, location_id: {_eq: $location_id}, timesheet_status: {_eq: $timesheet_status}, users: {name: {_ilike: $keyword}}, _or: [{other_working_hours: {}}, {timesheet_lesson_hours: {}}, {transportation_expenses: {}}, {_and: [{remark: {_is_null: false}}, {remark: {_neq: ""}}]}]}
+            ) {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: Timesheet_CountTimesheetByStatusV2
+        query: >
+          query Timesheet_CountTimesheetByStatusV2($from_date: timestamptz!,
+          $to_date: timestamptz!, $keyword: String, $location_id: String = null,
+          $staff_id: String = null) {
+            timesheet_count: get_timesheet_count(
+              args: {from_date: $from_date, to_date: $to_date, keyword: $keyword, location_id_arg: $location_id, staff_id_arg: $staff_id}
+            ) {
+              all_count
+              draft_count
+              submitted_count
+              approved_count
+              confirmed_count
+            }
+          }
+      - name: Timesheet_LocationsListConfirmer_V2
+        query: >-
+          query Timesheet_LocationsListConfirmer_V2($keyword: String,
+          $from_date: timestamptz!, $to_date: timestamptz!, $limit: Int = 10,
+          $offset: Int = 0) {
+            locations: location_timesheets_non_confirmed_count_v3(
+              args: {from_date: $from_date, to_date: $to_date, keyword: $keyword}
+              limit: $limit
+              offset: $offset
+              order_by: {is_confirmed: asc, unconfirmed_count: desc, location_id: desc}
+              distinct_on: [is_confirmed, unconfirmed_count, location_id]
+            ) {
+              location_id
+              name
+              is_confirmed
+              draft_count
+              submitted_count
+              approved_count
+              confirmed_count
+              unconfirmed_count
+            }
+            locations_aggregate(where: {name: {_ilike: $keyword}}) {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: Timesheet_GetNonConfirmedLocationCount
+        query: >
+          query Timesheet_GetNonConfirmedLocationCount($period_date:
+          timestamptz!) {
+            non_confirmed_location_count: get_non_confirmed_locations_aggregate(
+              args: {period_date: $period_date}
+            ) {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: Timesheet_GetTimesheetListWithFilter
+        query: >
+          query Timesheet_GetTimesheetListWithFilter($limit: Int = 10, $offset:
+          Int = 0, $where: timesheet_bool_exp = {}) {
+            timesheet(
+              limit: $limit
+              offset: $offset
+              where: $where
+              order_by: {timesheet_date: desc, timesheet_id: desc}
+            ) {
+              timesheet_date
+              timesheet_id
+              timesheet_status
+              user: users {
+                user_id
+                name
+                email
+              }
+              timesheet_lesson_hours {
+                lesson: lessons {
+                  start_time
+                  end_time
+                  scheduling_status
+                }
+              }
+              other_working_hours {
+                total_hour
+              }
+              location {
+                location_id
+                name
+              }
+              transportation_expenses {
+                cost_amount
+                round_trip
+              }
+            }
+          }
+      - name: Timesheet_GetConfirmationInfo
+        query: >
+          query Timesheet_GetConfirmationInfo($location_id: String, $from_date:
+          timestamptz, $to_date: timestamptz) {
+            timesheet_confirmation_info(
+              where: {location_id: {_eq: $location_id}, timesheet_confirmation_period: {end_date: {_gte: $from_date}, start_date: {_lte: $to_date}}}
+            ) {
+              id
+              location_id
+              period_id
+              timesheet_confirmation_period {
+                id
+                start_date
+                end_date
+              }
+            }
+          }
+      - name: Timesheet_PartnerAutoCreateTimesheetConfig
+        query: |
+          query Timesheet_PartnerAutoCreateTimesheetConfig {
+            partner_auto_create_timesheet_flag(limit: 1) {
+              flag_on
+            }
+          }
+      - name: Timesheet_GetTimesheetListWithFilterV3
+        query: >
+          query Timesheet_GetTimesheetListWithFilterV3($limit: Int = 10,
+          $offset: Int = 0, $where: timesheet_bool_exp = {}) {
+            timesheet(
+              limit: $limit
+              offset: $offset
+              where: $where
+              order_by: {timesheet_date: asc, timesheet_id: desc}
+            ) {
+              timesheet_date
+              timesheet_id
+              timesheet_status
+              user: users {
+                user_id
+                name
+                email
+              }
+              timesheet_lesson_hours {
+                lesson: lessons {
+                  start_time
+                  end_time
+                  scheduling_status
+                }
+              }
+              other_working_hours {
+                total_hour
+              }
+              location {
+                location_id
+                name
+              }
+              transportation_expenses {
+                cost_amount
+                round_trip
+              }
+            }
+          }
+      - name: Timesheet_ActionLogList
+        query: >
+          query Timesheet_ActionLogList($timesheet_id: String!, $limit: Int =
+          100, $offset: Int = 0) {
+            timesheet_action_log(
+              where: {timesheet_id: {_eq: $timesheet_id}}
+              limit: $limit
+              offset: $offset
+              order_by: {executed_at: asc_nulls_first}
+            ) {
+              action
+              action_log_id
+              executed_at
+              is_system
+              timesheet_id
+              users {
+                email
+                user_id
+              }
+            }
+          }
+      - name: Timesheet_ActionLogListV2
+        query: >
+          query Timesheet_ActionLogListV2($timesheet_id: String!, $limit: Int =
+          100, $offset: Int = 0) {
+            timesheet_action_log(
+              where: {timesheet_id: {_eq: $timesheet_id}}
+              limit: $limit
+              offset: $offset
+              order_by: {executed_at: asc_nulls_first}
+            ) {
+              action
+              action_log_id
+              executed_at
+              is_system
+              timesheet_id
+              user_basic_info {
+                email
+                user_id
+              }
+            }
+          }
+      - name: Timesheet_TimesheetOneV2
+        query: |
+          query Timesheet_TimesheetOneV2($timesheet_id: String!) {
+            timesheet(
+              where: {timesheet_id: {_eq: $timesheet_id}, _or: [{other_working_hours: {}}, {timesheet_lesson_hours: {}}, {transportation_expenses: {}}]}
+            ) {
+              staff_id
+              timesheet_date
+              timesheet_id
+              location_id
+              timesheet_status
+              remark
+              timesheet_lesson_hours {
+                lessons {
+                  scheduling_status
+                  start_time
+                  end_time
+                  teaching_method
+                  lesson_id
+                }
+              }
+              other_working_hours {
+                start_time
+                end_time
+                total_hour
+                remarks
+                other_working_hours_id
+                timesheet_config {
+                  timesheet_config_id
+                  config_value
+                  config_type
+                }
+              }
+              transportation_expenses {
+                cost_amount
+                remarks
+                round_trip
+                transportation_from
+                transportation_to
+                transportation_type
+                transportation_expense_id
+              }
+              user_basic_info {
+                email
+                name
+                user_id
+              }
+              location {
+                location_id
+                name
+              }
+            }
+          }
+      - name: Timesheet_GetTimesheetListWithFilterV4
+        query: >
+          query Timesheet_GetTimesheetListWithFilterV4($limit: Int = 10,
+          $offset: Int = 0, $where: timesheet_bool_exp = {}) {
+            timesheet(
+              limit: $limit
+              offset: $offset
+              where: $where
+              order_by: {timesheet_date: asc, timesheet_id: desc}
+            ) {
+              timesheet_date
+              timesheet_id
+              timesheet_status
+              user: user_basic_info {
+                user_id
+                name
+                email
+              }
+              timesheet_lesson_hours {
+                lesson: lessons {
+                  start_time
+                  end_time
+                  scheduling_status
+                }
+              }
+              other_working_hours {
+                total_hour
+              }
+              location {
+                location_id
+                name
+              }
+              transportation_expenses {
+                cost_amount
+                round_trip
+              }
+            }
+          }
+      - name: Timesheet_TimesheetOneV3
+        query: |
+          query Timesheet_TimesheetOneV3($timesheet_id: String!) {
+            timesheet(
+              where: {timesheet_id: {_eq: $timesheet_id}, _or: [{other_working_hours: {}}, {timesheet_lesson_hours: {}}, {transportation_expenses: {}}]}
+            ) {
+              staff_id
+              timesheet_date
+              timesheet_id
+              location_id
+              timesheet_status
+              remark
+              timesheet_lesson_hours {
+                lessons {
+                  scheduling_status
+                  start_time
+                  end_time
+                  teaching_method
+                  lesson_id
+                  preparation_time
+                  break_time
+                }
+              }
+              other_working_hours {
+                start_time
+                end_time
+                total_hour
+                remarks
+                other_working_hours_id
+                timesheet_config {
+                  timesheet_config_id
+                  config_value
+                  config_type
+                }
+              }
+              transportation_expenses {
+                cost_amount
+                remarks
+                round_trip
+                transportation_from
+                transportation_to
+                transportation_type
+                transportation_expense_id
+              }
+              user_basic_info {
+                email
+                name
+                user_id
+              }
+              location {
+                location_id
+                name
+              }
+            }
+          }
+      - name: Timesheet_GetTimesheetListWithFilterV5
+        query: >
+          query Timesheet_GetTimesheetListWithFilterV5($limit: Int = 10,
+          $offset: Int = 0, $where: timesheet_bool_exp = {}) {
+            timesheet(
+              limit: $limit
+              offset: $offset
+              where: $where
+              order_by: {timesheet_date: asc, timesheet_id: desc}
+            ) {
+              timesheet_date
+              timesheet_id
+              timesheet_status
+              user: user_basic_info {
+                user_id
+                name
+                email
+              }
+              timesheet_lesson_hours {
+                lesson: lessons {
+                  start_time
+                  end_time
+                  scheduling_status
+                  preparation_time
+                  break_time
+                }
+              }
+              other_working_hours {
+                total_hour
+              }
+              location {
+                location_id
+                name
+              }
+              transportation_expenses {
+                cost_amount
+                round_trip
+              }
+            }
+          }

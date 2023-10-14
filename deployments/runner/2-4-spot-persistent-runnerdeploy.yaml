@@ -1,0 +1,84 @@
+apiVersion: actions.summerwind.dev/v1alpha1
+kind: RunnerDeployment
+metadata:
+  name: 2-4-spot-persistent-runnerdeploy
+  namespace: actions-runner-system
+spec:
+  template:
+    metadata:
+      labels:
+        app: 2-4-spot-persistent-runnerdeploy
+      annotations:
+        cluster-autoscaler.kubernetes.io/safe-to-evict: 'true'
+    spec:
+      dockerMTU: 1400
+      dockerRegistryMirror: https://mirror.gcr.io/
+      dockerdWithinRunnerContainer: true
+      ephemeral: false
+      organization: manabie-com
+      image: asia-docker.pkg.dev/student-coach-e1e95/manaverse/actions-runner-dind:v2.307.1-ubuntu-20.04
+      labels:
+        - custom-runner
+        - 2-4-runner
+        - spot
+        - persistent
+        - 2-4-spot-persistent-runner
+      env:
+        - name: DISABLE_RUNNER_UPDATE
+          value: 'true'
+      nodeSelector:
+        cloud.google.com/gke-nodepool: 'c2d-highcpu-4-runners-spot'
+      tolerations:
+        - effect: NoSchedule
+          key: 'c2d-highcpu-4-runners-spot'
+          operator: Exists
+      resources:
+        requests:
+          cpu: 1300m
+          memory: 2500Mi
+        limits:
+          cpu: 2000m
+          memory: 4000Mi
+      imagePullPolicy: IfNotPresent
+---
+apiVersion: actions.summerwind.dev/v1alpha1
+kind: HorizontalRunnerAutoscaler
+metadata:
+  name: 2-4-spot-persistent-runner-deployment-autoscaler
+  namespace: actions-runner-system
+spec:
+  maxReplicas: 20
+  minReplicas: 0
+  scaleTargetRef:
+    name: 2-4-spot-persistent-runnerdeploy
+    kind: RunnerDeployment
+  metrics:
+    - repositoryNames:
+      - backend
+      - school-portal-admin
+      - student-app
+      - eibanam
+      type: TotalNumberOfQueuedAndInProgressWorkflowRuns
+  scaleUpTriggers:
+    - amount: 1
+      duration: 30m0s
+      githubEvent:
+        workflowJob: {}
+  scheduledOverrides:
+    # On Sundays at 11:30 PM to next Monday 03:30 AM
+    - startTime: '2023-05-28T23:30:00+07:00'
+      endTime: '2023-05-29T03:30:00+07:00'
+      minReplicas: 3
+      recurrenceRule:
+        frequency: Weekly
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: 2-4-spot-persistent-runnerdeploy
+  namespace: actions-runner-system
+spec:
+  minAvailable: 0
+  selector:
+    matchLabels:
+      runner-deployment-name: 2-4-spot-persistent-runnerdeploy

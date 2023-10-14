@@ -1,0 +1,12 @@
+common:
+  google_cloud_project: production-renseikai
+  firebase_project: student-coach-e1e95
+issuers:
+  - issuer: manabie
+    audience: prod-renseikai
+    jwks_endpoint: http://shamir:5680/.well-known/jwks.json
+jwt_applicant: prod-renseikai
+storage:
+  bucket: renseikai-backend
+scheduled_notification:
+  is_running_for_all_tenants: true

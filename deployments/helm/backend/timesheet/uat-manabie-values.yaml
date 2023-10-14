@@ -1,0 +1,16 @@
+enabled: true
+hasura:
+    useGlobalCronScheduledScaling: true
+hpa:
+    averageCPUUtilization: 300
+    averageMemoryValue: 512Mi
+    maxReplicas: 3
+    minReplicas: 2
+podAnnotations:
+    sidecar.istio.io/proxyCPU: 3m
+    sidecar.istio.io/proxyMemory: 60Mi
+resources:
+    requests:
+        cpu: 4m
+        memory: 46Mi
+useGlobalCronScheduledScaling: true

@@ -1,0 +1,38 @@
+table:
+  schema: public
+  name: districts
+object_relationships:
+  - name: city
+    using:
+      foreign_key_constraint_on: city_id
+array_relationships:
+  - name: schools
+    using:
+      foreign_key_constraint_on:
+        column: district_id
+        table:
+          schema: public
+          name: schools
+select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+        - district_id
+        - name
+        - country
+        - city_id
+        - created_at
+        - updated_at
+      filter: {}
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+        - district_id
+        - name
+        - country
+        - city_id
+        - created_at
+        - updated_at
+      filter: {}
+      allow_aggregations: true

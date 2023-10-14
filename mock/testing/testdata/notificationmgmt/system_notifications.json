@@ -1,0 +1,123 @@
+{
+	"schema": [
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "reference_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "status",
+			"data_type": "text",
+			"column_default": "'SYSTEM_NOTIFICATION_STATUS_NEW'::text",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "system_notification_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "url",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "valid_from",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "valid_to",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "system_notifications",
+			"policyname": "rls_system_notifications",
+			"qual": "permission_check(resource_path, 'system_notifications'::text)",
+			"with_check": "permission_check(resource_path, 'system_notifications'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "system_notifications",
+			"policyname": "rls_system_notifications_restrictive",
+			"qual": "permission_check(resource_path, 'system_notifications'::text)",
+			"with_check": "permission_check(resource_path, 'system_notifications'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "pk__system_notifications",
+			"column_name": "system_notification_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "uk__system_notifications__reference_id",
+			"column_name": "reference_id",
+			"constraint_type": "UNIQUE"
+		}
+	],
+	"table_name": "system_notifications",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

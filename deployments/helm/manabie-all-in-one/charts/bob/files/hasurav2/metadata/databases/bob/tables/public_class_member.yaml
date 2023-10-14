@@ -1,0 +1,30 @@
+table:
+  schema: public
+  name: class_member
+select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+        - class_id
+        - class_member_id
+        - user_id
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+          - resource_path:
+              _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+        - class_id
+        - class_member_id
+        - user_id
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+          - resource_path:
+              _eq: X-Hasura-Resource-Path
+      allow_aggregations: true

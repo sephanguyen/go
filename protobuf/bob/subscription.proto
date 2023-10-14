@@ -1,0 +1,188 @@
+syntax = "proto3";
+
+package manabie.bob;
+
+import "enum.proto";
+import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option (gogoproto.goproto_registration) = true;
+option go_package = "github.com/manabie-com/backend/pkg/genproto/bob;pb";
+
+message Plan {
+  string id = 1;
+  string description = 2;
+  string advertised_price = 3 [ deprecated = true ];
+  bool is_purchasable = 4;
+  repeated string upgradeable_to = 5 [ deprecated = true ];
+  repeated string benefits = 6;
+  int32 prioritize_level = 7;
+  bool is_hidden = 8 [ deprecated = true ];
+}
+
+message Package {
+  int32 id = 1;
+  string name = 2;
+  int32 price = 3;
+  int32 discounted_price = 4;
+  repeated string description = 5;
+  string notice = 6;
+  google.protobuf.Timestamp period = 7;
+  bool is_recommended = 8;
+  bool is_enabled = 9;
+  bool is_hidden = 10 [ deprecated = true ];
+  double carried_over_amount = 11 [ deprecated = true ];
+  string plan_id = 12 [ deprecated = true ];
+  Country country = 13;
+  int32 prioritize_level = 14;
+  repeated PackageItem package_items = 15;
+  string ios_bundle_id = 16;
+}
+
+message PackageItem {
+  string id = 1;
+  int32 package_id = 2;
+  string plan_id = 3;
+  google.protobuf.Timestamp expired_at = 4;
+  int32 duration = 5;
+  repeated Subject subject = 6;
+  repeated int32 grades = 7;
+}
+
+message CodOrderInfo {
+  string customer_name = 1;
+  string customer_phone_number = 2;
+  string customer_address = 3;
+  google.protobuf.Timestamp expected_delivery_time = 4;
+  CodOrderStatus status = 5;
+}
+
+message StudentSubscription {
+  string plan_id = 1;
+  repeated int32 grades = 2;
+  repeated Subject subjects = 3;
+  google.protobuf.Timestamp start = 4;
+  google.protobuf.Timestamp end = 5;
+  SubscriptionStatus status = 6;
+}
+
+message Order {
+  int32 id = 1;
+  double amount = 2;
+  string plan_id = 3 [ deprecated = true ];
+  string plan_name = 4 [ deprecated = true ];
+  string manual_created_by = 5;
+  OrderStatus status = 6;
+  string coupon = 7;
+  double coupon_amount = 8;
+  double carried_over_amount = 9 [ deprecated = true ];
+  int32 carried_over_from = 10 [ deprecated = true ];
+  google.protobuf.Timestamp start = 11 [ deprecated = true ];
+  google.protobuf.Timestamp end = 12 [ deprecated = true ];
+  google.protobuf.Timestamp updated_at = 13;
+  google.protobuf.Timestamp created_at = 14;
+  string currency = 15;
+  string payment_method = 16;
+  string payment_link = 17;
+  int32 package_id = 18;
+  string package_name = 19;
+  Country country = 20;
+  string student_id = 21;
+  string reference_number = 22;
+  CodOrderInfo cod_order_info = 23;
+  google.protobuf.Timestamp must_pay_before = 24;
+  repeated StudentSubscription subscriptions = 25;
+}
+
+message UpdateAsiaPayOrderRequest {
+  int32 order_id = 1;
+  int32 response_code = 2;
+  string full_response = 3;
+  string payment_method = 4;
+}
+
+message UpdateAsiaPayOrderResponse { bool successful = 1; }
+
+enum PromoType {
+  PROMOTION = 0;
+  PROMOTION_TEACHER = 1;
+  PROMOTION_REFERRAL = 2;
+  PROMOTION_LD = 3; // learner discovery
+  PROMOTION_SC = 4; // student club
+  PROMOTION_KOL = 5;
+  PROMOTION_ACTIVATION = 6;
+}
+
+enum PromoDiscountType {
+  PROMOTION_DISCOUNT_TYPE_FIXED_AMOUNT = 0;
+  PROMOTION_DISCOUNT_TYPE_PERCENTAGE = 1;
+}
+
+enum PromoStatus {
+  PROMOTION_STATUS_PUBLISHED = 0;
+  PROMOTION_STATUS_ARCHIVED = 1;
+}
+
+message Promotion {
+  PromoType promo_type = 1;
+  Country country = 2;
+  string code_prefix = 3;
+  string code = 4; // promotion code, if empty then use auto generated code
+  PromoDiscountType discount_type =
+      5;                      // DEPRECATED. Using PromotionRule instead.
+  double discount_amount = 6; // DEPRECATED. Using PromotionRule instead.
+  PromoStatus status = 7;
+  google.protobuf.Timestamp started_date = 8;
+  google.protobuf.Timestamp expired_date = 9;
+  int32 redemption_limit_per_code = 10;
+  int32 redemption_limit_per_user = 11;
+  string notes = 12;
+  repeated PromotionRule rules = 13;
+}
+
+message PromotionRule {
+  PromoType promo_type = 1;
+  PromoDiscountType discount_type = 2;
+  double discount_amount = 3;
+  google.protobuf.Struct conditions = 4;
+  google.protobuf.Struct rewards = 5;
+}
+
+message UpdateGHNOrderRequest {
+  string ghn_order_id = 1;
+  CodOrderTransitionAction action = 2;
+}
+
+message UpdateGHNOrderResponse {}
+
+message GetAdvertisePackageRequest {}
+
+message GetAdvertisePackageResponse {
+  message AdvertisePackageItem {
+    int32 package_id = 1;
+    string plan_id = 2;
+    string package_item_id = 3;
+  }
+  message AdvertisePackage {
+    int32 package_id = 1;
+    string name = 2;
+    int32 price = 3;
+    repeated string description = 4;
+    Country country = 5;
+    int32 prioritize_level = 6;
+    repeated AdvertisePackageItem package_items = 7;
+  }
+  repeated AdvertisePackage packages = 1;
+}
+
+service SubscriptionService {
+
+  rpc UpdateAsiaPayOrder(UpdateAsiaPayOrderRequest)
+      returns (UpdateAsiaPayOrderResponse){option deprecated = true;};
+  rpc UpdateGHNOrder(UpdateGHNOrderRequest) 
+      returns (UpdateGHNOrderResponse){option deprecated = true;};
+
+  rpc GetAdvertisePackage(GetAdvertisePackageRequest)
+      returns (GetAdvertisePackageResponse){option deprecated = true;};
+}

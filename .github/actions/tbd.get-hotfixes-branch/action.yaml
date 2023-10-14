@@ -1,0 +1,63 @@
+name: "tbd.get-hotfixes-branch"
+description: "Get hotfixes branch from release tag"
+
+inputs:
+  github-token:
+    description: "Github token"
+    required: true
+  release-tag:
+    description: "Release tag"
+    required: true
+  repo:
+    description: "Repository"
+    required: false
+
+outputs:
+  branch:
+    description: "Hotfixes branch"
+    value: ${{ steps.get-hotfix-branch.outputs.branch }}
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/github-script@v6
+      id: get-hotfix-branch
+      with:
+        github-token: ${{ inputs.github-token }}
+        script: |
+          var releaseTag = "${{ inputs.release-tag }}";
+          var owner = context.repo.owner;
+          var repo = '${{ inputs.repo }}';
+          var response = await github.rest.repos.getReleaseByTag({
+            owner,
+            repo,
+            tag: releaseTag,
+          });
+
+          console.log(JSON.stringify(response));
+
+          var targetCommitish = response.data.target_commitish;
+
+          console.log(targetCommitish);
+          if (targetCommitish == 'develop') {
+            console.log(releaseTag + ' on develop');
+            var commitRespo = await github.rest.repos.getCommit({
+              owner,
+              repo,
+              ref: releaseTag,
+            });
+            try {
+              await github.rest.git.createRef({
+                owner,
+                repo,
+                ref: "refs/heads/hotfixes/${{ inputs.release-tag }}",
+                sha: commitRespo.data.sha,
+              });
+            } catch (err) {
+              console.log(err);
+            }
+            core.setOutput('branch', 'hotfixes/${{ inputs.release-tag }}');
+          } else {
+            console.log('${{ inputs.release-tag }}' + ' on hotfixes branch');
+            core.setOutput('branch', targetCommitish);
+          }

@@ -1,0 +1,788 @@
+syntax = "proto3";
+
+package payment.v1;
+
+import "common/v1/requests.proto";
+import "google/protobuf/timestamp.proto";
+import "payment/v1/enums.proto";
+import "google/protobuf/wrappers.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/payment/v1;pmpb";
+
+message OrderItem {
+  string product_id = 1;
+  google.protobuf.StringValue discount_id = 2;
+  google.protobuf.Timestamp start_date = 3;
+  repeated CourseItem course_items = 4;
+  repeated ProductAssociation product_associations = 5;
+  google.protobuf.StringValue student_product_id = 6;
+  google.protobuf.Timestamp effective_date = 7;
+  google.protobuf.Timestamp cancellation_date = 8;
+  google.protobuf.StringValue package_associated_id = 9;
+  google.protobuf.Timestamp end_date = 10;
+  google.protobuf.StringValue associated_student_product_id = 11;
+  int32 student_product_version_number = 12;
+}
+
+message DiscountBillItem {
+  string discount_id = 1;
+  DiscountType discount_type = 2;
+  DiscountAmountType discount_amount_type = 3;
+  float discount_amount_value = 4;
+  float discount_amount = 5;
+}
+
+message TaxBillItem {
+  string tax_id = 1;
+  float tax_percentage = 2;
+  float tax_amount = 3;
+  TaxCategory tax_category = 8;
+}
+
+message CourseItem {
+  string course_id = 1;
+  string course_name = 2;
+  google.protobuf.Int32Value weight = 3;
+  google.protobuf.Int32Value slot = 4;
+}
+
+message BillingItem {
+  string product_id = 1;
+  google.protobuf.StringValue billing_schedule_period_id = 2;
+  float price = 3;
+  TaxBillItem tax_item = 4;
+  DiscountBillItem discount_item = 5;
+  float final_price = 6;
+  google.protobuf.Int32Value quantity = 7;
+  repeated CourseItem course_items = 8;
+  google.protobuf.StringValue student_product_id = 9;
+  google.protobuf.FloatValue adjustment_price = 10;
+  google.protobuf.BoolValue is_cancel_bill_item = 11;
+  google.protobuf.StringValue package_associated_id = 12;
+}
+
+message CreateOrderRequest {
+  string student_id = 1;
+  string location_id = 2;
+  string order_comment = 3;
+  OrderType order_type = 4;
+  repeated OrderItem order_items = 5;
+  repeated BillingItem billing_items = 6;
+  repeated BillingItem upcoming_billing_items = 7;
+  google.protobuf.StringValue reason = 8 [deprecated = true];
+  google.protobuf.StringValue background = 9;
+  google.protobuf.StringValue future_measures = 10;
+  int32 timezone = 11;
+  google.protobuf.Timestamp start_date = 12;
+  google.protobuf.Timestamp end_date = 13;
+  google.protobuf.Timestamp effective_date = 14;
+  repeated string leaving_reason_ids = 15;
+  google.protobuf.StringValue student_detail_path = 16;
+}
+
+message CreateOrderResponse {
+  bool successful = 1;
+  string order_id = 2;
+}
+
+message CustomBillingItem {
+  string name = 1;
+  TaxBillItem tax_item = 2;
+  float price = 3;
+  repeated string account_category_ids = 4;
+}
+
+message CreateCustomBillingRequest {
+  string student_id = 1;
+  string location_id = 2;
+  string order_comment = 3;
+  repeated CustomBillingItem custom_billing_items = 4;
+  OrderType order_type = 5;
+}
+
+message CreateCustomBillingResponse {
+  bool successful = 1;
+  string order_id = 2;
+}
+
+message RetrieveListOfOrdersFilter {
+  google.protobuf.Timestamp created_from = 1;
+  google.protobuf.Timestamp created_to = 2;
+  repeated OrderType order_types = 3;
+  repeated string product_ids = 4;
+  bool only_not_reviewed = 5;
+  bool only_student_not_enrolled = 6;
+}
+
+message RetrieveListOfOrdersRequest {
+  google.protobuf.Timestamp current_time = 1;
+  string keyword = 2;
+  OrderStatus order_status = 3;
+  RetrieveListOfOrdersFilter filter = 4;
+  common.v1.Paging paging = 5;
+  repeated string location_ids = 6;
+}
+
+message RetrieveListOfOrdersResponse {
+  message Order {
+    message CreatorInfo {
+      string user_id = 1;
+      string user_name = 2;
+    }
+    int32 order_sequence_number = 1;
+    string order_id = 2;
+    string student_id = 3;
+    string student_name = 8;
+    OrderStatus order_status = 4;
+    OrderType order_type = 5;
+    string product_details = 6;
+    google.protobuf.Timestamp create_date = 7;
+    bool is_reviewed = 9;
+    string location_id = 10;
+    string location_name = 11;
+    CreatorInfo creator_info = 12;
+  }
+  repeated Order items = 1;
+  common.v1.Paging next_page = 2;
+  common.v1.Paging previous_page = 3;
+  uint32 total_items = 4;
+  uint32 total_of_submitted = 5;
+  uint32 total_of_pending= 6;
+  uint32 total_of_rejected = 7;
+  uint32 total_of_voided = 8;
+  uint32 total_of_invoiced = 9;
+  uint32 total_of_order_need_to_review = 10;
+}
+
+message RetrieveListOfBillItemsRequest {
+  string student_id = 1;
+  common.v1.Paging paging = 2;
+  repeated string location_ids = 3;
+}
+
+message RetrieveListOfBillItemsResponse {
+  message BillItems{
+    int32 index = 1;
+    LocationInfo location_info = 2;
+    int32 billing_no = 3;
+    string order_id = 4;
+    BillItemDescription bill_item_description = 5;
+    BillingStatus billing_status = 6;
+    BillingType billing_type = 7;
+    google.protobuf.Timestamp billing_date = 8;
+    float amount = 9;
+    google.protobuf.Timestamp product_create_at = 10;
+    google.protobuf.FloatValue adjustment_price = 11;
+    OrderType order_type = 12;
+  }
+  repeated BillItems items = 1;
+  common.v1.Paging next_page = 2;
+  common.v1.Paging previous_page = 3;
+  uint32 total_items = 4;
+}
+
+message ProductInfo{
+  string product_id = 1;
+  string product_name = 2;
+  ProductType product_type = 3;
+  PackageType package_type = 4;
+  MaterialType material_type = 5;
+  FeeType fee_type = 6;
+  QuantityType quantity_type = 7;
+}
+
+message BillItemDescription{
+  string product_id = 1;
+  string product_name = 2;
+  ProductType product_type = 3;
+  PackageType package_type = 4;
+  MaterialType material_type = 5;
+  FeeType fee_type = 6;
+  QuantityType quantity_type = 7;
+  repeated CourseItem course_items = 8;
+  google.protobuf.StringValue billing_period_name = 9;
+  google.protobuf.StringValue billing_schedule_name = 10;
+  google.protobuf.Int32Value billing_ratio_numerator = 11;
+  google.protobuf.Int32Value billing_ratio_denominator = 12;
+}
+
+message LocationInfo {
+  string location_id = 1;
+  string location_name = 2;
+}
+
+message RetrieveListOfOrderItemsRequest {
+  string student_id = 1;
+  common.v1.Paging paging = 2;
+  repeated string location_ids = 3;
+}
+
+message RetrieveListOfOrderItemsResponse {
+  message OrderItems{
+    int32 index = 1;
+    LocationInfo location_info = 2;
+    int32 order_no = 3;
+    string order_id = 4;
+    OrderType order_type = 5;
+    OrderStatus order_status = 6;
+    repeated ProductInfo product_details = 7;
+    google.protobuf.Timestamp create_date = 8;
+  }
+  repeated OrderItems items = 1;
+  common.v1.Paging next_page = 2;
+  common.v1.Paging previous_page = 3;
+  uint32 total_items = 4;
+}
+
+message RetrieveListOfOrderProductsRequest {
+  string student_id = 1;
+  common.v1.Paging paging = 2;
+  repeated string location_ids = 3;
+}
+
+message RetrieveListOfOrderDetailProductsRequest {
+  string order_id = 1;
+  common.v1.Paging paging = 2;
+}
+
+message RetrieveListOfOrderDetailProductsResponse {
+  message OrderProduct{
+    message DiscountInfo {
+      string discount_name = 1;
+      string discount_id = 2;
+    }
+    int32 index = 1;
+    string product_id = 2;
+    string product_name = 3;
+    ProductType product_type = 4;
+    PackageType package_type = 5;
+    MaterialType material_type = 6;
+    FeeType fee_type = 7;
+    repeated CourseItem course_items = 8;
+    DiscountInfo discount_info = 9;
+    google.protobuf.Timestamp start_date = 10;
+    QuantityType quantity_type = 11;
+    google.protobuf.StringValue billing_period_name = 12;
+    google.protobuf.Int32Value billing_ratio_numerator = 13;
+    google.protobuf.Int32Value billing_ratio_denominator = 14;
+    google.protobuf.StringValue billing_schedule_name = 15;
+    StudentProductLabel student_product_label = 16;
+    google.protobuf.StringValue updated_from_student_product_id = 17;
+    google.protobuf.StringValue updated_to_student_product_id = 18;
+    string student_product_id = 19;
+    OrderType order_type = 20;
+    StudentProductStatus product_status = 21;
+    google.protobuf.Timestamp end_date = 22;
+  }
+  repeated OrderProduct items = 1;
+  common.v1.Paging next_page = 2;
+  common.v1.Paging previous_page = 3;
+  uint32 total_items = 4;
+}
+
+message RetrieveListOfOrderProductsResponse {
+  message OrderProduct{
+    message Duration {
+      google.protobuf.Timestamp from = 1;
+      google.protobuf.Timestamp to = 2;
+    }
+    message LocationInfo {
+      string location_name = 1;
+      string location_id = 2;
+    }
+    message DiscountInfo {
+      string discount_name = 1;
+      string discount_id = 2;
+    }
+    LocationInfo location_info = 1;
+    string product_name = 2;
+    ProductType product_type = 3;
+    PackageType package_type = 4;
+    QuantityType quantity_type = 5;
+    MaterialType material_type = 6;
+    FeeType fee_type = 7;
+    repeated CourseItem course_items = 8;
+    StudentProductStatus status = 9;
+    DiscountInfo discount_info = 10;
+    google.protobuf.Timestamp upcoming_billing_date = 11;
+    Duration duration = 12;
+    int32 index = 13;
+    string product_id = 14;
+    string student_product_id = 15;
+    StudentProductLabel student_product_label = 16;
+    google.protobuf.StringValue updated_from_student_product_id = 17;
+    google.protobuf.StringValue updated_to_student_product_id = 18;
+    google.protobuf.StringValue billing_period_name = 19;
+    google.protobuf.Int32Value billing_ratio_numerator = 20;
+    google.protobuf.Int32Value billing_ratio_denominator = 21;
+    google.protobuf.StringValue billing_schedule_name = 22;
+    bool is_operation_fee = 23;
+  }
+  repeated OrderProduct items = 1;
+  common.v1.Paging next_page = 2;
+  common.v1.Paging previous_page = 3;
+  uint32 total_items = 4;
+}
+
+message ProductAssociation {
+  string package_id = 1;
+  string course_id = 2;
+  string product_id = 3;
+  ProductType product_type = 4;
+}
+
+// Used by invoice service
+message UpdateBillItemStatusRequest {
+  message UpdateBillItem {
+    int32 bill_item_sequence_number = 1;
+    BillingStatus billing_status_to = 2;
+  }
+  repeated UpdateBillItem update_bill_items = 1;
+  string organization_id = 2;
+  string current_user_id = 3;
+}
+
+message UpdateBillItemStatusResponse {
+  message UpdateBillItemStatusError {
+    int32 bill_item_sequence_number = 1;
+    string error = 2;
+  }
+  repeated UpdateBillItemStatusError errors = 1;
+}
+
+message UpdateOrderStatusRequest {
+  message UpdateOrderStatus {
+    string order_id = 1;
+    OrderStatus order_status = 2;
+  }
+  repeated UpdateOrderStatus update_orders_statuses = 1;
+}
+
+message UpdateOrderStatusResponse {
+  message UpdateOrderStatusError {
+    string order_id = 1;
+    string error = 2;
+  }
+  repeated UpdateOrderStatusError errors = 1;
+}
+
+message RetrieveBillingOfOrderDetailsRequest {
+  string order_id = 1;
+  common.v1.Paging paging = 2;
+}
+
+message RetrieveBillingOfOrderDetailsResponse{
+  message OrderDetails{
+    int32 index = 1;
+    string order_id = 2;
+    int32 bill_item_sequence_number = 3;
+    BillingStatus billing_status = 4;
+    google.protobuf.Timestamp billing_date = 5;
+    float amount = 6;
+    BillItemDescription bill_item_description = 7;
+    google.protobuf.StringValue productDescription = 8;
+    BillingType billing_type = 9;
+  }
+  repeated OrderDetails items = 1;
+  common.v1.Paging next_page = 2;
+  common.v1.Paging previous_page = 3;
+  uint32 total_items = 4;
+}
+
+message RetrieveRecurringProductForWithdrawalRequest {
+  string student_id = 1;
+  string location_id = 2;
+}
+
+message DiscountInfo {
+  string discount_name = 1;
+  int32 discount_id = 2;
+}
+
+message RetrieveRecurringProductForWithdrawalResponse {
+  message OrderProduct{
+    LocationInfo location_info = 1;
+    string product_name = 2;
+    ProductType product_type = 3;
+    PackageType package_type = 4;
+    QuantityType quantity_type = 5;
+    MaterialType material_type = 6;
+    FeeType fee_type = 7;
+    repeated CourseItem course_items = 8;
+    StudentProductStatus status = 9;
+    DiscountInfo discount_info = 10;
+    int32 product_id = 11;
+    google.protobuf.Timestamp effective_date = 12;
+    string student_product_id = 13;
+  }
+  message BillAtOrder{
+    LocationInfo location_info = 1;
+    string product_name = 2;
+    ProductType product_type = 3;
+    PackageType package_type = 4;
+    QuantityType quantity_type = 5;
+    MaterialType material_type = 6;
+    FeeType fee_type = 7;
+    repeated CourseItem course_items = 8;
+    BillingType status = 9;
+    DiscountInfo discount_info = 10;
+    float amount = 11;
+    float TaxBillItem = 12;
+    google.protobuf.Timestamp effective_date = 13;
+    int32 index = 14;
+    int32 product_id = 15;
+    string student_product_id = 16;
+    string billing_period_name = 17;
+    int32 billing_ratio_numerator = 18;
+    int32 billing_ratio_denominator = 19;
+    
+  }
+  message UpcomingBilling{
+    LocationInfo location_info = 1;
+    string product_name = 2;
+    ProductType product_type = 3;
+    PackageType package_type = 4;
+    QuantityType quantity_type = 5;
+    MaterialType material_type = 6;
+    FeeType fee_type = 7;
+    repeated CourseItem course_items = 8;
+    BillingType status = 9;
+    DiscountInfo discount_info = 10;
+    float amount = 11;
+    google.protobuf.Timestamp upcoming_billing_date = 12;
+    google.protobuf.Timestamp effective_date = 13;
+    int32 product_id = 14;
+    string student_product_id = 15;
+    string billing_period_name = 16;
+    int32 billing_ratio_numerator = 17;  
+    int32 billing_ratio_denominator = 18;
+  }
+  message RecurringOfWithdrawal {
+    OrderProduct order_product = 1;
+    BillAtOrder bill_at_order = 2;
+    UpcomingBilling upcoming_billing = 3; 
+  }
+  repeated RecurringOfWithdrawal items = 1;                                                                                              
+}
+
+message CreateBulkOrderRequest {
+  message CreateNewOrderRequest {
+    string student_id = 1;
+    string location_id = 2;
+    string order_comment = 3;
+    OrderType order_type = 4;
+    repeated OrderItem order_items = 5;
+    repeated BillingItem billing_items = 6;
+    repeated BillingItem upcoming_billing_items = 7;
+    int32 timezone = 8;
+  }
+  repeated CreateNewOrderRequest new_order_requests = 1;
+}
+
+message CreateBulkOrderResponse {
+  message CreateNewOrderResponse {
+    bool successful = 1;
+    string order_id = 2;
+  }
+  repeated CreateNewOrderResponse new_order_responses = 1;
+}
+
+message VoidOrderRequest {
+  string order_id = 1;
+  int32 order_version_number = 2;
+}
+
+message VoidOrderResponse {
+  bool successful = 1;
+  string order_id = 2;
+}
+
+message GenerateBillingItemsRequest{
+  google.protobuf.Timestamp to = 1;
+  string organization_id = 2;
+}
+
+message GenerateBillingItemsResponse{
+  bool successful = 1;
+  int32 successed = 2;
+  int32 failed = 3;
+}
+
+message UpdateStudentProductStatusRequest{
+  google.protobuf.Timestamp effective_date = 1;
+  string organization_id = 2;
+  repeated string student_product_label = 3;
+}
+
+message UpdateStudentProductStatusResponse{
+  message UpdateStudentProductStatusError {
+    string student_product_id = 1;
+    string error = 2;
+  }
+  repeated string student_product_ids = 1;
+  repeated UpdateStudentProductStatusError errors = 2;
+}
+
+message EventSyncStudentPackageCourse {
+  string student_id = 1;
+  string location_id = 2;
+  string course_id = 3;
+  string student_package_id = 4;
+  google.protobuf.Timestamp student_start_date = 5;
+  google.protobuf.Timestamp student_end_date = 6;
+  google.protobuf.Int32Value course_slot = 7;
+  google.protobuf.Int32Value course_slot_per_week = 8;
+  PackageType package_type = 9;
+}
+
+message UpdateOrderReviewedFlagRequest{
+  string order_id = 1;
+  bool is_reviewed = 2;
+  int32 order_version_number = 3;
+}
+
+message UpdateOrderReviewedFlagResponse{
+  bool successful = 1;
+}
+
+message RetrieveListOfUniqueProductIDsRequest{
+  string student_id = 1;
+}
+
+message RetrieveListOfUniqueProductIDsResponse{
+  message ProductInfo {
+    string product_id = 1;
+    google.protobuf.Timestamp end_time = 2;
+  }
+  repeated ProductInfo product_details = 1;
+}
+
+message RetrieveListOfUniqueProductIDForBulkOrderRequest{
+  repeated string student_ids = 1;
+}
+
+message RetrieveListOfUniqueProductIDForBulkOrderResponse{
+  message ProductInfo {
+    string product_id = 1;
+    google.protobuf.Timestamp end_time = 2;
+  } 
+  message UniqueProductOfStudent {
+    string student_id = 1;
+    repeated ProductInfo product_details = 2;
+  }
+  repeated UniqueProductOfStudent unique_product_of_student = 1;
+}
+
+message GetLocationsForCreatingOrderRequest{
+  string name = 1;
+  int32 limit = 2;
+  repeated string location_ids = 3;
+}
+
+message GetLocationsForCreatingOrderResponse{
+  repeated LocationInfo location_infos = 2;
+}
+
+message RetrieveListOfOrderAssociatedProductOfPackagesRequest {
+  string student_product_id = 1;
+  common.v1.Paging paging = 2;
+  string package_id = 3;
+  repeated string course_ids = 4;
+}
+
+message RetrieveListOfOrderAssociatedProductOfPackagesResponse {
+  message OrderProduct{
+    message Duration {
+      google.protobuf.Timestamp from = 1;
+      google.protobuf.Timestamp to = 2;
+    }
+    message LocationInfo {
+      string location_name = 1;
+      string location_id = 2;
+    }
+    message DiscountInfo {
+      string discount_name = 1;
+      string discount_id = 2;
+    }
+    LocationInfo location_info = 1;
+    string product_name = 2;
+    ProductType product_type = 3;
+    MaterialType material_type = 4;
+    FeeType fee_type = 5;
+    StudentProductStatus status = 6;
+    DiscountInfo discount_info = 7;
+    google.protobuf.Timestamp upcoming_billing_date = 8;
+    Duration duration = 9;
+    int32 index = 10;
+    string product_id = 11;
+    string student_product_id = 12;
+    StudentProductLabel student_product_label = 13;
+    google.protobuf.StringValue updated_from_student_product_id = 14;
+    google.protobuf.StringValue updated_to_student_product_id = 15;
+    google.protobuf.StringValue billing_period_name = 16;
+    google.protobuf.Int32Value billing_ratio_numerator = 17;
+    google.protobuf.Int32Value billing_ratio_denominator = 18;
+    google.protobuf.StringValue billing_schedule_name = 19;
+  }
+  repeated OrderProduct items = 1;
+  common.v1.Paging next_page = 2;
+  common.v1.Paging previous_page = 3;
+  uint32 total_items = 4;
+  int32 total_associated_products_of_package = 5;
+}
+
+message ProductSpecificType {
+  ProductType product_type = 1;
+  PackageType package_type = 2;
+  MaterialType material_type = 3;
+  FeeType fee_type = 4;
+}
+
+message RetrieveListOfProductsFilter {
+  repeated ProductSpecificType product_types = 1;
+  repeated string student_grades = 2;
+}
+
+message RetrieveListOfProductsRequest {
+    RetrieveListOfProductsFilter filter = 1;
+    string keyword = 2;
+    ProductStatus product_status = 3;
+    common.v1.Paging paging = 4;
+}
+
+message RetrieveListOfProductsResponse {
+  message Product{
+    string product_name = 1;
+    ProductSpecificType product_type = 2;
+    ProductStatus product_status = 3;
+    repeated string grades = 4;
+    repeated LocationInfo location_info = 5;
+    string product_id = 6;
+  }
+  repeated Product items = 1;
+  common.v1.Paging next_page = 2;
+  common.v1.Paging previous_page = 3;
+  uint32 total_items = 4;
+  uint32 total_of_active = 5;
+  uint32 total_of_inactive = 6;
+}
+
+message RetrieveStudentEnrollmentStatusByLocationRequest {
+  message StudentLocation {
+    string student_id = 1;
+    string location_id = 2;
+  }
+  repeated StudentLocation student_locations = 1;
+}
+
+message RetrieveStudentEnrollmentStatusByLocationResponse {
+  message StudentStatusPerLocation {
+    string student_id = 1;
+    string location_id = 2;
+    bool is_enrollment = 3;
+  }
+  repeated StudentStatusPerLocation student_status_per_location = 1;
+}
+
+message RetrieveStudentEnrolledLocationsRequest {
+  string student_id = 1;
+}
+
+message RetrieveStudentEnrolledLocationsResponse {
+  message StudentStatusPerLocation {
+    string location_id = 1;
+    string student_status = 2;
+    bool has_scheduled_change_of_status_in_location = 3;
+  }
+
+  string student_id = 1;
+  repeated StudentStatusPerLocation student_status_per_location = 2;
+}
+
+message GetOrgLevelStudentStatusRequest{
+  message studentInfo {
+    string student_id = 1;
+    google.protobuf.StringValue student_product_id = 2;
+  }
+  repeated studentInfo student_info = 1;
+}
+
+message GetOrgLevelStudentStatusResponse {
+  message OrgLevelStudentStatus {
+    string student_id = 1;
+    bool is_enrolled_in_org = 2;
+    google.protobuf.StringValue student_product_id = 3;
+  }
+  repeated OrgLevelStudentStatus student_status = 1;
+}
+
+message RetrieveRecurringProductsOfStudentInLocationRequest {
+  string student_id = 1;
+  string location_id = 2;
+  OrderType order_type = 3;
+}
+
+message RetrieveRecurringProductsOfStudentInLocationResponse {
+  message StudentProduct {
+      string student_product_id = 1;
+      string student_id = 2;
+      string location_id = 3;
+      string product_status = 4;
+      string student_product_label = 5;
+      google.protobuf.Timestamp start_date = 6;
+      google.protobuf.Timestamp end_date = 7;
+  }
+  
+  repeated StudentProduct student_product_in_location = 1;
+}
+
+service OrderService {
+  rpc CreateOrder(CreateOrderRequest)
+      returns (CreateOrderResponse);
+  rpc CreateCustomBilling(CreateCustomBillingRequest)
+      returns (CreateCustomBillingResponse);
+  rpc RetrieveListOfOrders(RetrieveListOfOrdersRequest)
+      returns (RetrieveListOfOrdersResponse);
+  rpc RetrieveListOfBillItems(RetrieveListOfBillItemsRequest)
+      returns (RetrieveListOfBillItemsResponse);
+  rpc RetrieveListOfOrderProducts(RetrieveListOfOrderProductsRequest)
+      returns (RetrieveListOfOrderProductsResponse);
+  rpc RetrieveListOfOrderItems(RetrieveListOfOrderItemsRequest)
+      returns (RetrieveListOfOrderItemsResponse);
+  rpc UpdateBillItemStatus(UpdateBillItemStatusRequest)
+      returns (UpdateBillItemStatusResponse);
+  rpc UpdateOrderStatus(UpdateOrderStatusRequest)
+      returns (UpdateOrderStatusResponse);
+  rpc RetrieveBillingOfOrderDetails(RetrieveBillingOfOrderDetailsRequest)
+      returns (RetrieveBillingOfOrderDetailsResponse);
+  rpc RetrieveListOfOrderDetailProducts(RetrieveListOfOrderDetailProductsRequest)
+      returns (RetrieveListOfOrderDetailProductsResponse);
+  rpc CreateBulkOrder(CreateBulkOrderRequest)
+      returns (CreateBulkOrderResponse);
+  rpc VoidOrder(VoidOrderRequest)
+      returns (VoidOrderResponse);
+  rpc GenerateBillingItems(GenerateBillingItemsRequest)
+      returns (GenerateBillingItemsResponse);
+  rpc RetrieveRecurringProductForWithdrawal(RetrieveRecurringProductForWithdrawalRequest)
+      returns (RetrieveRecurringProductForWithdrawalResponse);
+  rpc UpdateOrderReviewedFlag(UpdateOrderReviewedFlagRequest)
+      returns (UpdateOrderReviewedFlagResponse);
+  rpc RetrieveListOfUniqueProductIDs(RetrieveListOfUniqueProductIDsRequest)
+      returns (RetrieveListOfUniqueProductIDsResponse);
+  rpc RetrieveListOfUniqueProductIDForBulkOrder(RetrieveListOfUniqueProductIDForBulkOrderRequest)
+      returns (RetrieveListOfUniqueProductIDForBulkOrderResponse);
+  rpc GetLocationsForCreatingOrder(GetLocationsForCreatingOrderRequest)
+      returns (GetLocationsForCreatingOrderResponse);
+  rpc RetrieveListOfOrderAssociatedProductOfPackages(RetrieveListOfOrderAssociatedProductOfPackagesRequest)
+      returns (RetrieveListOfOrderAssociatedProductOfPackagesResponse);
+  rpc RetrieveListOfProducts(RetrieveListOfProductsRequest)
+      returns (RetrieveListOfProductsResponse);
+  rpc RetrieveStudentEnrollmentStatusByLocation(RetrieveStudentEnrollmentStatusByLocationRequest)
+    returns (RetrieveStudentEnrollmentStatusByLocationResponse);
+  rpc RetrieveStudentEnrolledLocations(RetrieveStudentEnrolledLocationsRequest)
+    returns (RetrieveStudentEnrolledLocationsResponse);
+  rpc GetOrgLevelStudentStatus(GetOrgLevelStudentStatusRequest)
+    returns (GetOrgLevelStudentStatusResponse);
+  rpc RetrieveRecurringProductsOfStudentInLocation(RetrieveRecurringProductsOfStudentInLocationRequest)
+    returns (RetrieveRecurringProductsOfStudentInLocationResponse);
+}

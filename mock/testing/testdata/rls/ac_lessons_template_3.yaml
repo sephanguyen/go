@@ -1,0 +1,6 @@
+- template: 3
+  tableName: lessons
+  permissionPrefix: lesson.lessons
+  permissions:
+    postgres: []
+    hasura: []

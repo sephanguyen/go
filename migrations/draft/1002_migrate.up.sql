@@ -1,0 +1,4 @@
+-- We rollbacked on using a specific draft user, since draft does not affect our multi-tenancy.
+-- Simply use postgres user for draft instead.
+-- GRANT SELECT, INSERT, UPDATE ON ALL TABLES IN SCHEMA public to draft;
+-- ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public GRANT SELECT, INSERT, UPDATE ON TABLES TO draft;

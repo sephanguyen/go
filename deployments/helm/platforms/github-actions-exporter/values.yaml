@@ -1,0 +1,80 @@
+# Default values for github-actions-exporter.
+
+image:
+  repository: asia-docker.pkg.dev/student-coach-e1e95/manaverse/github-actions-exporter
+  pullPolicy: IfNotPresent
+  tag: "v1.8.1"
+
+nameOverride: ""
+fullnameOverride: ""
+
+env:
+  GITHUB_REFRESH: 30 # Refresh time Github Actions status in sec
+  GITHUB_ORGAS: "manabie-com" # List all organisations you want get informations. <orga>,<orgb>,<orgc>
+  GITHUB_REPOS: "manabie-com/backend" # List all repositories you want get informations. <orga>/<repo>,<orga>/<repo2>,<orga>/<repo3> (like test/test)
+  PORT: 9999 # Exporter port
+  GITHUB_API_URL: api.github.com
+#  ENTERPRISE_NAME: "" # Needed for enterprise endpoints (/enterprises/{ENTERPRISE_NAME}/*)
+  EXPORT_FIELDS: "repo,id,node_id,head_branch,head_sha,run_number,workflow_id,event,status,runner_name,job_name"  # A comma separated list of fields for workflow metrics that should be exported
+#  For the github authentications need to create a secret by default called actions-exporter
+#  for authentication via github personal token
+#                key: github_token
+#  for authentication via github app authentication
+#                key: github_app_id
+#                key: github_app_installation_id
+#                key: github_app_private_key
+secret:
+  name: "actions-exporter"
+
+serviceMonitor:
+  enabled: no
+  labels:
+    release: prometheus
+  # Set how frequently Prometheus should scrape
+  interval: 30s
+  # Set the namespace the ServiceMonitor should be deployed
+  # namespace: monitoring
+  # Set labels for the ServiceMonitor, use this to define your scrape label for Prometheus Operator
+  # labels:
+  # Set timeout for scrape
+  # timeout: 10s
+  # Set of labels to transfer on the Kubernetes Service onto the target.
+  # targetLabels: []
+  # metricRelabelings: []
+
+imagePullSecrets: []
+
+podAnnotations:
+  prometheus.io/scheme: "http"
+  prometheus.io/port: "9999"
+  prometheus.io/scrape: "true"
+
+podSecurityContext: {}
+#  fsGroup: 2000
+
+securityContext: {}
+#  capabilities:
+#    drop:
+#    - ALL
+#  readOnlyRootFilesystem: true
+#  runAsNonRoot: true
+#  runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 9999
+
+
+resources: {}
+#  limits:
+#    cpu: 300m
+#    memory: 128Mi
+#  requests:
+#    cpu: 100m
+#    memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

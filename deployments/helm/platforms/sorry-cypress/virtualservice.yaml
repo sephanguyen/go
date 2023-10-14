@@ -1,0 +1,87 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: sorry-cypress-api
+  namespace: sorry-cypress
+spec:
+  exportTo:
+  - istio-system
+  gateways:
+  - istio-system/stag-manabie-gateway
+  hosts:
+  - cypress-api.staging.manabie.io
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: sorry-cypress-api
+        port:
+          number: 4000
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: sorry-cypress-dashboard
+  namespace: sorry-cypress
+spec:
+  exportTo:
+  - istio-system
+  gateways:
+  - istio-system/stag-manabie-gateway
+  hosts:
+  - cypress-dashboard.staging.manabie.io
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: sorry-cypress-dashboard
+        port:
+          number: 8080
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: sorry-cypress-director
+  namespace: sorry-cypress
+spec:
+  exportTo:
+  - istio-system
+  gateways:
+  - istio-system/stag-manabie-gateway
+  hosts:
+  - cypress-director.staging.manabie.io
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: sorry-cypress-director
+        port:
+          number: 1234
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: sorry-cypress-minio
+  namespace: sorry-cypress
+spec:
+  exportTo:
+  - istio-system
+  gateways:
+  - istio-system/stag-manabie-gateway
+  hosts:
+  - minio.staging.manabie.io
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: sorry-cypress-minio
+        port:
+          number: 9000

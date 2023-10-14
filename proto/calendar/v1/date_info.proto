@@ -1,0 +1,77 @@
+syntax = "proto3";
+
+package calendar.v1;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/calendar/v1";
+
+import "google/protobuf/timestamp.proto";
+
+service  DateInfoReaderService {
+    rpc FetchDateInfo (FetchDateInfoRequest) returns (FetchDateInfoResponse);
+    rpc ExportDayInfo(ExportDayInfoRequest) returns (ExportDayInfoResponse);
+}
+
+service DateInfoModifierService {
+    rpc DuplicateDateInfo (DuplicateDateInfoRequest) returns (DuplicateDateInfoResponse);
+    rpc UpsertDateInfo(UpsertDateInfoRequest) returns (UpsertDateInfoResponse);
+}
+
+message DateInfo {
+    google.protobuf.Timestamp date = 1;
+    string location_id = 2;
+    string location_name = 3;
+    string date_type_id = 4;
+    string opening_time = 5;
+    string status = 6;
+    string timezone = 7;
+}
+
+message DateInfoDetailed {
+    DateInfo date_info = 1;
+    string date_type_display_name = 2;
+}
+
+message RepeatInfo {
+    google.protobuf.Timestamp start_date = 1;
+    google.protobuf.Timestamp end_date = 2;
+    string condition = 3;  // "daily", "weekly"
+}
+
+message FetchDateInfoRequest {
+    google.protobuf.Timestamp start_date = 1;
+    google.protobuf.Timestamp end_date = 2;
+    string location_id = 3;
+    string timezone = 4;
+}
+
+message FetchDateInfoResponse {
+    bool successful = 1;
+	string message = 2;
+	repeated DateInfo date_info = 3 [deprecated = true];
+    repeated DateInfoDetailed date_infos = 4;
+}
+
+message UpsertDateInfoRequest {
+    DateInfo date_info = 1;
+}
+
+message UpsertDateInfoResponse {
+    bool successful = 1;
+	string message = 2;
+}
+
+message DuplicateDateInfoRequest {
+    DateInfo date_info = 1;
+    RepeatInfo repeat_info = 2;
+}
+
+message DuplicateDateInfoResponse {
+    bool successful = 1;
+	string message = 2;
+}
+
+message ExportDayInfoRequest {}
+
+message ExportDayInfoResponse {
+  bytes data = 1;
+}

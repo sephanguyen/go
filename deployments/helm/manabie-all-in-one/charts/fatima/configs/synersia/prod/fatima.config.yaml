@@ -1,0 +1,9 @@
+common:
+  google_cloud_project: synersia
+issuers:
+  - issuer: manabie
+    audience: prod-synersia
+    jwks_endpoint: http://shamir:5680/.well-known/jwks.json
+  - issuer: https://securetoken.google.com/synersia
+    audience: synersia
+    jwks_endpoint: https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com

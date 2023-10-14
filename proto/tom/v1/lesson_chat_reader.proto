@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package tom.v1;
+
+import "tom/v1/conversations.proto";
+import "common/v1/requests.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/tom/v1;tpb";
+
+message LiveLessonConversationMessagesRequest {
+  string conversation_id = 2;
+  common.v1.Paging paging = 3;
+}
+
+message LiveLessonConversationMessagesResponse {
+  repeated MessageResponse messages = 1;
+}
+
+message LiveLessonPrivateConversationMessagesRequest {
+  string conversation_id = 1;
+  common.v1.Paging paging = 2;
+}
+
+message LiveLessonPrivateConversationMessagesResponse {
+  repeated MessageResponse messages = 1;
+}
+
+message LiveLessonConversationDetailRequest { string lesson_id = 1; }
+
+message LiveLessonConversationDetailResponse { Conversation conversation = 1; }
+
+message RefreshLiveLessonSessionRequest { string lesson_id = 1; }
+message RefreshLiveLessonSessionResponse {}
+
+service LessonChatReaderService {
+  rpc RefreshLiveLessonSession(RefreshLiveLessonSessionRequest)
+      returns (RefreshLiveLessonSessionResponse);
+
+  rpc LiveLessonConversationDetail(LiveLessonConversationDetailRequest)
+      returns (LiveLessonConversationDetailResponse);
+
+  rpc LiveLessonConversationMessages(LiveLessonConversationMessagesRequest)
+      returns (LiveLessonConversationMessagesResponse);
+  
+  rpc LiveLessonPrivateConversationMessages (LiveLessonPrivateConversationMessagesRequest) 
+      returns (LiveLessonPrivateConversationMessagesResponse);
+}

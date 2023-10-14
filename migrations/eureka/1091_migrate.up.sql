@@ -1,0 +1,1 @@
+alter table master_study_plan drop constraint if exists learning_material_id_fk;

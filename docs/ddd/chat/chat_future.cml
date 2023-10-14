@@ -1,0 +1,36 @@
+ContextMap DDDSampleMap {
+	contains UserManagementContext
+	contains LessonManagementContext
+	contains ChatContext
+	contains NotificationContext
+	contains PurchaseContext
+
+	
+	LessonManagementContext [D]<-[U,OHS,PL] ChatContext
+
+	ChatContext [C]<-[S] UserManagementContext
+	ChatContext [C]<-[S] PurchaseContext
+
+	ChatContext [D,ACL]<-[U,OHS,PL] NotificationContext
+
+}
+
+
+BoundedContext UserManagementContext {
+}
+
+BoundedContext LessonManagementContext {
+}
+
+BoundedContext MasterAccessControlContext {
+}
+
+BoundedContext ChatContext {
+}
+
+BoundedContext NotificationContext {
+}
+
+BoundedContext PurchaseContext {
+}
+

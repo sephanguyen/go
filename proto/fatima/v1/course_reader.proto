@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package fatima.v1;
+
+import "common/v1/profiles.proto";
+import "common/v1/requests.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/fatima/v1;fpb";
+
+message ListStudentByCourseRequest {
+    string course_id = 1;
+    string search_text = 2;
+    common.v1.Paging paging = 3;
+    repeated string location_ids = 4;
+}
+
+message ListStudentByCourseResponse {
+    repeated common.v1.BasicProfile profiles = 1;
+    common.v1.Paging next_page = 2;
+}
+
+service CourseReaderService {
+    rpc ListStudentByCourse(ListStudentByCourseRequest) returns (ListStudentByCourseResponse) {};
+}  

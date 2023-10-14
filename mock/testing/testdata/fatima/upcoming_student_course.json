@@ -1,0 +1,180 @@
+{
+	"schema": [
+		{
+			"column_name": "course_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "course_slot",
+			"data_type": "integer",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "course_slot_per_week",
+			"data_type": "integer",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "executed_error",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "is_executed_by_cronjob",
+			"data_type": "boolean",
+			"column_default": "false",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "location_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "package_type",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "student_end_date",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "student_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "student_package_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "student_start_date",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "upcoming_student_package_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "weight",
+			"data_type": "integer",
+			"column_default": null,
+			"is_nullable": "YES"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "upcoming_student_course",
+			"policyname": "rls_upcoming_student_course",
+			"qual": "permission_check(resource_path, 'upcoming_student_course'::text)",
+			"with_check": "permission_check(resource_path, 'upcoming_student_course'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "upcoming_student_course",
+			"policyname": "rls_upcoming_student_course_restrictive",
+			"qual": "permission_check(resource_path, 'upcoming_student_course'::text)",
+			"with_check": "permission_check(resource_path, 'upcoming_student_course'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "upcoming_student_course_pk",
+			"column_name": "course_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "upcoming_student_course_pk",
+			"column_name": "location_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "upcoming_student_course_pk",
+			"column_name": "student_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "upcoming_student_course_pk",
+			"column_name": "student_package_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "upcoming_student_course_pk",
+			"column_name": "upcoming_student_package_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "upcoming_student_course",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

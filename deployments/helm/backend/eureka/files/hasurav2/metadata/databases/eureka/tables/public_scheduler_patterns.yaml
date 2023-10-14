@@ -1,0 +1,70 @@
+table:
+  schema: public
+  name: scheduler_patterns
+object_relationships:
+  - name: brand
+    using:
+      foreign_key_constraint_on: brand_id
+  - name: center
+    using:
+      foreign_key_constraint_on: center_id
+  - name: scheduler_pattern
+    using:
+      foreign_key_constraint_on: scheduler_pattern_parent_id
+array_relationships:
+  - name: scheduler_items
+    using:
+      foreign_key_constraint_on:
+        column: scheduler_pattern_id
+        table:
+          schema: public
+          name: scheduler_items
+  - name: scheduler_patterns
+    using:
+      foreign_key_constraint_on:
+        column: scheduler_pattern_parent_id
+        table:
+          schema: public
+          name: scheduler_patterns
+select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+        - scheduler_pattern_id
+        - scheduler_pattern_parent_id
+        - scheduler_type
+        - time_zone
+        - start_time
+        - end_time
+        - all_day
+        - created_at
+        - updated_at
+        - deleted_at
+        - meta_data
+        - repeat_option_data
+        - latest_released_at
+        - brand_id
+        - center_id
+        - owner
+      filter: {}
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+        - scheduler_pattern_id
+        - scheduler_pattern_parent_id
+        - scheduler_type
+        - time_zone
+        - start_time
+        - end_time
+        - all_day
+        - created_at
+        - updated_at
+        - deleted_at
+        - meta_data
+        - repeat_option_data
+        - latest_released_at
+        - brand_id
+        - center_id
+        - owner
+      filter: {}
+      allow_aggregations: true

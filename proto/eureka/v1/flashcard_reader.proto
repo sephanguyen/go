@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package eureka.v1;
+
+import "common/v1/requests.proto";
+import "common/v1/contents.proto";
+import "eureka/v1/enums.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/eureka/v1;epb";
+
+message FlashcardQuizzes {
+    common.v1.Quiz item = 1;
+    FlashcardQuizStudyStatus status = 2;
+}
+  
+message RetrieveFlashCardStudyProgressRequest  {
+    string study_set_id = 1;
+    string student_id = 2;
+    common.v1.Paging paging = 3;
+}
+
+message RetrieveFlashCardStudyProgressResponse {
+    common.v1.Paging next_page = 1;
+    string study_set_id = 2;
+    repeated FlashcardQuizzes items = 3;
+    int32 studying_index = 4;
+}
+
+message RetrieveLastFlashcardStudyProgressRequest {
+    string study_plan_item_id = 1;
+    string lo_id = 2;
+    string student_id = 3;
+    //return the last study set id with completed_at or not, default is false
+    bool is_completed = 4;
+}
+  
+message RetrieveLastFlashcardStudyProgressResponse {
+    // return null if no records
+    string study_set_id = 1;
+}
+  
+
+service FlashCardReaderService {
+  rpc RetrieveFlashCardStudyProgress(RetrieveFlashCardStudyProgressRequest) returns (RetrieveFlashCardStudyProgressResponse); 
+  rpc RetrieveLastFlashcardStudyProgress(RetrieveLastFlashcardStudyProgressRequest) returns (RetrieveLastFlashcardStudyProgressResponse); //TODO:  PHASE 3
+}

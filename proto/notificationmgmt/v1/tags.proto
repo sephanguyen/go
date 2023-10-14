@@ -1,0 +1,87 @@
+syntax = "proto3";
+
+package notificationmgmt.v1;
+
+import "common/v1/requests.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/notificationmgmt/v1;npb";
+
+message UpsertTagRequest {
+    string tag_id = 1;
+    string name = 2;
+}
+
+message UpsertTagResponse {
+    string tag_id = 1;
+}
+
+message DeleteTagRequest {
+    string tag_id = 1;
+}
+
+message DeleteTagResponse {
+}
+
+message ImportTagsRequest {
+    bytes payload = 1;
+}
+
+message ImportTagsResponse {
+    message ImportTagsError {
+      int32 row_number = 1;
+      string error = 2;
+    }
+    repeated ImportTagsError errors = 1;
+}
+
+service TagMgmtModifierService {
+    rpc UpsertTag(UpsertTagRequest)
+        returns (UpsertTagResponse);
+    // Deprecated
+    rpc DeleteTag(DeleteTagRequest)
+        returns (DeleteTagResponse);
+    rpc ImportTags(ImportTagsRequest)
+        returns (ImportTagsResponse);
+}
+
+message CheckExistTagNameRequest {
+    string tag_name = 1;
+}
+
+message CheckExistTagNameResponse {
+    bool is_exist = 1;
+}
+
+message GetTagsByFilterRequest {
+    string keyword = 1;
+    common.v1.Paging paging = 2;
+}
+
+message GetTagsByFilterResponse {
+    message Tag {
+        string tag_id = 1;
+        string name = 2;
+    }
+
+    repeated Tag tags = 1;
+    uint32 total_items = 2;
+    common.v1.Paging next_page = 3;
+    common.v1.Paging previous_page = 4;
+}
+
+message ExportTagsRequest {
+}
+
+message ExportTagsResponse {
+    bytes data = 1;
+}
+
+service TagMgmtReaderService {
+    rpc CheckExistTagName(CheckExistTagNameRequest)
+        returns (CheckExistTagNameResponse);
+    // Deprecated
+    rpc GetTagsByFilter(GetTagsByFilterRequest)
+        returns (GetTagsByFilterResponse);
+    rpc ExportTags(ExportTagsRequest)
+        returns (ExportTagsResponse);
+}

@@ -1,0 +1,95 @@
+version: 2
+features:
+{{- range $key, $value := .Values.unleash.featureFlags }}
+  {{- range $feature := $value }}
+  - name: {{ $feature.name }}
+    description: {{ $feature.description | quote }}
+    type: {{ $feature.type }}
+    project: default
+    stale: {{ $feature.stale }}
+    variants: {{ $feature.variants }}
+  {{- end }}
+{{- end }}
+strategies: # our custom strategies list
+  - name: strategy_environment
+    description: "Strategy to work with different env: stag, uat, prod."
+    parameters:
+      - name: environments
+        type: list
+        description: list of environments
+        required: true
+    deprecated: false
+  - name: strategy_organization
+    description: strategy organization to enable/disable feature using organization ID
+    parameters:
+      - name: organizations
+        type: list
+        description: list of organizations
+        required: true
+    deprecated: false
+  - name: strategy_variant
+    description: "Strategy to work with different variants"
+    parameters:
+      - name: variants
+        type: list
+        description: list of variants
+        required: true
+    deprecated: false
+projects:
+  - id: default # must have because we are using free version
+    name: Default
+    description: Default project
+    createdAt: 2021-11-10T07:29:30.867Z
+    health: 100
+segments: []
+featureStrategies:
+{{- range $key, $value := .Values.unleash.featureFlags }}
+  {{- range $feature := $value }}
+    {{- range $strategy := $feature.strategies }}
+    - featureName: {{ $feature.name }}
+      projectId: default
+      environment: ":global:" # must have because we are using free version
+      strategyName: {{ $strategy.name }}
+      {{- with $strategy.parameters }}
+      parameters:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $strategy.constraints }}
+      constraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+environments:
+  - name: ":global:" # must have because we are using free version
+    type: default
+    enabled: true
+featureEnvironments:
+{{- range $key, $value := .Values.unleash.featureFlags }}
+  {{- range $feature := $value }}
+  - enabled: {{ $feature.enabled }}
+    featureName: {{ $feature.name }}
+    environment: ":global:"
+  {{- end }}
+{{- end }}
+tagTypes:
+  - name: simple # must have because we are using free version
+    description: Used to simplify filtering of features
+    icon: "#"
+  - name: team
+    description: 'Team responsible for the feature'
+    icon: null
+tags:
+{{- range $key, $value := .Values.unleash.featureFlags }}
+  - type: team
+    value: {{ $key }}
+{{- end }}
+featureTags:
+{{- range $key, $value := .Values.unleash.featureFlags }}
+  {{- range $feature := $value }}
+  - featureName: {{ $feature.name }}
+    tagType: team
+    tagValue: {{ $key }}
+  {{- end }}
+{{- end }}

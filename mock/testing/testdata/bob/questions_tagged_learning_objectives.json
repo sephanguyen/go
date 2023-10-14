@@ -1,0 +1,103 @@
+{
+	"schema": [
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "display_order",
+			"data_type": "integer",
+			"column_default": "0",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "lo_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "question_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "YES"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "questions_tagged_learning_objectives",
+			"policyname": "rls_questions_tagged_learning_objectives",
+			"qual": "permission_check(resource_path, 'questions_tagged_learning_objectives'::text)",
+			"with_check": "permission_check(resource_path, 'questions_tagged_learning_objectives'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "questions_tagged_learning_objectives",
+			"policyname": "rls_questions_tagged_learning_objectives_restrictive",
+			"qual": "permission_check(resource_path, 'questions_tagged_learning_objectives'::text)",
+			"with_check": "permission_check(resource_path, 'questions_tagged_learning_objectives'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "questions_tagged_learning_objectives_fk_1",
+			"column_name": "lo_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "questions_tagged_learning_objectives_fk",
+			"column_name": "question_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "questions_tagged_learning_objectives_pk",
+			"column_name": "lo_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "questions_tagged_learning_objectives_pk",
+			"column_name": "question_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "questions_tagged_learning_objectives",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

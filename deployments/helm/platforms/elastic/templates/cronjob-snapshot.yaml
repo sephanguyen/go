@@ -1,0 +1,89 @@
+{{- if .Values.elasticsearch.snapshot.enabled }}
+{{- if .Capabilities.APIVersions.Has "batch/v1/CronJob" }}
+apiVersion: batch/v1
+{{- else }}
+apiVersion: batch/v1beta1
+{{- end }}
+kind: CronJob
+metadata:
+  name: elasticsearch-{{ template "elastic.fullname" . }}-create-snapshot
+  labels:
+    {{- include "elastic.labels" . | nindent 4 }}
+spec:
+  concurrencyPolicy: Forbid
+  schedule: {{ .Values.elasticsearch.snapshot.schedule | quote }}
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 604800 #7days
+      template:
+        spec:
+          restartPolicy: OnFailure
+          serviceAccountName: {{ include "elastic.serviceAccountName" . }}
+          containers:
+          - name: elastic-create-snapshot
+            image: "{{ .Values.decryptorImage.repository }}:{{ .Values.decryptorImage.legacyTag }}"
+            imagePullPolicy: IfNotPresent
+            command:
+              - /bin/sh
+              - -c
+              - |
+                set -euo pipefail
+
+                code=0
+                sops --decrypt --output /kibana.yml /usr/share/kibana/config/kibana.encrypted.yaml || code=$?
+
+                if [ "$code" -ne 0 ]; then
+                  sops --decrypt /usr/share/kibana/config/kibana.encrypted.yaml > ./kibana.yml
+                  echo "============= decrypt old secret file"
+                fi
+
+                {{- if eq "local" .Values.environment }}
+                gcloud auth activate-service-account --key-file /configs/service_credential.json
+                {{- end }}
+
+                user=$(grep elasticsearch.username ./kibana.yml | awk '{print$2}' | tr -d \")
+                pass=$(grep elasticsearch.password ./kibana.yml | awk '{print$2}' | tr -d \")
+
+                if [[ "$(curl -k --silent --user ${user}:${pass} ${ELASTICSEARCH_URI}/_snapshot/_all 2>&1 | grep -c fs-repository)" == "1" ]]; then
+                  curl -k --silent -XPUT --user ${user}:${pass} \
+                    -H 'Content-Type: application/json' \
+                    "${ELASTICSEARCH_URI}/_snapshot/fs-repository/snapshot-$(date +%Y-%m-%d-%H:%M:%S)"
+                fi
+            env:
+              - name: ELASTICSEARCH_URI
+                value: {{ printf "https://elasticsearch-%s:%.0f" (include "elastic.fullname" .) .Values.elasticsearch.service.port }}
+            {{- if eq "local" .Values.environment }}
+              - name: GOOGLE_APPLICATION_CREDENTIALS
+                value: "/configs/service_credential.json"
+            {{- end }}
+            volumeMounts:
+          {{- if eq "local" .Values.environment }}
+            - name: secrets-volume
+              mountPath: /configs/service_credential.json
+              subPath: service_credential.json
+              readOnly: true
+          {{- end }}
+            - name: secrets-volume
+              mountPath: /usr/share/kibana/config/kibana.encrypted.yaml
+              subPath: kibana.encrypted.yaml
+              readOnly: true
+            - name: secrets-volume
+              mountPath: /usr/share/kibana/config/kibana_v2.encrypted.yaml
+              subPath: kibana_v2.encrypted.yaml
+              readOnly: true
+          volumes:
+          - name: secrets-volume
+            secret:
+              secretName: kibana-{{ include "elastic.fullname" . }}
+              items:
+            {{- if eq "local" .Values.environment }}
+              - key: service_credential.json
+                path: service_credential.json
+            {{- end }}
+              - key: kibana.encrypted.yaml
+                path: kibana.encrypted.yaml
+              - key: kibana_v2.encrypted.yaml
+                path: kibana_v2.encrypted.yaml
+{{- end }}

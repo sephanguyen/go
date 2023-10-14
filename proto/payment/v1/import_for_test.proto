@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package payment.v1;
+
+import "payment/v1/enums.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/payment/v1;pmpb";
+
+
+message ImportAllForTestRequest {
+  bytes payload = 1;
+}
+
+message ImportAllForTestResponse {
+  message ImportAllForTestError {
+    string entity_name = 1;
+    int32 row_number = 2;
+    string error = 3;
+  }
+  repeated ImportAllForTestError errors = 1;
+}
+
+service ImportMasterDataForTestService {
+  rpc ImportAllForTest(ImportAllForTestRequest)
+      returns (ImportAllForTestResponse);
+}

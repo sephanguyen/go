@@ -1,0 +1,99 @@
+syntax = "proto3";
+
+package syllabus.v1;
+
+import "syllabus/v1/enums.proto";
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/timestamp.proto";
+import "syllabus/v1/learning_material.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/syllabus/v1;sspb";
+
+message StudyPlanItemIdentity {
+    string study_plan_id = 1;
+    string learning_material_id = 2;
+    google.protobuf.StringValue student_id = 3; // when this field == null -> mean master_study_plan_item identify   
+}
+
+message StudyPlanData {
+    string study_plan_id = 1;
+    string name = 2;
+    string book_id = 3;
+    StudyPlanStatus status = 4;
+    bool track_school_progress = 5;
+    repeated int32 grades = 6;
+}
+
+message StudentStudyPlanData {
+    string study_plan_id = 1;
+    string name = 2;
+    string book_id = 3;
+    StudyPlanStatus status = 4;
+    bool track_school_progress = 5;
+    string student_id = 6;
+    repeated int32 grades = 7;
+}
+
+message StudyPlanItem {
+    StudyPlanItemIdentity study_plan_item_identity = 1;
+    google.protobuf.Timestamp available_from = 2;
+    google.protobuf.Timestamp available_to = 3;
+    google.protobuf.Timestamp start_date = 4;
+    google.protobuf.Timestamp end_date = 5;
+    StudyPlanItemStatus status = 6;
+    google.protobuf.Timestamp school_date = 7;
+    google.protobuf.Timestamp completed_at = 8;
+}
+
+message StudyPlanItemContent {
+    StudyPlanItem individual_study_plan_item = 1;
+    LearningMaterialType learning_material_type = 2;
+}
+
+message StudyPlanToDoItem {
+    StudyPlanItem individual_study_plan_item = 1;
+    StudyPlanItemToDoStatus status = 2;
+    AchievementCrown crown = 3;
+    LearningMaterialType learning_material_type = 4;
+}
+
+message StudyPlanTree {
+    string study_plan_id = 1;
+    BookTree book_tree = 2;
+    google.protobuf.Timestamp available_from = 3;
+    google.protobuf.Timestamp available_to = 4;
+    google.protobuf.Timestamp start_date = 5;
+    google.protobuf.Timestamp end_date = 6;
+    google.protobuf.Timestamp completed_at = 7;
+    StudyPlanItemStatus status = 8;
+    google.protobuf.Timestamp school_date = 9;
+}
+
+// StudyPlanIdentity this struct name is incorrect, please aware by read the struct, not the name.
+message StudyPlanIdentity {
+    string study_plan_id = 1;
+    string student_id = 2;
+    string learning_material_id = 3;
+    string study_plan_item_id = 4;
+}
+
+message MasterStudyPlanIdentify {
+    string study_plan_id = 1;
+    string learning_material_id = 2;
+}
+
+message MasterStudyPlan {
+    MasterStudyPlanIdentify master_study_plan_identify = 1;
+    google.protobuf.Timestamp available_from = 2;
+    google.protobuf.Timestamp available_to = 3;
+    google.protobuf.Timestamp start_date = 4;
+    google.protobuf.Timestamp end_date = 5;
+    StudyPlanItemStatus status = 6;
+    google.protobuf.Timestamp school_date = 7;
+}
+
+// StudyPlanIdt for recognize the study plan belong to the student or master
+message StudyPlanIdt {
+    string study_plan_id = 1;
+    google.protobuf.StringValue student_id = 2; // when this field == null -> mean master_study_plan identify   
+}

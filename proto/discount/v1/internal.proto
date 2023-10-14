@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package discount.v1;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/discount/v1;pmpb";
+
+message AutoSelectHighestDiscountRequest{
+    string organization_id = 1;
+}
+
+message AutoSelectHighestDiscountResponse{
+    message AutoSelectHighestDiscountError {
+        string student_id = 1;
+        string student_product_id = 2;
+        string error = 3;
+    }
+    int32 total_updated_products = 1;
+    repeated AutoSelectHighestDiscountError errors = 2;
+}
+
+service InternalService {
+    rpc AutoSelectHighestDiscount(AutoSelectHighestDiscountRequest)
+    returns (AutoSelectHighestDiscountResponse);
+}

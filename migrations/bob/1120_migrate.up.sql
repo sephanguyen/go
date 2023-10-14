@@ -1,0 +1,7 @@
+ALTER TABLE e2e_instances
+    ADD COLUMN IF NOT EXISTS status_statistics JSONB DEFAULT '{}';
+
+ALTER TABLE e2e_instances
+    ADD COLUMN IF NOT EXISTS flavor JSONB DEFAULT '{}';
+
+ALTER TABLE e2e_instances ADD COLUMN IF NOT EXISTS tags TEXT[];

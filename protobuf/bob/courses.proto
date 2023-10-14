@@ -1,0 +1,447 @@
+syntax = "proto3";
+
+package manabie.bob;
+
+import "enum.proto";
+import "user.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option (gogoproto.goproto_registration) = true;
+option go_package = "github.com/manabie-com/backend/pkg/genproto/bob;pb";
+
+message AssignmentSubmission {
+  string submission_id = 1;
+  string topic_id = 2;
+  string student_id = 4;
+  string content = 5;
+  repeated Attachment attachments = 6;
+  google.protobuf.Timestamp created_at = 8;
+}
+
+message ListSubmissionsRequest {
+  string topic_id = 1;
+  repeated string student_ids = 2; // required
+  int32 limit = 3;
+  google.protobuf.StringValue offset_id = 4;
+}
+
+message ListSubmissionsResponse {
+  repeated AssignmentSubmission submissions = 1;
+}
+
+message Attachment {
+  string name = 1;
+  string url = 2;
+}
+
+message ListTopicRequest {
+  Country country = 1;
+  string grade = 2;
+  Subject subject = 3;
+  TopicType topic_type = 4;
+}
+
+message ListTopicResponse { repeated Topic topics = 1; }
+
+message ListTopicsRequest {
+  Country country = 1;
+  string grade = 2;
+  Subject subject = 3;
+  TopicType topic_type = 4;
+  bool with_completeness = 5;
+}
+
+message ListTopicsResponse {
+  message Data {
+    Topic topic = 1;
+    int32 total_finished_los = 2;
+  }
+  repeated Data topics = 1;
+}
+
+message Topic {
+  string id = 1;
+  string name = 2;
+  Country country = 3;
+  string grade = 4;
+  Subject subject = 5;
+  TopicType type = 6;
+  google.protobuf.Timestamp updated_at = 7;
+  google.protobuf.Timestamp created_at = 8;
+  TopicStatus status = 9;
+  int32 display_order = 10;
+  google.protobuf.Timestamp published_at = 11;
+  int32 total_los = 12;
+  string chapter_id = 13;
+  int32 school_id = 14;
+  string icon_url = 15;
+  string instruction = 16;
+  repeated Attachment attachments = 17;
+  google.protobuf.StringValue copied_topic_id = 18;
+  bool essay_required = 19;
+}
+
+message Completenes {
+  bool quiz_finished = 1;
+  bool video_finished = 2;
+  bool study_guide_finished = 3;
+  float first_quiz_correctness = 4;
+}
+
+message Question {
+  string id = 1;
+  string master_question_id = 2; // for localize, can be null
+  Country country = 3;
+  string question = 4;         // question content
+  repeated string answers = 5; // correct answer will always be first
+  string explanation = 6;
+  int32 difficulty_level = 7;
+  google.protobuf.Timestamp updated_at = 8;
+  google.protobuf.Timestamp created_at = 9;
+  repeated string questions_tag_lo = 10;
+  string question_rendered = 11;
+  repeated string answers_rendered = 12;
+  string explanation_rendered = 13;
+  bool is_waiting_for_render = 14;
+  repeated string explanation_wrong_answer = 15;
+  repeated string explanation_wrong_answer_rendered = 16;
+}
+
+message LearningObjective {
+  string id = 1;
+  string name = 2;
+  Country country = 3;
+  string grade = 4;
+  Subject subject = 5;
+  int32 display_order = 6;
+  string video = 7;
+  string study_guide = 8;
+  string topic_id = 9;
+  string master_lo = 10;
+  string video_script = 11;
+  repeated string prerequisites = 12;
+  google.protobuf.Timestamp updated_at = 13;
+  google.protobuf.Timestamp created_at = 14;
+  int32 school_id = 15;
+  LearningObjectiveType type = 16;
+}
+
+message QuizSets {
+  string lo_id = 1;
+  string question_id = 2;
+  string display_order = 3;
+  google.protobuf.Timestamp updated_at = 4;
+  google.protobuf.Timestamp created_at = 5;
+}
+
+message UpsertLOsRequest { repeated LearningObjective learning_objectives = 1; }
+
+message UpsertLOsResponse { repeated string lo_ids = 1; }
+
+message SubmissionResult {
+  string question_id = 1;
+  bool correct = 2;
+}
+
+message TakeTheQuizRequest {
+  string lo_id = 1;
+  int32 limit = 2;
+  int32 page = 3;
+}
+
+message TakeTheQuizResponse {
+  repeated Question quizset = 1;
+  int32 total = 2;
+}
+
+message UpsertQuestionsRequest { repeated Question questions = 1; }
+
+message UpsertQuestionsResponse { repeated string question_ids = 1; }
+
+message PresetStudyPlan {
+  string id = 1;
+  string name = 2;
+  Country country = 3;
+  string grade = 4;
+  Subject subject = 5;
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp updated_at = 7;
+  // start_date is the start date of a preset study plan counts at week 1.
+  google.protobuf.Timestamp start_date = 8;
+}
+
+message UpsertPresetStudyPlansRequest {
+  repeated PresetStudyPlan preset_study_plans = 1;
+}
+
+message UpsertPresetStudyPlansResponse {
+  repeated string preset_study_plan_ids = 1;
+}
+
+message PresetStudyPlanWeekly {
+  string id = 1;
+  string topic_id = 2;
+  string preset_study_plan_id = 3;
+  int32 week = 4;
+}
+
+message UpsertPresetStudyPlanWeekliesRequest {
+  repeated PresetStudyPlanWeekly preset_study_plan_weeklies = 1;
+}
+
+message UpsertPresetStudyPlanWeekliesResponse {
+  repeated string preset_study_plan_weekly_ids = 1;
+}
+
+message UpsertQuizRequest { repeated QuizSets quizsets = 1; }
+
+message UpsertQuizResponse { bool successful = 1; }
+
+message LocalGrade { map<string, int32> local_grade = 1; }
+
+message RetrieveGradeMapResponse { map<string, LocalGrade> grade_map = 1; }
+
+message RetrieveGradeMapRequest {}
+
+message GetHistoryQuizDetailRequest {
+  string student_id = 1;
+  string quiz_id = 2;
+}
+
+message GetHistoryQuizDetailResponse {
+  Question question = 1;
+  // selected_answer = -1 mean no selected answer
+  int32 selected_answer = 2;
+  int32 display_order = 3;
+}
+
+message SuggestLORequest { string lo_name = 1; }
+
+message SuggestLOResponse { repeated LearningObjective suggest_los = 1; }
+
+message Chapter {
+  string chapter_id = 1;
+  string chapter_name = 2;
+  Country country = 3;
+  Subject subject = 4;
+  string grade = 5;
+  int32 display_order = 6;
+  repeated Topic topics = 7;
+
+  google.protobuf.Timestamp updated_at = 8;
+  google.protobuf.Timestamp created_at = 9;
+  int32 school_id = 10;
+}
+
+message GetChapterListRequest {
+  string chapter_id = 1;
+  string chapter_name = 2;
+  uint32 limit = 3;
+  uint32 page = 4;
+  Subject subject = 5;
+  string grade = 6;
+  Country country = 7;
+}
+
+message GetChapterListResponse {
+  repeated Chapter chapters = 1;
+  uint32 total = 2;
+}
+
+message RetrieveCoursesRequest {
+  string id = 1;
+  string name = 2;
+  Country country = 3 [ deprecated = true ];
+  Subject subject = 4;
+  string grade = 5;
+  int32 limit = 6;
+  int32 page = 7;
+  repeated Country countries = 8;
+  CourseType course_type = 9;
+  CourseStatus course_status = 10;
+  bool is_assigned = 11;
+  // class_id filter is mutually exclusive with is_assigned
+  int32 class_id = 12;
+}
+
+message RetrieveCoursesResponse {
+  message Course {
+    string id = 1;
+    string name = 2;
+    Country country = 3;
+    Subject subject = 4;
+    string grade = 5;
+    repeated Chapter chapters = 6;
+    google.protobuf.Timestamp updated_at = 7;
+    google.protobuf.Timestamp created_at = 8;
+    int32 school_id = 9;
+    int32 class_id = 10;
+    google.protobuf.Timestamp start_date = 11;
+    google.protobuf.Timestamp end_date = 12;
+    CourseType course_type = 13;
+    repeated BasicProfile teachers = 14;
+    CourseStatus course_status = 15;
+    repeated int32 class_ids = 16;
+    repeated string book_ids = 17;
+  }
+  repeated Course courses = 1;
+  int32 total = 2;
+}
+
+message RetrieveStudentSubmissionsRequest {
+  enum SubmissionOrderType {
+    SUBMISSION_ORDER_TYPE_NONE = 0;
+    SUBMISSION_ORDER_TYPE_FIRST = 1;
+    SUBMISSION_ORDER_TYPE_LAST = 2;
+  }
+  string student_id = 1;
+  SubmissionOrderType type = 2;
+  int32 limit = 3;
+  int32 page = 4;
+  string lo_id = 5;
+}
+
+message RetrieveStudentSubmissionsResponse {
+  repeated GetHistoryQuizDetailResponse submissions = 1;
+  int32 total = 2;
+}
+
+message QuestionV2 {
+  string id = 1;
+  string master_question_id = 2; // for localize, can be null
+  Country country = 3;
+  string question = 4;         // question content
+  repeated string answers = 5; // correct answer will always be first
+  string explanation = 6;
+  int32 difficulty_level = 7;
+  google.protobuf.Timestamp updated_at = 8;
+  google.protobuf.Timestamp created_at = 9;
+  repeated string questions_tag_lo = 10;
+  string question_url = 11;
+  repeated string answers_url = 12;
+  string explanation_url = 13;
+  repeated string explanation_wrong_answer = 14;
+  repeated string explanation_wrong_answer_url = 15;
+  bool is_waiting_for_render = 16;
+}
+
+message TakeTheQuizV2Response {
+  repeated QuestionV2 quizset = 1;
+  int32 total = 2;
+}
+
+message Pagination {
+  int32 limit = 1;
+  int32 page = 2;
+}
+
+message RetrieveLiveLessonRequest {
+  repeated string course_ids = 1;
+  Pagination pagination = 2;
+  google.protobuf.Timestamp from = 3;
+  google.protobuf.Timestamp to = 4;
+}
+
+message Lesson {
+  string lesson_id = 1;
+  Topic topic = 2;
+  google.protobuf.Timestamp start_time = 3;
+  google.protobuf.Timestamp end_time = 4;
+  string preset_study_plan_weekly_ids = 5;
+  LessonStatus status = 6;
+  repeated BasicProfile teacher = 7;
+  int32 total_learner = 8;
+  string course_id = 9;
+  repeated int32 user_class_ids = 10 [ deprecated = true ];
+}
+
+message RetrieveLiveLessonResponse {
+  repeated Lesson lessons = 1;
+  int32 total = 2;
+}
+
+message RetrieveCoursesByIDsRequest { repeated string ids = 1; }
+
+message CreateBrightCoveUploadUrlRequest { string name = 1; }
+
+message CreateBrightCoveUploadUrlResponse {
+  string signed_url = 1;
+  string api_request_url = 2;
+  string video_id = 3;
+}
+
+message FinishUploadBrightCoveRequest {
+  string api_request_url = 1;
+  string video_id = 2;
+}
+
+message FinishUploadBrightCoveResponse {}
+
+message Book {
+  string id = 1;
+  string name = 2;
+  Country country = 3;
+  Subject subject = 4;
+  string grade = 5;
+  int32 school_id = 6;
+  string course_id = 7;
+  google.protobuf.Timestamp updated_at = 8;
+  google.protobuf.Timestamp created_at = 9;
+  repeated Chapter chapters = 10;
+}
+
+message RetrieveBooksRequest {
+  int32 limit = 1;
+  int32 page = 2;
+  string course_id = 3;
+}
+
+message RetrieveBooksResponse {
+  repeated Book books = 1;
+  int32 total = 2;
+}
+
+service Course {
+  rpc ListTopic(ListTopicRequest) returns (ListTopicResponse){option deprecated = true;};
+  rpc ListTopics(ListTopicsRequest) returns (ListTopicsResponse){option deprecated = true;};
+
+  rpc UpsertLOs(UpsertLOsRequest) returns (UpsertLOsResponse);
+  rpc UpsertQuizSets(UpsertQuizRequest) returns (UpsertQuizResponse){option deprecated = true;};
+
+  rpc TakeTheQuiz(TakeTheQuizRequest)
+      returns (TakeTheQuizResponse){option deprecated = true;}; // call by student only
+  rpc TakeTheQuizV2(TakeTheQuizRequest)
+      returns (TakeTheQuizV2Response) {option deprecated = true;}; // call by student only
+  rpc UpsertQuestions(UpsertQuestionsRequest) returns (UpsertQuestionsResponse){option deprecated = true;};
+  rpc GetHistoryQuizDetail(GetHistoryQuizDetailRequest)
+      returns (GetHistoryQuizDetailResponse){option deprecated = true;};
+
+  rpc UpsertPresetStudyPlans(UpsertPresetStudyPlansRequest)
+      returns (UpsertPresetStudyPlansResponse);
+  rpc UpsertPresetStudyPlanWeeklies(UpsertPresetStudyPlanWeekliesRequest)
+      returns (UpsertPresetStudyPlanWeekliesResponse);
+  rpc RetrieveGradeMap(RetrieveGradeMapRequest)
+      returns (RetrieveGradeMapResponse);
+
+  rpc SuggestLO(SuggestLORequest) returns (SuggestLOResponse);
+  rpc GetChapterList(GetChapterListRequest) returns (GetChapterListResponse){option deprecated = true;};
+
+  rpc RetrieveCourses(RetrieveCoursesRequest) returns (RetrieveCoursesResponse);
+  rpc RetrieveAssignedCourses(RetrieveCoursesRequest)
+      returns (RetrieveCoursesResponse);
+  rpc RetrieveStudentSubmissions(RetrieveStudentSubmissionsRequest)
+      returns (RetrieveStudentSubmissionsResponse) {option deprecated = true;};
+  rpc RetrieveLiveLesson(RetrieveLiveLessonRequest)
+      returns (RetrieveLiveLessonResponse);
+  rpc RetrieveCoursesByIDs(RetrieveCoursesByIDsRequest)
+      returns (RetrieveCoursesResponse);
+
+  rpc CreateBrightCoveUploadUrl(CreateBrightCoveUploadUrlRequest)
+      returns (CreateBrightCoveUploadUrlResponse);
+  rpc FinishUploadBrightCove(FinishUploadBrightCoveRequest)
+      returns (FinishUploadBrightCoveResponse);
+
+  rpc RetrieveBooks(RetrieveBooksRequest) returns (RetrieveBooksResponse);
+}

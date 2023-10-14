@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS idx__permission__permssion_name on "permission" (permission_name);

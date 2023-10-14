@@ -1,0 +1,114 @@
+table:
+  schema: public
+  name: quizzes
+array_relationships:
+  - name: quiz_sets
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: quiz_sets
+        insertion_order: null
+        column_mapping:
+          external_id: quiz_external_ids
+select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+        - quiz_id
+        - country
+        - school_id
+        - external_id
+        - kind
+        - question
+        - explanation
+        - options
+        - tagged_los
+        - difficulty_level
+        - created_by
+        - approved_by
+        - status
+        - updated_at
+        - created_at
+        - deleted_at
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+        - difficulty_level
+        - school_id
+        - explanation
+        - options
+        - question
+        - approved_by
+        - country
+        - created_by
+        - external_id
+        - kind
+        - quiz_id
+        - status
+        - tagged_los
+        - created_at
+        - deleted_at
+        - updated_at
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+          - school_id:
+              _in: X-Hasura-School-Ids
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+        - difficulty_level
+        - school_id
+        - explanation
+        - options
+        - question
+        - approved_by
+        - country
+        - created_by
+        - external_id
+        - kind
+        - quiz_id
+        - status
+        - tagged_los
+        - created_at
+        - deleted_at
+        - updated_at
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+          - school_id:
+              _in: X-Hasura-School-Ids
+      allow_aggregations: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+        - difficulty_level
+        - school_id
+        - explanation
+        - options
+        - question
+        - approved_by
+        - country
+        - created_by
+        - external_id
+        - kind
+        - quiz_id
+        - status
+        - tagged_los
+        - created_at
+        - deleted_at
+        - updated_at
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+      allow_aggregations: true

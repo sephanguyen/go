@@ -1,0 +1,37 @@
+@startuml communication_simplified
+hide circle
+
+' actor User as User order 10
+participant Cron as Cron order 10
+participant Enigma as Enigma order 20
+participant NATS as NATS order 30
+participant Yasuo as Yasuo order 40
+participant NATS as NATS2 order 50
+participant Tom as Tom order 60
+
+Cron -> Enigma: Update new information by interval
+activate Enigma
+Enigma -> NATS: Publish "subject_jprep_sync_user_course"
+deactivate Enigma
+NATS -> Yasuo: Receive "SubjectJPREPSyncUserCourse"
+activate Yasuo
+note right Yasuo
+CourseService.SyncStudentLesson() upserting lessons
+Compare request with database to check for each students, which lesson needs removing, which needs adding
+and compile into new outgoing events 
+This event is different from Enigma by the fact that Enigma reflects the data overwrite
+while this event only reflect the data changes
+end note
+Yasuo -> NATS2: Publish "subject_sync_student_lessons" with event EventSyncUserCourse
+
+
+deactivate Yasuo 
+NATS2 -> Tom: \
+Publish "subject_sync_student_lessons"\nwith "EventSyncUserCourse" 
+activate Tom
+note right Tom
+Based on Action kinds of message, either upserting or 
+removing student from lesson conversation
+end note
+deactivate Tom
+@enduml

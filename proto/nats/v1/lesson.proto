@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package nats.v1;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/nats/v1;npb";
+
+message EvtLessonES {
+    string lesson_id = 1;
+}

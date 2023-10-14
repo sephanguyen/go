@@ -1,0 +1,30 @@
+{{- if .Values.createBackendDbs.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "yugabyte.fullname" . }}-create-dbs
+spec:
+  backoffLimit: 1
+  template:
+    spec:
+      containers:
+      - name: create-db
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: IfNotPresent
+        command:
+          - /bin/bash
+          - -c
+          - |
+            # until ./postgres/bin/pg_isready -h {{ include "yugabyte.fullname" . }}-tserver -p 5433; do echo "waiting" && sleep 5; done; echo "done";
+            until ./postgres/bin/pg_isready -h {{ include "yugabyte.fullname" . }} -p 5433; do echo "waiting" && sleep 5; done; echo "done";
+
+            # if [[ "$(ysqlsh -h {{ include "yugabyte.fullname" . }}-tserver -c 'select datname from pg_database' | grep -c eureka)" != "1" ]]; then
+            if [[ "$(ysqlsh -h {{ include "yugabyte.fullname" . }} -c 'select datname from pg_database' | grep -c eureka)" != "1" ]]; then
+              # ysqlsh -h {{ include "yugabyte.fullname" . }}-tserver -p 5433 -c "CREATE DATABASE eureka WITH COLOCATED=true"
+              ysqlsh -h {{ include "yugabyte.fullname" . }} -p 5433 -c "CREATE DATABASE eureka WITH COLOCATED=true"
+            fi
+        env:
+          - name: PGPASSWORD
+            value: {{ default "yugabyte" .Values.createBackendDbs.pgPassword }}
+      restartPolicy: Never
+{{- end }}

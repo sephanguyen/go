@@ -1,0 +1,271 @@
+suite: eureka deployments yaml file
+templates:
+  - charts/eureka/templates/app.yaml
+  - charts/eureka/templates/deployment-all-consumers.yaml
+  - charts/eureka/templates/deployment-jprep-sync-course-student.yaml
+  - charts/eureka/templates/deployment-monitors.yaml
+values:
+  - ../charts/eureka/values.yaml
+  - ../values.yaml
+  - ../local-manabie-values.yaml
+  - ../../platforms/gateway/local-manabie-values.yaml
+tests:
+  - it: should work with eureka
+    template: charts/eureka/templates/app.yaml
+    documentIndex: 4
+    set:
+      global.eureka.enabled: true
+      global.eureka.sops.enabled: true
+      global.environment: local
+      global.vendor: manabie
+      global.image.repository: local
+      global.sqlProxy.enabled: true
+      eureka.image.tag: latest
+    asserts:
+      - hasDocuments:
+          count: 22
+    ## Document 0: hasura deployment
+      - isKind:
+          of: Deployment
+      - equal:
+          path: spec.template.spec.containers[0].name
+          value: eureka
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "local:latest"
+      - equal:
+          path: spec.template.spec.containers[0].command
+          value:
+            - /bin/sh
+            - -c
+            - |
+              #!/bin/bash
+              set -eu
+              cat <<EOF > modd.conf
+              /server {
+                daemon +sigterm: /server \\
+                  gserver \\
+                  eureka \\
+                  --commonConfigPath=/configs/eureka.common.config.yaml \\
+                  --configPath=/configs/eureka.config.yaml \\
+                  --secretsPath=/configs/eureka.secrets.encrypted.yaml
+              }
+              EOF
+              exec modd
+      - isNotNull:
+          path: spec.template.spec.containers[0].readinessProbe
+      - matchRegex:
+          path: spec.template.spec.containers[0].readinessProbe.exec.command[2]
+          pattern: .*localhost:5550.*
+      - contains:
+          path: spec.template.spec.containers[0].ports
+          content:
+            name: grpc
+            containerPort: 5550
+            protocol: TCP
+
+  - it: should have a eureka-all-consumers deployments
+    template: charts/eureka/templates/deployment-all-consumers.yaml
+    set:
+      global.eureka.enabled: true
+      global.eureka.sops.enabled: true
+      global.environment: local
+      global.image.repository: local
+      global.vendor: manabie
+      global.sqlProxy.enabled: true
+      eureka.image.tag: latest
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].name
+          value: eureka-all-consumers
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "local:latest"
+      - equal:
+          path: spec.template.spec.containers[0].command
+          value:
+            - /bin/sh
+            - -c
+            - |
+              #!/bin/bash
+              set -eu
+              cat <<EOF > modd.conf
+              /server {
+                daemon +sigterm: /server gjob \\
+                  eureka_all_consumers \\
+                  --commonConfigPath=/configs/eureka.common.config.yaml \\
+                  --configPath=/configs/eureka.config.yaml \\
+                  --secretsPath=/configs/eureka.secrets.encrypted.yaml
+              }
+              EOF
+              exec modd
+      - contains:
+          path: spec.template.spec.containers[0].ports
+          content:
+            name: grpc
+            containerPort: 5550
+            protocol: TCP
+      - equal:
+          path: spec.template.metadata.annotations.[cluster-autoscaler.kubernetes.io/safe-to-evict]
+          value: "true"
+
+  - it: should have a eureka-jprep-sync-course-students deployment
+    template: charts/eureka/templates/deployment-jprep-sync-course-student.yaml
+    set:
+      global.eureka.enabled: true
+      global.eureka.sops.enabled: true
+      global.environment: local
+      global.image.repository: local
+      global.vendor: manabie
+      global.sqlProxy.enabled: true
+      eureka.image.tag: latest
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].name
+          value: eureka-jprep-sync-course-student
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "local:latest"
+      - equal:
+          path: spec.template.spec.containers[0].command
+          value:
+            - /bin/sh
+            - -c
+            - |
+              #!/bin/bash
+              set -eu
+              cat <<EOF > modd.conf
+              /server {
+                daemon +sigterm: /server gjob \\
+                  eureka_jprep_sync_course_student \\
+                  --commonConfigPath=/configs/eureka.common.config.yaml \\
+                  --configPath=/configs/eureka.config.yaml \\
+                  --secretsPath=/configs/eureka.secrets.encrypted.yaml
+              }
+              EOF
+              exec modd
+      - contains:
+          path: spec.template.spec.containers[0].ports
+          content:
+            name: grpc
+            containerPort: 5550
+            protocol: TCP
+      - equal:
+          path: spec.template.metadata.annotations.[cluster-autoscaler.kubernetes.io/safe-to-evict]
+          value: "true"
+
+  - it: should have monitors deployments
+    template: charts/eureka/templates/deployment-monitors.yaml
+    set:
+      global.eureka.enabled: true
+      global.eureka.sops.enabled: true
+      global.environment: local
+      global.image.repository: local
+      global.vendor: manabie
+      global.sqlProxy.enabled: true
+      eureka.image.tag: latest
+    asserts:
+    ## Document 3: eureka-monitors deployment
+      - equal:
+          path: spec.template.spec.containers[0].name
+          value: eureka-monitors
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: "local:latest"
+      - equal:
+          path: spec.template.spec.containers[0].command
+          value:
+            - /bin/sh
+            - -c
+            - |
+              #!/bin/bash
+              set -eu
+              cat <<EOF > modd.conf
+              /server {
+                daemon +sigterm: /server gjob \\
+                  eureka_monitors \\
+                  --commonConfigPath=/configs/eureka.common.config.yaml \\
+                  --configPath=/configs/eureka.config.yaml \\
+                  --secretsPath=/configs/eureka.secrets.encrypted.yaml
+              }
+              EOF
+              exec modd
+      - contains:
+          path: spec.template.spec.containers[0].ports
+          content:
+            name: grpc
+            containerPort: 5550
+            protocol: TCP
+      - equal:
+          path: spec.template.metadata.annotations.[cluster-autoscaler.kubernetes.io/safe-to-evict]
+          value: "true"
+
+  - it: Test Case 2 with volume
+    template: charts/eureka/templates/app.yaml
+    documentIndex: 4
+    set:
+      global.eureka.enabled: true
+      global.eureka.sops.enabled: true
+      global.environment: local
+      global.vendor: manabie
+      global.image.repository: local
+      global.sqlProxy.enabled: true
+    asserts:
+      - equal:
+          path: spec.template.spec.volumes[0].secret.secretName
+          value: eureka
+      - equal:
+          path: spec.template.spec.volumes[0].secret.items[0].key
+          value: eureka.secrets.encrypted.yaml
+      - equal:
+          path: spec.template.spec.volumes[0].secret.items[1].key
+          value: eureka_migrate.secrets.encrypted.yaml
+      - equal:
+          path: spec.template.spec.volumes[1].name
+          value: "hasura-secrets-decrypted-volume"
+      - equal:
+          path: spec.template.spec.volumes[2].configMap.name
+          value: eureka-hasura-metadata
+      - equal:
+          path: spec.template.spec.volumes[3].secret.items[0].key
+          value: service_credential.json
+
+  - it: Test Case 2 with Init Containers and MetaData
+    template: charts/eureka/templates/app.yaml
+    documentIndex: 4
+    set:
+      global.eureka.enabled: true
+      global.eureka.sops.enabled: true
+      global.environment: local
+      global.vendor: manabie
+      global.image.repository: local
+      global.sqlProxy.enabled: true
+    asserts:
+      - equal:
+          path: spec.template.spec.initContainers[0].name
+          value: wait-for-shamir
+      - equal:
+          path: spec.template.spec.initContainers[0].imagePullPolicy
+          value: IfNotPresent
+      - equal:
+          path: spec.template.spec.initContainers[1].name
+          value: eureka-migrate
+      - equal:
+          path: spec.template.spec.initContainers[2].name
+          value: hasura-decrypt-secret
+      - equal:
+          path: spec.template.spec.initContainers[3].name
+          value: hasura-migration
+      - equal:
+          path: spec.template.spec.initContainers[0].imagePullPolicy
+          value: IfNotPresent
+      - equal:
+          path: spec.template.metadata.labels.[app.kubernetes.io/name]
+          value: "eureka"
+      - equal:
+          path: spec.template.metadata.annotations.[sidecar.istio.io/proxyCPU]
+          value: "5m"
+      - isNotEmpty:
+          path: spec.template.metadata.annotations.[checksum/eureka.config.yaml]
+      - isNotEmpty:
+          path: spec.template.metadata.annotations.[checksum/eureka.secrets.encrypted.yaml]

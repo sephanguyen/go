@@ -1,0 +1,15 @@
+{
+    "iss": "{{ or .IssuerPrefix "http://firebase.emulator.svc.cluster.local:40401" }}/{{ or .Audience "fake_aud" }}",
+    "client_id": "{{ or .Audience "fake_cognito_aud" }}",
+    "auth_time": {{ .AuthTime }},
+    "username": "{{ .UserID }}",
+    "sub": "{{ .UserID }}",
+    "iat": {{ .IssueAt }},
+    "exp": {{ .Expiration }},
+   	"version": 2,
+    "origin_jti": "{{ .UserID }}",
+    "event_id": "{{ .UserID }}",
+	"token_use": "access",
+	"scope": "openid",
+    "jti": "{{ .UserID }}"
+}

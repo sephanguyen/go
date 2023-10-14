@@ -1,0 +1,15 @@
+version: v1beta1
+build:
+  roots:
+    - .
+lint:
+  use:
+    - MINIMAL
+  ignore:
+    - options/annotations.proto
+breaking:
+  use:
+    - WIRE_JSON
+deps:
+  # https://buf.build/envoyproxy/protoc-gen-validate
+  - buf.build/envoyproxy/protoc-gen-validate

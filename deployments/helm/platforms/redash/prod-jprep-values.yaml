@@ -1,0 +1,4 @@
+sqlProxy:
+  enabled: false
+alloydbProxy:
+  enabled: false

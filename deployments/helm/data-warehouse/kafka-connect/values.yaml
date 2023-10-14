@@ -1,0 +1,88 @@
+connect:
+  image:
+    repository: asia.gcr.io/student-coach-e1e95/customized_debezium_connect
+    tag: 1.9.6
+    pullPolicy: IfNotPresent
+
+  groupID: "1"
+
+  bootstrapServers:
+    host: dwh-kafka-svc
+    port: 9092
+
+  CONFIG_STORAGE_TOPIC: my_connect_configs
+  OFFSET_STORAGE_TOPIC: my_connect_offsets
+  STATUS_STORAGE_TOPIC: my_connect_statuses
+
+  converter:
+    key: io.confluent.connect.avro.AvroConverter
+    value: io.confluent.connect.avro.AvroConverter
+
+  schemaRegistry:
+    key: http://dwh-cp-schema-registry:8081
+    value: http://dwh-cp-schema-registry:8081
+
+  heapOptions: "-XX:MaxRAMPercentage=70 -XX:InitialRAMPercentage=50 "
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 1792Mi
+    limits:
+      cpu: 1000m
+      memory: 3096Mi
+
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - podAffinityTerm:
+            labelSelector:
+              matchExpressions:
+                - key: app.kubernetes.io/name
+                  operator: In
+                  values: ["kafka-connect"]
+            topologyKey: kubernetes.io/hostname
+          weight: 1
+
+initConnectorImage:
+  repository: asia.gcr.io/student-coach-e1e95/kafkatools
+  tag: 0.0.2
+
+sqlProxy:
+  enabled: false
+  connName: ""
+  image:
+    repository: gcr.io/cloudsql-docker/gce-proxy
+    tag: 1.29.0
+  resources:
+    requests:
+      cpu: 5m
+      memory: 16Mi
+    limits:
+      cpu: 100m
+      memory: 32Mi
+
+alloydbProxy:
+  enabled: false
+  alloydbConnName: ""
+  image:
+    repository: gcr.io/alloydb-connectors/alloydb-auth-proxy
+    tag: 0.5.0
+  resources:
+    requests:
+      cpu: "5m"
+      memory: "16Mi"
+
+sopsImage:
+  repository: mozilla/sops
+  tag: v3.7.3-alpine
+decryptorImage:
+  repository: asia.gcr.io/student-coach-e1e95/decrypt-secret
+  tag: "20220517"
+
+imagePullSecrets: []
+
+podAnnotations:
+  cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+
+enableAC: false

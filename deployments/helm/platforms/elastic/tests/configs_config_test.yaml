@@ -1,0 +1,98 @@
+suite: elastic config file
+templates:
+  - configmap.yaml
+values:
+  - ../configs/config.yml
+tests:
+  - it: Open id connect url is correct on local
+    set:
+      environment: local
+      vendor: vendor
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - matchRegex:
+          path: data.[config.yml]
+          pattern: '(.*)openid_auth_domain:\n(.*)'
+      - matchRegex:
+          path: data.[config.yml]
+          pattern: '(.*)openid_auth_domain:\n(.*\n)*(.*)openid_connect_url: http:\/\/shamir\.local-vendor-backend\.svc\.cluster\.local:5680\/oidc\/.well-known\/openid-configuration(.*)'
+  - it: Open id connect url is correct on stag
+    set:
+      environment: stag
+      vendor: vendor
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - matchRegex:
+          path: data.[config.yml]
+          pattern: '(.*)openid_auth_domain:\n(.*)'
+      - matchRegex:
+          path: data.[config.yml]
+          pattern: '(.*)openid_auth_domain:\n(.*\n)*(.*)openid_connect_url: http:\/\/shamir\.stag-vendor-backend\.svc\.cluster\.local:5680\/oidc\/\.well-known\/openid-configuration(.*)'
+  - it: Open id connect url is correct on uat
+    set:
+      environment: uat
+      vendor: vendor
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - matchRegex:
+          path: data.[config.yml]
+          pattern: '(.*)openid_auth_domain:\n(.*)'
+      - matchRegex:
+          path: data.[config.yml]
+          pattern: '(.*)openid_auth_domain:\n(.*\n)*(.*)openid_connect_url: http:\/\/shamir\.uat-vendor-backend\.svc\.cluster\.local:5680\/oidc\/\.well-known\/openid-configuration(.*)'
+  - it: Open id connect url is correct on prod
+    set:
+      environment: prod
+      vendor: vendor
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - matchRegex:
+          path: data.[config.yml]
+          pattern: '(.*)openid_auth_domain:\n(.*)'
+      - matchRegex:
+          path: data.[config.yml]
+          pattern: '(.*)openid_auth_domain:\n(.*\n)*(.*)openid_connect_url: http:\/\/shamir\.prod-vendor-backend\.svc\.cluster\.local:5680\/oidc\/\.well-known\/openid-configuration(.*)'
+  - it: Open auth order must be 1 on local
+    set:
+      environment: local
+      vendor: test
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - matchRegex:
+          path: data.[config.yml]
+          pattern: '(.*)openid_auth_domain:\n(.*\n)*(.*)order: 1(.*)'
+  - it: Open auth order must be 1 on stag
+    set:
+      environment: stag
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - matchRegex:
+          path: data.[config.yml]
+          pattern: '(.*)openid_auth_domain:\n(.*\n)*(.*)order: 1(.*)'
+  - it: Open auth order must be 1 on uat
+    set:
+      environment: uat
+      vendor: test
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - matchRegex:
+          path: data.[config.yml]
+          pattern: '(.*)openid_auth_domain:\n(.*\n)*(.*)order: 1(.*)'
+  - it: Open auth order must be 1 on prod
+    set:
+      environment: prod
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - matchRegex:
+          path: data.[config.yml]
+          pattern: '(.*)openid_auth_domain:\n(.*\n)*(.*)order: 1(.*)'
+
+

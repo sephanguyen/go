@@ -1,0 +1,57 @@
+run:
+  tests: false
+  skip-dirs:
+    - ^mock/
+    - ^pkg/
+
+linters:
+  disable-all: true
+  enable:
+    - bodyclose
+    - errcheck
+    - exportloopref
+    - gci
+    - goconst
+    - gocritic
+    - gocyclo
+    - gofmt
+    - goimports
+    - gosec
+    - gosimple
+    - govet
+    - ineffassign
+    - misspell
+    - prealloc
+    - revive
+    - rowserrcheck
+    - staticcheck
+    - stylecheck
+    - unconvert
+    - unparam
+    - unused
+    - whitespace
+
+linters-settings:
+  gci:
+    skip-generated: true
+    custom-order: true
+    sections:
+      - standard
+      - prefix(github.com/manabie-com/backend)
+      - prefix(github.com/manabie-com)
+      - default
+
+issues:
+  exclude-rules:
+    # disable unused linter for packages in features directory,
+    # because those are invoked by godog, that makes the
+    # unused linter reports false positive errors.
+    - path: features
+      linters:
+        - unused
+        - goconst
+    - path: cmd
+      linters:
+        - goconst
+  # new: true # TODO @anhpngt: set when there's a reasonable number of errors left
+  # fix: true

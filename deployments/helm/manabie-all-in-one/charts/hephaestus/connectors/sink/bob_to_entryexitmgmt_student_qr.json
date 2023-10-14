@@ -1,0 +1,24 @@
+{{- if (ne "jprep" .Values.global.vendor) }}
+{
+  "name": "{{ .Values.global.environment }}_{{ .Values.global.vendor }}_bob_to_entryexitmgmt_student_qr_sink_connector",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+    "tasks.max": "1",
+    "topics": "{{ .Values.global.environment }}.{{ .Values.global.vendor }}.bob.public.student_qr",
+    "connection.url": "${file:/config/kafka-connect-config.properties:entryexitmgmt_url}",
+    "transforms": "unwrap,route",
+    "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+    "transforms.unwrap.drop.tombstones": "true",
+    "transforms.unwrap.delete.handling.mode": "drop",
+    "transforms.route.type": "org.apache.kafka.connect.transforms.RegexRouter",
+    "transforms.route.regex": "([^.]+).([^.]+).([^.]+).([^.]+).([^.]+)",
+    "transforms.route.replacement": "$5",
+    "auto.create": "false",
+    "insert.mode": "upsert",
+    "delete.enabled": "false",
+    "pk.mode": "record_value",
+    "pk.fields": "qr_id",
+    "fields.whitelist": "qr_id,student_id,qr_url,version,created_at,updated_at,resource_path"
+  }
+}
+{{- end }}

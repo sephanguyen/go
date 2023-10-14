@@ -1,0 +1,148 @@
+syntax = "proto3";
+
+package syllabus.v1;
+
+import "syllabus/v1/common.proto";
+import "syllabus/v1/learning_material.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/syllabus/v1;sspb";
+
+//AssignmentBase is assignment metadata
+message AssignmentBase {
+    //Learning Material metadata
+    LearningMaterialBase base = 1;
+    //list of attachments urls
+    repeated string attachments = 2;
+    // assignments status
+    string status = 3;
+    // instruction or descriptions
+    string instruction = 4;
+    // max grade number
+    uint32 max_grade = 5;
+    // require grade for submissions
+    bool is_required_grade = 6;
+    // allow student resubmission
+    bool allow_resubmission = 7;
+    // require student send attachments
+    bool require_attachment = 8;
+    // enable student send late submissions
+    bool allow_late_submission = 9; 
+    // require student send text notes
+    bool require_assignment_note = 10;
+    // require student send video submissions
+    bool require_video_submission = 11;
+}
+
+message InsertAssignmentRequest {
+    // We only need send some fields bellow
+    // 1. LearningMaterialBase 
+        // 1. No learning_material 
+        // 2. topic_id
+        // 3. name
+        // 4. No send type
+    // 2. attachments
+    // 3. No status
+    // 4. instruction
+    // 5. max_grade
+    // 6. is_required_grade
+    // 7. allow_resubmission
+    // 8. require_attachment
+    // 9. allow_late_submission
+    // 10. require_assignment_note
+    // 11. require_video_submission
+    AssignmentBase assignment = 1;
+}
+
+message InsertAssignmentResponse {
+    // return generated Learning Material ULID
+    string learning_material_id = 1;
+}
+
+message UpdateAssignmentRequest{
+    // We only need send some fields bellow
+    // 1. LearningMaterialBase 
+        // 1. No learning_material 
+        // 2. No topic_id
+        // 3. name
+        // 4. No type
+    // 2. attachments
+    // 3. status
+    // 4. instruction
+    // 5. max_grade
+    // 6. is_required_grade
+    // 7. allow_resubmission
+    // 8. require_attachment
+    // 9. allow_late_submission
+    // 10. require_assignment_note
+    // 11. require_video_submission
+    AssignmentBase assignment = 1;
+}
+
+// UpdateAssignmentResponse is empty message 
+message UpdateAssignmentResponse{
+}
+
+message InsertAdhocAssignmentRequest {
+    string student_id = 1;
+    string course_id = 2;
+    string chapter_name = 3;// TODO: if default seem we should add this field
+    string topic_name = 4;// TODO: if default seem we should add this field
+    string book_name = 5; // TODO:  if default seem we should add this field
+    string study_plan_name = 6;
+    google.protobuf.Timestamp start_date = 7;
+    google.protobuf.Timestamp end_date = 8;
+    AssignmentBase assignment = 9;
+}
+message InsertAdhocAssignmentResponse{
+    string learning_material_id = 1;
+}
+
+message UpdateAdhocAssignmentRequest{
+    string student_id = 1;
+    string course_id = 2;
+    string chapter_name = 3;// TODO: if default seem we should add this field
+    string topic_name = 4;// TODO: if default seem we should add this field
+    string book_name = 5; // TODO:  if default seem we should add this field
+    string study_plan_name = 6;
+    google.protobuf.Timestamp start_date = 7;
+    google.protobuf.Timestamp end_date = 8;
+    AssignmentBase assignment = 9;
+}
+
+message UpdateAdhocAssignmentResponse{
+}
+
+message ListAssignmentRequest {
+    repeated string learning_material_ids = 1;
+}
+
+message ListAssignmentResponse {
+    repeated AssignmentBase assignments = 1;
+}
+
+message SubmitAssignmentRequest {
+    StudentSubmission submission = 1; 
+} 
+
+message SubmitAssignmentResponse {
+    string submission_id = 1;
+}
+
+// Assignment is a gRPC service used for Assignment learning material type 
+service Assignment {
+    // InsertAssignment insert an assignment
+    rpc InsertAssignment(InsertAssignmentRequest)
+        returns (InsertAssignmentResponse);
+    // UpdateAssignment update metadata of an assignment
+    rpc UpdateAssignment(UpdateAssignmentRequest)
+        returns (UpdateAssignmentResponse);
+    rpc InsertAdhocAssignment (InsertAdhocAssignmentRequest) // UpsertAdHocAssignment
+        returns (InsertAdhocAssignmentResponse);
+    rpc UpdateAdhocAssignment (UpdateAdhocAssignmentRequest)//UpsertAdHocAssignment //TODO: re-check again
+        returns (UpdateAdhocAssignmentResponse);
+    rpc ListAssignment(ListAssignmentRequest)
+        returns (ListAssignmentResponse);
+    rpc SubmitAssignment(SubmitAssignmentRequest)
+        returns (SubmitAssignmentResponse);
+}

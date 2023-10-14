@@ -1,0 +1,16 @@
+nameOverride: "elastic"
+elasticsearch:
+  replicas: 1
+  storage:
+    storageClass: "standard"
+    storageSize: "20Gi"
+  snapshot:
+    enabled: false
+    storageClass: "standard"
+    storageSize: "10Gi"
+  initIndices: true
+  resources:
+    requests:
+      memory: 1024Mi
+      cpu: 50m
+  javaopts: "-Xms600m -Xmx600m"

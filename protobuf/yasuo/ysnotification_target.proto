@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package manabie.yasuo;
+
+import "ysenum.proto";
+import "google/protobuf/timestamp.proto";
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option (gogoproto.goproto_registration) = true;
+option go_package = "github.com/manabie-com/backend/pkg/genproto/yasuo;pb";
+
+message NotificationTarget {
+  string id = 1;
+  string name = 2;
+  string conditions = 3;
+  NotificationTargetStatus status = 4;
+  google.protobuf.Timestamp schedule_at = 7;
+}
+
+message CreateNotificationTargetRequest {
+  NotificationTarget notificationTarget = 1;
+}
+
+message CreateNotificationTargetResponse {
+  string notificationTargetID = 1;
+  bool successful = 2;
+}
+
+message UpdateNotificationTargetRequest {
+  NotificationTarget notificationTarget = 1;
+}
+
+message UpdateNotificationTargetResponse {
+  string notificationTargetID = 1;
+  bool successful = 2;
+}
+
+service NotificationTargetService {
+  rpc CreateNotificationTarget(CreateNotificationTargetRequest)
+      returns (CreateNotificationTargetResponse);
+  rpc UpdateNotificationTarget(UpdateNotificationTargetRequest)
+      returns (UpdateNotificationTargetResponse);
+}

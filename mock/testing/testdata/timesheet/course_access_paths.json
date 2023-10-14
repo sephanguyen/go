@@ -1,0 +1,99 @@
+{
+	"schema": [
+		{
+			"column_name": "course_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "location_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "course_access_paths",
+			"policyname": "rls_course_access_paths",
+			"qual": "permission_check(resource_path, 'course_access_paths'::text)",
+			"with_check": "permission_check(resource_path, 'course_access_paths'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "course_access_paths",
+			"policyname": "rls_course_access_paths_restrictive",
+			"qual": "permission_check(resource_path, 'course_access_paths'::text)",
+			"with_check": "permission_check(resource_path, 'course_access_paths'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "course_access_paths_pk",
+			"column_name": "course_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "course_access_paths_pk",
+			"column_name": "location_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "course_access_paths",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

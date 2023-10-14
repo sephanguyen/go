@@ -1,0 +1,49 @@
+{{- if not .Values.disabled }}
+{{ include "virtualservice.teacher.tpl" . }}
+
+{{ if eq .Values.global.environment "prod" }}
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: prod-{{ .Values.global.vendor }}-teacher-front-end-manabie
+  labels:
+    {{- include "teacher.labels" . | nindent 4 }}
+spec:
+  hosts:
+{{ if eq .Values.global.vendor "tokyo" }}
+  - classroom.manabie.net
+{{ else }}
+  - {{ .Values.global.vendor }}.teacher.manabie.net
+{{ end }}
+  gateways:
+    - istio-system/prod-{{ .Values.global.vendor }}-teacher-front-end
+  exportTo:
+    - istio-system
+{{- with .Values.httpRoute }}
+  http:
+{{ toYaml . | indent 4 }}
+{{- end }}
+{{ end }}
+
+{{ if eq .Values.global.environment "stag" "uat" }}
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: {{ .Values.global.environment }}-{{ .Values.global.vendor }}-teacher-front-end
+  labels:
+    {{- include "teacher.labels" . | nindent 4 }}
+spec:
+  hosts:
+  - {{ .Values.global.vendor }}.teacher.{{ .Values.global.environment }}.manabie.net
+  gateways:
+    - istio-system/{{ .Values.global.environment }}-{{ .Values.global.vendor }}-teacher-front-end
+  exportTo:
+    - istio-system
+{{- with .Values.httpRoute }}
+  http:
+{{ toYaml . | indent 4 }}
+{{- end }}
+{{ end }}
+{{- end }}

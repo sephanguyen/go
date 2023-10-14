@@ -1,0 +1,111 @@
+{
+	"schema": [
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "is_added_to_enrollment_by_default",
+			"data_type": "boolean",
+			"column_default": "false",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "is_enrollment_required",
+			"data_type": "boolean",
+			"column_default": "false",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "is_operation_fee",
+			"data_type": "boolean",
+			"column_default": "false",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "is_pausable",
+			"data_type": "boolean",
+			"column_default": "true",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "product_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "product_setting",
+			"policyname": "rls_product_setting",
+			"qual": "permission_check(resource_path, 'product_setting'::text)",
+			"with_check": "permission_check(resource_path, 'product_setting'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "product_setting",
+			"policyname": "rls_product_setting_restrictive",
+			"qual": "permission_check(resource_path, 'product_setting'::text)",
+			"with_check": "permission_check(resource_path, 'product_setting'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "fk_product_setting_product_id",
+			"column_name": "product_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "product_settings_pk",
+			"column_name": "product_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "product_setting",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

@@ -1,0 +1,201 @@
+unleash:
+  featureFlags:
+    communication:
+      - name: Communication_Chat_DownloadImageFromChat
+        description: "A feature flag to enable Download Image From Chat (LT-10454)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Communication_Chat_EnableDLSElasticSearch
+        description: "A feature flag to enable DLS for ElasticSearch (LT-10310, LT-18085, LT-18590)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Communication_Notification_NotificationForAssignmentReturned
+        description: "A feature flag to enable Notification For Assignment Returned (LT-1054)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: Communication_Notification_BackOffice_NotificationTags
+        description: "A feature toggle to enable Notification Tags in back office"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Communication_Notification_BackOffice_AttachZipFile
+        description: "A feature toggle to enable Attach and Download Zip File in JPREP (LT-20723, LT-33607)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Communication_Notification_BackOffice_File_Extension
+        description: "A feature toggle to enable other file extension in back office (LT-32112)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Communication_Notification_Mobile_SupportOtherFileExtensions
+        description: "A feature toggle to enable other file extension in mobile app (LT-35635)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Communication_Notification_DownloadZipFile
+        description: "A feature toggle to enable zip file feature in learner app (LT-23426, LT-33607)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Communication_Chat_EnableMessagingFeature
+        description: "A feature toggle to enable messaging feature on teacher & learner (LT-33645)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "none"
+            constraints: []
+      - name: Communication_Chat_EnableGetConversationV2
+        description: "Create feature flag to apply new api GetConversationV2 (LT-34621)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: Communication_Notification_TokenRefactoring
+        description: "A feature toggle to enable Token refactoring to decouple token from user token (LT-34663)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Communication_Notification_BackOffice_TemplateSelection_Questionnaire
+        description: "A feature toggle to enable Template Selection Questionnaire in back office (LT-36534)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "none"
+            constraints: []
+      - name: Communication_Notification_BackOffice_Composer_Filter
+        description: "A feature toggle to enable Composer Filter in back office (LT-33740)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Communication_Notification_BackOffice_Delete_Notification
+        description: "A feature toggle to enable Delete Notification in back office (LT-33190)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Communication_Notification_BackOffice_Cache_Filter
+        description: "A feature toggle to enable Update Search & Filter behavior to keep search/filter conditions in back office (LT-36726)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Communication_Chat_BackOffice
+        description: "A feature toggle to enable Chat in back office (LT-42145)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "none"
+            constraints: []
+      - name: Communication_BO_Chat
+        description: "A feature toggle to enable BO Chat on Learner (LT-45912)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: Communication_Agora_Service
+        description: "A feature toggle to enable Agora message service (LT-47031)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []

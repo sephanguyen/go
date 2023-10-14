@@ -1,0 +1,10 @@
+global:
+  sqlProxy:
+    connName: ""
+  cloudSQLUsePublicIP: false
+  cloudSQLCommonInstance: ""
+  cloudSQLLMSInstance: ""
+serviceAccountEmailSuffix: ""
+cloudSQLUsePublicIP: false
+cloudSQLCommonInstance: ""
+cloudSQLLMSInstance: ""

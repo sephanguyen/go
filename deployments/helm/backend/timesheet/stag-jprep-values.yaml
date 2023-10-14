@@ -1,0 +1,4 @@
+enabled: true
+hasura:
+    useGlobalCronScheduledScaling: true
+useGlobalCronScheduledScaling: true

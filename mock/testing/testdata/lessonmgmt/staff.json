@@ -1,0 +1,175 @@
+{
+	"schema": [
+		{
+			"column_name": "auto_create_timesheet",
+			"data_type": "boolean",
+			"column_default": "false",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "end_date",
+			"data_type": "date",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "staff_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "start_date",
+			"data_type": "date",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "working_status",
+			"data_type": "text",
+			"column_default": "'AVAILABLE'::text",
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "staff",
+			"policyname": "rls_staff_delete_location",
+			"qual": "(true \u003c= ( SELECT true AS bool\n   FROM (granted_permissions p\n     JOIN user_access_paths usp ON ((usp.location_id = p.location_id)))\n  WHERE ((p.user_id = current_setting('app.user_id'::text)) AND (p.permission_id = ( SELECT p2.permission_id\n           FROM permission p2\n          WHERE ((p2.permission_name = 'user.staff.write'::text) AND (p2.resource_path = current_setting('permission.resource_path'::text))))) AND (usp.user_id = staff.staff_id) AND (usp.deleted_at IS NULL))\n LIMIT 1))",
+			"with_check": null,
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "staff",
+			"policyname": "rls_staff_insert_location",
+			"qual": null,
+			"with_check": "(1 = 1)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "staff",
+			"policyname": "rls_staff_restrictive",
+			"qual": "permission_check(resource_path, 'staff'::text)",
+			"with_check": "permission_check(resource_path, 'staff'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "staff",
+			"policyname": "rls_staff_select_location",
+			"qual": "(true \u003c= ( SELECT true AS bool\n   FROM (granted_permissions p\n     JOIN user_access_paths usp ON ((usp.location_id = p.location_id)))\n  WHERE ((p.user_id = current_setting('app.user_id'::text)) AND (p.permission_id = ( SELECT p2.permission_id\n           FROM permission p2\n          WHERE ((p2.permission_name = 'user.staff.read'::text) AND (p2.resource_path = current_setting('permission.resource_path'::text))))) AND (usp.user_id = staff.staff_id) AND (usp.deleted_at IS NULL))\n LIMIT 1))",
+			"with_check": null,
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "staff",
+			"policyname": "rls_staff_update_location",
+			"qual": "(true \u003c= ( SELECT true AS bool\n   FROM (granted_permissions p\n     JOIN user_access_paths usp ON ((usp.location_id = p.location_id)))\n  WHERE ((p.user_id = current_setting('app.user_id'::text)) AND (p.permission_id = ( SELECT p2.permission_id\n           FROM permission p2\n          WHERE ((p2.permission_name = 'user.staff.write'::text) AND (p2.resource_path = current_setting('permission.resource_path'::text))))) AND (usp.user_id = staff.staff_id) AND (usp.deleted_at IS NULL))\n LIMIT 1))",
+			"with_check": "(true \u003c= ( SELECT true AS bool\n   FROM (granted_permissions p\n     JOIN user_access_paths usp ON ((usp.location_id = p.location_id)))\n  WHERE ((p.user_id = current_setting('app.user_id'::text)) AND (p.permission_id = ( SELECT p2.permission_id\n           FROM permission p2\n          WHERE ((p2.permission_name = 'user.staff.write'::text) AND (p2.resource_path = current_setting('permission.resource_path'::text))))) AND (usp.user_id = staff.staff_id) AND (usp.deleted_at IS NULL))\n LIMIT 1))",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "pk__staff",
+			"column_name": "staff_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "staff",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

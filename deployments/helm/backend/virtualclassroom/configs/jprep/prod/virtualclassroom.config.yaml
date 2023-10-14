@@ -1,0 +1,23 @@
+common:
+  google_cloud_project: student-coach-e1e95
+jwt_applicant: b5e72419a81ca9e1a5
+issuers:
+  - issuer: manabie
+    audience: b5e72419a81ca9e1a5
+    jwks_endpoint: http://shamir:5680/.well-known/jwks.json
+  - issuer: https://securetoken.google.com/student-coach-e1e95
+    audience: student-coach-e1e95
+    jwks_endpoint: https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com
+agora:
+  app_id: 03ff2af914d34718a6a8a087c3c802eb
+  customer_id: d2e84f547a4c463f9493195c6db363c3
+  endpoint: https://api.agora.io
+  bucket: virtualclassroom-backend
+whiteboard:
+  app_id: V7mZoJt9Eeqxp_kxzbwYqQ/eVI9bwOEhTqIOQ
+storage:
+  bucket: jprep-backend
+natsjs:
+  address: "nats://nats-jetstream.prod-jprep-nats-jetstream.svc.cluster.local:4223"
+zegocloud:
+  app_id: 641864696

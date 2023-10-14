@@ -1,0 +1,1 @@
+DROP TRIGGER IF EXISTS trigger_study_plan_items_to_individual_study_plan on study_plan_items;

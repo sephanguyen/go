@@ -1,0 +1,7 @@
+@startuml communication_simplified
+hide circle
+User    -> Bob:  Call "NotificationReaderService.RetrieveNotificationDetail"
+Bob     -> DB: find notification and its data
+DB      -> Bob: result
+Bob     -> User: result
+@enduml

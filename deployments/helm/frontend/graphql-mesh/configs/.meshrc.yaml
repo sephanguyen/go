@@ -1,0 +1,44 @@
+sources:
+    - name: bob
+      handler:
+          grpc:
+              prefixQueryMethod: ["retrieve", "get", "list"]
+              endpoint: dns:bob:5050
+              protoFilePath:
+                  file: ./proto/bob/**/*.proto
+                  load:
+                      includeDirs:
+                          - ./proto
+              requestTimeout: 200000
+              metaData:
+                  pkg: com.manabie.liz
+                  version: 1.0.0
+                  token: ["req", "headers", "x-graphql-mesh-authorization"]
+    - name: yasuo
+      handler:
+          grpc:
+              prefixQueryMethod: ["retrieve", "get", "list"]
+              endpoint: dns:yasuo:5250
+              protoFilePath:
+                  file: ./proto/yasuo/**/*.proto
+                  load:
+                      includeDirs:
+                          - ./proto
+              requestTimeout: 200000
+              metaData:
+                  pkg: com.manabie.liz
+                  version: 1.0.0
+                  token: ["req", "headers", "x-graphql-mesh-authorization"]
+cache:
+    file:
+        path: ./cache.json
+
+transforms:
+    - namingConvention:
+          typeNames: pascalCase
+          enumValues: upperCase
+          fieldNames: camelCase
+          fieldArgumentNames: camelCase
+
+serve:
+    hostname: 0.0.0.0

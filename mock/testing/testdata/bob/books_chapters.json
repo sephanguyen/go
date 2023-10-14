@@ -1,0 +1,99 @@
+{
+	"schema": [
+		{
+			"column_name": "book_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "chapter_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "books_chapters",
+			"policyname": "rls_books_chapters",
+			"qual": "permission_check(resource_path, 'books_chapters'::text)",
+			"with_check": "permission_check(resource_path, 'books_chapters'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "books_chapters",
+			"policyname": "rls_books_chapters_restrictive",
+			"qual": "permission_check(resource_path, 'books_chapters'::text)",
+			"with_check": "permission_check(resource_path, 'books_chapters'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "books_chapters_pk",
+			"column_name": "book_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "books_chapters_pk",
+			"column_name": "chapter_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "books_chapters",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

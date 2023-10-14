@@ -1,0 +1,220 @@
+suite: timesheet deployment yaml file
+templates:
+  - charts/timesheet/templates/app.yaml
+values:
+  - ../charts/timesheet/values.yaml
+  - ../values.yaml
+  - ../local-manabie-values.yaml
+  - ../../platforms/gateway/local-manabie-values.yaml
+tests:
+  - it: First template should be configmaps
+    set:
+      global.timesheet.enabled: true
+      global.timesheet.sops.enabled: true
+      global.environment: local
+      global.vendor: manabie
+      global.image.repository: local
+      timesheet.image.tag: v1
+      timesheet.service.port: 6850
+      global.sqlProxy.enabled: true
+    documentIndex: 0
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - isNotNull:
+          path: data.[timesheet.common.config.yaml]
+      - isNotNull:
+          path: data.[timesheet.config.yaml]
+
+  - it: Second template should be secrect
+    set:
+      global.timesheet.enabled: true
+      global.timesheet.sops.enabled: true
+      global.environment: local
+      global.vendor: manabie
+      global.image.repository: local
+      timesheet.image.tag: v1
+      timesheet.service.port: 6850
+      global.sqlProxy.enabled: true
+    documentIndex: 1
+    asserts:
+      - isKind:
+          of: Secret
+      - isNotNull:
+          path: data.[service_credential.json]
+      - isNotNull:
+          path: data.[timesheet.secrets.encrypted.yaml]
+      - isNotNull:
+          path: data.[hasura.secrets.encrypted.yaml]
+
+  - it: Third template should be PodDisruptionBudget
+    set:
+      global.timesheet.enabled: true
+      global.timesheet.sops.enabled: true
+      global.environment: local
+      global.vendor: manabie
+      global.image.repository: local
+      timesheet.image.tag: v1
+      timesheet.service.port: 6850
+      global.sqlProxy.enabled: true
+    documentIndex: 2
+    asserts:
+      - isKind:
+          of: PodDisruptionBudget
+      - equal:
+          path: spec.maxUnavailable
+          value: 1
+
+  - it: fourth template should be ServiceAccount
+    set:
+      global.timesheet.enabled: true
+      global.timesheet.sops.enabled: true
+      global.environment: local
+      global.vendor: manabie
+      global.image.repository: local
+      timesheet.image.tag: v1
+      timesheet.service.port: 6850
+      global.sqlProxy.enabled: true
+    documentIndex: 3
+    asserts:
+      - isKind:
+          of: ServiceAccount
+      - equal:
+          path: metadata.name
+          value: local-timesheet
+  - it: fifth template should be Deployment
+    set:
+      global.timesheet.enabled: true
+      global.timesheet.sops.enabled: true
+      global.environment: local
+      global.vendor: manabie
+      global.image.repository: local
+      timesheet.image.tag: v1
+      global.sqlProxy.enabled: true
+    documentIndex: 4
+    asserts:
+      - isKind:
+          of: Deployment
+
+      # init containers
+      - equal:
+          path: spec.template.spec.initContainers[0].name
+          value: wait-for-shamir
+
+      # metadata
+      - equal:
+          path: spec.template.metadata.labels.[app.kubernetes.io/name]
+          value: "timesheet"
+      - equal:
+          path: spec.template.metadata.annotations.[sidecar.istio.io/proxyCPU]
+          value: "10m"
+      - isNotEmpty:
+          path: spec.template.metadata.annotations.[checksum/timesheet.config.yaml]
+      - isNotEmpty:
+          path: spec.template.metadata.annotations.[checksum/timesheet.secrets.encrypted.yaml]
+      - isNotEmpty:
+          path: spec.template.metadata.annotations.[checksum/timesheet_migrate.secrets.encrypted.yaml]
+
+      # containers
+      - equal:
+          path: spec.template.spec.containers[0].name
+          value: timesheet
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: local:v1
+      - equal:
+          path: spec.template.spec.containers[0].command
+          value:
+            - /bin/sh
+            - -c
+            - |
+              #!/bin/bash
+              set -eu
+              cat <<EOF > modd.conf
+              /server {
+                daemon +sigterm: /server \\
+                  gserver \\
+                  timesheet \\
+                  --commonConfigPath=/configs/timesheet.common.config.yaml \\
+                  --configPath=/configs/timesheet.config.yaml \\
+                  --secretsPath=/configs/timesheet.secrets.encrypted.yaml
+              }
+              EOF
+              exec modd
+      - isNotNull:
+          path: spec.template.spec.containers[0].readinessProbe
+      - matchRegex:
+          path: spec.template.spec.containers[0].readinessProbe.exec.command[2]
+          pattern: .*localhost:6850.*
+      - contains:
+          path: spec.template.spec.containers[0].ports
+          content:
+            name: grpc
+            containerPort: 6850
+            protocol: TCP
+
+      # volumes
+      - equal:
+          path: spec.template.spec.volumes[0].secret.secretName
+          value: timesheet
+      - equal:
+          path: spec.template.spec.volumes[0].secret.items[0].key
+          value: timesheet.secrets.encrypted.yaml
+      - equal:
+          path: spec.template.spec.volumes[4].configMap.items[0].key
+          value: timesheet.common.config.yaml
+      - equal:
+          path: spec.template.spec.volumes[2].configMap.name
+          value: timesheet-hasura-metadata
+      - equal:
+          path: spec.template.spec.volumes[3].secret.items[0].key
+          value: service_credential.json
+
+      #affinity
+      - contains:
+          path: spec.template.spec.affinity.nodeAffinity.preferredDuringSchedulingIgnoredDuringExecution
+          content:
+            weight: 10
+            preference:
+              matchExpressions:
+              - key: cloud.google.com/gke-spot
+                operator: In
+                values:
+                - "true"
+      - contains:
+          path: spec.template.spec.affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution
+          content:
+            weight: 100
+            podAffinityTerm:
+              labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: timesheet
+              topologyKey: kubernetes.io/hostname
+      - contains:
+          path: spec.template.spec.tolerations
+          content:
+            effect: NoSchedule
+            key: "cloud.google.com/gke-spot"
+            operator: Exists
+
+  - it: sixth template should be Service
+    set:
+      global.timesheet.enabled: true
+      global.timesheet.sops.enabled: true
+      global.environment: local
+      global.vendor: manabie
+      global.image.repository: local
+      timesheet.image.tag: v1
+      timesheet.service.port: 6850
+      global.sqlProxy.enabled: true
+    documentIndex: 5
+    asserts:
+      - isKind:
+          of: Service
+      - contains:
+          path: spec.ports
+          content:
+            name: grpc-web-port
+            protocol: TCP
+            targetPort: grpc
+            port: 6850

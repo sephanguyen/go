@@ -1,0 +1,8 @@
+common:
+  google_cloud_project: synersia
+  firebase_project: synersia
+  identity_platform_project: student-coach-e1e95
+issuers:
+  - issuer: manabie
+    audience: prod-synersia
+    jwks_endpoint: http://shamir:5680/.well-known/jwks.json

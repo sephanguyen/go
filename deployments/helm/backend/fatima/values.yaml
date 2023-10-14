@@ -1,0 +1,166 @@
+adminHttp:
+    - corsPolicy:
+        allowHeaders:
+            - authorization
+            - grpc-timeout
+            - content-type
+            - keep-alive
+            - user-agent
+            - cache-control
+            - content-transfer-encoding
+            - token
+            - student-id
+            - x-accept-content-transfer-encoding
+            - x-accept-response-streaming
+            - x-request-id
+            - x-user-agent
+            - x-graphql-mesh-authorization
+            - x-grpc-web
+            - if-none-match
+            - pkg
+            - version
+            - connect-timeout-ms
+            - connect-protocol-version
+            - connect-content-encoding
+            - connect-accept-encoding
+        allowMethods:
+            - POST
+            - GET
+            - OPTIONS
+            - PUT
+            - DELETE
+        allowOrigins:
+            - regex: .*
+        exposeHeaders:
+            - grpc-status
+            - grpc-message
+            - etag
+        maxAge: 100s
+      match:
+        - uri:
+            prefix: /fatima/
+      rewrite:
+        uri: /
+      route:
+        - destination:
+            host: fatima-hasura
+            port:
+                number: 8080
+affinity: {}
+affinityOverride: {}
+apiHttp:
+    - fault:
+        abort:
+            httpStatus: 403
+            percentage:
+                value: 100
+      match:
+        - uri:
+            exact: /fatima.v1.SubscriptionModifierService/ListStudentPackage
+        - uri:
+            exact: /fatima.v1.SubscriptionModifierService/ListStudentPackageV2
+        - uri:
+            prefix: /fatima.v1.InternalService
+      route:
+        - destination:
+            host: fatima
+            port:
+                number: 5450
+    - match:
+        - uri:
+            prefix: /fatima
+      route:
+        - destination:
+            host: fatima
+            port:
+                number: 5450
+clientVersion: v0.30.0
+cronjobs:
+    cron-job-schedule-class:
+        cmd: job_schedule_class
+        schedule: 0 17 * * *
+enabled: true
+grpcPort: 5450
+hasura:
+    anonymous:
+        enabled: false
+    enableConsole: true
+    enabledApis: metadata,graphql
+    pgConnections: 8
+    pgTimeout: 10
+    resources:
+        requests:
+            memory: 256Mi
+    service:
+        port: 8080
+        type: ClusterIP
+hasuraEnabled: true
+jobs:
+    migrate-jprep-student-package:
+        cmd: fatima_migrate_jprep_student_package
+    migrate-student-package:
+        cmd: fatima_migrate_student_packages
+    migrate-student-package-and-package-class:
+        cmd: fatima_migrate_student_package_and_package_class
+    migrate-student-package-and-package-class-by-csv:
+        cmd: fatima_migrate_student_package_and_package_class_by_csv
+metrics:
+    enabled: true
+migrationEnabled: true
+pdb:
+    enabled: false
+readinessProbe:
+    enabled: false
+resources:
+    requests:
+        cpu: 5m
+        memory: 72Mi
+service:
+    port: 5450
+    type: ClusterIP
+webHttp:
+    - corsPolicy:
+        allowHeaders:
+            - authorization
+            - grpc-timeout
+            - content-type
+            - keep-alive
+            - user-agent
+            - cache-control
+            - content-transfer-encoding
+            - token
+            - student-id
+            - x-accept-content-transfer-encoding
+            - x-accept-response-streaming
+            - x-request-id
+            - x-user-agent
+            - x-graphql-mesh-authorization
+            - x-grpc-web
+            - if-none-match
+            - pkg
+            - version
+            - connect-timeout-ms
+            - connect-protocol-version
+            - connect-content-encoding
+            - connect-accept-encoding
+        allowMethods:
+            - POST
+            - GET
+            - OPTIONS
+            - PUT
+            - DELETE
+        allowOrigins:
+            - regex: .*
+        exposeHeaders:
+            - grpc-status
+            - grpc-message
+            - etag
+        maxAge: 100s
+      match:
+        - uri:
+            prefix: /fatima
+      route:
+        - destination:
+            host: fatima
+            port:
+                number: 5450

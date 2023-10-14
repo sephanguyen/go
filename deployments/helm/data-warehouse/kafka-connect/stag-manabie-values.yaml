@@ -1,0 +1,18 @@
+connect:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 1792Mi
+    limits:
+      cpu: 2000m
+      memory: 5096Mi
+
+alloydbProxy:
+  enabled: true
+  alloydbConnName: "projects/staging-manabie-online/locations/asia-southeast1/clusters/stag-alloydb/instances/stag-alloydb-w01?port=6432"
+
+syncAlloydbEnabled: true
+
+global:
+  sqlProxy:
+    lmsConnName: "staging-manabie-online:asia-southeast1:manabie-lms-de12e08e"

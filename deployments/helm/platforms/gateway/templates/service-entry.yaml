@@ -1,0 +1,58 @@
+{{- if and (eq "dorp" .Values.environment) (eq "synersia" (default .Values.vendor .Values.org)) }}
+apiVersion: networking.istio.io/v1beta1
+kind: ServiceEntry
+metadata:
+  name: dorp-tokyo-admin
+spec:
+  hosts:
+    - admin.prep.tokyo.manabie.io
+  location: MESH_EXTERNAL
+  ports:
+    - number: 443
+      name: https
+      protocol: TLS
+  resolution: DNS
+  exportTo:
+    - '*'
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: dorp-tokyo-admin-tls
+spec:
+  host: admin.prep.tokyo.manabie.io
+  trafficPolicy:
+    tls:
+      mode: SIMPLE
+      sni: admin.prep.tokyo.manabie.io
+---
+{{- end }}
+{{- if and (eq "prod" .Values.environment) (eq "synersia" (default .Values.vendor .Values.org)) }}
+apiVersion: networking.istio.io/v1beta1
+kind: ServiceEntry
+metadata:
+  name: prod-tokyo-admin
+spec:
+  hosts:
+    - admin.prod.tokyo.manabie.io
+  location: MESH_EXTERNAL
+  ports:
+    - number: 443
+      name: https
+      protocol: TLS
+  resolution: DNS
+  exportTo:
+    - '*'
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: prod-tokyo-admin-tls
+spec:
+  host: admin.prod.tokyo.manabie.io
+  trafficPolicy:
+    tls:
+      mode: SIMPLE
+      sni: admin.prod.tokyo.manabie.io
+---
+{{- end }}

@@ -1,0 +1,47 @@
+name: tiered.post_merge_sync_chart_test
+on:
+  push:
+    branches:
+      - develop
+    paths:
+      - 'deployments/helm/backend/**'
+      - 'deployments/helm/manabie-all-in-one/charts/**'
+      - 'deployments/helm/libs/**'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}
+
+jobs:
+  post-merge-sync-chart-test:
+    runs-on: ["4-8-large-runner"]
+    timeout-minutes: 30
+    steps:
+      - name: Collect Workflow Telemetry
+        continue-on-error: true
+        timeout-minutes: 5
+        uses: manabie-com/workflow-telemetry-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.BUILD_GITHUB_TOKEN }}
+        with:
+          comment_on_pr: false
+
+      - name: Checkout source
+        uses: actions/checkout@v3
+        timeout-minutes: 5
+
+      - name: Sync chart test
+        id: sync-chart-test
+        run: |
+          go test ./deployments/tests/skaffold2_helm_util_chart_test.go
+          go test ./deployments/tests/sync_charts_test.go
+
+      - name: Notify when sync-chart test failed
+        if: failure() && steps.sync-chart-test.outcome != 'success' && steps.sync-chart-test.outcome != 'skipped'
+        uses: ./.github/actions/slack-post-merge
+        with:
+          status: 'failure'
+          message: 'The sync-chart test of the post-merge workflow was failed. Please help us run `make sync-chart`.'
+          username: ${{ github.actor }}
+          BUILD_GITHUB_TOKEN: ${{ secrets.BUILD_GITHUB_TOKEN }}
+          SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}

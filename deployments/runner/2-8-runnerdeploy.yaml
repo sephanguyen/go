@@ -1,0 +1,89 @@
+apiVersion: actions.summerwind.dev/v1alpha1
+kind: RunnerDeployment
+metadata:
+  name: 2-8-runnerdeploy
+  namespace: actions-runner-system
+spec:
+  template:
+    metadata:
+      labels:
+        app: 2-8-runnerdeploy
+      annotations:
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+    spec:
+      organization: manabie-com
+      dockerdWithinRunnerContainer: true
+      image: asia-docker.pkg.dev/student-coach-e1e95/manaverse/actions-runner-dind:v2.307.1-ubuntu-20.04
+      labels:
+        - custom-runner
+        - default-image-runner
+        - large-runner
+        - 2-8-runner
+      env:
+      - name: DISABLE_RUNNER_UPDATE
+        value: "true"
+      nodeSelector:
+        cloud.google.com/gke-nodepool: "e2-highmem-2-runners-on-demand"
+      tolerations:
+      - effect: NoSchedule
+        key: "e2-highmem-2-runners-on-demand"
+        operator: Exists
+      resources:
+        limits:
+          cpu: 2000m
+          memory: 14Gi
+        requests:
+          cpu: 1300m
+          memory: 10Gi
+      dockerRegistryMirror: https://mirror.gcr.io/
+      imagePullPolicy: IfNotPresent
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: runner-deployment-name
+                    operator: In
+                    values:
+                      - 2-8-runnerdeploy
+              topologyKey: kubernetes.io/hostname
+---
+apiVersion: actions.summerwind.dev/v1alpha1
+kind: HorizontalRunnerAutoscaler
+metadata:
+  name: 2-8-runner-deployment-autoscaler
+  namespace: actions-runner-system
+spec:
+  maxReplicas: 10
+  metrics:
+  - repositoryNames:
+    - backend
+    - school-portal-admin
+    type: TotalNumberOfQueuedAndInProgressWorkflowRuns
+  minReplicas: 0
+  scaleDownDelaySecondsAfterScaleOut: 300
+  scaleTargetRef:
+    name: 2-8-runnerdeploy
+  scaleUpTriggers:
+  - amount: 1
+    duration: 30m
+    githubEvent:
+      workflowJob: {}
+  scheduledOverrides:
+    # On Sundays at 11:30 PM to next Monday 03:30 AM
+    - startTime: '2023-05-28T23:30:00+07:00'
+      endTime: '2023-05-29T03:30:00+07:00'
+      minReplicas: 1
+      recurrenceRule:
+        frequency: Weekly
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: 2-8-runnerdeploy
+  namespace: actions-runner-system
+spec:
+  maxUnavailable: 0
+  selector:
+    matchLabels:
+      runner-deployment-name: 2-8-runnerdeploy

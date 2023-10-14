@@ -1,0 +1,83 @@
+syntax = "proto3";
+
+package tom.v1;
+
+import "tom/v1/enums.proto";
+import "google/protobuf/timestamp.proto";
+import "common/v1/profiles.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/tom/v1;tpb";
+
+message MessageResponse {
+  string message_id = 1;
+  string conversation_id = 2;
+  string user_id = 3;
+  // may be contain CodesMessageType if MessageType == event or button
+  string content = 4;
+  string url_media = 5;
+  MessageType type = 6;
+  google.protobuf.Timestamp created_at = 7;
+  string local_message_id = 8;
+  string target_user = 9;
+  bool is_deleted = 10;
+  string deleted_by = 11;
+  google.protobuf.Timestamp updated_at = 12;
+}
+
+message EventPing {}
+
+message EventDeleteMessage {
+  string conversation_id = 1;
+  string message_id = 2;
+  string deleted_by = 3;
+}
+
+message Event {
+  oneof event {
+    MessageResponse event_new_message = 1;
+    EventDeleteMessage event_delete_message = 2;
+    EventPing event_ping = 3;
+  }
+}
+
+message StreamingEventResponse {
+  oneof event {
+    MessageResponse event_new_message = 1;
+    EventDeleteMessage event_delete_message = 2;
+    EventPing event_ping = 3;
+  }
+}
+
+message Conversation {
+  message User {
+    string id = 1;
+    common.v1.UserGroup group = 2;
+    bool is_present = 3;
+    google.protobuf.Timestamp seen_at = 4;
+  }
+
+  string conversation_id = 1;
+  string coach_id = 2 [deprecated = true];
+  string student_id = 3;
+  repeated string guest_ids = 4 [deprecated = true];
+  bool seen = 5;
+  MessageResponse last_message = 6;
+  string tutor_id = 7 [deprecated = true];
+  string student_question_id = 8;
+  ConversationStatus status = 9;
+  repeated string previous_coach_ids = 10 [deprecated = true];
+  repeated User users = 11;
+  uint32 class_id = 12;
+  ConversationType conversation_type = 13;
+  TeacherConversationStatus teacher_conversation_status = 14;
+  string conversation_name = 15;
+  bool is_replied = 16;
+  string owner = 17;
+}
+
+// only for server
+message InternalSendMessageRequest {
+  repeated string user_ids = 1;
+  map<string, bool> receive_host = 2;
+  Event event = 3;
+}

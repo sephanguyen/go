@@ -1,0 +1,115 @@
+name: "Prepare infos"
+description: "A composite action for prepare infos"
+inputs:
+  workflow_type:
+    description: "Workflow type (Build or Deploy)"
+    required: true
+outputs:
+  me_platforms:
+    description: "Mobile platforms"
+    value: ${{ steps.prepare.outputs.me_platforms }}
+  me_apps:
+    description: "Mobile Apps"
+    value: ${{ steps.prepare.outputs.me_apps }}
+  orgs:
+    description: "Organizations"
+    value: ${{ steps.prepare.outputs.orgs }}
+  env:
+    description: "Environment"
+    value: ${{ steps.prepare.outputs.env }}
+  be_release_tag:
+    description: "Backend release tag"
+    value: ${{ steps.prepare.outputs.be_release_tag }}
+  fe_release_tag:
+    description: "FE release tag"
+    value: ${{ steps.prepare.outputs.fe_release_tag }}
+  me_release_tag:
+    description: "ME release tag"
+    value: ${{ steps.prepare.outputs.me_release_tag }}
+  auto_deploy:
+    description: "Auto deploy"
+    value: ${{ steps.prepare.outputs.auto_deploy }}
+  deploy_all:
+    description: "Deploy all in one job if have 3 tags for FE, BE, ME when auto deploy"
+    value: ${{ steps.prepare.outputs.deploy_all }}
+  max_deploy_parallel:
+    description: "Value for strategy.max-parallel in deployment step"
+    value: ${{ steps.prepare.outputs.max_deploy_parallel }}
+
+  actor:
+    description: User that trigger this workflow
+    value: ${{ steps.prepare.outputs.actor }}
+  alert_channel:
+    description: The alert's channel of the workflow that trigger this workflow
+    value: ${{ steps.prepare.outputs.alert_channel }}
+  alert_timestamp:
+    description: The alert's timestamp of the workflow that trigger this workflow
+    value: ${{ steps.prepare.outputs.alert_timestamp }}
+
+  backend_k8s_orgs:
+    description: "Organizations for Backend K8S build & deployment"
+    value: ${{ steps.prepare.outputs.backend_k8s_orgs }}
+  backoffice_k8s_orgs:
+    description: "Organizations for Backend K8S build & deployment"
+    value: ${{ steps.prepare.outputs.backoffice_k8s_orgs }}
+  teacher_k8s_orgs:
+    description: "Organizations for Backend K8S build & deployment"
+    value: ${{ steps.prepare.outputs.teacher_k8s_orgs }}
+  learner_k8s_orgs:
+    description: "Organizations for Backend K8S build & deployment"
+    value: ${{ steps.prepare.outputs.learner_k8s_orgs }}
+  backoffice_firebase_orgs:
+    description: "Organizations for Back-office Firebase build & deployment"
+    value: ${{ steps.prepare.outputs.backoffice_firebase_orgs }}
+  learner_firebase_orgs:
+    description: "Organizations for Learner Firebase build & deployment"
+    value: ${{ steps.prepare.outputs.learner_firebase_orgs }}
+  learner_android_orgs:
+    description: "Organizations for Learner Android build & deployment"
+    value: ${{ steps.prepare.outputs.learner_android_orgs }}
+  learner_ios_orgs:
+    description: "Organizations for Learner IOS build & deployment"
+    value: ${{ steps.prepare.outputs.learner_ios_orgs }}
+  teacher_firebase_orgs:
+    description: "Organizations for Teacher Firebase build & deployment"
+    value: ${{ steps.prepare.outputs.teacher_firebase_orgs }}
+  appsmith_orgs:
+    description: "Organizations for Appsmith deployment"
+    value: ${{ steps.prepare.outputs.appsmith_orgs }}
+
+  workflow_ref:
+    description: "The workflow ref of the workflow that trigger this workflow"
+    value: ${{ steps.prepare.outputs.workflow_ref }}
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/github-script@v6
+      id: prepare
+      env:
+        ME_PLATFORMS: ${{ github.event.inputs.me_platforms }}
+        ME_APPS: ${{ github.event.inputs.me_apps }}
+        AUTO_DEPLOY: ${{ github.event.inputs.auto_deploy }}
+      with:
+        github-token: ${{ env.GITHUB_TOKEN }}
+        script: |
+          const { prepareInfos } = require('${{ github.workspace }}/.github/actions/tbd.prepare-infos/prepare-infos.js');
+
+          prepareInfos({
+              process,
+              context,
+              core,
+              workflow_type: "${{ inputs.workflow_type }}"
+          });
+
+    - name: Summary output
+      shell: bash
+      run: |
+        set -e
+        cat <<EOF > $GITHUB_STEP_SUMMARY
+
+        | Type     | Input tag                                                                                                                                      |
+        | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+        | backend  | [${{ steps.prepare.outputs.be_release_tag }}](https://github.com/manabie-com/backend/releases/tag/${{ steps.prepare.outputs.be_release_tag }})                 |
+        | frontend | [${{ steps.prepare.outputs.fe_release_tag }}](https://github.com/manabie-com/school-portal-admin/releases/tag/${{ steps.prepare.outputs.fe_release_tag }})     |
+        | mobile   | [${{ steps.prepare.outputs.me_release_tag }}](https://github.com/manabie-com/student-app/releases/tag/${{ steps.prepare.outputs.me_release_tag }})            |
+        EOF

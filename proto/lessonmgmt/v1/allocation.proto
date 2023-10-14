@@ -1,0 +1,122 @@
+syntax = "proto3";
+
+package lessonmgmt.v1;
+
+import "common/v1/requests.proto";
+import "lessonmgmt/v1/enums.proto";
+import "lessonmgmt/v1/lessons.proto";
+import "google/protobuf/timestamp.proto";
+import "common/v1/enums.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/lessonmgmt/v1;lpb";
+
+enum LessonAllocationStatus {
+  ALL = 0;
+  NONE_ASSIGNED = 1;
+  PARTIALLY_ASSIGNED = 2;
+  FULLY_ASSIGNED = 3;
+  OVER_ASSIGNED = 4;
+}
+
+enum CourseTeachingMethod{
+  COURSE_TEACHING_METHOD_NONE = 0;
+  COURSE_TEACHING_METHOD_INDIVIDUAL = 1;
+  COURSE_TEACHING_METHOD_GROUP = 2;
+}
+
+message GetLessonAllocationRequest {
+  message Filter {
+    repeated string course_ids = 1;
+    repeated string course_type_ids = 2;
+    CourseTeachingMethod teaching_method = 3 [deprecated =true];
+    google.protobuf.Timestamp start_time = 4;
+    google.protobuf.Timestamp end_time = 5;
+    repeated string location_ids = 6;
+    bool is_reallocation_only = 7;
+    bool is_class_unassigned = 8 [deprecated =true];
+    LessonAllocationStatus allocation_status = 9;
+    repeated CourseTeachingMethod teaching_methods = 10;
+    repeated string product_id = 11; 
+  }
+  common.v1.Paging paging = 1;
+  string keyword = 2;
+  Filter filter = 3;
+  repeated string location_ids = 4;
+  string timezone = 5;
+}
+
+message GetLessonAllocationResponse {
+  message AllocationListInfo {
+    string student_id = 1;
+    string course_id = 2;
+    string location_id = 3;
+    google.protobuf.Timestamp start_time = 4;
+    google.protobuf.Timestamp end_time = 5;
+    LessonAllocationStatus allocation_status = 6;
+    int32 purchased_slot = 7;
+    int32 assigned_slot = 8;
+    string course_type_id = 9 [deprecated =true];
+    CourseTeachingMethod teaching_method = 10 [deprecated =true];
+    bool is_weekly_schedule = 11;
+    string student_subscription_id = 12;
+    string class_id = 13 [deprecated =true];
+    PackageTypeSchedule package_type_schedule = 14;
+  }
+  repeated AllocationListInfo items = 1;
+  common.v1.Paging next_page = 2;
+  common.v1.Paging previous_page = 3;
+  uint32 total_items = 4;
+  uint32 total_of_none_assigned = 5;
+  uint32 total_of_partially_assigned = 6;
+  uint32 total_of_fully_assigned = 7;
+  uint32 total_of_over_assigned = 8;
+}
+
+
+
+message GetLessonScheduleByStudentSubscriptionRequest {
+  string student_subscription_id = 1;
+  common.v1.Paging paging = 2;
+}
+
+message GetLessonScheduleByStudentSubscriptionResponse {
+  message Lesson {
+    string lesson_id = 1;
+    string location_id = 2;
+    google.protobuf.Timestamp start_time = 3;
+    google.protobuf.Timestamp end_time = 4;
+    StudentAttendStatus attendance_status = 5;
+    string report_id = 6;
+    LessonStatus lesson_status = 7;
+    common.v1.LessonTeachingMethod teaching_method = 8;
+    bool is_locked = 9;
+  }
+
+  message WeeklyLessonList {
+    string academic_week_id = 1;
+    uint32 week_order = 2;
+    string week_name = 3;
+    google.protobuf.Timestamp start_time = 4;
+    google.protobuf.Timestamp end_time = 5;
+    uint32 frequency = 6;
+    string location_id = 7;
+    repeated Lesson lessons = 8;
+  }
+
+  message CourseLocationSchedule {
+    string course_location_schedule_id = 1;
+    PackageTypeSchedule package_type_schedule = 2;
+  }
+  repeated WeeklyLessonList items = 1;
+  uint32 total_items = 2;
+  uint32 allocated_lessons_count = 3;
+  common.v1.Paging next_page = 4;
+  common.v1.Paging previous_page = 5;
+  uint32 total_lesson = 6;
+  CourseLocationSchedule course_location_schedule = 7;
+}
+
+service LessonAllocationReaderService {
+  rpc GetLessonAllocation(GetLessonAllocationRequest) returns (GetLessonAllocationResponse);
+  rpc GetLessonScheduleByStudentSubscription(GetLessonScheduleByStudentSubscriptionRequest) returns (GetLessonScheduleByStudentSubscriptionResponse);
+}

@@ -1,0 +1,193 @@
+objstoreConfig: |-
+  type: GCS
+  config:
+    bucket: manabie-thanos
+
+bucketweb:
+  enabled: false
+  serviceAccount:
+    create: true
+    annotations:
+      iam.gke.io/gcp-service-account: thanos-bucketweb@student-coach-e1e95.iam.gserviceaccount.com
+
+compactor:
+  enabled: true
+  serviceAccount:
+    create: true
+    annotations:
+      iam.gke.io/gcp-service-account: thanos-compactor@student-coach-e1e95.iam.gserviceaccount.com
+  retentionResolutionRaw: "60d"
+  retentionResolution5m: "60d"
+  retentionResolution1h: "90d"
+  # extraFlags:
+  #   - --compact.concurrency
+  tolerations:
+    - key: monitoring
+      operator: Equal
+      value: "true"
+      effect: NoSchedule
+  persistence:
+    size: 70Gi
+
+query:
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 5
+    targetMemory: 85
+  resources:
+    requests:
+      memory: 128Mi
+  pdb:
+    create: true
+    minAvailable: 1
+  dnsDiscovery:
+    enabled: false
+  extraFlags:
+    - --endpoint-strict=thanos-sidecar.staging.manabie.io:443
+    - --endpoint-strict=thanos-sidecar.prod.tokyo.manabie.io:443
+    - --endpoint-strict=thanos-sidecar.jp-partners.manabie.io:443
+    - --endpoint-strict=thanos-store.manabie.io:443
+    - --grpc-client-tls-secure
+
+queryFrontend:
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 5
+    targetMemory: 85
+  resources:
+    requests:
+      memory: 48Mi
+  pdb:
+    create: true
+    minAvailable: 1
+  extraFlags:
+    - --http.config=/etc/config/http_config.yaml
+  extraVolumeMounts:
+    - name: http-config
+      mountPath: /etc/config
+  extraVolumes:
+    - name: http-config
+      configMap:
+        name: thanos-query-frontend-http-config
+  readinessProbe:
+    enabled: false
+  customReadinessProbe:
+    httpGet:
+      path: /-/ready
+      port: http
+      httpHeaders:
+      - name: Authorization
+        value: Basic YWRtaW46ZmNjOGFjNDI1M2NiOGZhZTMxZWZmNDAy
+  livenessProbe:
+    enabled: false
+  customLivenessProbe:
+    httpGet:
+      path: /-/healthy
+      port: http
+      httpHeaders:
+      - name: Authorization
+        value: Basic YWRtaW46ZmNjOGFjNDI1M2NiOGZhZTMxZWZmNDAy
+  startupProbe:
+    enabled: false
+  tolerations:
+    - key: monitoring
+      operator: Equal
+      value: "true"
+      effect: NoSchedule
+  podAnnotations:
+    prometheus.io/scheme: "http"
+    prometheus.io/port: "10902"
+    prometheus.io/scrape: "true"
+
+storegateway:
+  enabled: true
+  serviceAccount:
+    create: true
+    annotations:
+      iam.gke.io/gcp-service-account: thanos-storegateway@student-coach-e1e95.iam.gserviceaccount.com
+  persistence:
+    storageClass: premium-rwo
+  tolerations:
+    - key: monitoring
+      operator: Equal
+      value: "true"
+      effect: NoSchedule
+  podAnnotations:
+    prometheus.io/scheme: "http"
+    prometheus.io/port: "10902"
+    prometheus.io/scrape: "true"
+
+receive:
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 2
+    targetMemory: 95
+  replicaCount: 1
+  resources:
+    requests:
+      memory: 8Gi
+  pdb:
+    create: false
+    minAvailable: 1
+  enabled: false
+  serviceAccount:
+    create: true
+    annotations:
+      iam.gke.io/gcp-service-account: thanos-receive@student-coach-e1e95.iam.gserviceaccount.com
+  extraFlags:
+    - --http.config=/etc/config/http_config.yaml
+  extraVolumeMounts:
+    - name: http-config
+      mountPath: /etc/config
+  extraVolumes:
+    - name: http-config
+      configMap:
+        name: thanos-receive-http-config
+  readinessProbe:
+    enabled: false
+  customReadinessProbe:
+    httpGet:
+      path: /-/ready
+      port: http
+      httpHeaders:
+      - name: Authorization
+        value: Basic aGVhbHRoY2hlY2s6YjFiMjgxMDliNWYyMTgwYTE1OThjNzRj
+  livenessProbe:
+    enabled: false
+  customLivenessProbe:
+    httpGet:
+      path: /-/healthy
+      port: http
+      httpHeaders:
+      - name: Authorization
+        value: Basic aGVhbHRoY2hlY2s6YjFiMjgxMDliNWYyMTgwYTE1OThjNzRj
+    periodSeconds: 30
+    failureThreshold: 20
+  startupProbe:
+    enabled: false
+  customStartupProbe:
+    httpGet:
+      path: /-/healthy
+      port: http
+      httpHeaders:
+      - name: Authorization
+        value: Basic aGVhbHRoY2hlY2s6YjFiMjgxMDliNWYyMTgwYTE1OThjNzRj
+    periodSeconds: 30
+    failureThreshold: 90
+  tsdbRetention: 2h
+  tolerations:
+    - key: monitoring
+      operator: Equal
+      value: "true"
+      effect: NoSchedule
+  persistence:
+    size: 16Gi
+    storageClass: premium-rwo
+
+ruler:
+  enabled: false
+  alertmanagers:
+    - https://alertmanager.prod.manabie-vn.manabie.io

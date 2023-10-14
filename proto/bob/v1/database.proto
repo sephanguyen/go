@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package bob.v1;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/bob/v1;bpb";
+
+message PostgresUser {
+  string user_name = 1;
+  bool use_create_db = 2;
+  bool use_super = 3;
+  bool use_repl = 4;
+  bool use_by_pass_rls = 5;
+}
+
+message GetPostgresUserPermissionRequest {
+}
+
+message GetPostgresUserPermissionResponse {
+  repeated PostgresUser postgres_users = 1;
+}
+
+service PostgresUserService {
+  rpc GetPostgresUserPermission(GetPostgresUserPermissionRequest)
+      returns (GetPostgresUserPermissionResponse);
+}
+
+message PostgresNamespace {
+  string namespace = 1;
+  repeated string access_privileges = 2;
+}
+
+message GetPostgresNamespaceRequest{}
+
+message GetPostgresNamespaceResponse{
+  repeated PostgresNamespace postgres_namespaces = 1;
+}
+
+service PostgresNamespaceService{
+  rpc GetPostgresNamespace(GetPostgresNamespaceRequest)
+      returns (GetPostgresNamespaceResponse);
+}

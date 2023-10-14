@@ -1,0 +1,99 @@
+{
+	"schema": [
+		{
+			"column_name": "max_slot",
+			"data_type": "integer",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "package_end_date",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "package_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "package_start_date",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "package_type",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "package",
+			"policyname": "rls_package",
+			"qual": "permission_check(resource_path, 'package'::text)",
+			"with_check": "permission_check(resource_path, 'package'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "package",
+			"policyname": "rls_package_restrictive",
+			"qual": "permission_check(resource_path, 'package'::text)",
+			"with_check": "permission_check(resource_path, 'package'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "fk_package_package_id",
+			"column_name": "package_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "package_pk",
+			"column_name": "package_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "package",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

@@ -1,0 +1,13 @@
+apiVersion: v2
+description: Helm chart for deploying kserve resources and CRDs
+keywords:
+- kserve
+- modelmesh
+name: kserve
+sources:
+- http://github.com/kserve/kserve
+version: v0.9.0
+dependencies:
+  - name: util
+    version: 0.1.0
+    repository: file://../../../libs/util

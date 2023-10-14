@@ -1,0 +1,264 @@
+# Even though this file only tests replica count, it can be extended
+# to check other things as well. We should rename this file to a more
+# suitable name then.
+suite: test replica count
+templates: # should contain all services except draft and gandalf
+  - ../templates/proxy-deployment.yaml
+
+  # - charts/zeus/templates/app.yaml
+# not sure why `values` works here, while the document doesn't mention it
+# ref: https://github.com/quintush/helm-unittest/blob/master/DOCUMENT.md#test-suite
+values:
+  - ../values.yaml
+tests:
+  # One should move services from tests[0] to tests[1] when migrating the helm chart to the new template.
+  - it: prod-aic-services should have 2 replicas (using old template)
+    values:
+      - ../../gateway/prod-aic-values.yaml
+      - ../prod-aic-values.yaml
+    set: &defaultHelmSet
+      # global.zeus.enabled: true
+      global.environment: prod
+      global.vendor: aic
+    templates: &templateV1List
+      - ../templates/proxy-deployment.yaml
+    asserts: &assertV1List
+      - equal:
+          path: spec.replicas
+          value: 2
+
+
+  # This test checks the same field as the previous test, but
+  # adjusted for services using the new template from `templates/_app.yaml`.
+  - it: prod-aic-services should have 2 replicas (new template using "templates/_app.yaml")
+    values:
+      - ../../gateway/prod-aic-values.yaml
+      - ../prod-aic-values.yaml
+    set:
+      <<: *defaultHelmSet
+      global.environment: prod
+      global.vendor: aic
+    templates: &templateV2List
+    asserts: &assertV2List
+      - equal:
+          path: spec.replicas
+          value: 2
+        documentIndex: 0
+
+  # !!! NOTES !!!
+  #   All the tests below are identical to the first 2 tests, but for different partners.
+  #   With the use of anchors, the tests below are duplicated from the first two tests.
+  #   so it is likely you will not need to change anything in the tests below.
+
+  # ga
+  - it: prod-ga-services should have 2 replicas (using old template)
+    values:
+      - ../../gateway/prod-ga-values.yaml
+      - ../prod-ga-values.yaml
+    set:
+      <<: *defaultHelmSet
+      global.environment: prod
+      global.vendor: ga
+    templates: *templateV1List
+    asserts: *assertV1List
+
+  - it: prod-ga-services should have 2 replicas (new template using "templates/_app.yaml")
+    values:
+      - ../../gateway/prod-ga-values.yaml
+      - ../prod-ga-values.yaml
+    set:
+      <<: *defaultHelmSet
+      global.environment: prod
+      global.vendor: ga
+    templates: *templateV2List
+    asserts: *assertV2List
+
+  # jprep
+  - it: prod-jprep-services should have 2 replicas (using old template)
+    values:
+      - ../../gateway/prod-jprep-values.yaml
+      - ../prod-jprep-values.yaml
+    set:
+      <<: *defaultHelmSet
+      global.environment: prod
+      global.vendor: jprep
+    templates: *templateV1List
+    asserts: *assertV1List
+
+  - it: prod-jprep-services should have 2 replicas (new template using "templates/_app.yaml")
+    values:
+      - ../../gateway/prod-jprep-values.yaml
+      - ../prod-jprep-values.yaml
+    set:
+      <<: *defaultHelmSet
+      global.environment: prod
+      global.vendor: jprep
+    templates: *templateV2List
+    asserts: *assertV2List
+
+  # renseikai
+  - it: prod-renseikai-services should have 2 replicas (using old template)
+    values:
+      - ../../gateway/prod-renseikai-values.yaml
+      - ../prod-renseikai-values.yaml
+    set:
+      <<: *defaultHelmSet
+      global.environment: prod
+      global.vendor: renseikai
+    templates: *templateV1List
+    asserts: *assertV1List
+
+  - it: prod-renseikai-services should have 2 replicas (new template using "templates/_app.yaml")
+    values:
+      - ../../gateway/prod-renseikai-values.yaml
+      - ../prod-renseikai-values.yaml
+    set:
+      <<: *defaultHelmSet
+      global.environment: prod
+      global.vendor: renseikai
+    templates: *templateV2List
+    asserts: *assertV2List
+
+  # synersia
+  - it: prod-synersia-services should have 2 replicas (using old template)
+    values:
+      - ../../gateway/prod-synersia-values.yaml
+      - ../prod-synersia-values.yaml
+    set:
+      <<: *defaultHelmSet
+      global.environment: prod
+      global.vendor: synersia
+    templates: *templateV1List
+    asserts: *assertV1List
+
+  - it: prod-synersia-services should have 2 replicas (new template using "templates/_app.yaml")
+    values:
+      - ../../gateway/prod-synersia-values.yaml
+      - ../prod-synersia-values.yaml
+    set:
+      <<: *defaultHelmSet
+      global.environment: prod
+      global.vendor: synersia
+    templates: *templateV2List
+    asserts: *assertV2List
+
+  # tokyo
+  - it: prod-tokyo-services should have 2 replicas (using old template)
+    values:
+      - ../../gateway/prod-tokyo-values.yaml
+      - ../prod-tokyo-values.yaml
+    set:
+      <<: *defaultHelmSet
+      global.environment: prod
+      global.vendor: tokyo
+    templates: *templateV1List
+    asserts: *assertV1List
+
+  - it: prod-tokyo-services should have 2 replicas (new template using "templates/_app.yaml")
+    values:
+      - ../../gateway/prod-tokyo-values.yaml
+      - ../prod-tokyo-values.yaml
+    set:
+      <<: *defaultHelmSet
+      global.environment: prod
+      global.vendor: tokyo
+    templates: *templateV2List
+    asserts: *assertV2List
+
+  # uat-manabie
+  - it: uat-manabie-services should have 2 replicas (using old template)
+    values:
+      - ../../gateway/uat-manabie-values.yaml
+      - ../uat-manabie-values.yaml
+    set:
+      <<: *defaultHelmSet
+      global.environment: uat
+      global.vendor: manabie
+    templates: *templateV1List
+    asserts: &uatAssertV1List
+      - equal:
+          path: spec.replicas
+          value: 2
+
+  - it: uat-manabie-services should have 2 replicas (new template using "templates/_app.yaml")
+    values:
+      - ../../gateway/uat-manabie-values.yaml
+      - ../uat-manabie-values.yaml
+    set:
+      <<: *defaultHelmSet
+      global.environment: uat
+      global.vendor: manabie
+    templates: *templateV2List
+    asserts: &uatAssertV2List
+      - equal:
+          path: spec.replicas
+          value: 2
+
+  # uat-jprep
+  - it: uat-jprep-services should have 2 replicas (using old template)
+    values:
+      - ../../gateway/uat-jprep-values.yaml
+      - ../uat-jprep-values.yaml
+    set:
+      <<: *defaultHelmSet
+      global.environment: uat
+      global.vendor: jprep
+    templates: *templateV1List
+    asserts: *uatAssertV1List
+
+  - it: uat-jprep-services should have 2 replicas (new template using "templates/_app.yaml")
+    values:
+      - ../../gateway/uat-jprep-values.yaml
+      - ../uat-jprep-values.yaml
+    set:
+      <<: *defaultHelmSet
+      global.environment: uat
+      global.vendor: jprep
+    templates: *templateV2List
+    asserts: *uatAssertV2List
+
+  # stag-manabie
+  - it: stag-manabie-services should have 2 replicas (using old template)
+    values:
+      - ../../gateway/stag-manabie-values.yaml
+      - ../stag-manabie-values.yaml
+    set:
+      <<: *defaultHelmSet
+      global.environment: stag
+      global.vendor: manabie
+    templates: *templateV1List
+    asserts: *uatAssertV1List
+
+  - it: stag-manabie-services should have 2 replicas (new template using "templates/_app.yaml")
+    values:
+      - ../../gateway/stag-manabie-values.yaml
+      - ../stag-manabie-values.yaml
+    set:
+      <<: *defaultHelmSet
+      global.environment: stag
+      global.vendor: manabie
+    templates: *templateV2List
+    asserts: *uatAssertV2List
+
+  # stag-jprep
+  - it: stag-jprep-services should have 2 replicas (using old template)
+    values:
+      - ../../gateway/stag-jprep-values.yaml
+      - ../stag-jprep-values.yaml
+    set:
+      <<: *defaultHelmSet
+      global.environment: stag
+      global.vendor: jprep
+    templates: *templateV1List
+    asserts: *uatAssertV1List
+
+  - it: stag-jprep-services should have 2 replicas (new template using "templates/_app.yaml")
+    values:
+      - ../../gateway/stag-jprep-values.yaml
+      - ../stag-jprep-values.yaml
+    set:
+      <<: *defaultHelmSet
+      global.environment: stag
+      global.vendor: jprep
+    templates: *templateV2List
+    asserts: *uatAssertV2List

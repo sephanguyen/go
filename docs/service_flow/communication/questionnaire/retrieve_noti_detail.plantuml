@@ -1,0 +1,29 @@
+@startuml AddNewNotification
+hide circle
+
+actor User as User order 10
+participant Bob as Bob order 40
+User -> Bob:  Call "NotificationReader.RetrieveNotificationDetail"
+note over User,Bob
+request payload: 
+    noti_id
+    <color:#green>++target_id
+end note
+activate Bob
+note right Bob
+1. Old logic: Find user_info_noti,info_noti,info_noti_msg
+2. New logic: If info_noti has questionnaire: 
+    Build questionnaire obj reading (questionnaire,qn_question) tables
+    Find qn_user_answer using(
+        qn_id=noti.qn_id,
+        user_id=current_user,
+        target_id=noti.student_id
+    ) 
+        if empty: 
+            qn_user_answers = []
+        else
+            qn_user_answers = [{question_order_id,answer}]
+    
+end note
+deactivate Bob
+@enduml

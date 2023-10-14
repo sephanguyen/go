@@ -1,0 +1,110 @@
+{
+	"schema": [
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "qr_id",
+			"data_type": "integer",
+			"column_default": "nextval('student_qr_id_seq'::regclass)",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "qr_url",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "student_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "version",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "student_qr",
+			"policyname": "rls_student_qr_location",
+			"qual": "(true \u003c= ( SELECT true AS bool\n   FROM (granted_permissions p\n     JOIN user_access_paths usp ON ((usp.location_id = p.location_id)))\n  WHERE ((p.user_id = current_setting('app.user_id'::text)) AND (p.permission_id = ( SELECT p2.permission_id\n           FROM permission p2\n          WHERE ((p2.permission_name = 'entryexit.student_qr.read'::text) AND (p2.resource_path = current_setting('permission.resource_path'::text))))) AND (usp.user_id = student_qr.student_id) AND (usp.deleted_at IS NULL))\n LIMIT 1))",
+			"with_check": "(true \u003c= ( SELECT true AS bool\n   FROM (granted_permissions p\n     JOIN user_access_paths usp ON ((usp.location_id = p.location_id)))\n  WHERE ((p.user_id = current_setting('app.user_id'::text)) AND (p.permission_id = ( SELECT p2.permission_id\n           FROM permission p2\n          WHERE ((p2.permission_name = 'entryexit.student_qr.write'::text) AND (p2.resource_path = current_setting('permission.resource_path'::text))))) AND (usp.user_id = student_qr.student_id) AND (usp.deleted_at IS NULL))\n LIMIT 1))",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "student_qr",
+			"policyname": "rls_student_qr_restrictive",
+			"qual": "permission_check(resource_path, 'student_qr'::text)",
+			"with_check": "permission_check(resource_path, 'student_qr'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "student_qr_pk",
+			"column_name": "qr_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "student_qr_qr_url_key",
+			"column_name": "qr_url",
+			"constraint_type": "UNIQUE"
+		},
+		{
+			"constraint_name": "student_qr_student_id_key",
+			"column_name": "student_id",
+			"constraint_type": "UNIQUE"
+		}
+	],
+	"table_name": "student_qr",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

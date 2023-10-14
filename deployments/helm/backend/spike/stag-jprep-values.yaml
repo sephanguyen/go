@@ -1,0 +1,6 @@
+podAnnotations:
+    sidecar.istio.io/proxyCPU: 5m
+    sidecar.istio.io/proxyMemory: 50Mi
+resources:
+    limits:
+        memory: 2Gi

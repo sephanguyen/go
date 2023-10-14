@@ -1,0 +1,121 @@
+{
+	"schema": [
+		{
+			"column_name": "access_path",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "created_user_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "location_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "notification_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "info_notifications_access_paths",
+			"policyname": "rls_info_notifications_access_paths_location_permission_v4",
+			"qual": "(true \u003c= ( SELECT true AS bool\n   FROM granted_permissions p\n  WHERE ((p.user_id = current_setting('app.user_id'::text)) AND (p.location_id = info_notifications_access_paths.location_id) AND ((p.permission_id = ( SELECT p2.permission_id\n           FROM permission p2\n          WHERE ((p2.permission_name = 'communication.notification.read'::text) AND (p2.resource_path = current_setting('permission.resource_path'::text))))) OR ((p.permission_id = ( SELECT p2.permission_id\n           FROM permission p2\n          WHERE ((p2.permission_name = 'communication.notification.owner'::text) AND (p2.resource_path = current_setting('permission.resource_path'::text))))) AND (info_notifications_access_paths.created_user_id = current_setting('app.user_id'::text)))))\n LIMIT 1))",
+			"with_check": "(true \u003c= ( SELECT true AS bool\n   FROM granted_permissions p\n  WHERE ((p.user_id = current_setting('app.user_id'::text)) AND (p.location_id = info_notifications_access_paths.location_id) AND ((p.permission_id = ( SELECT p2.permission_id\n           FROM permission p2\n          WHERE ((p2.permission_name = 'communication.notification.write'::text) AND (p2.resource_path = current_setting('permission.resource_path'::text))))) OR ((p.permission_id = ( SELECT p2.permission_id\n           FROM permission p2\n          WHERE ((p2.permission_name = 'communication.notification.owner'::text) AND (p2.resource_path = current_setting('permission.resource_path'::text))))) AND (info_notifications_access_paths.created_user_id = current_setting('app.user_id'::text)))))\n LIMIT 1))",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "info_notifications_access_paths",
+			"policyname": "rls_info_notifications_access_paths_restrictive",
+			"qual": "permission_check(resource_path, 'info_notifications_access_paths'::text)",
+			"with_check": "permission_check(resource_path, 'info_notifications_access_paths'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "fk__info_notifications_access_paths__location_id",
+			"column_name": "location_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "fk__info_notifications_access_paths__notification_id",
+			"column_name": "notification_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "pk__info_notifications_access_paths",
+			"column_name": "location_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "pk__info_notifications_access_paths",
+			"column_name": "notification_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "info_notifications_access_paths",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

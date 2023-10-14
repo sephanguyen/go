@@ -1,0 +1,70 @@
+table:
+  schema: public
+  name: location_types
+select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+        - created_at
+        - deleted_at
+        - display_name
+        - is_archived
+        - location_type_id
+        - name
+        - parent_location_type_id
+        - parent_name
+        - updated_at
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+        - created_at
+        - deleted_at
+        - display_name
+        - is_archived
+        - location_type_id
+        - name
+        - parent_location_type_id
+        - parent_name
+        - updated_at
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+          - resource_path:
+              _eq: X-Hasura-Resource-Path
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+        - created_at
+        - deleted_at
+        - display_name
+        - location_type_id
+        - name
+        - parent_name
+        - updated_at
+      filter:
+        _and:
+          - resource_path:
+              _eq: X-Hasura-Resource-Path
+          - deleted_at:
+              _is_null: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+        - created_at
+        - deleted_at
+        - display_name
+        - location_type_id
+        - name
+        - parent_name
+        - updated_at
+      filter:
+        _and:
+          - resource_path:
+              _eq: X-Hasura-Resource-Path
+          - deleted_at:
+              _is_null: true

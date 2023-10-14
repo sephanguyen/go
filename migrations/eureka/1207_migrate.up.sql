@@ -1,0 +1,1 @@
+ALTER TABLE IF EXISTS question_group ADD COLUMN IF NOT EXISTS rich_description JSONB NULL;

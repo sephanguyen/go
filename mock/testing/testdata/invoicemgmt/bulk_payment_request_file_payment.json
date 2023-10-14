@@ -1,0 +1,115 @@
+{
+	"schema": [
+		{
+			"column_name": "bulk_payment_request_file_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "bulk_payment_request_file_payment_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "payment_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "bulk_payment_request_file_payment",
+			"policyname": "rls_bulk_payment_request_file_payment",
+			"qual": "permission_check(resource_path, 'bulk_payment_request_file_payment'::text)",
+			"with_check": "permission_check(resource_path, 'bulk_payment_request_file_payment'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "bulk_payment_request_file_payment",
+			"policyname": "rls_bulk_payment_request_file_payment_restrictive",
+			"qual": "permission_check(resource_path, 'bulk_payment_request_file_payment'::text)",
+			"with_check": "permission_check(resource_path, 'bulk_payment_request_file_payment'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "bulk_payment_request_file_payment_bulk_payment_request_file__fk",
+			"column_name": "bulk_payment_request_file_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "bulk_payment_request_file_payment_payment__fk",
+			"column_name": "payment_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "bulk_payment_request_file_payment__pk",
+			"column_name": "bulk_payment_request_file_payment_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "bulk_payment_request_file_payment_payment_id_key",
+			"column_name": "payment_id",
+			"constraint_type": "UNIQUE"
+		}
+	],
+	"table_name": "bulk_payment_request_file_payment",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

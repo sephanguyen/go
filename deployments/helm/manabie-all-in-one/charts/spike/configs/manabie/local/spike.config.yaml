@@ -1,0 +1,19 @@
+common:
+  grpc:
+    client_name: spike
+    client_version: {{ .Values.clientVersion }}
+  identity_platform_project: dev-manabie-online
+postgres_v2:
+  notificationmgmt:
+    max_conns: 16
+issuers:
+  - issuer: http://firebase.emulator.svc.cluster.local:40401/fake_aud
+    audience: fake_aud
+    jwks_endpoint: http://firebase.emulator.svc.cluster.local:40401/jwkset
+  - issuer: manabie
+    audience: manabie-local
+    jwks_endpoint: http://shamir:5680/.well-known/jwks.json
+email_webhook:
+  receive_from_all_tenant: true
+  #receive_only_from_tenant:
+  #  - ""

@@ -1,0 +1,41 @@
+replicaCount: 2
+
+httpRoute:
+  - match:
+      - uri:
+          prefix: /
+    route:
+      - destination:
+          host: backoffice.uat-manabie-backoffice-mfe.svc.cluster.local
+          port:
+            number: 80
+
+affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: cloud.google.com/gke-spot
+                operator: In
+                values: ["true"]
+              - key: n2d-highmem-2-uat-spot
+                operator: In
+                values: ["true"]
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution: []
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - podAffinityTerm:
+            topologyKey: kubernetes.io/hostname
+            labelSelector:
+              matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values: ["backoffice"]
+          weight: 100
+tolerations:
+  - effect: NoSchedule
+    key: cloud.google.com/gke-spot
+    operator: Exists
+  - effect: NoSchedule
+    key: n2d-highmem-2-uat-spot
+    operator: Exists

@@ -1,0 +1,80 @@
+syntax = "proto3";
+
+package discount.v1;
+
+import "discount/v1/enums.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/discount/v1;pmpb";
+
+message ImportDiscountTagRequest {
+  bytes payload = 1;
+}
+
+message ImportDiscountTagResponse {
+  message ImportDiscountTagError {
+    int32 row_number = 1;
+    string error = 2;
+  }
+  repeated ImportDiscountTagError errors = 1;
+}
+
+message ImportProductGroupRequest {
+  bytes payload = 1;
+}
+
+message ImportProductGroupResponse {
+  message ImportProductGroupError {
+    int32 row_number = 1;
+    string error = 2;
+  }
+  repeated ImportProductGroupError errors = 1;
+}
+
+message ImportProductGroupMappingRequest {
+  bytes payload = 1;
+}
+
+message ImportProductGroupMappingResponse {
+  message ImportProductGroupMappingError {
+    int32 row_number = 1;
+    string error = 2;
+  }
+  repeated ImportProductGroupMappingError errors = 1;
+}
+
+message ImportPackageDiscountSettingRequest {
+  bytes payload = 1;
+}
+
+message ImportPackageDiscountSettingResponse {
+  message ImportPackageDiscountSettingError {
+    int32 row_number = 1;
+    string error = 2;
+  }
+  repeated ImportPackageDiscountSettingError errors = 1;
+}
+
+message ImportPackageDiscountCourseMappingRequest {
+  bytes payload = 1;
+}
+
+message ImportPackageDiscountCourseMappingResponse {
+  message ImportPackageDiscountCourseMappingError {
+    int32 row_number = 1;
+    string error = 2;
+  }
+  repeated ImportPackageDiscountCourseMappingError errors = 1;
+}
+
+service ImportMasterDataService {
+  rpc ImportDiscountTag(ImportDiscountTagRequest)
+      returns (ImportDiscountTagResponse);
+  rpc ImportProductGroup(ImportProductGroupRequest)
+      returns (ImportProductGroupResponse);
+  rpc ImportProductGroupMapping(ImportProductGroupMappingRequest)
+      returns (ImportProductGroupMappingResponse);
+  rpc ImportPackageDiscountSetting(ImportPackageDiscountSettingRequest)
+    returns (ImportPackageDiscountSettingResponse);
+  rpc ImportPackageDiscountCourseMapping(ImportPackageDiscountCourseMappingRequest)
+    returns (ImportPackageDiscountCourseMappingResponse);
+}

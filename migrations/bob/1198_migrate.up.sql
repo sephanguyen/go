@@ -1,0 +1,4 @@
+DROP TABLE IF EXISTS e2e_instances;
+DROP TABLE IF EXISTS e2e_features;
+DROP TABLE IF EXISTS e2e_scenarios;
+DROP TABLE IF EXISTS e2e_steps;

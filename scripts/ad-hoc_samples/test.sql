@@ -1,0 +1,1 @@
+SELECT * FROM activity_logs as al WHERE al.action_type= :v1 AND al.status= :v2 LIMIT 10;

@@ -1,0 +1,1100 @@
+unleash:
+  featureFlags:
+    lesson:
+      - name: Lesson_GenerateGqlPaginationQuery_BackOffice
+        description: "This is a dummy toggle for testing purpose"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+      - name: Lesson_LessonReport_BackOffice_LessonReportManagement
+        description: "This is a dummy toggle for testing purpose"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_LessonManagement
+        description: "A feature flag to enable Lesson Management"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "none"
+            constraints: []
+      - name: Lesson_LessonGroup_BackOffice_LessonManagement
+        description: "A feature flag to enable Lesson Group in Lesson Management (LT-15487)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_CreateLessonGroup
+        description: "A feature flag to enable display form create lesson group (LT-15488)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_RecurringLesson
+        description: "A feature flag to enable display recurring lesson (LT-13526)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_DraftOrPublishedLesson
+        description: "A feature flag to enable display draft or published lesson (LT-13373)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_LessonReportIndividualUpdate
+        description: "A feature flag to enable display lesson report with new UI (LT-15799)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_LockLesson
+        description: "A feature flag to enable display lock the lesson data after receiving the event from the Timesheet team (LT-21844)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_CourseManagement_BackOffice_AddLocationField
+        description: "A feature flag to enable field Location in Course Management"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_CourseManagement_BackOffice_RemoveCourseLocation
+        description: "A feature flag to to allow remove course-location (LT-12188)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_Global_BackOffice_NavLocationSelect
+        description: "A feature flag to enable dropdown button to open Location selection dialog in Nav Bar"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_LocationFilter
+        description: "A feature flag to enable Location filter in Lesson Management"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_AssignedStudent_BackOffice_AssignedStudentList
+        description: "A feature flag to enable Assigned Student List in Lesson Management (LT-19396)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_Course_BackOffice_TeachingMethod
+        description: "A feature flag to use teaching method in course page (LT-13371)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+          - name: strategy_organization
+            parameters:
+              organizations: "-2147483635,-2147483642,-2147483639,-2147483623,-2147483628"
+            constraints: []
+      - name: Lesson_CourseManagement_BackOffice_ClassManagement
+        description: "A feature flag to enable class management (LT-15459)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_BACKEND_Student_View_Lesson_Blacklisted_Course_List
+        description: "(THIS IS ONLY FOR BDD TESTING ON BACKEND) A feature flag to enable student can view blacklisted/whitelisted A+ courses. If true, show all except blacklist whitelist, else only show whitelist. (LT-15814)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: Lesson_CourseDetail_BackOffice_LocationField
+        description: "A feature flag to show location field in course detail (LT-16917)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_AttachHyperLinkStudent
+        description: "A feature flag to enable attach hyperlink to the student name in lesson detail page (LT-19858)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_LessonReportGroup
+        description: "A feature flag to enable display lesson report group (LT-15801)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_ShowAlertWhenNoLessonMember
+        description: "A feature flag to enable show alert when lesson no lesson member (LT-18838)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: BACKEND_Lesson_HandleUpdateStatusWhenUserSubmitLessonReport
+        description: "A feature flag to allow update status when user submit lesson report feature (LT-21178)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: BACKEND_Lesson_HandleShowOnlyPublishStatusForEndpointListLessonForTeacherStudent
+        description: "A feature flag to show only publish status for endpoint list lesson for teacher, student (LT-20416)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_LessonWithDayType
+        description: "A feature flag to enable display lesson with Day type (LT-17709)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_AllocateStudentToLessonAutomatically
+        description: "A feature flag to enable auto allocate student to lesson (LT-19806)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_ValidateStudentCourseDuration
+        description: "A feature flag to enable checking and validating student course duration suitable with lesson time (LT-19811)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_DuplicateLesson
+        description: "A feature flag to enable duplicate lesson (LT-18840)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_CancelLesson
+        description: "A feature flag to enable cancel lesson (LT-18839)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: BACKEND_Lesson_LockLessonSubscription
+        description: "A feature flag to show Scheduled Invoices features (LT-22267)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_LessonUpdateAttendance
+        description: "A feature flag to enable display update the attendance in lesson upsert (LT-15800)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_Improvement_RecurringLessonEdgeCase
+        description: "A feature flag to enable improvement for recurring lesson edge cases (LT-22016)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_Improvement_StudentInfoTable
+        description: "A feature flag to enable improvement for student info table (LT-25463)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_GradeMaster
+        description: "A feature flag to enable grade master for lesson (LT-25265)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_ValidationLessonBeforeCompleted
+        description: "A feature flag to enable check attendance status when lesson moving to completed (LT-22050)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_RecordingList
+        description: "A feature flag to enable lesson recording feature (LT-18072)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_LessonAlertPermission
+        description: "A feature flag to enable show alert permission when editing lesson (LT-19723)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_StaffQuery
+        description: "A feature flag to update from teacher table to staff table (LT-25870)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_UseNameInTableRelatedToLesson
+        description: "A feature flag to use student name and teacher name from user table to lesson_members, lesson_teacher, lesson_student_subscriptions tables (LT-27441)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "none"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_AddDayColumnToLessonsTable
+        description: "A feature flag to enable adding Day column to lessons list table (LT-21189)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_PublishAndCancelLessonByBulk
+        description: "A feature flag to enable publish and cancel lesson by bulk (LT-21194)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: BACKEND_Student_ChangeClassSubscription
+        description: "A feature flag to Student Auto Join Lesson features (LT-22044)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_Student_UseUserBasicInfoTable
+        description: "A feature flag to toggle LessonMGMT to use table `user_basic_info` instead of table `users` for querying (LT-28343)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_ImportClassroomCSV
+        description: "A feature flag to enable importing classroom by uploading CSV file (LT-21206)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_FlagLessonWithCourseType
+        description: "A feature flag to enable flag the lesson with course type (LT-21210)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_ReallocateStudents
+        description: "A feature flag to Reallocate students to lesson features (LT-21190)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_AttachZoomLink
+        description: "A feature flag to enable attach zoom link feature (LT-28164)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_LessonManagementV2
+        description: "A feature flag to enable Lesson ManagementV2 (LT-27610)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_SearchUserByKanaKanjName
+        description: "A feature flag to enable search teacher or student by Kana, Kanji name (LT-21188)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_ImportLessonCSV
+        description: "A feature flag to enable importing lesson by uploading CSV file (LT-21192)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_CreateSchedulerInCalendar
+        description: "A feature flag to enable creating scheduler for lessons in calendar db thru API (LT-24219)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "none"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_FilterBasedOnLocationSetting
+        description: "A feature flag to enable adjusting location, course and class filters based on Location Settings (LT-28831)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_ImproveUploadPDFFile
+        description: "A feature flag to enable getting the newest conversion status of pdf file (LT-16482)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_EnrollmentStudentTag
+        description: "A feature flag to enable adding 'New' student tag to student list (LT-21193)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_ConfigurationsLessonReportAndWrite
+        description: "A feature flag to enable feature configuration for lesson report and lesson write (LT-26433)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_AssignedStudent_BackOffice_FilterLocationAndCourseUnderLocationSetting
+        description: "A feature flag to enable filter location and course based on location settings to Assigned Student List (LT-28832)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_UpdateJapaneseTranslation
+        description: "A feature flag to enable updating Japanese translation (LT-32069)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_UpdateRenseikaiIndividualLessonReport
+        description: "A feature flag to enable updating Renseikai individual lesson report (LT-27479)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_ShareAudioFile
+        description: "A feature flag to enable uploading audio file (LT-29124)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_FilterTeacherByGrantedLocation
+        description: "A feature flag to enable filtering teacher by granted location (LT-30698)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_MigrationAPIBobToLessonMgmtService
+        description: "A feature flag to enable migration api from bob to lessonmgmt service (LT-33946)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "none"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_UpdateGroupReportRenseikai
+        description: "A feature flag to enable attendance group lesson report Renseikai (LT-28736)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_ImportLessonByCSVV2
+        description: "A feature flag to enable importing lesson by uploading CSV file - ver2 (LT-33286)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_ExportEnrolledStudentAndTeacher
+        description: "A feature flag to enable master management for enrolled student and teacher export (LT-37697)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_SaveReportPerStudent
+        description: "A feature flag to enable saving lesson report per student (LT-30893)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_ReportHistory
+        description: "A feature flag to enable report history (LT-27132)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_UseStudentEnrollmentStatusHistory
+        description: "A feature flag to enable using student_enrollment_status_history (LT-35721)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_Student_SearchInGivenNameColumn
+        description: "A feature flag to toggle LessonMGMT to look also in given_name column in users table when using keyword search (LT-35984)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "none"
+            constraints: []
+      - name: BACKEND_Lesson_UpcomingLiveLessonNotification
+        description: "A feature flag to enable sending notifications for upcoming live lessons (LT-36337)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_ReportReviewPermission
+        description: "A feature flag to restrict report submission (LT-27132)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_StandardizingFormFilterAdvanced
+        description: "A feature flag to standardizing Search and Filter behavior (LT-36644)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_OptimisticLockingLessonReport
+        description: "A feature flag to optimistic locking lesson report (LT-37207)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_MicroFrontendTaskRunnerConvertPDF
+        description: "A feature flag to enable using manaTaskRunner when converting pdf file (LT-35379)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_UpdateClassroomFlow
+        description: "A feature flag to enable the new classroom flow (LT-30711)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_PrefilterStudentInLessonUpsert
+        description: "A feature flag to enable pre-filtering student list in add student dialog (LT-38410)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_DynamicColumnLessonList
+        description: "A feature flag to enable dynamic column on lesson list (LT-21200)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_UpdateLessonUpsert
+        description: "A feature flag to enable new lesson upsert (LT-32514)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_PrefilterCourseAndClassInLessonList
+        description: "A feature flag to enable update pre-filtering course and class in lesson list (LT-32718)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_SwitchNewDBConnection
+        description: "A feature flag to switch database from bob to lessonmgmt (LT-38552)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_FilterLessonByLessonReportStatus
+        description: "A feature flag to enable filter lesson by lesson report status (LT-24074)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_LessonAllocation
+        description: "A feature flag to enable show lesson allocation list (LT-36434)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_UpdateToLessonRecurring
+        description: "A feature flag to enable update edit lesson recurring (LT-38838)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_AddKanaNameGenderAndSchoolToStudentInfo
+        description: "A feature flag to add Kana name, gender and school name to Student Info (LT-21187)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_ReportAdjustmentsBasedOnStudentAttendance
+        description: "A feature flag to report logic adjustments based on Student Attendance (LT-39071)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_RecurringLessonImprovement
+        description: "A feature flag to improve student info should not be overwritten when there are changes to general Info (LT-39111)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_TemporaryLocationAssignment
+        description: "A feature flag to refactor implement create temporary assignment(LT-40464)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_LessonAppConfig
+        description: "A feature flag to toggle use lessonAppConfig instead root config (LT-40301)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_Migrate_Query_Bob_To_LessonMgmt
+        description: "A feature flag to toggle migrating query bob to lessonmgmt (LT-38549)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_CourseTeachingTime
+        description: "A feature flag to allow user to add preparation time and break time per course (LT-39811)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_NewDatePicker
+        description: "A feature flag to toggle new date picker component (LT-41260)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_ImportExportCourseLocationScheduling
+        description: "A feature flag to import and export course location scheduling (LT-39878)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_UpdateConfigAssignedStudentList
+        description: "A feature flag to convert the existing Assigned Student List to Attendance module (LT-42768)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_NotShowLeaveThePagePopup
+        description: "A feature flag to enable not show Leave the Page Popup when nothing is changed in form (LT-41495)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_ShowUnassignedClassTag
+        description: "A feature flag to enable filter Student by Unassigned Class and show that tag (LT-42769)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_ClassDoIntegration
+        description: "A feature flag to enable ClassDo integration (LT-44424)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_PrefilterStudentByCourse
+        description: "A feature flag to enable pre-filter student by course of group lesson (LT-44776)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_FilterLessonAllocationByProduct
+        description: "A feature flag to enable filter Lesson Allocation by product (LT-44400)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_OptimizeImportLesson
+        description: "A feature flag to enable optimizing import lesson (LT-45559)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+      - name: Lesson_LessonManagement_FilterAttendanceListByCurrentYear
+        description: "A feature flag to enable filter attendance list by current academic year (LT-46187)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+          - name: strategy_organization
+            parameters:
+              organizations: "-2147483623,-2147483635,-2147483642"
+            constraints: []
+      - name: Lesson_LessonManagement_BackOffice_OptimizeLessonAllocation
+        description: "A feature flag to enable optimize lesson allocation (LT-46208)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []

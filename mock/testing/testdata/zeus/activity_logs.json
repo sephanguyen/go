@@ -1,0 +1,96 @@
+{
+	"schema": [
+		{
+			"column_name": "action_type",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "activity_log_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "finished_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "payload",
+			"data_type": "jsonb",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "request_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "status",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "user_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "activity_logs",
+			"policyname": null,
+			"qual": null,
+			"with_check": null,
+			"relrowsecurity": null,
+			"relforcerowsecurity": null,
+			"permissive": null,
+			"roles": {
+				"Elements": null,
+				"Dimensions": null,
+				"Status": 1
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "activity_logs_pkey",
+			"column_name": "activity_log_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "activity_logs",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

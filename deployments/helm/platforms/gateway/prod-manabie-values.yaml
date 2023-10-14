@@ -1,0 +1,46 @@
+skipTLSVerify: &skipTLSVerify false
+
+acme: &acme
+  email: tech.support@manabie.com
+  server: https://acme-v02.api.letsencrypt.org/directory
+
+dnsNames: &dnsNames
+  webApi:
+    - web-api.prod.manabie-vn.manabie.io
+  api:
+    - api.prod.manabie-vn.manabie.io
+  admin:
+    - admin.prod.manabie-vn.manabie.io
+  backoffice:
+    - backoffice.prod.manabie-vn.manabie.io
+  teacher:
+    - teacher.prod.manabie-vn.manabie.io
+  learner:
+    - learner.prod.manabie-vn.manabie.io
+
+backend: &backend
+  skipTLSVerify: *skipTLSVerify
+
+  acme: *acme
+
+  dnsNames: *dnsNames
+global: *backend
+
+bob: *backend
+enigma: *backend
+eureka: *backend
+fatima: *backend
+tom: *backend
+yasuo: *backend
+usermgmt: *backend
+backoffice: *backend
+learner-web: *backend
+teacher-web: *backend
+unleash: *backend
+mastermgmt: *backend
+import-map-deployer: *backend
+payment: *backend
+lessonmgmt: *backend
+entryexitmgmt: *backend
+virtualclassroom: *backend
+timesheet: *backend

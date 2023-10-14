@@ -1,0 +1,12 @@
+{
+    "recommendations": [
+        "streetsidesoftware.code-spell-checker",
+        "golang.go",
+        "ms-kubernetes-tools.vscode-kubernetes-tools",
+        "jebbs.plantuml",
+        "redhat.vscode-yaml",
+        "ms-python.python",
+        "timonwong.shellcheck",
+        "editorconfig.editorconfig"
+    ]
+} 

@@ -1,0 +1,39 @@
+- name: allowed-queries
+  definition:
+    queries:
+      - name: ActivityLogById
+        query: |
+          query ActivityLogById ($activity_log_id: String = "") {
+          	activity_logs_by_pk(activity_log_id: $activity_log_id) {
+          		action_type
+          		created_at
+          		deleted_at
+          		payload
+          		request_at
+          		resource_path
+          		status
+          		updated_at
+          		user_id
+          	}
+          }
+      - name: ActivityLogs
+        query: |
+          query ActivityLogs ($limit: Int = 10, $offset: Int = 0, $action_type: String = "", $request_at_start: timestamptz = "", $request_at_end: timestamptz = "") {
+          	activity_logs(limit: $limit, offset: $offset, where: {action_type:{_eq:$action_type},request_at:{_gte:$request_at_start,_lte:$request_at_end}}) {
+          		action_type
+          		created_at
+          		deleted_at
+          		payload
+          		request_at
+          		resource_path
+          		status
+          		updated_at
+          		user_id
+          		activity_log_id
+          	}
+          	activity_logs_aggregate(where: {action_type:{_eq:$action_type},request_at:{_gte:$request_at_start,_lte:$request_at_end}}) {
+          		aggregate {
+          			count
+          		}
+          	}
+          }

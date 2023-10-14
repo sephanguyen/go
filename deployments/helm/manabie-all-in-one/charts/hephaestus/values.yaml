@@ -1,0 +1,40 @@
+grpcPort: 7150
+
+metrics:
+  enabled: false
+  podAnnotations: {}
+affinity: {}
+affinityOverride: {}
+
+postHookUpsertKafkaConnect: true
+postHookUpsertKsqlMigration: true
+postHookSyncDataLake: false
+postHookSyncDataWarehouse : false
+
+postHookMigrateDataLake: false
+postHookMigrateDatawarehouses: false
+
+hookLocalInitData:
+  image:
+    repository: jbergknoff/postgresql-client
+    tag: latest
+
+ksqldb:
+  migrate:
+    image:
+      repository: confluentinc/ksqldb-cli
+      tag: 0.28.2
+
+dataWarehousePartners:
+  - kec
+
+dwhCounter:
+  schedule: "0 * * * *"
+
+enableAC: false
+topicPrefix: ""
+enableCounterTest: false
+
+kecResourcePath: "-2147483642"
+cpRegistryHost: "http://dwh-cp-schema-registry:8081"
+fileFilter: "00"

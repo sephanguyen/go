@@ -1,0 +1,30 @@
+common:
+  grpc:
+    client_name: notificationmgmt
+    client_version: {{ .Values.clientVersion }}
+  firebase_project: dev-manabie-online
+postgres_v2:
+  bob:
+    max_conns: 16
+  notificationmgmt:
+    max_conns: 16
+issuers:
+  - issuer: http://firebase.emulator.svc.cluster.local:40401/fake_aud
+    audience: fake_aud
+    jwks_endpoint: http://firebase.emulator.svc.cluster.local:40401/jwkset
+  - issuer: manabie
+    audience: manabie-local
+    jwks_endpoint: http://shamir:5680/.well-known/jwks.json
+brightcove:
+  account_id: 6064018595001
+  client_id: 7f7d1f2e-9a66-4cf5-8187-95aabd9ccaa8
+  profile: Asia-PREMIUM (96-1500)
+jwt_applicant: manabie-local
+storage:
+  endpoint: https://minio.local.manabie.io:31600
+  region: us-east-1
+  bucket: manabie
+  secure: true
+  insecure_skip_verify: true
+scheduled_notification:
+  is_running_for_all_tenants: true

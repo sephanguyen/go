@@ -1,0 +1,164 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "graphql-mesh.fullname" . }}
+  labels:
+    {{- include "graphql-mesh.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "graphql-mesh.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/proto: {{ (.Files.Glob "proto/**").AsConfig | sha256sum }}
+        checksum/meshrc.yaml: {{ tpl ("configs/.meshrc.yaml" | .Files.Get) . | sha256sum }}
+      {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "graphql-mesh.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "graphql-mesh.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      volumes:
+      - name: proto
+        configMap:
+          name: {{ include "graphql-mesh.fullname" . }}-proto
+      - name: config-volume
+        configMap:
+          name: {{ include "graphql-mesh.fullname" . }}
+          items:
+          - key: .meshrc.yaml
+            path: .meshrc.yaml
+      containers:
+        - name: {{ .Chart.Name }}          
+          image: "{{ .Values.graphqlMesh.image.repository }}:{{ .Values.graphqlMesh.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.graphqlMesh.image.pullPolicy }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          ports:
+            - name: graphql-mesh
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+#           readinessProbe:
+#             httpGet:
+#               path: /graphql-mesh/health
+#               port: {{ .Values.service.port }}
+#             initialDelaySeconds: 5
+#             timeoutSeconds: 5
+#             periodSeconds: 5
+#           livenessProbe:
+#             httpGet:
+#               path: /graphql-mesh/health
+#               port: {{ .Values.service.port }}
+#             timeoutSeconds: 5
+          volumeMounts:
+          - name: config-volume
+            mountPath: /graphq-mesh/.meshrc.yaml
+            subPath: .meshrc.yaml
+            readOnly: true
+    {{- range $path, $_ := .Files.Glob "proto/**/*.proto" }}
+          - name: proto
+            mountPath: "/graphq-mesh/{{ $path }}"
+            subPath: {{ $path | replace "/" "-" }}
+    {{- end }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              
+              yarn start
+              
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      affinity:
+        nodeAffinity:
+        {{- if ne "local" .Values.global.environment }}
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: cloud.google.com/gke-spot
+                operator: In
+                values:
+                - "true"
+          {{- range $k1, $v1 := .Values.affinity }}
+            {{- if eq $k1 "nodeAffinity" }}
+            {{- range $k2, $v2 := $v1 }}
+                {{- if eq $k2 "requiredDuringSchedulingIgnoredDuringExecution" }}
+                {{- toYaml $v2 | indent 12 }}
+                {{- else }}
+                {{- $k2 | nindent 10 }}:
+                {{- toYaml $v2 | nindent 12 }}
+                {{- end }}
+            {{- end }}
+            {{- end }}
+          {{- end }}
+        {{- else }}
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 10
+              preference:
+                matchExpressions:
+                - key: cloud.google.com/gke-spot
+                  operator: In
+                  values:
+                  - "true"
+          {{- range $k1, $v1 := .Values.affinity }}
+            {{- if eq $k1 "nodeAffinity" }}
+            {{- range $k2, $v2 := $v1 }}
+                {{- if eq $k2 "preferredDuringSchedulingIgnoredDuringExecution" }}
+                {{- toYaml $v2 | indent 12 }}
+                {{- else }}
+                {{- $k2 | nindent 10 }}:
+                {{- toYaml $v2 | nindent 12 }}
+                {{- end }}
+            {{- end }}
+            {{- end }}
+          {{- end }}
+        {{- end }}
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                    matchLabels:
+                      app.kubernetes.io/name: {{ include "graphql-mesh.name" . }}
+                topologyKey: kubernetes.io/hostname
+    {{- range $k1, $v1 := .Values.affinity }}
+      {{- if eq $k1 "podAntiAffinity" }}
+      {{- range $k2, $v2 := $v1 }}
+          {{- if eq $k2 "preferredDuringSchedulingIgnoredDuringExecution" }}
+          {{- toYaml $v2 | indent 12 }}
+          {{- else }}
+          {{- $k2 | nindent 10 }}:
+          {{- toYaml $v2 | nindent 12 }}
+          {{- end }}
+      {{- end }}
+      {{- end }}
+    {{- end }}
+    {{- range $k1, $v1 := .Values.affinity }}
+    {{- if and (ne $k1 "nodeAffinity") (ne $k1 "podAntiAffinity") }}
+    {{- $k1 | nindent 8 }}:
+    {{- toYaml $v1 | nindent 10 }}
+    {{- end }}
+    {{- end }}
+      tolerations:
+        - effect: NoSchedule
+          key: "cloud.google.com/gke-spot"
+          operator: Exists
+    {{- with .Values.tolerations }}
+        {{- toYaml . | nindent 8 }}
+    {{- end }}

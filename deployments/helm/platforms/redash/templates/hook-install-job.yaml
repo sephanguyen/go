@@ -1,0 +1,134 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "{{ .Release.Name }}-install"
+  labels:
+    {{- include "redash.labels" . | nindent 4 }}
+    app.kubernetes.io/component: install
+  annotations:
+    # This is what defines this resource as a hook.
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  ttlSecondsAfterFinished: {{ .Values.hookInstallJob.ttlSecondsAfterFinished }}
+  template:
+    metadata:
+      name: "{{ .Release.Name }}"
+      labels:
+        {{- include "redash.selectorLabels" . | nindent 8 }}
+      {{- if .Values.hookInstallJob.podAnnotations }}
+      annotations:
+      {{ toYaml .Values.hookInstallJob.podAnnotations | nindent 8 }}
+      {{- end }}
+    spec:
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      serviceAccountName: {{ include "redash.serviceAccountName" . }}
+      restartPolicy: Never
+      securityContext:
+        {{- toYaml .Values.hookInstallJob.podSecurityContext | nindent 8 }}
+      initContainers:
+      - name: decrypt-secret
+        image: "{{ .Values.sopsImage }}"
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+        - mountPath: /secrets_env/redash.secrets.encrypted.env
+          subPath: redash.secrets.encrypted.env
+          name: redash-env-secret
+        - mountPath: /decrypted_env
+          name: decrypted-env
+        {{- if eq "local" .Values.environment }}
+        - name: service-credential
+          mountPath: /configs/service_credential.json
+          subPath: service_credential.json
+          readOnly: true
+        env:
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: "/configs/service_credential.json"
+        {{- end }}
+        command:
+          - /bin/sh
+          - -c
+          - |
+            sops -d /secrets_env/redash.secrets.encrypted.env > /decrypted_env/config.env
+      containers:
+      - name: {{ include "redash.name" . }}-server
+        securityContext:
+          {{- toYaml .Values.hookInstallJob.securityContext | nindent 12 }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        volumeMounts:
+          - name: config
+            mountPath: /config
+          - name: decrypted-env
+            mountPath: /decrypted_env
+        env:
+        {{- include "redash.env" . | nindent 10 }}
+        {{- range $key, $value := .Values.server.env }}
+          - name: "{{ $key }}"
+            value: "{{ $value }}"
+        {{- end }}
+        envFrom:
+        {{- include "redash.envFrom" . | nindent 10 }}
+        resources:
+{{ toYaml .Values.server.resources | indent 10 }}
+        command:
+        - /bin/bash
+        - -c
+        - |
+        {{- if .Values.sqlProxy.enabled }}
+          echo "Running cloud-sql-proxy asynchronously"
+          /cloud_sql_proxy {{ printf "-instances=%s" .Values.sqlProxy.connName }} \
+            -structured_logs \
+            -log_debug_stdout=true &
+
+          until nc -z 127.0.0.1 5432; do
+            echo "Waiting for the proxy to run..."
+            sleep 2
+          done
+        {{- end }}
+          /config/dynamicenv.sh
+          /config/install-upgrade.sh install
+          exitcode=$?
+        {{- if .Values.sqlProxy.enabled }}
+          echo "Sending SIGTERM to cloud-sql-proxy process"
+          fuser -k -TERM 5432/tcp
+        {{- end }}
+          exit $exitcode
+
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "redash.fullname" . }}
+            defaultMode: 0777
+        - name: redash-env-secret
+          secret:
+            secretName: {{ include "redash.fullname" . }}
+            items:
+            - key: redash.secrets.encrypted.env
+              path: redash.secrets.encrypted.env
+        - name: decrypted-env
+          emptyDir: {}
+        {{- if eq "local" .Values.environment }}
+        - name: service-credential
+          secret:
+            secretName: {{ include "redash.fullname" . }}
+            items:
+            - key: service_credential.json
+              path: service_credential.json
+        {{- end }}
+    {{- with .Values.hookInstallJob.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.hookInstallJob.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.hookInstallJob.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}

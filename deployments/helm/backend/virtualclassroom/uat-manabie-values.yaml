@@ -1,0 +1,14 @@
+enabled: true
+hpa:
+    averageCPUUtilization: 300
+    averageMemoryValue: 512Mi
+    maxReplicas: 3
+    minReplicas: 2
+podAnnotations:
+    sidecar.istio.io/proxyCPU: 2m
+    sidecar.istio.io/proxyMemory: 50Mi
+resources:
+    requests:
+        cpu: 3m
+        memory: 36Mi
+useGlobalCronScheduledScaling: true

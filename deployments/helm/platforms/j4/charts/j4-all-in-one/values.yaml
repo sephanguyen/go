@@ -1,0 +1,21 @@
+# Default values for j4.
+replicaCount: 3
+
+discovery:
+  port: 12345
+fullnameOverride: j4
+image:
+  # repository: asia.gcr.io/student-coach-e1e95/backend-j4
+  # tag: "locally"
+  pullPolicy: IfNotPresent
+j4:
+  service:
+    type: ClusterIP
+    raftPort: 4002
+
+metrics:
+  enabled: true
+  podAnnotations:
+    prometheus.io/scheme: "http"
+    prometheus.io/port: "8888"
+    prometheus.io/scrape: "true"

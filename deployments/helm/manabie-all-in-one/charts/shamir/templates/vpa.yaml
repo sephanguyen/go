@@ -1,0 +1,3 @@
+{{- if .Values.global.vpa.enabled }}
+{{ include "util.vpa" . }}
+{{- end }}

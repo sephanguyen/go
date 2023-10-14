@@ -1,0 +1,91 @@
+name: tbd.get_current_release
+
+run-name: tbd.get_current_release ${{ inputs.environment }} - ${{ inputs.organization }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        description: "Choose an environment to build"
+        options:
+          - production
+          - preproduction
+          - uat
+          - staging
+        required: true
+
+      organization:
+        type: choice
+        description: "Choose an organization to get current tag"
+        required: true
+        options:
+          - tokyo
+          - manabie
+          - jprep
+
+jobs:
+  get-release-tag:
+    permissions:
+      contents: "read"
+      id-token: "write"
+    timeout-minutes: 5
+    runs-on: ["self-hosted", "100m-400mi", "spot", "persistent"]
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Get current release tag
+        id: tags
+        uses: ./.github/actions/tbd.get-current-tags
+        with:
+          environment: ${{ inputs.environment }}
+          organization: ${{ inputs.organization }}
+
+      - name: school-portal-admin
+        uses: ./.github/actions/tbd.get-hotfixes-branch
+        id: fe-hotfixes-branch
+        if: inputs.environment != 'staging'
+        with:
+          repo: 'school-portal-admin'
+          release-tag: ${{ steps.tags.outputs.fe_release_tag }}
+          github-token: ${{ secrets.BUILD_GITHUB_TOKEN }}
+
+      - name: student-app
+        uses: ./.github/actions/tbd.get-hotfixes-branch
+        id: me-hotfixes-branch
+        if: inputs.environment != 'staging'
+        with:
+          repo: 'student-app'
+          release-tag: ${{ steps.tags.outputs.me_release_tag }}
+          github-token: ${{ secrets.BUILD_GITHUB_TOKEN }}
+
+      - name: backend
+        uses: ./.github/actions/tbd.get-hotfixes-branch
+        id: be-hotfixes-branch
+        if: inputs.environment != 'staging'
+        with:
+          repo: 'backend'
+          release-tag: ${{ steps.tags.outputs.be_release_tag }}
+          github-token: ${{ secrets.BUILD_GITHUB_TOKEN }}
+
+      - name: Summary output hotfixes branch
+        if: inputs.environment != 'staging'
+        env:
+          BE_BRANCH: ${{ steps.be-hotfixes-branch.outputs.branch }}
+          FE_BRANCH: ${{ steps.fe-hotfixes-branch.outputs.branch }}
+          ME_BRANCH: ${{ steps.me-hotfixes-branch.outputs.branch }}
+        run: |
+          set -e
+          cat <<EOF > $GITHUB_STEP_SUMMARY
+          ### Hotfixes branches for ${{ inputs.environment }}
+
+          | Type | hotfixes branch |
+          | --- | --- |
+          | backend | [${{ env.BE_BRANCH }}](https://github.com/manabie-com/backend/tree/${{ env.BE_BRANCH }}) |
+          | frontend | [${{ env.FE_BRANCH }}](https://github.com/manabie-com/school-portal-admin/tree/${{ env.FE_BRANCH }}) |
+          | mobile | [${{ env.ME_BRANCH }}](https://github.com/manabie-com/student-app/tree/${{ env.ME_BRANCH }}) |
+
+          EOF
+
+          cat .github/actions/tbd.get-hotfixes-branch/HOTFIX_WORKFLOW.md >> $GITHUB_STEP_SUMMARY
+        shell: bash

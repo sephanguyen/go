@@ -1,0 +1,58 @@
+apiVersion: v1
+kind: Service
+metadata:
+  # name: {{ include "yugabyte.fullname" . }}-tserver
+  name: {{ include "yugabyte.fullname" . }}
+  labels:
+    {{- include "yugabyte.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9000
+      targetPort: tserver-http-ui
+      protocol: TCP
+      name: http-ui
+    - port: 5433
+      targetPort: pgsql
+      protocol: TCP
+      name: pgsql
+    - port: 7000
+      targetPort: master-http-ui
+      protocol: TCP
+      name: http
+    - port: 7100
+      targetPort: master-rpc
+      protocol: TCP
+      name: rpc
+  selector:
+    {{- include "yugabyte.selectorLabels" . | nindent 4 }}
+    # role: tserver
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "yugabyte.fullname" . }}-headless
+  labels:
+    {{- include "yugabyte.labels" . | nindent 4 }}
+spec:
+  clusterIP: None
+  ports:
+    - port: 9000
+      targetPort: tserver-http-ui
+      protocol: TCP
+      name: http-ui
+    - port: 5433
+      targetPort: pgsql
+      protocol: TCP
+      name: pgsql
+    - port: 7000
+      targetPort: master-http-ui
+      protocol: TCP
+      name: http
+    - port: 7100
+      targetPort: master-rpc
+      protocol: TCP
+      name: rpc
+  selector:
+    {{- include "yugabyte.selectorLabels" . | nindent 4 }}
+    # role: tserver

@@ -1,0 +1,86 @@
+# Default values for mlflow.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: asia.gcr.io/student-coach-e1e95/mlflow
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "20220816"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: "mlflow"
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+containerPort:
+  name: http
+  port: 5000
+  protocol: TCP
+
+service:
+  type: ClusterIP
+  port: 80
+
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+
+environment: ""
+vendor: ""
+
+gcsKey: ""
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+global:
+  sqlProxy:
+    enabled: false
+    connName: ""
+    image:
+      repository: gcr.io/cloudsql-docker/gce-proxy
+      tag: 1.29.0
+    resources:
+      requests:
+        cpu: 5m
+        memory: 16Mi
+      limits:
+        cpu: 100m
+        memory: 32Mi

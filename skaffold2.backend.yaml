@@ -1,0 +1,353 @@
+apiVersion: skaffold/v4beta5
+kind: Config
+metadata:
+  name: backend
+deploy:
+  helm:
+    releases:
+      - name: common
+        chartPath: deployments/helm/backend/common
+        namespace: '{{.ENV}}-{{.ORG}}-backend'
+        setValueTemplates:
+          global.environment: '{{.ENV}}'
+          global.vendor: '{{.ORG}}'
+        createNamespace: true
+        skipBuildDependencies: true
+        wait: false
+        skipTests: true
+      - &ReleaseObject
+        name: fink
+        chartPath: deployments/helm/backend/fink
+        valuesFiles:
+          - deployments/helm/platforms/gateway/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/backend/values.yaml
+          - deployments/helm/backend/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/backend/fink/{{.ENV}}-{{.ORG}}-values.yaml
+        namespace: '{{.ENV}}-{{.ORG}}-backend'
+        setValueTemplates:
+          global.environment: '{{.ENV}}'
+          global.vendor: '{{.ORG}}'
+          global.image.tag: '{{default "local" .TAG}}'
+        skipBuildDependencies: true
+        wait: false
+        skipTests: true
+      - <<: *ReleaseObject
+        name: shamir
+        chartPath: deployments/helm/backend/shamir
+        valuesFiles:
+          - deployments/helm/platforms/gateway/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/backend/values.yaml
+          - deployments/helm/backend/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/backend/shamir/{{.ENV}}-{{.ORG}}-values.yaml
+      - <<: *ReleaseObject
+        name: auth
+        chartPath: deployments/helm/backend/auth
+        valuesFiles:
+          - deployments/helm/platforms/gateway/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/backend/values.yaml
+          - deployments/helm/backend/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/backend/auth/{{.ENV}}-{{.ORG}}-values.yaml
+      - <<: *ReleaseObject
+        name: draft
+        chartPath: deployments/helm/backend/draft
+        valuesFiles:
+          - deployments/helm/platforms/gateway/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/backend/values.yaml
+          - deployments/helm/backend/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/backend/draft/{{.ENV}}-{{.ORG}}-values.yaml
+      - <<: *ReleaseObject
+        name: zeus
+        chartPath: deployments/helm/backend/zeus
+        valuesFiles:
+          - deployments/helm/platforms/gateway/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/backend/values.yaml
+          - deployments/helm/backend/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/backend/zeus/{{.ENV}}-{{.ORG}}-values.yaml
+      - <<: *ReleaseObject
+        name: yasuo
+        chartPath: deployments/helm/backend/yasuo
+        valuesFiles:
+          - deployments/helm/platforms/gateway/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/backend/values.yaml
+          - deployments/helm/backend/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/backend/yasuo/{{.ENV}}-{{.ORG}}-values.yaml
+      - <<: *ReleaseObject
+        name: notificationmgmt
+        chartPath: deployments/helm/backend/notificationmgmt
+        valuesFiles:
+          - deployments/helm/platforms/gateway/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/backend/values.yaml
+          - deployments/helm/backend/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/backend/notificationmgmt/{{.ENV}}-{{.ORG}}-values.yaml
+      - <<: *ReleaseObject
+        name: jerry
+        chartPath: deployments/helm/backend/jerry
+        valuesFiles:
+          - deployments/helm/platforms/gateway/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/backend/values.yaml
+          - deployments/helm/backend/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/backend/jerry/{{.ENV}}-{{.ORG}}-values.yaml
+      - <<: *ReleaseObject
+        name: bob
+        chartPath: deployments/helm/backend/bob
+        valuesFiles:
+          - deployments/helm/platforms/gateway/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/backend/values.yaml
+          - deployments/helm/backend/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/backend/bob/{{.ENV}}-{{.ORG}}-values.yaml
+      - <<: *ReleaseObject
+        name: eureka
+        chartPath: deployments/helm/backend/eureka
+        valuesFiles:
+          - deployments/helm/platforms/gateway/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/backend/values.yaml
+          - deployments/helm/backend/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/backend/eureka/{{.ENV}}-{{.ORG}}-values.yaml
+      - <<: *ReleaseObject
+        name: enigma
+        chartPath: deployments/helm/backend/enigma
+        valuesFiles:
+          - deployments/helm/platforms/gateway/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/backend/values.yaml
+          - deployments/helm/backend/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/backend/enigma/{{.ENV}}-{{.ORG}}-values.yaml
+      - <<: *ReleaseObject
+        name: entryexitmgmt
+        chartPath: deployments/helm/backend/entryexitmgmt
+        valuesFiles:
+          - deployments/helm/platforms/gateway/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/backend/values.yaml
+          - deployments/helm/backend/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/backend/entryexitmgmt/{{.ENV}}-{{.ORG}}-values.yaml
+      - <<: *ReleaseObject
+        name: calendar
+        chartPath: deployments/helm/backend/calendar
+        valuesFiles:
+          - deployments/helm/platforms/gateway/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/backend/values.yaml
+          - deployments/helm/backend/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/backend/calendar/{{.ENV}}-{{.ORG}}-values.yaml
+      - <<: *ReleaseObject
+        name: mastermgmt
+        chartPath: deployments/helm/backend/mastermgmt
+        valuesFiles:
+          - deployments/helm/platforms/gateway/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/backend/values.yaml
+          - deployments/helm/backend/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/backend/mastermgmt/{{.ENV}}-{{.ORG}}-values.yaml
+      - <<: *ReleaseObject
+        name: lessonmgmt
+        chartPath: deployments/helm/backend/lessonmgmt
+        valuesFiles:
+          - deployments/helm/platforms/gateway/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/backend/values.yaml
+          - deployments/helm/backend/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/backend/lessonmgmt/{{.ENV}}-{{.ORG}}-values.yaml
+      - <<: *ReleaseObject
+        name: conversationmgmt
+        chartPath: deployments/helm/backend/conversationmgmt
+        valuesFiles:
+          - deployments/helm/platforms/gateway/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/backend/values.yaml
+          - deployments/helm/backend/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/backend/conversationmgmt/{{.ENV}}-{{.ORG}}-values.yaml
+      - <<: *ReleaseObject
+        name: usermgmt
+        chartPath: deployments/helm/backend/usermgmt
+        valuesFiles:
+          - deployments/helm/platforms/gateway/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/backend/values.yaml
+          - deployments/helm/backend/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/backend/usermgmt/{{.ENV}}-{{.ORG}}-values.yaml
+      - <<: *ReleaseObject
+        name: discount
+        chartPath: deployments/helm/backend/discount
+        valuesFiles:
+          - deployments/helm/platforms/gateway/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/backend/values.yaml
+          - deployments/helm/backend/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/backend/discount/{{.ENV}}-{{.ORG}}-values.yaml
+      - <<: *ReleaseObject
+        name: tom
+        chartPath: deployments/helm/backend/tom
+        valuesFiles:
+          - deployments/helm/platforms/gateway/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/backend/values.yaml
+          - deployments/helm/backend/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/backend/tom/{{.ENV}}-{{.ORG}}-values.yaml
+      - <<: *ReleaseObject
+        name: invoicemgmt
+        chartPath: deployments/helm/backend/invoicemgmt
+        valuesFiles:
+          - deployments/helm/platforms/gateway/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/backend/values.yaml
+          - deployments/helm/backend/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/backend/invoicemgmt/{{.ENV}}-{{.ORG}}-values.yaml
+      - <<: *ReleaseObject
+        name: timesheet
+        chartPath: deployments/helm/backend/timesheet
+        valuesFiles:
+          - deployments/helm/platforms/gateway/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/backend/values.yaml
+          - deployments/helm/backend/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/backend/timesheet/{{.ENV}}-{{.ORG}}-values.yaml
+      - <<: *ReleaseObject
+        name: fatima
+        chartPath: deployments/helm/backend/fatima
+        valuesFiles:
+          - deployments/helm/platforms/gateway/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/backend/values.yaml
+          - deployments/helm/backend/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/backend/fatima/{{.ENV}}-{{.ORG}}-values.yaml
+      - <<: *ReleaseObject
+        name: virtualclassroom
+        chartPath: deployments/helm/backend/virtualclassroom
+        valuesFiles:
+          - deployments/helm/platforms/gateway/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/backend/values.yaml
+          - deployments/helm/backend/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/backend/virtualclassroom/{{.ENV}}-{{.ORG}}-values.yaml
+      - <<: *ReleaseObject
+        name: payment
+        chartPath: deployments/helm/backend/payment
+        valuesFiles:
+          - deployments/helm/platforms/gateway/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/backend/values.yaml
+          - deployments/helm/backend/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/backend/payment/{{.ENV}}-{{.ORG}}-values.yaml
+      - <<: *ReleaseObject
+        name: spike
+        chartPath: deployments/helm/backend/spike
+        valuesFiles:
+          - deployments/helm/platforms/gateway/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/backend/values.yaml
+          - deployments/helm/backend/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/backend/spike/{{.ENV}}-{{.ORG}}-values.yaml
+      - <<: *ReleaseObject
+        name: hephaestus
+        chartPath: deployments/helm/backend/hephaestus
+        valuesFiles:
+          - deployments/helm/platforms/gateway/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/backend/values.yaml
+          - deployments/helm/backend/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/backend/hephaestus/{{.ENV}}-{{.ORG}}-values.yaml
+  statusCheck: true
+  statusCheckDeadlineSeconds: 60
+profiles:
+  - name: local
+    activation:
+      - env: ENV=local
+    patches:
+      - op: add
+        path: /deploy/kubeContext
+        value: kind-kind
+      - op: add
+        path: /deploy/helm/releases/26/setValueTemplates/ksqldb.migrate.image.repository
+        value: '{{.ARTIFACT_REGISTRY_DOMAIN}}/confluentinc/ksqldb-cli'
+      - op: add
+        path: /deploy/helm/releases/26/setValueTemplates/hookLocalInitData.image.repository
+        value: '{{.ARTIFACT_REGISTRY_DOMAIN}}/jbergknoff/postgresql-client'
+      - op: add
+        path: /deploy/helm/releases/26/setValueTemplates/postHookMigrateDataLake
+        value: '{{if .DATA_WH }}true{{else}}false{{end}}'
+      - op: add
+        path: /deploy/helm/releases/26/setValueTemplates/postHookMigrateDatawarehouses
+        value: '{{if .DATA_WH }}true{{else}}false{{end}}'
+      - op: add
+        path: /deploy/helm/releases/26/setValueTemplates/postHookSyncDataLake
+        value: '{{if .DATA_WH }}true{{else}}false{{end}}'
+      - op: add
+        path: /deploy/helm/releases/26/setValueTemplates/postHookSyncDataWarehouse
+        value: '{{if .DATA_WH }}true{{else}}false{{end}}'
+      - op: add
+        path: /deploy/helm/releases/26/setValueTemplates/enableAC
+        value: '{{if .DATA_WH_AC }}true{{else}}false{{end}}'
+      - op: add
+        path: /deploy/helm/releases/26/setValueTemplates/fileFilter
+        value: '{{default "00" .DATA_WH_FILE_FILTER}}'
+      - op: add
+        path: /deploy/helm/releases/-
+        value:
+          <<: *ReleaseObject
+          name: gandalf
+          chartPath: deployments/helm/backend/gandalf
+          valuesFiles:
+            - deployments/helm/platforms/gateway/{{.ENV}}-{{.ORG}}-values.yaml
+            - deployments/helm/backend/values.yaml
+            - deployments/helm/backend/{{.ENV}}-{{.ORG}}-values.yaml
+            - deployments/helm/backend/gandalf/{{.ENV}}-{{.ORG}}-values.yaml
+    build:
+      artifacts:
+        - image: backend
+          context: .
+          custom:
+            buildCommand: |
+              cat <<EOF | bash
+              #!/bin/bash
+              set -eu
+              CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ./build/server ./cmd/server/
+              CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ./build/bdd.test ./features/
+              CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ./build/stub ./features/stub/
+              DOCKER_BUILDKIT=1 docker build --progress=plain \
+                --tag "$IMAGE" \
+                --file ./developments/development.Dockerfile \
+                --build-arg GO_VERSION=$(cat ./deployments/versions/go) \
+                --target developer "$BUILD_CONTEXT"
+              docker tag "$IMAGE" asia.gcr.io/student-coach-e1e95/backend:locally
+              echo "Loading asia.gcr.io/student-coach-e1e95/backend:locally into kind"
+              kind load docker-image asia.gcr.io/student-coach-e1e95/backend:locally
+
+              if [ "$PUSH_IMAGE" == "true" ]; then
+                >&2 echo "Arfifacts built in local should NOT be pushed"
+                exit 1
+              fi
+              EOF
+      tagPolicy:
+        customTemplate:
+          template: 'locally'
+      local:
+        push: false
+
+  - name: ci
+    activation:
+      - kubeContext: ^kind-kind$
+        env: CI=true
+    patches:
+      # Adjust log level on CI to suppress some logs
+      - op: add
+        path: /deploy/helm/releases/27/setValueTemplates/global.localLogLevel
+        value: dpanic
+
+  - name: test
+    patches:
+      - op: remove
+        path: /deploy/helm/releases/3
+      - op: remove
+        path: /deploy/helm/releases/2
+      - op: remove
+        path: /deploy/helm/releases/0
+  - name: hephaestus-only
+    deploy:
+      helm:
+        releases:
+          - <<: *ReleaseObject
+            name: hephaestus
+            chartPath: deployments/helm/backend/hephaestus
+            valuesFiles:
+              - deployments/helm/platforms/gateway/{{.ENV}}-{{.ORG}}-values.yaml
+              - deployments/helm/backend/values.yaml
+              - deployments/helm/backend/{{.ENV}}-{{.ORG}}-values.yaml
+              - deployments/helm/backend/hephaestus/{{.ENV}}-{{.ORG}}-values.yaml
+            setValueTemplates:
+              ksqldb.migrate.image.repository: '{{.ARTIFACT_REGISTRY_DOMAIN}}/confluentinc/ksqldb-cli'
+              hookLocalInitData.image.repository: '{{.ARTIFACT_REGISTRY_DOMAIN}}/jbergknoff/postgresql-client'
+              postHookMigrateDataLake: '{{if .DATA_WH }}true{{else}}false{{end}}'
+              postHookMigrateDatawarehouses: '{{if .DATA_WH }}true{{else}}false{{end}}'
+              postHookSyncDataLake: '{{if .DATA_WH }}true{{else}}false{{end}}'
+              postHookSyncDataWarehouse: '{{if .DATA_WH }}true{{else}}false{{end}}'
+              enableAC: '{{if .DATA_WH_AC }}true{{else}}false{{end}}'
+              fileFilter: '{{default "00" .DATA_WH_FILE_FILTER}}'
+              setValueTemplates:
+              global.environment: '{{.ENV}}'
+              global.vendor: '{{.ORG}}'
+              global.image.tag: '{{default "local" .TAG}}'

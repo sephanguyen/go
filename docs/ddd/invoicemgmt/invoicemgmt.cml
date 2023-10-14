@@ -1,0 +1,20 @@
+ContextMap Invoice {
+  contains UserManagementContext
+  contains OrderContext
+  contains InvoiceContext
+
+  InvoiceContext [C]<-[S] UserManagementContext
+
+	OrderContext [P]<->[P] InvoiceContext
+}
+
+
+BoundedContext UserManagementContext {
+}
+
+BoundedContext OrderContext {
+}
+
+BoundedContext InvoiceContext {
+}
+

@@ -1,0 +1,550 @@
+@startuml
+hide circle
+' skinparam groupInheritance 2
+' skinparam Linetype polyline
+
+
+rectangle {
+    package "JPREP" #14BB41 {
+        namespace DataSync #1DDDDD {
+            namespace UserManagement {
+                class Student <<payload>> {
+                }
+                class Staff <<payload>> {
+                }
+            }
+            class SyncAPI <<api>> {
+                PUT: {{baseUrl}}/user-registration
+            }
+        }
+    }
+    namespace ThirdPartyAS #DDDDDD {
+        node firebase #DDD1DD [
+        **Firebase Authentication**
+        ]
+        node keycloak #DDD1DD [
+        **Keycloak SSO Authentication**
+        ]
+    }
+
+    namespace UserManagement {
+        class UserService <<service>> {
+            CreateUser()
+            GetUserProfile()
+            UpdateUserProfile()
+            UpdateUserDeviceToken()
+            OverrideUserPassword()
+        }
+        class StudentService <<service>> {
+            CreateStudent()
+            UpdateStudent()
+            GetStudentProfile()
+        }
+        class ParentService <<service>> {
+            CreateParent()
+            UpdateParent()
+            AssignToStudent()
+            RemoveFromStudent()
+        }
+        class SchoolMasterService <<serivce>>{
+            ImportSchool()
+            ImportSchoolCourse()
+            ImportSchoolLevel()
+        }
+        class UserGroupMgmtService <<serivce>>{
+            CreateUserGroup()
+            UpdateUserGroup()
+        }
+        class StaffService <<serivce>>{
+            CreateStaff()
+            UpdateStaff()
+        }
+
+        class User <<entity>> {
+            user_id: string
+            country: string
+            name: string
+            first_name: string
+            last_name: string
+            first_name_phonetic: string
+            last_name_phonetic: string
+            full_name_phonetic: string
+            given_name: string
+            avatar: string
+            phone_number: string
+            email: string
+            device_token: string
+            allow_notification: bool
+            user_group: string
+            last_login_date: timestamp
+            birthday: date
+            gender: string
+            resource_path: string
+            ' updated_at: timestamp
+            ' created_at: timestamp
+            ' is_tester: bool
+            ' facebook_id: string
+            ' platform: string
+            ' phone_verified: bool
+            ' email_verified: bool
+            ' deleted_at: timestamp
+        }
+
+        class User_PhoneNumber <<entity>> {
+            user_id: string
+            phone_number_id: string
+            phone_number: string
+            type: string
+        }
+
+        class User_Address <<entity>> {
+            user_address_id: string
+            user_id: string
+            address_type: string
+            postal_code: string
+            city: string
+            prefecture_id: string
+            resource_path: string
+            first_street: string
+            second_street: string
+             ' updated_at: timestamp
+             ' created_at: timestamp
+             ' deleted_at: timestamp
+        }
+
+        class School_History <<entity>> {
+            student_id: string
+            school_id: string
+            school_course_id: string
+            start_date: timestamp
+            end_date: timestamp
+            is_current: bool
+            resource_path: string
+             ' updated_at: timestamp
+             ' created_at: timestamp
+             ' deleted_at: timestamp
+        }
+
+        class Prefecture <<entity>> {
+            prefecture_id: string
+            prefecture_code: string
+            country: string
+            name: string
+             ' updated_at: timestamp
+             ' created_at: timestamp
+             ' deleted_at: timestamp
+        }
+
+        note left of User::user_group
+        Conflicting with 
+        end note
+
+        class Student <<entity>> {
+            student_id: string
+            current_grade: int
+            student_enrollment_status: string
+            student_external_id: string
+            student_note: string
+            resource_path: string
+            previous_grade: int
+            ' school_id: int
+            ' updated_at: timestamp
+            ' created_at: timestamp
+            ' deleted_at: timestamp
+            ' additional_data: jsonb
+        }
+        note right of Student::student_enrollment_status
+        **STUDENT_ENROLLMENT_STATUS_POTENTIAL**
+        **STUDENT_ENROLLMENT_STATUS_ENROLLED**
+        **STUDENT_ENROLLMENT_STATUS_WITHDRAWN**
+        **STUDENT_ENROLLMENT_STATUS_GRADUATED**
+        **STUDENT_ENROLLMENT_STATUS_LOA**
+
+        Subscribe to Payment domain to receive message to update
+        **StatusChanged {**
+            **newEnrollmentStatus**
+        **}**
+        end note
+
+        class StudentAccessPathHistory <<entity>> {
+            location_id: string
+            student_id: string
+            enrollment_status: string
+            start_date: timestamp
+            end_date: timestamp
+            comment: string
+        }
+
+        class StudentPaymentDetail <<entity>> {
+            student_id: string
+            bank_branch_id: string
+            user_address_id: int
+            payee: string
+            payee_phone_number: string
+            payment_method: string
+            account_number: string
+            account_holder: string
+            account_type: string
+            verification_status: string
+        }
+
+        class StudentParent <<entity>> {
+            student_id: string
+            parent_id: string
+            relationship: string
+            resource_path: string
+            ' created_at: timestamp
+            ' updated_at: timestamp
+            ' deleted_at: timestamp
+        }
+        class Parent <<entity>> {
+            parent_id: string
+            resource_path: string
+            ' school_id: int
+            ' updated_at: timestamp
+            ' created_at: timestamp
+            ' deleted_at: timestamp
+        }
+        class TaggedUser <<entity>> {
+            tag_id: int
+            user_id: string
+        }
+
+        class Staff <<entity>> {
+            staff_id: string
+            auto_create_timesheet: bool
+            resource_path: string
+            ' updated_at: timestamp
+            ' created_at: timestamp
+            ' deleted_at: timestamp
+        }
+        note left of Staff
+        **Staff will replace**
+        **Teacher and SchoolAdmin**
+        end note
+
+        class SchoolInfo <<entity>> {
+            school_id: string
+            school_partner_id: string
+            school_name: string
+            school_name_phonetic: string
+            school_level_id: string
+            adddress: string
+            is_archived: bool
+            resource_path: string
+        }
+        class SchoolLevel <<entity>> {
+            level_id: string
+            level_name: string
+            sequence: int
+            is_archived: bool
+            resource_path: string
+        }
+         class SchoolLevelGrade <<entity>> {
+            level_id: string
+            grade_partner_id: string
+            resource_path: string
+        }
+        class Student_SchoolInfo <<entity>> {
+            student_id: string
+            school_id: string
+            school_course_id: string
+            start_date: timestamp
+            end_date: timestamp
+            transfer_school: bool
+            resource_path: string
+        }
+
+        class SchoolCourse <<entity>> {
+            school_course_id: string
+            school_course_partner_id: string
+            school_course_name: string
+            school_course_name_phonetic: string
+            school_id: string
+            is_archived: bool
+            resource_path: string
+        }
+
+        class SchoolLevelGrade <<entity>> {
+            school_level_id: string
+            grade_id: string
+            is_archived: bool
+            resource_path: string
+        }
+
+        class UserAccessPath <<entity>> {
+            user_id: string
+            access_path: string
+            location_id: string
+            resource_path: string
+        }
+
+        class UserEvent <<event>> {
+            EvtUser_CreateParent
+            EvtUser_CreateStudent
+            EvtUserInfo
+            EvtUser_ParentRemovedFromStudent
+            EvtUser_ParentAssignedToStudent
+        }
+      
+        'UserGroup Management'
+       class Role <<entity>> {
+            role_id: string
+            role_name: string
+            resource_path: string
+            ' created_at: timestamp
+            ' updated_at: timestamp
+            ' deleted_at: timestamp
+        }
+
+        class PermissionRole <<entity>> {
+            permission_id: string
+            role_id: string
+            resource_path: string
+            ' created_at: timestamp
+            ' updated_at: timestamp
+            ' deleted_at: timestamp
+        }
+        class Permission <<entity>> {
+            permission_id: string
+            permission_name: string
+            resource_path: string
+            ' created_at: timestamp
+            ' updated_at: timestamp
+            ' deleted_at: timestamp
+        }
+
+        class UserGroup <<entity>> {
+            user_group_id: string
+            user_group_name: string
+            resource_path: string
+            ' created_at: timestamp
+            ' updated_at: timestamp
+            ' deleted_at: timestamp
+        }
+
+        note left of UserGroup
+        **new version of UserGroup**
+        (new AccessControl feature)
+        end note
+      
+        class UserGroupMember <<entity>> {
+            user_id: string
+            user_group_id: string
+            resource_path: string
+            ' created_at: timestamp
+            ' updated_at: timestamp
+            ' deleted_at: timestamp
+        }
+        class GrantedRole <<entity>> {
+            granted_role_id: string
+            user_group_id: string
+            role_id: string
+            resource_path: string
+            ' created_at: timestamp
+            ' updated_at: timestamp
+            ' deleted_at: timestamp
+        }
+        class GrantedRoleAccessPath <<entity>> {
+            granted_role_id: string
+            location_id: string
+            access_path: string
+            resource_path: string
+            ' created_at: timestamp
+            ' updated_at: timestamp
+            ' deleted_at: timestamp
+        }
+
+        class Bank <<entity>> {
+            bank_id: string
+            code: string
+            name: string
+            phonetic_name: string
+            is_archived: bool
+        }
+
+        class BankBranch <<entity>> {
+            bank_branch_id: \tstring
+            bank_id: string
+            code: int
+            name: string
+            phonetic_name: string
+            is_archived: bool
+        }
+
+        class Transportation <<entity>> {
+            transportation_id: string
+            staff_id: string
+            transportation_type: string
+            location_id: string
+            from: string
+            to: string
+            amount: number
+            round_trip: string
+            total: number
+            remarks: string
+            resource_path: string
+            ' updated_at: timestamp
+            ' created_at: timestamp
+            ' deleted_at: timestamp
+        }
+
+        class UserTag <<entity>> {
+             tag_id: string
+             user_tag_partner_id: string
+             name: string
+             is_archived: bool
+             user_tag_type: string
+        }
+        note right of UserTag::user_tag_type
+        **USER_TAG_TYPE_STUDENT**
+        **USER_TAG_TYPE_STUDENT_DISCOUNT**
+        **USER_TAG_TYPE_PARENT**
+        **USER_TAG_TYPE_PARENT_DISCOUNT**
+        end note
+
+
+
+        note left of Transportation::transportation_type
+        **BUS**
+        **TRAIN**
+        end note
+
+        
+        note right of UserEvent::EvtUser_CreateParent
+        Published to "User.Created" when creating
+        new parent or assign parent to student
+        end note
+        note right of UserEvent::EvtUser_CreateStudent
+        Published to "User.Created" when creating new student
+        end note
+        note right of UserEvent::EvtUserInfo
+        Published to "user_device_token" when creating new student
+        end note
+        note right of UserEvent::EvtUser_ParentRemovedFromStudent
+        Published to "User.Updated" when remove relationship between parent and student
+        end note
+        note right of UserEvent::EvtUser_ParentAssignedToStudent
+        Published to "User.Updated" when assign parent to student
+        end note
+
+        Student -left-|> User
+        Parent --|> User
+        Student "1" *-up- "many" StudentParent
+        Student "1" *-up- "many" TaggedUser
+        Student "1" *-up- "many" StudentAccessPathHistory
+        Student "1" *-up- "1" StudentPaymentDetail
+        BankBranch "1" *-up- "many" StudentPaymentDetail
+        Bank "1" *-up- "many" BankBranch
+        Staff "1" *-up- "many" Transportation
+        Staff "1" *-up- "1" User
+        Parent "1" *-- "many" StudentParent
+        Parent "1" *-- "many" TaggedUser
+        User "1" *-- "many" User_PhoneNumber
+        User "1" *-- "many" User_Address
+        User "1" *-up- "many" UserAccessPath
+        UserService -[hidden]- UserEvent
+        Student "1" *-up- "many" Student_SchoolInfo
+        SchoolInfo "1" *-up- "many" Student_SchoolInfo
+        SchoolInfo "1" *-up- "many" SchoolCourse
+        SchoolInfo "1" *-up- "many" SchoolLevel
+        SchoolLevel "1" *-up- "many" SchoolLevelGrade
+        SchoolCourse "1" *-up- "many" Student_SchoolInfo
+        
+        Role "1" *-up- "many" PermissionRole
+        Permission "1" *-- "many" PermissionRole
+        User "1" *-- "many" UserGroupMember
+        UserGroup "1" *-- "many" UserGroupMember
+        UserGroup "1" *-- "many" GrantedRole
+        Role "1" *-- "many" GrantedRole
+        GrantedRole "1" *-- "many" GrantedRoleAccessPath
+
+        User_Address "1" *-- "1" StudentPaymentDetail
+        User_Address "many" *-- "1" Prefecture
+
+        School_History "1" *-- "1" SchoolInfo
+        School_History "many" *-- "1" Student
+
+        TaggedUser "many" -up-> "1" UserTag
+    }
+
+    namespace AccessControl {
+
+        class Privileges {
+            Parent
+            Student
+        }
+        class AuthorizationService <<service>> {
+            Check(apiEndpoint:string, userID:string) Privilege
+        }
+        class AuthenticationService <<service>> {
+            Login(secret: string) token
+            Logout()
+            VerifyToken()
+            ExchangeToken()
+            ExchangeCustomToken()
+            ' create(user: User)
+            ' update((user: User)
+            ' disable(user: User)
+        }
+    }
+    note "To provide authentication using passwords, \nphone numbers and popular identity providers like \nGoogle, Facebook over OAUTH2 and OIDC protocol" as N1
+    ThirdPartyAS .. N1
+    N1 .. AccessControl.AuthenticationService
+
+    namespace MasterManagement {
+        class Location <<entity>> {
+            location_id: string
+        }
+
+        class Grade <<entity>> {
+            grade_id: string
+            grade: int
+        }
+    }
+
+    namespace Fatima {
+        class StudentPackage <<entity>> {
+            student_package_id: string
+            student_id: string
+            package_id: string
+            start_at: date
+            end_at: date
+            is_active: bool
+            resource_path: string
+            properties: json
+            location_ids: []string
+        }
+
+        class StudentPackageAccessPath <<entity>> {
+            student_package_id: string
+            course_id: string
+            student_id: string
+            location_id: string
+            access_path: string
+            resource_path: string
+        }
+
+        class StudentPackageClass <<entity>> {
+            student_package_id: string
+            course_id: string
+            student_id: string
+            class_id: string
+            location_id: string
+            access_path: string
+            resource_path: string
+        } 
+    }
+}
+
+AccessControl -[hidden]-> UserManagement
+DataSync.UserManagement -[hidden]-> UserManagement
+UserManagement.UserAccessPath "many" -up-> "1" MasterManagement.Location
+UserManagement.SchoolLevelGrade "many" -up-> "1" MasterManagement.Grade
+Fatima.StudentPackage "many" -up-> "1" UserManagement.Student
+Fatima.StudentPackageAccessPath "many" -up-> "1" Fatima.StudentPackage
+Fatima.StudentPackageAccessPath "many" -up-> "1" Fatima.StudentPackageClass
+UserManagement.GrantedRoleAccessPath "many" -up-> "1" MasterManagement.Location
+AccessControl.AuthenticationService <-up-> ThirdPartyAS
+JPREP <-right-> keycloak
+@enduml

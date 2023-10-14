@@ -1,0 +1,1 @@
+ALTER TABLE public.student_packages ALTER COLUMN package_id DROP NOT NULL;

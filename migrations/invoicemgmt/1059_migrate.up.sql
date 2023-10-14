@@ -1,0 +1,1 @@
+ALTER TABLE public.bulk_payment_validations ADD COLUMN IF NOT EXISTS validation_date timestamp with time zone NOT NULL;

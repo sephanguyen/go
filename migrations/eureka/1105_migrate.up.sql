@@ -1,0 +1,4 @@
+CREATE TRIGGER trigger_study_plan_items_to_individual_study_plan
+AFTER INSERT OR UPDATE ON public.study_plan_items
+FOR EACH ROW
+EXECUTE FUNCTION public.trigger_study_plan_items_to_individual_study_plan();

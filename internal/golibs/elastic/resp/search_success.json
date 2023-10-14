@@ -1,0 +1,84 @@
+{
+    "took": 6,
+    "timed_out": false,
+    "_shards": {
+        "total": 1,
+        "successful": 1,
+        "skipped": 0,
+        "failed": 0
+    },
+    "hits": {
+        "total": {
+            "value": 2,
+            "relation": "eq"
+        },
+        "max_score": 1.0,
+        "hits": [
+            {
+                "_index": "conversations",
+                "_type": "_doc",
+                "_id": "01FK2TJDPFP8VTVBZKCH0WSX89",
+                "_score": null,
+                "_source": {
+                    "conversation_id": "01FK2TJDPFP8VTVBZKCH0WSX89",
+                    "conversation_name.english": "Ronald Taylor",
+                    "conversation_name.japanese": "ドラえもん",
+                    "course_ids": [
+                        "01FK2TJC26P76M672MJPV3PF94"
+                    ],
+                    "user_ids": [
+                        "01FK2TJC26P76M672MJPV3PF94"
+                    ],
+                    "last_message": {
+                        "text": "hello",
+                        "updated_at": "2021-10-28T06:49:33.651862Z"
+                    },
+                    "is_replied": true,
+                    "owner": "4003",
+                    "conversation_type": "CONVERSATION_STUDENT",
+                    "access_paths": [
+                        "location1/location2",
+                        "location3/location4"
+                    ]
+                },
+                "sort": [
+                    1635403773651,
+                    "01FK2TJDPFP8VTVBZKCH0WSX89"
+                ]
+            },
+            {
+                "_index": "conversations",
+                "_type": "_doc",
+                "_id": "01FJV2ZM3HMSX1P4WH41TSB3XD",
+                "_score": null,
+                "_source": {
+                    "conversation_id": "01FJV2ZM3HMSX1P4WH41TSB3XD",
+                    "conversation_name.english": "user-01FJV2ZJD4YDDGRMTS26W1Y658",
+                    "conversation_name.japanese": "ドラえもん",
+                    "course_ids": [
+                        "01FJV2ZJDCXXF7H43F4S04S2V8",
+                        "01FJV2ZJDCXXF7H43F4S04S2V8"
+                    ],
+                    "user_ids": [
+                        "01FJV2ZJDCXXF7H43F4S04S2V8"
+                    ],
+                    "last_message": {
+                        "text": "hello",
+                        "updated_at": "2021-10-25T06:42:39.349661Z"
+                    },
+                    "is_replied": true,
+                    "owner": "4003",
+                    "conversation_type": "CONVERSATION_STUDENT",
+                    "access_paths": [
+                        "location1/location2",
+                        "location3/location4"
+                    ]
+                },
+                "sort": [
+                    1635144159349,
+                    "01FJV2ZM3HMSX1P4WH41TSB3XD"
+                ]
+            }
+        ]
+    }
+}

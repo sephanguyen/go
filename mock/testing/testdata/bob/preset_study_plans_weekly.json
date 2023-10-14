@@ -1,0 +1,149 @@
+{
+	"schema": [
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "end_date",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "lesson_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "preset_study_plan_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "preset_study_plan_weekly_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "start_date",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "topic_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "week",
+			"data_type": "smallint",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "preset_study_plans_weekly",
+			"policyname": "rls_preset_study_plans_weekly",
+			"qual": "permission_check(resource_path, 'preset_study_plans_weekly'::text)",
+			"with_check": "permission_check(resource_path, 'preset_study_plans_weekly'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "preset_study_plans_weekly",
+			"policyname": "rls_preset_study_plans_weekly_restrictive",
+			"qual": "permission_check(resource_path, 'preset_study_plans_weekly'::text)",
+			"with_check": "permission_check(resource_path, 'preset_study_plans_weekly'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "weekly_preset_study_plans_fk_1",
+			"column_name": "preset_study_plan_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "weekly_preset_study_plans_fk",
+			"column_name": "topic_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "weekly_preset_study_plans_pk",
+			"column_name": "preset_study_plan_weekly_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "weekly_preset_study_plans_un",
+			"column_name": "preset_study_plan_id",
+			"constraint_type": "UNIQUE"
+		},
+		{
+			"constraint_name": "weekly_preset_study_plans_un",
+			"column_name": "topic_id",
+			"constraint_type": "UNIQUE"
+		},
+		{
+			"constraint_name": "weekly_preset_study_plans_un",
+			"column_name": "week",
+			"constraint_type": "UNIQUE"
+		}
+	],
+	"table_name": "preset_study_plans_weekly",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

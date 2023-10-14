@@ -1,0 +1,183 @@
+@startuml
+hide circle
+
+namespace Syllabus-LO-LearningStats {
+
+    class LearningObjective <<entity>>  {
+        name string
+        grade int
+        subject string
+        topic_id string
+        video string
+        study_guide string
+        copied_from string
+        type string
+        school_id string
+        ' updated_at: timestamp
+        ' created_at: timestamp
+        ' deleted_at: timestamp
+    }
+
+    class StudyPlan <<entity>> {
+        study_plan_id string
+        name string
+        master_study_plan_id string
+        name string
+        study_plan_type string
+        course_id string
+        ' updated_at: timestamp
+        ' created_at: timestamp
+        ' deleted_at: timestamp
+
+    }
+
+    class StudyPlanItem <<entity>> {
+        study_plan_item_id string
+        study_plan_id string
+        available_from datetime
+        available_to dateimte
+        start_date datetime
+        end_date dateimte
+        copy_study_plan_item_id string
+        content_structure jsonb
+        content_structure_flatten string
+        ' updated_at: timestamp
+        ' created_at: timestamp
+        ' deleted_at: timestamp
+    }
+
+    class LOsStudyPlanItems <<value object>> {
+        lo_id string
+        study_plan_item_id string
+        ' updated_at: timestamp
+        ' created_at: timestamp
+        ' deleted_at: timestamp
+    }
+
+    class Student <<value object>> {}
+
+    class Quiz <<entity>> {
+        quiz_id string
+        external_id string
+        kind string
+        question jsonb
+        explanation jsonb
+        options jsonb
+        ' updated_at: timestamp
+        ' created_at: timestamp
+        ' deleted_at: timestamp
+    }
+    note bottom of Quiz
+    table of questions 
+    end note
+    note left of Quiz::kind
+    one of 
+    * QUIZ_TYPE_MCQ
+    * QUIZ_TYPE_FIB
+    * QUIZ_TYPE_POW
+    * QUIZ_TYPE_TAD
+    * QUIZ_TYPE_MIQ
+    * QUIZ_TYPE_MAQ
+    end note
+    note right of Quiz::question
+    question contents
+    end note
+    note right of Quiz::options
+    question answers contents
+    end note
+
+    'Table name 'quiz_sets', 'quizsets' is the old table which is deprecated.
+    class QuizSets <<entity>> {
+        quiz_set_id string
+        lo_id string
+        quiz_external_ids jsonb
+        ' updated_at: timestamp
+        ' created_at: timestamp
+        ' deleted_at: timestamp
+    }
+    note right of QuizSets
+    set of quizzes created in LO 
+    end note
+    note left of QuizSets::quiz_external_ids
+    list of quiz external ids from Quiz table
+    end note
+
+    class ShuffledQuizSets <<entity>> {
+        original_quiz_set_id string
+        shuffled_quiz_set_id string
+        quiz_external_ids jsonb
+        lo_id string
+        student_id string
+        study_plan_item_id string
+        total_correctness int
+        submission_history jsonb
+        session_id string
+        ' updated_at: timestamp
+        ' created_at: timestamp
+        ' deleted_at: timestamp
+    }
+    note right of ShuffledQuizSets::session_id
+    used for calculate student stats
+    end note
+
+
+    class StudentEventLogs <<entity>> {
+        student_event_log_id string
+        student_id string
+        event_type string
+        payoad jsonb
+        ' created_at: timestamp
+        ' deleted_at: timestamp
+    }
+    note left of StudentEventLogs::event_type
+    one of 
+    * VIDEO_FINISHED
+    * STUDY_GUIDE_FINISHED
+    * QUIZ_FINISHED
+    * QUIZ_ANSWER_SELECTED (*)
+    * LEARNING_OBJECTIVE (*)
+    end note
+
+    class StudentLearningObjectivesCompleteness <<value object>>  {
+        student_id string
+        lo_id string
+        is_finished_quiz bool
+        is_finished_video bool
+        is_finished_study_guide bool
+        first_quiz_correctness double
+        higest_quiz_score double
+        ' finished_quiz_at: timestamp
+        ' updated_at: timestamp
+        ' created_at: timestamp
+        ' deleted_at: timestamp
+    }
+
+    class StudentLearningTimeByDaily <<entity>> {
+        student_id string
+        learning_time int
+        sessions []string
+        ' day: timestamp
+        ' updated_at: timestamp
+        ' created_at: timestamp
+        ' deleted_at: timestamp
+    }
+
+
+    StudyPlan "1" *-- "n" StudyPlanItem
+    StudyPlanItem "1" .. "n" LOsStudyPlanItems
+    LOsStudyPlanItems "n" .. "1" LearningObjective
+    Student --> ShuffledQuizSets : do LO quiz
+    ShuffledQuizSets "n" .. "1" QuizSets
+    LearningObjective "1" .. "1" QuizSets
+    QuizSets "1" *-- "n" Quiz
+    LearningObjective "1" *-- "n" Quiz
+    StudyPlanItem "1" .. "n" ShuffledQuizSets
+    StudentEventLogs "n" .. "n" ShuffledQuizSets
+    Student "1" .. "n" StudentEventLogs
+    StudentLearningTimeByDaily "1" *-- "n" StudentEventLogs
+    Student "1" .. "n" StudentLearningTimeByDaily
+    Student "1" .. "n" StudentLearningObjectivesCompleteness
+    LearningObjective "1" .. "1" StudentLearningObjectivesCompleteness
+    StudentLearningObjectivesCompleteness "1" .. "n" StudentEventLogs
+}
+@enduml

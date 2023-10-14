@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "infras.fullname" . }}-test-connection"
+  labels:
+    {{- include "infras.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['{{ include "infras.fullname" . }}:{{ .Values.minio.service.port }}']
+  restartPolicy: Never

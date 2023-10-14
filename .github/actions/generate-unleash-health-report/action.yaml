@@ -1,0 +1,35 @@
+name: "generate-unleash-health-report"
+description: "generate unleash health report"
+
+inputs:
+  admin_token:
+    required: true
+    description: "Admin token of the requested unleash environment"
+  api_url:
+    description: "API URL of the requested unleash environment"
+    required: true
+
+outputs:
+  report:
+    description: "Features health report of the requested unleash environment"
+    value: ${{ steps.generate_report.outputs.report }}
+  message:
+    description: "Features health message of the requested unleash environment"
+    value: ${{ steps.generate_report.outputs.message }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - uses: actions/github-script@v6
+      id: generate_report
+      with:
+        script: |
+          const { unleashHealthReport } = require('${{ github.workspace }}/.github/actions/generate-unleash-health-report/generate_unleash_report.js');
+
+          const { report, message } = unleashHealthReport("${{ inputs.admin_token }}", "${{ inputs.api_url }}");
+
+          core.setOutput('report', report);
+          core.setOutput('message', message);

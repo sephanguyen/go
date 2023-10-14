@@ -1,0 +1,88 @@
+table:
+  schema: public
+  name: study_plan_items
+object_relationships:
+  - name: assignment_study_plan_item
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: assignment_study_plan_items
+        insertion_order: null
+        column_mapping:
+          study_plan_item_id: study_plan_item_id
+  - name: lo_study_plan_item
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: lo_study_plan_items
+        insertion_order: null
+        column_mapping:
+          study_plan_item_id: study_plan_item_id
+  - name: study_plan
+    using:
+      foreign_key_constraint_on: study_plan_id
+array_relationships:
+  - name: assignment_study_plan_items
+    using:
+      foreign_key_constraint_on:
+        column: study_plan_item_id
+        table:
+          schema: public
+          name: assignment_study_plan_items
+  - name: lo_study_plan_items
+    using:
+      foreign_key_constraint_on:
+        column: study_plan_item_id
+        table:
+          schema: public
+          name: lo_study_plan_items
+select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+        - available_from
+        - available_to
+        - completed_at
+        - content_structure
+        - copy_study_plan_item_id
+        - created_at
+        - deleted_at
+        - display_order
+        - end_date
+        - start_date
+        - status
+        - study_plan_id
+        - study_plan_item_id
+        - updated_at
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+        - available_from
+        - available_to
+        - completed_at
+        - content_structure
+        - copy_study_plan_item_id
+        - created_at
+        - deleted_at
+        - display_order
+        - end_date
+        - start_date
+        - status
+        - study_plan_id
+        - study_plan_item_id
+        - updated_at
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+          - study_plan:
+              school_id:
+                _in: X-Hasura-School-Ids
+      allow_aggregations: true

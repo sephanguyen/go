@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package spike.v1;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/spike/v1;spb";
+
+enum EmailStatus {
+    EMAIL_STATUS_NONE = 0;
+    EMAIL_STATUS_QUEUED_FAILED = 1;
+    EMAIL_STATUS_QUEUED = 2;
+    EMAIL_STATUS_PROCESSED_FAILED = 3;
+    EMAIL_STATUS_PROCESSED = 4;
+}
+
+enum EmailEventType {
+    EMAIL_EVENT_TYPE_NONE = 0;
+    EMAIL_EVENT_TYPE_DELIVERY = 1;
+    EMAIL_EVENT_TYPE_ENGAGEMENT = 2;
+}
+
+enum EmailEvent {
+    EMAIL_EVENT_NONE = 0;
+    EMAIL_EVENT_PROCESSED = 1;
+    EMAIL_EVENT_DROPPED = 2;
+    EMAIL_EVENT_DELIVERED = 3;
+    EMAIL_EVENT_DEFERRED = 4;
+    EMAIL_EVENT_BOUNCE = 5;
+    EMAIL_EVENT_BLOCKED = 6;
+    EMAIL_EVENT_OPEN = 7;
+    EMAIL_EVENT_CLICK = 8;
+    EMAIL_EVENT_SPAM_REPORT = 9;
+    EMAIL_EVENT_UNSUBSCRIBE = 10;
+    EMAIL_EVENT_GROUP_UNSUBSCRIBE = 11;
+    EMAIL_EVENT_GROUP_RESUBSCRIBE = 12;
+}
+
+message SendEmailRequest {
+    message EmailContent {
+        string PlainText = 1;
+        string HTML = 2;
+    } 
+
+    string subject = 1;
+    EmailContent content = 2;
+    repeated string recipients = 3;
+    string organization_id = 4;
+}
+
+message SendEmailResponse {
+    string email_id = 1;
+}
+
+
+service EmailModifierService {
+    rpc SendEmail(SendEmailRequest)
+        returns (SendEmailResponse);
+}
+

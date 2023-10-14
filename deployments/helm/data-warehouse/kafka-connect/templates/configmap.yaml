@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/name: kafka-connect
+  name: kafka-connect
+data:
+  exporter_config.yml: |-
+{{ .Files.Get "configs/exporter.yml" | nindent 4 }}
+  kafka-connect-config.properties: |-
+{{ tpl (printf "configs/%s/%s/kafka-connect-config.properties" .Values.global.vendor .Values.global.environment | .Files.Get) . | indent 4 }}
+  kafka-connect.env: |-
+{{ printf "configs/%s/%s/kafka-connect.env" .Values.global.vendor .Values.global.environment | .Files.Get | indent 4 }}
+  log4j.properties: |-
+{{ .Files.Get "configs/log4j.properties" | nindent 4 }}

@@ -1,0 +1,48 @@
+table:
+  schema: public
+  name: lesson_groups
+select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+        - lesson_group_id
+        - course_id
+        - media_ids
+        - updated_at
+        - created_at
+      filter: {}
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+        - course_id
+        - lesson_group_id
+        - media_ids
+        - created_at
+        - updated_at
+      filter: {}
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+        - lesson_group_id
+        - course_id
+        - media_ids
+        - updated_at
+        - created_at
+        - resource_path
+      filter:
+        resource_path:
+          _eq: X-Hasura-Resource-Path
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+        - media_ids
+        - course_id
+        - lesson_group_id
+        - resource_path
+        - created_at
+        - updated_at
+      filter:
+        resource_path:
+          _eq: X-Hasura-Resource-Path

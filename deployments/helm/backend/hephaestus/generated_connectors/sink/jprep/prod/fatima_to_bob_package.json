@@ -1,0 +1,23 @@
+{
+  "name": "prod_jprep_fatima_to_bob_package_sink_connector",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+    "tasks.max": "1",
+    "topics": "prod.jprep.fatima.public.package",
+    "connection.url": "${file:/config/kafka-connect-config.properties:bob_url}",
+    "auto.create": "false",
+    "insert.mode": "upsert",
+    "table.name.format": "package",
+    "fields.whitelist": "max_slot,package_end_date,package_id,package_start_date,package_type,resource_path",
+    "transforms": "unwrap,route",
+    "transforms.route.type": "org.apache.kafka.connect.transforms.RegexRouter",
+    "transforms.route.regex": "([^.]+).([^.]+).([^.]+).([^.]+).([^.]+)",
+    "transforms.route.replacement": "$5",
+    "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+    "delete.enabled": "false",
+    "pk.mode": "record_value",
+    "pk.fields": "package_id",
+    "transforms.unwrap.drop.tombstones": "true",
+    "transforms.unwrap.delete.handling.mode": "drop"
+  }
+}

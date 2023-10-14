@@ -1,0 +1,64 @@
+defaultHeartBeatQuery: SELECT 1
+customHeartbeatQuery: INSERT INTO public.debezium_heartbeat (id, updated_at) VALUES (1, NOW()) ON CONFLICT(id) DO UPDATE SET updated_at=EXCLUDED.updated_at
+dbUseCustomHeartBeat: [mastermgmt]
+envs: [local, stag, uat, prod]
+orgs: [e2e, manabie, jprep, aic, ga, renseikai, synersia, tokyo]
+database: mastermgmt
+schema: public
+preProductionEnabled: true
+datapipelines:
+- name: organizations
+  table: organizations
+  source:
+    deployEnv: [local, uat, stag, prod]
+    deployOrg: [e2e, manabie, aic, ga, renseikai, synersia, tokyo]
+  sinks:
+  - database: bob
+    deployEnv: [local, uat, stag, prod]
+    deployOrg: [e2e, manabie, aic, ga, renseikai, synersia, tokyo]
+  - database: notificationmgmt
+    deployEnv: [local, stag]
+    deployOrg: [e2e, manabie, aic, ga, renseikai, synersia, tokyo, jprep]
+  - database: lessonmgmt
+    deployOrg: [ e2e, manabie, aic, ga, renseikai, synersia, tokyo ]
+    deployEnv: [ local, stag, uat, prod ]
+
+- name: grade
+  table: grade
+  sinks:
+  - database: bob
+  - database: fatima
+    deployEnv: [local, stag, uat, dorp, prod]
+  - database: entryexitmgmt
+    # not deployed in jprep
+    deployOrg: [e2e, manabie, aic, ga, renseikai, synersia, tokyo]
+
+- name: internal_configuration_value
+  table: internal_configuration_value
+  sinks:
+  - database: bob
+    deployEnv: [local, stag, uat, prod]
+    deployOrg: [e2e, manabie, aic, ga, renseikai, synersia, tokyo]
+- name: external_configuration_value
+  table: external_configuration_value
+  sinks:
+  - database: bob
+    deployEnv: [local, stag, uat, prod]
+    deployOrg: [e2e, manabie, aic, ga, renseikai, synersia, tokyo]
+- name: configuration_key
+  table: configuration_key
+  sinks:
+  - database: bob
+    deployEnv: [local, stag, uat, prod]
+    deployOrg: [e2e, manabie, aic, ga, renseikai, synersia, tokyo]
+- name: academic_week
+  table: academic_week
+  sinks:
+  - database: bob
+  - database: lessonmgmt
+- name: academic_year
+  table: academic_year
+  sinks:
+  - database: bob
+  - database: lessonmgmt
+  - database: eureka

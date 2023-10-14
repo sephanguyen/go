@@ -1,0 +1,34 @@
+table:
+  schema: public
+  name: assign_study_plan_tasks
+select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+        - id
+        - study_plan_ids
+        - status
+        - course_id
+        - created_at
+        - updated_at
+        - deleted_at
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+        - id
+        - study_plan_ids
+        - status
+        - course_id
+        - created_at
+        - updated_at
+        - deleted_at
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+      allow_aggregations: true

@@ -1,0 +1,42 @@
+{
+	"schema": [
+		{
+			"column_name": "id",
+			"data_type": "integer",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "debezium_heartbeat",
+			"policyname": null,
+			"qual": null,
+			"with_check": null,
+			"relrowsecurity": null,
+			"relforcerowsecurity": null,
+			"permissive": null,
+			"roles": {
+				"Elements": null,
+				"Dimensions": null,
+				"Status": 1
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "debezium_heartbeat_pkey",
+			"column_name": "id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "debezium_heartbeat",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

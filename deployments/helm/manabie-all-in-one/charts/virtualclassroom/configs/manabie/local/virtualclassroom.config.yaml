@@ -1,0 +1,31 @@
+common:
+  google_cloud_project: dev-manabie-online
+postgres_v2:
+  bob:
+    max_conns: 16
+  lessonmgmt:
+    max_conns: 16
+issuers:
+  - issuer: http://firebase.emulator.svc.cluster.local:40401/fake_aud
+    audience: fake_aud
+    jwks_endpoint: http://firebase.emulator.svc.cluster.local:40401/jwkset
+  - issuer: manabie
+    audience: manabie-local
+    jwks_endpoint: http://shamir:5680/.well-known/jwks.json
+storage:
+  endpoint: http://minio-infras.emulator.svc.cluster.local:9000
+  region: us-east-1
+  bucket: manabie
+  secure: false
+agora:
+  app_id: fake-app-id
+  customer_id: fake-customer-id
+  endpoint: http://gandalf:5889/cloud_recording
+  bucket: manabie
+  maximum_learner_streamings: 13
+whiteboard:
+  app_id: fake_id
+  endpoint: http://gandalf:5889
+  token_life_span: 5m
+zegocloud:
+  app_id: 123456789

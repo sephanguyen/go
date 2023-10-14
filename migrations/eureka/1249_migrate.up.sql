@@ -1,0 +1,1 @@
+CREATE INDEX CONCURRENTLY IF NOT EXISTS chapters_book_id_idx ON public.chapters(book_id);

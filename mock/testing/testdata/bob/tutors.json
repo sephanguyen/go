@@ -1,0 +1,124 @@
+{
+	"schema": [
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "current_active_questions",
+			"data_type": "smallint",
+			"column_default": "0",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "grades",
+			"data_type": "ARRAY",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "open_questions",
+			"data_type": "smallint",
+			"column_default": "0",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "skill_set",
+			"data_type": "ARRAY",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "status",
+			"data_type": "text",
+			"column_default": "'TUTOR_STATUS_NONE'::text",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "total_resolved_questions",
+			"data_type": "integer",
+			"column_default": "0",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "tutor_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "tutors",
+			"policyname": "rls_tutors",
+			"qual": "permission_check(resource_path, 'tutors'::text)",
+			"with_check": "permission_check(resource_path, 'tutors'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "tutors",
+			"policyname": "rls_tutors_restrictive",
+			"qual": "permission_check(resource_path, 'tutors'::text)",
+			"with_check": "permission_check(resource_path, 'tutors'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "tutors_pk",
+			"column_name": "tutor_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "tutors",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

@@ -1,0 +1,211 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "kafka.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "kafka.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: {{ include "kafka.name" . }}
+    {{- include "kafka.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "kafka.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: {{ include "kafka.name" . }}
+  serviceName: {{ include "kafka.fullname" . }}-svc-headless
+  {{- if .Values.kafka.cluster.enabled }}
+  replicas: {{ .Values.kafka.cluster.replicas }}
+  {{- else }}
+  replicas: 1
+  {{- end }}
+  {{- if eq "local" .Values.environment }}
+  podManagementPolicy: Parallel
+  {{- else }}
+  podManagementPolicy: OrderedReady
+  {{- end }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "kafka.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: {{ include "kafka.name" . }}
+      annotations:
+      {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- with .Values.kafka }}
+      {{- $context := (mustMerge (deepCopy .) $) }}
+      affinity: {{- include "util.affinityNew" $context | nindent 8 }}
+      tolerations: {{- include "util.tolerations" $context | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.securityContext | nindent 8 }}
+      {{- with .Values.kafka.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "util.serviceAccountName" . }}
+      volumes:
+      - name: jmx-config
+        configMap:
+          name: {{ template "kafka.fullname" . }}-jmx-configmap
+      - name: {{ include "kafka.fullname" . }}
+        secret:
+          secretName: {{ include "kafka.fullname" . }}
+          items:
+          - key: kafka_server_jaas.encrypted.conf
+            path: kafka_server_jaas.encrypted.conf
+      - name: decrypted-secret
+        emptyDir: {}
+{{- if eq "local" .Values.environment }}
+      - name: service-credential
+        secret:
+          secretName: {{ include "kafka.fullname" . }}
+          items:
+          - key: service_credential.json
+            path: service_credential.json
+{{- end }}
+{{- if .Values.enableAC }}
+      initContainers:
+      - name: decrypt-secret
+        image: "{{ .Values.decryptorImage.repository }}:{{ .Values.decryptorImage.tag }}"
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+        - name: decrypted-secret
+          mountPath: /decrypted
+        - name: {{ include "kafka.fullname" . }}
+          mountPath: /secrets/kafka_server_jaas.encrypted.conf
+          subPath: kafka_server_jaas.encrypted.conf
+        {{- if eq "local" .Values.environment }}
+        - name: service-credential
+          mountPath: /configs/service_credential.json
+          subPath: service_credential.json
+          readOnly: true
+        {{- end }}
+        env:
+        {{- if eq "local" .Values.environment }}
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: "/configs/service_credential.json"
+        {{- end }}
+        - name: HOSTNAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        command:
+          - /bin/bash
+          - -c
+          - |
+
+            set -e
+            echo "====="
+            
+            sops -d --output /decrypted/kafka_server_jaas.conf /secrets/kafka_server_jaas.encrypted.conf
+{{- end }}
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.kafka.image.repository }}:{{ .Values.kafka.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: {{ .Values.kafka.image.pullPolicy }}
+        env:
+        - name: HOSTNAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: CLUSTER_ID
+          value: ZbxI0SJZRiKLJNHusxNHAA
+        - name: EXTRA_ARGS
+          value: "-javaagent:/kafka/etc/jmx_prometheus_javaagent.jar=5555:/kafka/etc/jmx-kafka/jmx-kafka-prometheus.yml"
+        - name: JMXHOST
+          value: "0.0.0.0"
+        - name: JMXPORT
+          value: "1976"
+        - name: KAFKA_AUTO_CREATE_TOPICS_ENABLE
+          value: "false"
+        - name: KAFKA_MESSAGE_MAX_BYTES
+          value: "10485760"
+        - name: KAFKA_REPLICA_FETCH_MAX_BYTES
+          value: "10485760"
+        - name: KAFKA_HEAP_OPTS
+          value: "{{ .Values.kafka.heapOptions }}"
+        - name: LOG_LEVEL
+          value: "WARN"
+{{- if .Values.enableAC }}
+        - name: KAFKA_OPTS
+          value: "-Djava.security.auth.login.config=/decrypted/kafka_server_jaas.conf"
+        - name: KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL
+          value: "PLAIN"
+        - name: KAFKA_SASL_ENABLED_MECHANISMS
+          value: "PLAIN"
+        - name: KAFKA_SASL_MECHANISM_CONTROLLER_PROTOCOL
+          value: "PLAIN"
+        - name: KAFKA_INTER_BROKER_LISTENER_NAME
+          value: "BROKER"
+        - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
+          value: "BROKER:SASL_PLAINTEXT,CONTROLLER:SASL_PLAINTEXT"
+        - name: KAFKA_CONTROLLER_LISTENER_NAMES
+          value: "CONTROLLER"
+{{- end }}
+        ports:
+        - containerPort: 9092
+          name: client
+          protocol: TCP
+        - containerPort: 9093
+          name: cluster
+          protocol: TCP
+        resources:
+          {{- toYaml .Values.kafka.resources | nindent 10 }}
+        volumeMounts:
+{{- if ne "local" .Values.environment }}
+        - name: data-warehouse-kafka-pvc
+          mountPath: {{ .Values.kafka.fileStorage.storageDirectory }}
+{{- end }}
+        - name: jmx-config
+          mountPath: /kafka/etc/jmx-kafka
+        - name: decrypted-secret
+          mountPath: /decrypted
+        command:
+        - bash
+        - "-c"
+        - |
+          ordinal=${HOSTNAME##*-}
+          export NODE_ID=$(($ordinal + 1))
+          export KAFKA_CONTROLLER_QUORUM_VOTERS=""
+
+{{- if .Values.enableAC }}
+          echo $LISTENERS;
+          echo $HOST_NAME;
+          if [[ -z "$HOST_NAME" ]]; then
+            HOST_NAME=$(ip addr | grep 'BROADCAST' -A2 | tail -n1 | awk '{print $2}' | cut -f1  -d'/')
+          fi
+
+          export KAFKA_LISTENERS=BROKER://$HOST_NAME:9092,CONTROLLER://$HOST_NAME:9093;
+          export KAFKA_ADVERTISED_LISTENERS=BROKER://$HOST_NAME:9092;
+{{- end }}
+
+          {{- if .Values.kafka.cluster.enabled }}
+          export NUM_HOST={{ .Values.kafka.cluster.replicas }}
+          {{- else }}
+          export NUM_HOST=1
+          {{- end }}
+          for i in $( seq 0 $(($NUM_HOST-1)) )
+          do
+            if [ ! "$KAFKA_CONTROLLER_QUORUM_VOTERS" ];then
+              export KAFKA_CONTROLLER_QUORUM_VOTERS=$(($i+1))@{{ include "kafka.fullname" . }}-$i.{{ include "kafka.fullname" . }}-svc-headless.{{ $.Release.Namespace }}.svc.cluster.local:9093
+            else
+              export KAFKA_CONTROLLER_QUORUM_VOTERS=$KAFKA_CONTROLLER_QUORUM_VOTERS,$(($i+1))@{{ include "kafka.fullname" . }}-$i.{{ include "kafka.fullname" . }}-svc-headless.{{ $.Release.Namespace }}.svc.cluster.local:9093
+            fi
+          done
+          echo "KAFKA_CONTROLLER_QUORUM_VOTERS: $KAFKA_CONTROLLER_QUORUM_VOTERS"
+          /docker-entrypoint.sh start
+  volumeClaimTemplates:
+  - metadata:
+      name: data-warehouse-kafka-pvc
+      labels:
+        app.kubernetes.io/name: {{ include "kafka.name" . }}
+    spec:
+      accessModes: {{ .Values.kafka.fileStorage.accessModes }}
+      storageClassName: {{ .Values.kafka.fileStorage.storageClassName }}
+      resources:
+        requests:
+          storage: {{ .Values.kafka.fileStorage.size }}

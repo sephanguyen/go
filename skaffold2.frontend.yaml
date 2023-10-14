@@ -1,0 +1,146 @@
+apiVersion: skaffold/v4beta5
+kind: Config
+metadata:
+  name: frontend
+
+profiles:
+  - name: graphql-mesh
+    deploy:
+      helm:
+        hooks:
+          before:
+            - host:
+                command: # copy proto directory to graphql-mesh
+                  - /bin/bash
+                  - -c
+                  - |
+                    set -eu
+                    mkdir -p ./deployments/helm/frontend/graphql-mesh/proto
+                    cp -rf ./proto/. ./deployments/helm/frontend/graphql-mesh/proto/.
+          after:
+            - host:
+                command:
+                  - bash
+                  - -c
+                  - |
+                    echo "To access import-map-deployer, you need to add '$ip admin.local-green.manabie.io' to your /etc/hosts, and visit:"
+                    echo "    https://admin.local-green.manabie.io:31600/graphql-mesh/graphql import map deployer"
+
+        releases:
+          - name: graphql-mesh
+            chartPath: deployments/helm/frontend/graphql-mesh
+            namespace: "{{.ENV}}-{{.ORG}}-frontend"
+            createNamespace: true
+            skipBuildDependencies: true
+            valuesFiles:
+              - "deployments/helm/platforms/gateway/{{.ENV}}-{{.ORG}}-values.yaml"
+              - "deployments/helm/frontend/graphql-mesh/values.yaml"
+            setValueTemplates:
+              global:
+                environment: "{{.ENV}}"
+                vendor: "{{.ORG}}"
+              serviceAccountEmailSuffix: "{{.SERVICE_ACCOUNT_EMAIL_SUFFIX}}"
+
+  - name: imd
+    deploy:
+      helm:
+        hooks:
+          after:
+            - host:
+                command:
+                  - bash
+                  - -c
+                  - |
+                    echo "To access import-map-deployer, you need to add '$ip admin.local-green.manabie.io' to your /etc/hosts, and visit:"
+                    echo "    https://admin.local-green.manabie.io:31600/imd import map deployer"
+        releases:
+          - name: import-map-deployer
+            chartPath: deployments/helm/platforms/import-map-deployer
+            namespace: "{{.ENV}}-{{.ORG}}-frontend"
+            createNamespace: true
+            skipBuildDependencies: true
+            valuesFiles:
+              - "deployments/helm/platforms/gateway/{{.ENV}}-{{.ORG}}-values.yaml"
+              - "deployments/helm/platforms/import-map-deployer/values.yaml"
+            setValueTemplates:
+              global: #will remove global prefix later
+                vendor: "{{.ORG}}"
+                environment: "{{.ENV}}"
+              serviceAccountEmailSuffix: "{{.SERVICE_ACCOUNT_EMAIL_SUFFIX}}"
+
+  - name: backoffice-mfe
+    deploy:
+      helm:
+        hooks:
+          after:
+            - host:
+                command:
+                  - bash
+                  - -c
+                  - |
+                    echo "To access BO, you need to add '$ip backoffice-mfe.local.manabie.io' to your /etc/hosts, and visit:"
+                    echo "    https://backoffice-mfe.local.manabie.io:31600 backoffice-mfe"
+        releases:
+          - name: backoffice-mfe
+            chartPath: deployments/helm/frontend/backoffice
+            # namespace: "{{.ENV}}-{{.ORG}}-backoffice-mfe"
+            namespace: '{{.ENV}}-{{.ORG}}-{{if and (eq "stag" .ENV) (eq "manabie" .ORG)}}frontend{{else}}backoffice-mfe{{end}}'
+            createNamespace: true
+            wait: true
+            skipBuildDependencies: true
+            valuesFiles:
+              - "deployments/helm/platforms/gateway/{{.ENV}}-{{.ORG}}-values.yaml"
+              - "deployments/helm/frontend/backoffice/values.yaml"
+              - "deployments/helm/frontend/backoffice/{{.ENV}}-{{.ORG}}-values.yaml"
+            setValueTemplates:
+              global:
+                environment: "{{.ENV}}"
+                vendor: "{{.ORG}}"
+              hostname: "backofficeMfe"
+              image:
+                repository: "asia.gcr.io/student-coach-e1e95/backoffice"
+                tag: "{{.BACKOFFICE_TAG}}"
+
+  - name: backoffice
+    activation:
+      - env: E2E=true
+    deploy:
+      helm:
+        hooks:
+          before:
+            - host:
+                command:
+                  - bash
+                  - -c
+                  - |
+                    if [[ "$ENV" == "local"  ]]; then
+                        kind load docker-image asia.gcr.io/student-coach-e1e95/school-portal-admin:${BACKOFFICE_TAG}
+                    fi
+          after:
+            - host:
+                command:
+                  - bash
+                  - -c
+                  - |
+                    echo "To access BO, you need to add '$ip backoffice.local.manabie.io' to your /etc/hosts, and visit:"
+                    echo "    https://backoffice.local.manabie.io:31600 backoffice"
+        releases:
+          - name: backoffice
+            chartPath: deployments/helm/frontend/backoffice
+            namespace: "{{.ENV}}-{{.ORG}}-frontend"
+            createNamespace: true
+            wait: true
+            skipBuildDependencies: true
+            valuesFiles:
+              - "deployments/helm/platforms/gateway/{{.ENV}}-{{.ORG}}-values.yaml"
+              - "deployments/helm/frontend/backoffice/values.yaml"
+              - "deployments/helm/frontend/backoffice/{{.ENV}}-{{.ORG}}-values.yaml"
+            setValueTemplates:
+              global:
+                environment: "{{.ENV}}"
+                vendor: "{{.ORG}}"
+              hostname: "backoffice"
+              disabled: '{{if and (eq "stag" .ENV) (eq "manabie" .ORG)}}true{{end}}'
+              image:
+                repository: "asia.gcr.io/student-coach-e1e95/school-portal-admin"
+                tag: "{{.BACKOFFICE_TAG}}"

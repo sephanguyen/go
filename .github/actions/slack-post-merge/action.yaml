@@ -1,0 +1,57 @@
+name: "slack-post-merge"
+description: "Send a message to Slack when post-merge failed."
+
+inputs:
+  status:
+    required: true
+    description: Status of the reported job
+  message:
+    required: true
+    description: Custom message
+  username:
+    required: true
+    description: Github Username
+  BUILD_GITHUB_TOKEN:
+    required: true
+    description: Github token
+  SLACK_TOKEN:
+    required: true
+    description: Slack token
+
+runs:
+  using: composite
+  steps:
+    - name: Install dependency
+      run: |
+        npm install glob
+        npm install js-hcl-parser
+      shell: bash
+
+    - id: get-email
+      uses: actions/github-script@v6
+      env:
+        GITHUB_USERNAME: ${{ inputs.username }}
+      with:
+        github-token: ${{ inputs.BUILD_GITHUB_TOKEN }}
+        script: |
+          const { findEmail } = require('./.github/scripts/get_manabie_email.js');
+          var email = await findEmail(process.env.GITHUB_USERNAME);
+          if (!email) email = 'chivy.nguyen@manabie.com';
+          core.setOutput('email', email)
+
+    - id: find-slack-user
+      uses: scribd/find-slack-user-action@v1.0.2
+      with:
+        email: ${{ steps.get-email.outputs.email }}
+        slack-token: ${{ inputs.SLACK_TOKEN }}
+
+    - name: Send message to post-merge-alert
+      uses: act10ns/slack@v2
+      env:
+        TEAM_ID: 'S02KVLHBZDY'
+        USER_ID: '${{ steps.find-slack-user.outputs.member-id }}'
+      with:
+        webhook-url: "https://hooks.slack.com/services/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" #post-merge-alert
+        status: ${{ inputs.status }}
+        message: "${{ inputs.message }}"
+        config: ./.github/slack-post-merge-template.yml

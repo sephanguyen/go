@@ -1,0 +1,15 @@
+.git
+.DS_Store
+.gitignore
+.dockerignore
+README.md
+env.*
+.idea
+cover.*
+./developments
+./deployments
+./docs
+.github
+Makefile
+
+node_modules

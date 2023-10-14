@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package tom.v2;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/tom/v2;tpb";
+
+message CreateConversation {
+  string name = 1;
+  string type = 2;
+  bool notification_enabled = 3;
+  string process_id = 4;
+}
+
+message AddMemberToConversation {
+  string conversation_id = 1;
+  string member_id = 2;
+  string role = 3;
+}
+message RemoveMemberFromConversation {
+  string conversation_id = 1;
+  string member_id = 2;
+}
+message ConversationCreated {
+  string process_id = 1;
+  string conversation_id = 2;
+  string type = 3;
+}
+message MemberAddedToConversation {
+  string conversation_id = 1;
+  string member_id = 2;
+}
+message MemberRemovedFromConversation {
+  string conversation_id = 1;
+  string member_id = 2;
+}

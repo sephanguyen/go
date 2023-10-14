@@ -1,0 +1,132 @@
+adminHttp:
+    - corsPolicy:
+        allowHeaders:
+            - authorization
+            - grpc-timeout
+            - content-type
+            - keep-alive
+            - user-agent
+            - cache-control
+            - content-transfer-encoding
+            - token
+            - x-accept-content-transfer-encoding
+            - x-accept-response-streaming
+            - x-request-id
+            - x-user-agent
+            - x-graphql-mesh-authorization
+            - x-grpc-web
+            - if-none-match
+            - pkg
+            - version
+            - connect-timeout-ms
+            - connect-protocol-version
+            - connect-content-encoding
+            - connect-accept-encoding
+        allowMethods:
+            - POST
+            - GET
+            - OPTIONS
+            - PUT
+            - DELETE
+        allowOrigins:
+            - regex: .*
+        exposeHeaders:
+            - grpc-status
+            - grpc-message
+            - etag
+        maxAge: 100s
+      match:
+        - uri:
+            prefix: /calendar/
+      rewrite:
+        uri: /
+      route:
+        - destination:
+            host: calendar-hasura
+            port:
+                number: 8080
+affinity: {}
+affinityOverride: {}
+apiHttp:
+    - match:
+        - uri:
+            prefix: /calendar.v1
+      route:
+        - destination:
+            host: calendar
+            port:
+                number: 7050
+enabled: true
+grpcPort: 7050
+hasura:
+    anonymous:
+        enabled: false
+    enableConsole: true
+    enabledApis: metadata,graphql
+    pgConnections: 8
+    pgTimeout: 10
+    resources:
+        requests:
+            memory: 110Mi
+    service:
+        port: 8080
+        type: ClusterIP
+hasuraEnabled: true
+jobs:
+    fill-scheduler-to-lessons:
+        cmd: fill_scheduler_to_lessons
+    update-invalid-schedulers:
+        cmd: update_invalid_schedulers
+metrics:
+    enabled: true
+migrationEnabled: true
+readinessProbe:
+    enabled: true
+service:
+    port: 7050
+    type: ClusterIP
+webHttp:
+    - corsPolicy:
+        allowHeaders:
+            - authorization
+            - grpc-timeout
+            - content-type
+            - keep-alive
+            - user-agent
+            - cache-control
+            - content-transfer-encoding
+            - token
+            - x-accept-content-transfer-encoding
+            - x-accept-response-streaming
+            - x-request-id
+            - x-user-agent
+            - x-graphql-mesh-authorization
+            - x-grpc-web
+            - if-none-match
+            - pkg
+            - version
+            - connect-timeout-ms
+            - connect-protocol-version
+            - connect-content-encoding
+            - connect-accept-encoding
+        allowMethods:
+            - POST
+            - GET
+            - OPTIONS
+            - PUT
+            - DELETE
+        allowOrigins:
+            - regex: .*
+        exposeHeaders:
+            - grpc-status
+            - grpc-message
+            - etag
+        maxAge: 100s
+      match:
+        - uri:
+            prefix: /calendar.v1
+      route:
+        - destination:
+            host: calendar
+            port:
+                number: 7050

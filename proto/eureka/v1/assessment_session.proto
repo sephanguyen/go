@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package eureka.v1;
+
+import "common/v1/requests.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/eureka/v1;epb";
+
+message GetAssessmentSessionsByCourseAndLMRequest {
+    repeated string course_id = 1;
+    repeated string learning_material_id = 2;
+    repeated string location_ids = 3;
+    common.v1.Paging paging = 4;
+}
+  
+message GetAssessmentSessionsByCourseAndLMResponse {  
+    message AssessmentSession {
+      string session_id = 1;
+      string assessment_id = 2;
+      string user_id = 3;
+      string user_name = 4;
+    }
+    repeated AssessmentSession assessment_sessions = 1;
+    int32 total_items = 2;
+    common.v1.Paging next_page = 3;
+}
+
+service AssessmentSessionService {
+    rpc GetAssessmentSessionsByCourseAndLM(GetAssessmentSessionsByCourseAndLMRequest) returns (GetAssessmentSessionsByCourseAndLMResponse);
+}

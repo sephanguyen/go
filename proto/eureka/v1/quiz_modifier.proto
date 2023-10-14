@@ -1,0 +1,158 @@
+syntax = "proto3";
+
+package eureka.v1;
+
+import "common/v1/contents.proto";
+import "common/v1/enums.proto";
+import "common/v1/requests.proto";
+import "common/v1/question_group.proto";
+import "eureka/v1/course_modifier.proto";
+import "eureka/v1/flashcard_reader.proto";
+import "google/protobuf/wrappers.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/eureka/v1;epb";
+
+// For backward compatible
+message QuizCore {
+  string external_id = 1;
+  common.v1.QuizType kind = 2;
+  int32 school_id = 3;
+  common.v1.Country country = 4;
+  common.v1.RichText question = 5;
+  common.v1.RichText explanation = 6;
+  repeated string tagged_los = 7;
+  int32 difficulty_level = 8;
+  repeated common.v1.QuizOption options = 9;
+  repeated common.v1.QuizConfig config = 10;
+}
+
+message UpsertQuizRequest {
+  QuizCore quiz = 1;
+  string lo_id = 2;
+}
+
+message UpsertQuizResponse {
+  string id = 1;
+}
+
+message QuizLO {
+  common.v1.QuizCore quiz = 1;
+  string lo_id = 2;
+}
+
+message UpsertSingleQuizRequest {
+  QuizLO quiz_lo = 1;
+}
+
+message UpsertSingleQuizResponse {
+  string id = 1;
+}
+
+message CreateQuizTestRequest {
+  string study_plan_item_id = 1;
+  string lo_id = 2;
+  string student_id = 3;
+  // let empty for the first call
+  google.protobuf.StringValue set_id = 4;
+  common.v1.Paging paging = 5;
+  string session_id = 6;
+  bool keep_order = 7;
+}
+
+message CreateQuizTestResponse {
+  common.v1.Paging next_page = 1;
+  repeated common.v1.Quiz items = 2;
+  string quizzes_id = 3;
+  repeated common.v1.QuestionGroup question_groups = 4;
+}
+
+message DeleteQuizRequest {
+  string quiz_id = 1;
+  int32 school_id = 2;
+}
+
+message DeleteQuizResponse {}
+message CreateFlashCardStudyRequest  {
+  string study_plan_item_id = 1;
+  string lo_id = 2;
+  string student_id = 3;
+  string study_set_id = 4;
+  common.v1.Paging paging = 5;
+  bool keep_order = 6;
+}
+
+message CreateFlashCardStudyResponse {
+  common.v1.Paging next_page = 1;
+  string study_set_id = 2;
+  repeated eureka.v1.FlashcardQuizzes items = 3;
+  int32 studying_index = 4;
+}
+
+message CreateRetryQuizTestRequest {
+  string study_plan_item_id = 1;
+  string lo_id = 2;
+  string student_id = 3;
+  google.protobuf.StringValue set_id = 4;
+  common.v1.Paging paging = 5;
+  string session_id = 6;
+  bool keep_order = 7;
+  google.protobuf.StringValue retry_shuffle_quiz_id = 8;
+}
+
+message CreateRetryQuizTestResponse {
+  common.v1.Paging next_page = 1;
+  repeated common.v1.Quiz items = 2;
+  string quizzes_id = 3;
+  repeated common.v1.QuestionGroup question_groups = 4;
+}
+
+message CheckQuizCorrectnessRequest {
+  string set_id = 1;
+  string quiz_id = 2;
+  repeated Answer answer = 3;
+}
+
+message CheckQuizCorrectnessResponse {
+  repeated bool correctness = 1;
+  bool is_correct_all = 2;
+  repeated string filled_texts = 3;
+  repeated string correct_texts = 4;
+  oneof result {
+    common.v1.OrderingResult ordering_result = 11;
+  }
+}
+
+message RemoveQuizFromLORequest {
+  string quiz_id = 1;
+  string lo_id = 2;
+}
+
+message RemoveQuizFromLOResponse {}
+
+message UpdateDisplayOrderOfQuizSetRequest {
+  message QuizExternalIDPair {
+    string first = 1;
+    string second = 2;
+  }
+  string lo_id = 1;
+  repeated QuizExternalIDPair pairs = 2;
+}
+
+message UpdateDisplayOrderOfQuizSetResponse{
+}
+
+service QuizModifierService {
+  rpc UpsertQuiz(UpsertQuizRequest) returns (UpsertQuizResponse) {
+    option deprecated = true;
+  };
+  rpc UpsertSingleQuiz(UpsertSingleQuizRequest)
+      returns (UpsertSingleQuizResponse);
+  rpc CreateQuizTest(CreateQuizTestRequest) returns (CreateQuizTestResponse); //TODO: PHASE 3 discuss again x
+  rpc DeleteQuiz(DeleteQuizRequest) returns (DeleteQuizResponse);
+  rpc CreateFlashCardStudy(CreateFlashCardStudyRequest) returns (CreateFlashCardStudyResponse);//TODO: PHASE 3, discuss again
+  rpc CreateRetryQuizTest(CreateRetryQuizTestRequest) returns (CreateRetryQuizTestResponse); // TODO: PHASE 3, discuss again
+  rpc CheckQuizCorrectness(CheckQuizCorrectnessRequest) returns (CheckQuizCorrectnessResponse);
+  rpc RemoveQuizFromLO(RemoveQuizFromLORequest) returns (RemoveQuizFromLOResponse);
+  rpc UpdateDisplayOrderOfQuizSet(UpdateDisplayOrderOfQuizSetRequest)
+      returns (UpdateDisplayOrderOfQuizSetResponse);
+}  

@@ -1,0 +1,6 @@
+common:
+  google_cloud_project: student-coach-e1e95
+email_webhook:
+  receive_from_all_tenant: false
+  receive_only_from_tenant:
+    - "-2147483641"

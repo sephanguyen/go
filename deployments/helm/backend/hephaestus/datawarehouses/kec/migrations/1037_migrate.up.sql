@@ -1,0 +1,17 @@
+ALTER TABLE IF EXISTS public.courses ADD COLUMN IF NOT EXISTS subject text;
+ALTER TABLE IF EXISTS public.courses ADD COLUMN IF NOT EXISTS display_order int DEFAULT 0;
+ALTER TABLE IF EXISTS public.courses ADD COLUMN IF NOT EXISTS start_date timestamptz;
+ALTER TABLE IF EXISTS public.courses ADD COLUMN IF NOT EXISTS end_date timestamptz;
+ALTER TABLE IF EXISTS public.courses ADD COLUMN IF NOT EXISTS preset_study_plan_id text;
+ALTER TABLE IF EXISTS public.courses ADD COLUMN IF NOT EXISTS icon text;
+ALTER TABLE IF EXISTS public.courses ADD COLUMN IF NOT EXISTS status text;
+ALTER TABLE IF EXISTS public.courses ADD COLUMN IF NOT EXISTS courses_remarks text;
+ALTER TABLE IF EXISTS public.courses ADD COLUMN IF NOT EXISTS course_partner_id text;
+ALTER TABLE IF EXISTS public.courses ADD COLUMN IF NOT EXISTS course_is_archived boolean NULL DEFAULT false;
+ALTER TABLE IF EXISTS public.courses ADD COLUMN IF NOT EXISTS course_type_id text;
+ALTER TABLE IF EXISTS public.courses ADD COLUMN IF NOT EXISTS course_type_name text;
+ALTER TABLE IF EXISTS public.courses ADD COLUMN IF NOT EXISTS course_type_created_at text;
+ALTER TABLE IF EXISTS public.courses ADD COLUMN IF NOT EXISTS course_type_updated_at text;
+ALTER TABLE IF EXISTS public.courses ADD COLUMN IF NOT EXISTS course_type_deleted_at text;
+ALTER TABLE IF EXISTS public.courses ADD COLUMN IF NOT EXISTS course_type_remarks text;
+ALTER TABLE IF EXISTS public.courses ADD COLUMN IF NOT EXISTS course_type_is_archived text;

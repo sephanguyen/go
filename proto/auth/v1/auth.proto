@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package auth.v1;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/auth/v1;apb";
+
+
+message ExchangeSalesforceTokenRequest {
+}
+
+message ExchangeSalesforceTokenResponse {
+  string token = 1;
+}
+
+service AuthService {
+  rpc ExchangeSalesforceToken(ExchangeSalesforceTokenRequest) returns (ExchangeSalesforceTokenResponse);
+}

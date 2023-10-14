@@ -1,0 +1,1 @@
+ALTER TABLE public.order ADD COLUMN withdrawal_effective_date timestamp with time zone NULL;

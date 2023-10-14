@@ -1,0 +1,6 @@
+apiVersion: v2
+name: bob
+description: A Helm chart for bob
+type: application
+appVersion: "1.0"
+version: 0.1.0

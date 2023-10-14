@@ -1,0 +1,146 @@
+unleash:
+  featureFlags:
+    timesheet:
+      - name: Timesheet_TimesheetManagement_BackOffice_TimesheetManagement
+        description: "A feature flag to enable Timesheet Management (LT-16159)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Timesheet_TimesheetConfirmation_BackOffice_TimesheetConfirmation
+        description: "A feature flag to enable Timesheet Confirmation (LT-18149)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_MasterManagement_BackOffice_Timesheet_Group
+        description: "A feature flag to enable Timesheet group options in the Master Management (LT-17026)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: BACKEND_Timesheet_TimesheetManagement_AutoCreate
+        description: "A feature flag to enable the auto create timesheet (LT-19981)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Timesheet_StaffManagement_BackOffice_AutoCreateConfig
+        description: "A feature flag to enable the auto create timesheet (LT-22041)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: User_StaffManagement_BackOffice_TimesheetSetting
+        description: "A feature flag to enable Timesheet Setting tab in Staff detail (LT-21030)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Timesheet_StaffManagement_BackOffice_TransportationExpenseConfig
+        description: "A feature flag to enable the transportation expense config (LT-29952)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Timesheet_TimesheetConfirmation_Confirmation_Window
+        description: "A feature flag to enable the Timesheet Confirmation Window (LT-32489)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Timesheet_TimesheetManagement_ActionLog
+        description: "A feature flag to enable the Timesheet Action Log (LT-39910)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: BACKEND_Timesheet_TimesheetManagement_ActionLog
+        description: "A feature flag to enable activity log on backend (LT-39867)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Timesheet_Appsmith_BackOffice_Timesheet_Widget
+        description: "A feature toggle to enable Timesheet Widget in back office (LT-41112)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Timesheet_TimesheetManagement_BreakAndPreparationTime
+        description: "A feature flag to toggle break and preparation time columns (LT-42750)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Timesheet_TimesheetManagement_AppConfig
+        description: "A feature flag to enable timesheet app config (LT-40303)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []

@@ -1,0 +1,8 @@
+Teacher,day of week,time available,subject,grade
+Teacher_1,"2,3,4","14h-16h,16h-18h",Toan,6
+Teacher_2,"3,4,5","18h-20h,20h-22h",Ly,7
+Teacher_3,"4,5,6","14h-16h,16h-18h",Hoa,8
+Teacher_4,"2,6,7","18h-20h,20h-22h",Toan,9
+Teacher_5,"3,4,5","14h-16h,16h-18h",Ly,7
+Teacher_6,"2,4,5","18h-20h,20h-22h",Hoa,8
+Teacher_7,"5,6,7","18h-20h,20h-22h",Toan,9

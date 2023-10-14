@@ -1,0 +1,115 @@
+# Default values for cp-schema-registry.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+## ------------------------------------------------------
+## Schema Registry
+## ------------------------------------------------------
+
+## Number of Scheme Registry Pod
+replicaCount: 2
+
+## Image Info
+## ref: https://hub.docker.com/r/confluentinc/cp-schema-registry/
+image: asia.gcr.io/student-coach-e1e95/customized_cp_schema_registry
+imageTag: 7.1.2
+
+## Specify a imagePullPolicy
+## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+imagePullPolicy: IfNotPresent
+
+## Specify an array of imagePullSecrets.
+## Secrets must be manually created in the namespace.
+## ref: https://kubernetes.io/docs/concepts/containers/images/#specifying-imagepullsecrets-on-a-pod
+imagePullSecrets:
+
+## Schema Registry Settings Overrides
+## Configuration Options can be found here: https://docs.confluent.io/current/schema-registry/docs/config.html
+configurationOverrides:
+  schema.compatibility.level: "none"
+
+## Additional env variables
+customEnv: {}
+
+## The port on which the Schema Registry will be available and serving requests
+servicePort: 8081
+
+## Schema registry JVM Heap Option
+heapOptions: "-Xms128M -Xmx128M"
+
+## You can list load balanced service endpoint, or list of all brokers (which is hard in K8s).  e.g.:
+## bootstrapServers: "PLAINTEXT://dozing-prawn-kafka-headless:9092"
+## Charts uses Kafka Coordinator Master Election: https://docs.confluent.io/current/schema-registry/docs/design.html#kafka-coordinator-master-election
+kafka:
+  bootstrapServers: "dwh-kafka-svc:9092"
+
+resources:
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  requests:
+    memory: 456Mi
+    cpu: 200m
+  limits: 
+    cpu: 2000m
+    memory: 2524Mi
+
+## Custom pod annotations
+podAnnotations:
+  cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+
+## Node labels for pod assignment
+## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+nodeSelector: {}
+
+## Taints to tolerate on node assignment:
+## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+tolerations: []
+
+## Pod scheduling constraints
+## Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+    - weight: 1
+      podAffinityTerm:
+        topologyKey: kubernetes.io/hostname
+        labelSelector:
+          matchExpressions:
+          - key: app.kubernetes.io/name
+            operator: In
+            values: ["cp-schema-registry"]
+
+## Privilege and access control settings for a Pod or Container
+## https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+## In the source image cp_schema_registry:7.1.2, using appuser with id 1000
+securityContext:
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+  runAsNonRoot: true
+
+## Monitoring
+## Schema Registry JMX Settings
+## ref: https://docs.confluent.io/current/schema-registry/docs/monitoring.html
+jmx:
+  port: 1976
+
+## Prometheus Exporter Configuration
+## ref: https://prometheus.io/docs/instrumenting/exporters/
+prometheus:
+  ## JMX Exporter Configuration
+  ## ref: https://github.com/prometheus/jmx_exporter
+  jmx:
+    enabled: true
+    port: 8080
+  
+sopsImage:
+  repository: mozilla/sops
+  tag: v3.7.3-alpine
+decryptorImage:
+  repository: asia.gcr.io/student-coach-e1e95/decrypt-secret
+  tag: "20220517"
+
+enableAC: false

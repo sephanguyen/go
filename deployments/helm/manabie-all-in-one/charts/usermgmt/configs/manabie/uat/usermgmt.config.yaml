@@ -1,0 +1,15 @@
+common:
+  google_cloud_project: staging-manabie-online
+  firebase_project: uat-manabie
+  identity_platform_project: uat-manabie
+issuers:
+  - issuer: manabie
+    audience: manabie-stag
+    jwks_endpoint: http://shamir:5680/.well-known/jwks.json
+postgres_v2:
+  bob:
+    shard_id: 1
+jwt_applicant: manabie-stag
+with_us:
+  bucket_name: uat-etl
+  slack_channel: C034T7SAQ8G

@@ -1,0 +1,136 @@
+{
+	"schema": [
+		{
+			"column_name": "available_or_not",
+			"data_type": "boolean",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "center_num",
+			"data_type": "integer",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "date",
+			"data_type": "date",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "id",
+			"data_type": "integer",
+			"column_default": "nextval('student_available_slot_master_id_seq'::regclass)",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "period",
+			"data_type": "integer",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "run_time_id",
+			"data_type": "character varying",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "student_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "time_period",
+			"data_type": "integer",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "year",
+			"data_type": "integer",
+			"column_default": null,
+			"is_nullable": "YES"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "student_available_slot_master",
+			"policyname": "rls_student_available_slot_master",
+			"qual": "permission_check(resource_path, 'student_available_slot_master'::text)",
+			"with_check": "permission_check(resource_path, 'student_available_slot_master'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "student_available_slot_master",
+			"policyname": "rls_student_available_slot_master_restrictive",
+			"qual": "permission_check(resource_path, 'student_available_slot_master'::text)",
+			"with_check": "permission_check(resource_path, 'student_available_slot_master'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "student_available_slot_master_pk",
+			"column_name": "id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "student_available_slot_master",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

@@ -1,0 +1,263 @@
+syntax = "proto3";
+
+package manabie.bob;
+import "enum.proto";
+import "google/protobuf/timestamp.proto";
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option (gogoproto.goproto_registration) = true;
+option go_package = "github.com/manabie-com/backend/pkg/genproto/bob;pb";
+
+message EvtStudentQuestion {
+  message CreateStudentQuestion {
+    string student_id = 1;
+    string student_question_id = 2;
+    string quiz_id = 3;
+    string content = 4;
+    repeated string url_medias = 5;
+    string title = 6;
+  }
+
+  message AllocateStudentQuestion {
+    string student_question_id = 1;
+    string tutor_id = 2;
+    string notification_title = 3;
+    string notification_body = 4;
+  }
+
+  message EventMessageChat {
+    string student_question_id = 1;
+    string content = 2;
+    string notification_title = 3;
+    string notification_body = 4;
+  }
+
+  message EventArchivedQuestion { string student_question_id = 1; }
+
+  oneof message {
+    CreateStudentQuestion create_student_question = 1;
+    AllocateStudentQuestion allocate_student_question = 2;
+    EventMessageChat event_message_chat = 3;
+    EventArchivedQuestion event_archived_question = 4; // archived after 3 days
+  }
+}
+
+message EvtAllocateStudentQuestion { string student_question_id = 1; }
+
+message RetryWithDelayEvent {
+  google.protobuf.Timestamp when = 1;
+  oneof message {
+    EvtAllocateStudentQuestion evt_allocate_student_question = 2;
+  }
+}
+
+message EvtCoachAuto {
+  CoachAutoEvent event = 1;
+  string student_id = 2;
+  string content = 3;
+}
+
+message StudentLearning {
+  string student_id = 1;
+  StudentLearningEvent event = 2;
+  int32 promotion_id = 3;
+}
+
+message EvtClassRoom {
+  message CreateClass {
+    int32 class_id = 1;
+    string teacher_id = 2;
+    string class_name = 3;
+    repeated string teacher_ids = 4;
+  }
+
+  message JoinClass {
+    int32 class_id = 1;
+    string user_id = 2;
+    UserGroup user_group = 3;
+  }
+
+  message LeaveClass {
+    int32 class_id = 1;
+    repeated string user_ids = 2;
+    bool is_kicked = 3;
+  }
+
+  message EditClass {
+    int32 class_id = 1;
+    string class_name = 2;
+  }
+
+  message ActiveConversation {
+    int32 class_id = 1;
+    bool active = 2;
+  }
+
+  oneof message {
+    CreateClass create_class = 1;
+    JoinClass join_class = 2;
+    LeaveClass leave_class = 3;
+    EditClass edit_class = 4;
+    ActiveConversation active_conversation = 5;
+  }
+}
+
+message EvtLesson {
+  message Lesson {
+    string lesson_id = 1;
+    string name = 2;
+    repeated string learner_ids = 3;
+  }
+  message CreateLessons { repeated Lesson lessons = 1; }
+
+  message JoinLesson {
+    string lesson_id = 1;
+    string user_id = 2;
+    UserGroup user_group = 3;
+  }
+
+  message UpdateLesson {
+    string lesson_id = 1;
+    string class_name = 2;
+    repeated string learner_ids = 3;
+  }
+
+  message LeaveLesson {
+    string lesson_id = 1;
+    string user_id = 2;
+  }
+
+  message EndLiveLesson {
+    string lesson_id = 1;
+    string user_id = 2;
+  }
+
+  oneof message {
+    CreateLessons create_lessons = 1;
+    JoinLesson join_lesson = 2;
+    UpdateLesson update_lesson = 3;
+    LeaveLesson leave_lesson = 4;
+    EndLiveLesson end_live_lesson = 5;
+  }
+}
+
+message EvtUserInfo {
+  string user_id = 1;
+  string device_token = 2;
+  bool allow_notification = 3;
+  string name = 4;
+}
+
+message ProcessAllocateStudentQuestionRequest { uint32 limit = 1; }
+
+message ProcessAllocateStudentQuestionResponse {
+  uint32 total_allocated = 1;
+  uint32 total_not_allocated = 2;
+}
+
+message ProcessArchivedStudentQuestionRequest {
+  uint32 limit = 1;
+  string duration = 2;
+}
+
+message ProcessArchivedStudentQuestionResponse {
+  uint32 total_student_questions = 1;
+}
+
+message ProcessDisableProcessingStudentQuestionRequest { string duration = 1; }
+
+message ProcessDisableProcessingStudentQuestionResponse {
+  uint32 total_student_questions = 1;
+}
+
+message ProcessTimeOutSolvedStudentQuestionRequest {
+  repeated string student_question_ids = 1;
+}
+
+message ProcessTimeOutSolvedStudentQuestionResponse {
+  uint32 total_student_questions = 1;
+}
+
+message ProcessTimeOutOrderRequest {
+  string duration = 1;
+  PaymentGateway gateway = 2;
+  OrderStatus status = 3;
+}
+
+message ProcessTimeOutOrderResponse { repeated int32 order_ids = 1; }
+
+message ProcessCancelCodOrderExpiredRequest {
+  uint32 limit = 1;
+  string duration = 2;
+}
+
+message ProcessCancelCodOrderExpiredResponse { uint32 total_cod_orders = 1; }
+
+message RetrieveTopicIconRequest { string topic_id = 1; }
+
+message RetrieveTopicIconResponse { string url = 2; }
+
+message CheckWaitingForAssignedQuestionsRequest {
+  string duration = 1;
+  int64 quota = 2;
+}
+
+message CheckWaitingForAssignedQuestionsResponse {
+  int64 total_waiting_for_assigned_questions = 1;
+}
+
+message AssignmentEvent {
+  message Assigned {
+    string assignment_id = 1;
+    int32 class_id = 2;
+    // student_ids is null when teacher assigns for whole class
+    // and not null when teacher assigns for students in class.
+    repeated string student_ids = 3;
+  }
+
+  message Returned {
+    string submission_id = 1;
+    float given_score = 2;
+    float total_score = 3;
+  }
+
+  // student submitted assignment
+  message Submitted { string submission_id = 1; }
+
+  // teacher update start date, end date
+  message Updated {
+    string assignment_id = 1;
+    google.protobuf.Timestamp start_date = 2;
+    google.protobuf.Timestamp end_date = 3;
+  }
+
+  oneof event {
+    Assigned assigned = 1;
+    Returned returned = 2;
+    Submitted submitted = 3;
+    Updated updated = 4;
+  }
+}
+
+service Internal {
+  rpc ProcessAllocateStudentQuestion(ProcessAllocateStudentQuestionRequest)
+      returns (ProcessAllocateStudentQuestionResponse);
+  rpc ProcessArchivedStudentQuestion(ProcessArchivedStudentQuestionRequest)
+      returns (ProcessArchivedStudentQuestionResponse);
+  rpc ProcessDisableProcessingStudentQuestion(
+      ProcessDisableProcessingStudentQuestionRequest)
+      returns (ProcessDisableProcessingStudentQuestionResponse);
+  rpc ProcessTimeOutSolvedStudentQuestion(
+      ProcessTimeOutSolvedStudentQuestionRequest)
+      returns (ProcessTimeOutSolvedStudentQuestionResponse){option deprecated = true;};
+  rpc ProcessTimeOutOrder(ProcessTimeOutOrderRequest)
+      returns (ProcessTimeOutOrderResponse){option deprecated = true;};
+  rpc ProcessCancelCodOrderExpired(ProcessCancelCodOrderExpiredRequest)
+      returns (ProcessCancelCodOrderExpiredResponse){option deprecated = true;};
+
+  rpc RetrieveTopicIcon(RetrieveTopicIconRequest)
+      returns (RetrieveTopicIconResponse){option deprecated = true;};
+
+  rpc CheckWaitingForAssignedQuestions(CheckWaitingForAssignedQuestionsRequest)
+      returns (CheckWaitingForAssignedQuestionsResponse){option deprecated = true;};
+}

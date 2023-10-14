@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+
+package zeus.v1;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/zeus/v1;zpb";
+
+
+// Define gRPC service 
+service CentralizeLogsService {}

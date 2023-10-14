@@ -1,0 +1,11 @@
+table:
+  schema: public
+  name: e2e_instances_status_count
+select_permissions:
+  - role: user
+    permission:
+      columns:
+        - status
+        - instances_count
+      filter: {}
+      allow_aggregations: true

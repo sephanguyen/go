@@ -1,0 +1,61 @@
+name: "Deploy backend"
+description: |
+  A composite action to deploy for backend.
+  Requires the checkout action "actions/checkout" with fetch-depth 0 to run first.
+inputs:
+  environment:
+    description: "Target environment (staging/uat/production)"
+    required: true
+  organization:
+    description: "Target organization (manabie/jprep/synersia/...)"
+    required: true
+  be_release_tag:
+    description: "Input backend release tag"
+    default: ""
+runs:
+  using: "composite"
+  steps:
+    - uses: manabie-com/workflow-telemetry-action@v2
+      continue-on-error: true
+      with:
+        github_token: ${{ inputs.BUILD_GITHUB_TOKEN }}
+        comment_on_pr: false
+
+    - name: Setup Kubernetes for ${{ inputs.environment }}-${{ inputs.organization }}
+      uses: ./.github/actions/setup-k8s
+      with:
+        organization: ${{ inputs.organization }}
+        environment: ${{ inputs.environment }}
+
+    - name: Re-checkout backend source to deployment ref "${{ inputs.be_release_tag }}"
+      run: |
+        set -eu
+        git fetch origin --no-tags refs/tags/${{ inputs.be_release_tag }}:refs/tags/${{ inputs.be_release_tag }}
+        git checkout ${{ inputs.be_release_tag }}
+      shell: bash
+
+    - name: Get deployment configuration
+      id: config
+      uses: ./.github/actions/get-deployment-config
+      with:
+        environment: ${{ inputs.environment }}
+        organization: ${{ inputs.organization }}
+
+    - name: Enable RLS for Hasura
+      run: ./.github/scripts/enable_rls_hasura.bash
+      shell: bash
+
+    - name: Deploying to ${{ inputs.environment }}-${{ inputs.organization }}
+      env:
+        ENV: ${{ steps.config.outputs.env }}
+        ORG: ${{ steps.config.outputs.org }}
+        SERVICE_ACCOUNT_EMAIL_SUFFIX: ${{ steps.config.outputs.serviceAccountEmailSuffix }}
+        TAG: ${{ inputs.be_release_tag }} # TAG is also BACKEND_TAG
+      run: |
+        set -eu
+        skaffold deploy -f skaffold.backbone.yaml -p nats-only
+        skaffoldv2 deploy -f skaffold2.backend.yaml
+        skaffold deploy -f skaffold.manaverse.yaml
+      shell: bash
+
+    - uses: actions/checkout@v3

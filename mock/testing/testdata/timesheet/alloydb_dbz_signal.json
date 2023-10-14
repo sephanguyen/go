@@ -1,0 +1,48 @@
+{
+	"schema": [
+		{
+			"column_name": "data",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "type",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "alloydb_dbz_signal",
+			"policyname": null,
+			"qual": null,
+			"with_check": null,
+			"relrowsecurity": null,
+			"relforcerowsecurity": null,
+			"permissive": null,
+			"roles": {
+				"Elements": null,
+				"Dimensions": null,
+				"Status": 1
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "alloydb_dbz_signal_pkey",
+			"column_name": "id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "alloydb_dbz_signal",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

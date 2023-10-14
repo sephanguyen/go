@@ -1,0 +1,9 @@
+resources:
+  requests:
+    cpu: 100m
+    memory: 1024Mi
+  limits:
+    cpu: 2000m
+    memory: 8024Mi
+imagePullSecrets:
+  - name: regcred

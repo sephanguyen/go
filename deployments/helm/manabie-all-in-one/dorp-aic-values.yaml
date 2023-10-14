@@ -1,0 +1,192 @@
+global:
+  dbPrefix: "tokyo_"
+  dbUserPrefix: "prod-"
+  serviceAccountEmailSuffix: "production-aic"
+  replicaCount: 1
+  cloudSQLUsePublicIP: true
+  cloudSQLCommonInstance: "student-coach-e1e95:asia-northeast1:clone-prod-tokyo"
+  cloudSQLLMSInstance: "student-coach-e1e95:asia-northeast1:clone-prod-tokyo-lms-b2dc4508"
+  hasura:
+    replicaCount: 1
+    affinityOverride:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: cloud.google.com/gke-spot
+              operator: In
+              values: ["true"]
+            - key: environment
+              operator: In
+              values: ["preproduction"]
+    tolerations:
+      - effect: NoSchedule
+        key: cloud.google.com/gke-spot
+        operator: Exists
+      - effect: NoSchedule
+        key: environment
+        operator: Equal
+        value: preproduction
+
+  affinityOverride:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: cloud.google.com/gke-spot
+            operator: In
+            values: ["true"]
+          - key: environment
+            operator: In
+            values: ["preproduction"]
+  tolerations:
+    - effect: NoSchedule
+      key: cloud.google.com/gke-spot
+      operator: Exists
+    - effect: NoSchedule
+      key: environment
+      operator: Equal
+      value: preproduction
+eureka:
+  eurekaAllConsumers:
+    affinityOverride:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: cloud.google.com/gke-spot
+              operator: In
+              values: ["true"]
+            - key: environment
+              operator: In
+              values: ["preproduction"]
+    tolerations:
+      - effect: NoSchedule
+        key: cloud.google.com/gke-spot
+        operator: Exists
+      - effect: NoSchedule
+        key: environment
+        operator: Equal
+        value: preproduction
+  eurekaJPREPSyncCourseStudent:
+    affinityOverride:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: cloud.google.com/gke-spot
+              operator: In
+              values: ["true"]
+            - key: environment
+              operator: In
+              values: ["preproduction"]
+    tolerations:
+      - effect: NoSchedule
+        key: cloud.google.com/gke-spot
+        operator: Exists
+      - effect: NoSchedule
+        key: environment
+        operator: Equal
+        value: preproduction
+  eurekaMonitors:
+    affinityOverride:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: cloud.google.com/gke-spot
+              operator: In
+              values: ["true"]
+            - key: environment
+              operator: In
+              values: ["preproduction"]
+    tolerations:
+      - effect: NoSchedule
+        key: cloud.google.com/gke-spot
+        operator: Exists
+      - effect: NoSchedule
+        key: environment
+        operator: Equal
+        value: preproduction
+tom:
+  replicaCount: 2
+  affinityOverride:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: cloud.google.com/gke-spot
+            operator: In
+            values: ["true"]
+          - key: environment
+            operator: In
+            values: ["preproduction"]
+  tolerations:
+    - effect: NoSchedule
+      key: cloud.google.com/gke-spot
+      operator: Exists
+    - effect: NoSchedule
+      key: environment
+      operator: Equal
+      value: preproduction
+unleash:
+  unleash:
+    affinityOverride:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: cloud.google.com/gke-spot
+                  operator: In
+                  values: ["true"]
+                - key: environment
+                  operator: In
+                  values: ["preproduction"]
+    tolerations:
+      - effect: NoSchedule
+        key: "cloud.google.com/gke-spot"
+        operator: Exists
+      - key: environment
+        operator: Equal
+        value: preproduction
+        effect: NoSchedule
+  unleashProxy:
+    affinityOverride:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: cloud.google.com/gke-spot
+              operator: In
+              values: ["true"]
+            - key: environment
+              operator: In
+              values: ["preproduction"]
+    tolerations:
+      - effect: NoSchedule
+        key: cloud.google.com/gke-spot
+        operator: Exists
+      - effect: NoSchedule
+        key: environment
+        operator: Equal
+        value: preproduction
+zeus:
+  resources:
+    requests:
+      memory: 64Mi
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "10m"
+    sidecar.istio.io/proxyMemory: "50Mi"
+usermgmt:
+  cronjobs:
+    check-enrollment-status-date:
+      cmd: usermgmt_cronjob_check_enrollment_status_date
+      schedule: "0 0 * * *"
+    cronjob-itee-download-data-file:
+      cmd: usermgmt_itee_download_data_file
+      schedule: "13 19 * * *"
+      disabled: true
+    cronjob-withus-download-data-file:
+      cmd: usermgmt_withus_download_data_file
+      schedule: "13 19 * * *"
+      disabled: true

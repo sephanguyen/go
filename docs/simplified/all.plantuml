@@ -1,0 +1,22 @@
+@startuml simplified
+
+!include communication_chat.plantuml!communication_simplified
+!include communication_notification.plantuml!communication_simplified
+!include support.plantuml!support_simplified
+!include live_lesson.plantuml!live_lesson_simplified
+!include organization.plantuml!organization_simplified
+!include payment.plantuml!payment_simplified
+!include syllabus.plantuml!syllabus_simplified
+!include user_and_access.plantuml!user_and_access_simplified
+
+UserManagement.User .. Communication.User : duplicates
+UserManagement.Student .. Organization.Student : duplicates
+UserManagement.Student .. PurchaseAndPayment.Student : duplicates
+UserManagement.Student .. Syllabus.Student : duplicates
+UserManagement.Student "1" *-- "many" PurchaseAndPayment.SellingItems : buys
+PurchaseAndPayment.StudentSubscriptions ..> Organization.StudentEnrollment : creates
+' layout
+' Support.MediaService -down[hidden]-> Communication.EventNotification
+' Payment.Course -up[hidden]-> Communication.EventNotification
+Communication.User -up[hidden]-> Support.Media
+@enduml

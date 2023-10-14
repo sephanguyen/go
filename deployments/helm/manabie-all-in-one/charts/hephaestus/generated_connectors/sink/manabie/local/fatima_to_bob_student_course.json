@@ -1,0 +1,23 @@
+{
+  "name": "local_manabie_fatima_to_bob_student_course_sink_connector",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+    "tasks.max": "1",
+    "topics": "local.manabie.fatima.public.student_course",
+    "connection.url": "${file:/config/kafka-connect-config.properties:bob_url}",
+    "auto.create": "false",
+    "insert.mode": "upsert",
+    "table.name.format": "student_course",
+    "fields.whitelist": "course_id,course_slot,course_slot_per_week,created_at,deleted_at,location_id,package_type,resource_path,student_end_date,student_id,student_package_id,student_start_date,updated_at,weight",
+    "transforms": "unwrap,route",
+    "transforms.route.type": "org.apache.kafka.connect.transforms.RegexRouter",
+    "transforms.route.regex": "([^.]+).([^.]+).([^.]+).([^.]+).([^.]+)",
+    "transforms.route.replacement": "$5",
+    "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+    "delete.enabled": "false",
+    "pk.mode": "record_value",
+    "pk.fields": "course_id,location_id,student_id,student_package_id",
+    "transforms.unwrap.drop.tombstones": "true",
+    "transforms.unwrap.delete.handling.mode": "drop"
+  }
+}

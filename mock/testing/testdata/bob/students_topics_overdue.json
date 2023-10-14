@@ -1,0 +1,115 @@
+{
+	"schema": [
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "due_date",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "student_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "topic_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "students_topics_overdue",
+			"policyname": "rls_students_topics_overdue",
+			"qual": "permission_check(resource_path, 'students_topics_overdue'::text)",
+			"with_check": "permission_check(resource_path, 'students_topics_overdue'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "students_topics_overdue",
+			"policyname": "rls_students_topics_overdue_restrictive",
+			"qual": "permission_check(resource_path, 'students_topics_overdue'::text)",
+			"with_check": "permission_check(resource_path, 'students_topics_overdue'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "students_topic_overdue_fk",
+			"column_name": "student_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "students_topic_overdue_fk1",
+			"column_name": "topic_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "students_topic_overdue_pk",
+			"column_name": "student_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "students_topic_overdue_pk",
+			"column_name": "topic_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "students_topics_overdue",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

@@ -1,0 +1,35 @@
+common:
+  google_cloud_project: staging-manabie-online
+jwt_applicant: jprep-stag
+issuers:
+  - issuer: manabie
+    audience: jprep-stag
+    jwks_endpoint: http://shamir:5680/.well-known/jwks.json
+storage:
+  bucket: stag-manabie-backend
+brightcove:
+  account_id: 6064018595001
+  client_id: 3c6e5dd5-a7fc-4cc3-94a7-95bd0c553e31
+whiteboard:
+  app_id: V7mZoJt9Eeqxp_kxzbwYqQ/rtGV6Bj_XDpLcw
+agora:
+  app_id: 793d72fc36614e03aa90866c2bc2271c
+check_client_versions:
+  - com.manabie.student_manabie_app:1.5.0
+  - com.manabie.studentManabieApp:1.5.0
+  - com.manabie.liz:1.0.0
+  - com.manabie.lms_manabie_app:1.0.0
+  - com.manabie.lmsManabieApp:1.0.0
+  - jp.jprep.jprep_learner:1.0.0
+  - jp.jprep.jprepLearner:1.0.0
+  - jp.jprep.jprep_teacher:1.0.0
+  - jp.jprep.jprepTeacher:1.0.0
+  - com.manabie.enigma:1.0.0
+  - com.manabie.learner:2.0.20230509020728
+  - com.manabie.teacher:2.0.20230509020728
+  - jp.jprep.learner:2.0.20230509020728
+  - jp.jprep.teacher:2.0.20230509020728
+keycloak_auth:
+  path: https://d2020-ji-sso.jprep.jp
+  realm: manabie-test
+  client_id: manabie-app

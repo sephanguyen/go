@@ -1,0 +1,116 @@
+{
+	"schema": [
+		{
+			"column_name": "billing_schedule_period_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "price",
+			"data_type": "numeric",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "price_type",
+			"data_type": "text",
+			"column_default": "'DEFAULT_PRICE'::text",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "product_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "product_price_id",
+			"data_type": "integer",
+			"column_default": "nextval('product_price_id_seq'::regclass)",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "quantity",
+			"data_type": "integer",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "product_price",
+			"policyname": "rls_product_price",
+			"qual": "permission_check(resource_path, 'product_price'::text)",
+			"with_check": "permission_check(resource_path, 'product_price'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "product_price",
+			"policyname": "rls_product_price_restrictive",
+			"qual": "permission_check(resource_path, 'product_price'::text)",
+			"with_check": "permission_check(resource_path, 'product_price'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "fk_product_price_billing_schedule_period_id",
+			"column_name": "billing_schedule_period_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "fk_product_price_product_id",
+			"column_name": "product_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "product_price_pk",
+			"column_name": "product_price_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "product_price",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

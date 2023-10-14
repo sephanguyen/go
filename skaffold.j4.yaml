@@ -1,0 +1,95 @@
+apiVersion: skaffold/v2beta29
+kind: Config
+metadata:
+  name: j4-all-in-one
+deploy:
+  statusCheckDeadlineSeconds: 600
+  helm:
+    releases:
+      - name: j4-all-in-one
+        chartPath: deployments/helm/platforms/j4/charts/j4-all-in-one
+        namespace: '{{.NAMESPACE}}'
+        wait: true
+        createNamespace: true
+        skipBuildDependencies: true
+        imageStrategy:
+          helm: {}
+        valuesFiles:
+          - deployments/helm/platforms/gateway/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/platforms/j4/{{.ENV}}-{{.ORG}}-values.yaml
+        setValueTemplates:
+          image:
+            repository:  '{{.IMAGE_NAME}}'
+            tag: '{{.IMAGE_TAG}}'
+          j4:
+            replicas: '{{ .J4_REPLICAS }}'
+            forceDNSBoot: '{{ .J4_DNS_BOOT }}'
+          global:
+            project: '{{.PROJECT_ID}}'
+            environment: '{{.ENV}}'
+            vendor: '{{.ORG}}'
+            sqlProxy:
+              enabled: '{{if ne "local" .ENV}}true{{else}}false{{end}}'
+              connName: '{{.SQL_PROXY_CONN_NAME}}'
+            job_config:
+              scenarioName: '{{ .SCENARIO_NAME }}'
+build:
+  local:
+    push: false
+    useDockerCLI: true
+profiles:
+  # Build image in local
+  - name: local
+    activation:
+      - env: ENV=local
+    patches:
+      - op: add
+        path: /deploy/kubeContext
+        value: kind-kind
+      - op: replace
+        path: /deploy/helm/releases/0/namespace
+        value: local-manabie-backend
+      - op: add
+        path: /build/local
+        value:
+          push: true
+      - op: replace
+        path: /build/artifacts/0/image
+        value: localhost:5001/asia.gcr.io/student-coach-e1e95/backend-j4
+    build:
+      artifacts:
+        - image: asia.gcr.io/student-coach-e1e95/backend-j4
+          context: .
+          custom:
+            buildCommand: |
+              cat <<EOF | bash
+              #!/bin/bash
+
+              set -eu
+              CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -ldflags="-extldflags=-static" -v -o ./build/j4 ./cmd/j4/
+
+              if [ ! -f "./build/rqlite" ]; then
+                  curl -L https://github.com/rqlite/rqlite/releases/download/v7.6.1/rqlite-v7.6.1-linux-amd64.tar.gz -o ./build/rqlite-v7.6.1-linux-amd64.tar.gz
+                  tar xvfz ./build/rqlite-v7.6.1-linux-amd64.tar.gz --directory ./build
+                  cp ./build/rqlite-v7.6.1-linux-amd64/rqlite ./build/rqlite
+                  chmod +x ./build/rqlite
+                  rm -rf ./build/rqlite-v7.6.1-linux-amd64
+                  rm ./build/rqlite-v7.6.1-linux-amd64.tar.gz
+              fi
+              DOCKER_BUILDKIT=1 docker build --progress=plain \
+                --tag "$IMAGE" \
+                --file ./developments/development.Dockerfile \
+                --build-arg GO_VERSION=$(cat ./deployments/versions/go) \
+                --target j4-runner "$BUILD_CONTEXT"
+
+              echo "Loading $IMAGE into kind"
+              kind load docker-image "$IMAGE"
+
+              if [ "$PUSH_IMAGE" == "true" ]; then
+                docker push "$IMAGE"
+              fi
+              echo $IMAGE;
+              EOF
+      tagPolicy:
+        customTemplate:
+          template: 'locally'

@@ -1,0 +1,875 @@
+name: tbd.deploy
+
+run-name: ${{ github.event.action || 'tbd.deploy' }} ${{ github.event.client_payload.payload.orgs || inputs.orgs }}/${{ github.event.client_payload.payload.env || inputs.env }}
+
+on:
+  repository_dispatch:
+    types: [tbd.deploy_be, tbd.deploy_fe, tbd.deploy_me, tbd.deploy_all]
+
+  workflow_dispatch:
+    inputs:
+      env:
+        type: choice
+        description: "Choose an environment to deploy"
+        options:
+          - staging
+          - uat
+          - preproduction
+          - production
+        required: true
+        default: staging
+
+      orgs:
+        description: "Choose organization(s) to deploy. Invalid organization will be automatically filtered. (manabie, jprep, tokyo, synersia, renseikai, ga, aic)"
+        required: true
+        default: "manabie, jprep, tokyo, synersia, renseikai, ga, aic"
+
+      # BE deploy inputs
+      be_release_tag: #---------
+        description: "---------------Backend----------------- Choose be_release_tag, will deploy BE if not empty."
+        required: false
+
+      # FE deploy inputs
+      fe_release_tag:
+        description: "--------------Frontend----------------- Choose fe_release_tag, will deploy FE if not empty."
+        required: false
+        default: ""
+
+      # ME deploy inputs
+      me_release_tag:
+        description: "---------------Mobile------------------ Choose me_release_tag, will deploy ME if not empty."
+        required: false
+
+      me_apps:
+        description: "Choose me_apps: learner, teacher"
+        required: true
+        default: "learner, teacher"
+
+      me_platforms:
+        description: "Choose me_platforms: web, ios, android. notes: teacher have web platform only!"
+        required: true
+        default: "web, ios, android"
+
+env:
+  BE_TAG: "${{ github.event.inputs.be_release_tag }}"
+  FE_TAG: "${{ github.event.inputs.fe_release_tag }}"
+  ME_TAG: "${{ github.event.inputs.me_release_tag }}"
+  ENV: ${{ github.event.inputs.env }}
+  ORGS: ${{ github.event.inputs.orgs }}
+  GITHUB_TOKEN: ${{ secrets.BUILD_GITHUB_TOKEN }}
+
+  DOCKER_REPOSITORY: "asia.gcr.io"
+  PREFIX_IMAGE: "asia.gcr.io/student-coach-e1e95"
+  BUILD_FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+
+jobs:
+  prepare-info:
+    permissions:
+      contents: "read"
+      id-token: "write"
+    runs-on: ["self-hosted", "100m-400mi", "spot", "persistent"]
+    timeout-minutes: 5
+    outputs:
+      me_platforms: ${{ steps.prepare.outputs.me_platforms }}
+      me_apps: ${{ steps.prepare.outputs.me_apps }}
+      orgs: ${{ steps.prepare.outputs.orgs }}
+      env: ${{ steps.prepare.outputs.env }}
+      fe_release_tag: ${{ steps.prepare.outputs.fe_release_tag }}
+      me_release_tag: ${{ steps.prepare.outputs.me_release_tag }}
+      be_release_tag: ${{ steps.prepare.outputs.be_release_tag }}
+      max_deploy_parallel: ${{ steps.prepare.outputs.max_deploy_parallel }}
+
+      actor: ${{ steps.prepare.outputs.actor }}
+      alert_channel: ${{ steps.prepare.outputs.alert_channel }}
+      alert_timestamp: ${{ steps.prepare.outputs.alert_timestamp }}
+
+      backend_k8s_orgs: ${{ steps.prepare.outputs.backend_k8s_orgs }}
+      backoffice_k8s_orgs: ${{ steps.prepare.outputs.backoffice_k8s_orgs }}
+      teacher_k8s_orgs: ${{ steps.prepare.outputs.teacher_k8s_orgs }}
+      learner_k8s_orgs: ${{ steps.prepare.outputs.learner_k8s_orgs }}
+      backoffice_firebase_orgs: ${{ steps.prepare.outputs.backoffice_firebase_orgs }}
+      learner_firebase_orgs: ${{ steps.prepare.outputs.learner_firebase_orgs }}
+      learner_android_orgs: ${{ steps.prepare.outputs.learner_android_orgs }}
+      learner_ios_orgs: ${{ steps.prepare.outputs.learner_ios_orgs }}
+      teacher_firebase_orgs: ${{ steps.prepare.outputs.teacher_firebase_orgs }}
+      appsmith_orgs: ${{ steps.prepare.outputs.appsmith_orgs }}
+      workflow_ref: ${{ steps.workflow_ref.outputs.workflow_ref }}
+      runners: ${{ steps.runners.outputs.runners }}
+
+      # mfe stuffs
+      mfe-squads: ${{ steps.mfe-prepare-info.outputs.squads }}
+      mfe-fragments: ${{ steps.mfe-prepare-info.outputs.fragments }}
+      mfe-teams: ${{ steps.mfe-prepare-info.outputs.mfe-teams }}
+      mfe-teams-args: ${{ needs.prepare-info.outputs.mfe-teams-args }}
+      mfe-team-infos: ${{ steps.mfe-prepare-info.outputs.mfe-team-infos }}
+      mfe-fragments-args: ${{ needs.prepare-info.outputs.mfe-fragments-args }}
+    env:
+      HOTFIX_ENV: ("production" "preproduction" "uat")
+      TOKYO_ENV: ("production" "preproduction")
+    steps:
+      - uses: actions/checkout@v3
+
+      - id: prepare
+        with:
+          workflow_type: "deploy"
+        uses: ./.github/actions/tbd.prepare-infos
+
+      - id: org
+        if: ${{ !steps.prepare.outputs.be_release_tag && contains(env.HOTFIX_ENV, steps.prepare.outputs.env) }}
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const org = ${{ contains(env.TOKYO_ENV, steps.prepare.outputs.env) }} ? 'tokyo' : 'manabie'
+            core.setOutput('org', org)
+
+      - name: Get curent BE hotfix branches
+        if: ${{ !steps.prepare.outputs.be_release_tag && contains(env.HOTFIX_ENV, steps.prepare.outputs.env) }}
+        id: be-hotfix
+        uses: ./.github/actions/tbd.get-current-hotfix-branch
+        with:
+          github-token: ${{ env.GITHUB_TOKEN }}
+          organization: ${{ steps.org.outputs.org }}
+          environment: ${{ steps.prepare.outputs.env }}
+          repo: backend
+
+      - id: workflow_ref
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const beTag = '${{ steps.prepare.outputs.be_release_tag }}'
+            if (beTag) {
+              core.setOutput('workflow_ref', beTag)
+              return
+            }
+
+            const currentHotfixBranch = '${{ steps.be-hotfix.outputs.branch }}'
+            if (currentHotfixBranch) {
+              core.setOutput('workflow_ref', currentHotfixBranch)
+              return
+            }
+
+            const workflowRef = '${{ steps.prepare.outputs.workflow_ref }}' || '${{ github.ref }}'
+            core.setOutput('workflow_ref', workflowRef);
+
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ steps.workflow_ref.outputs.workflow_ref }}
+
+      - id: privileges-check
+        if: ${{ steps.prepare.outputs.env != 'staging' && github.actor != 'manaops' }}
+        uses: ./.github/actions/tbd.privileges-check
+        with:
+          actor: ${{ github.actor }}
+          github-token: ${{ secrets.BUILD_GITHUB_TOKEN }}
+
+      - name: mfe.prepare-info
+        id: mfe-prepare-info
+        uses: ./.github/actions/mfe.prepare-info
+        if: ${{ steps.prepare.outputs.fe_release_tag != '' }}
+        with:
+          github-token: ${{ secrets.BUILD_GITHUB_TOKEN }}
+          release_tag: ${{ steps.prepare.outputs.fe_release_tag }}
+          orgs: ${{ github.event.inputs.orgs }}
+          env: ${{ steps.prepare.outputs.env }}
+          auto_deploy: ${{ steps.prepare.outputs.auto_deploy }}
+          squads: ""
+          fragments: "" # should use github.event.inputs.services
+          context_ref: "${{ github.ref }}"
+          build_and_deploy_root_only: false
+          workflow_type: "deploy"
+
+      - id: runners
+        uses: ./.github/actions/runners
+        with:
+          option: ${{ steps.prepare.outputs.env }}
+          token: ${{ secrets.ORG_GITHUB_TOKEN }}
+
+      - uses: actions/checkout@v3
+        with:
+          ref: develop
+
+  send-deploy-alert:
+    runs-on: ["self-hosted", "100m-400mi", "spot", "persistent"]
+    if: ${{ needs.prepare-info.outputs.be_release_tag != '' || needs.prepare-info.outputs.fe_release_tag != '' || needs.prepare-info.outputs.me_release_tag != '' }}
+    needs: [prepare-info]
+    env:
+      ENVIRONMENT: "${{ needs.prepare-info.outputs.env }}"
+    outputs:
+      alert_id: ${{ steps.alert.outputs.alert_id }}
+      channel_id: ${{ steps.alert.outputs.channel_id }}
+      squad_alert: ${{ steps.alert.outputs.squad_alert }}
+      user_alert: ${{ steps.alert.outputs.user_alert }}
+    steps:
+      - uses: actions/checkout@v3
+        timeout-minutes: 5
+        with:
+          ref: "${{ needs.prepare-info.outputs.workflow_ref }}"
+
+      - id: alert
+        uses: ./.github/actions/slack-alert-send
+        with:
+          be_tag: ${{ needs.prepare-info.outputs.be_release_tag }}
+          fe_tag: ${{ needs.prepare-info.outputs.fe_release_tag }}
+          me_tag: ${{ needs.prepare-info.outputs.me_release_tag }}
+          message: "Deploy ${{ env.ENVIRONMENT }}"
+          orgs: ${{ needs.prepare-info.outputs.orgs }}
+          SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
+          reply_thread_channel: ${{ needs.prepare-info.outputs.alert_channel }}
+          reply_thread_id: ${{ needs.prepare-info.outputs.alert_timestamp }}
+          actor: ${{ needs.prepare-info.outputs.actor }}
+
+  create-status:
+    runs-on: ["self-hosted", "100m-400mi", "spot", "persistent"]
+    needs: prepare-info
+    timeout-minutes: 10
+    env:
+      ENVIRONMENT: ${{ needs.prepare-info.outputs.env }}
+    outputs:
+      be_status_id: ${{ steps.create-be-status.outputs.deployment_id }}
+      fe_status_id: ${{ steps.create-fe-status.outputs.deployment_id }}
+      me_status_id: ${{ steps.create-me-status.outputs.deployment_id }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: "${{ needs.prepare-info.outputs.workflow_ref }}"
+
+      - name: Create BE in_progress status
+        id: create-be-status
+        if: needs.prepare-info.outputs.be_release_tag != ''
+        uses: ./.github/actions/tbd.create-deployment-status
+        env:
+          STATE: "in_progress"
+          REPO: backend
+          RELEASE_TAG: "${{ needs.prepare-info.outputs.be_release_tag }}"
+
+      - name: Create FE in_progress status
+        id: create-fe-status
+        if: needs.prepare-info.outputs.fe_release_tag != ''
+        uses: ./.github/actions/tbd.create-deployment-status
+        env:
+          STATE: "in_progress"
+          REPO: school-portal-admin
+          RELEASE_TAG: "${{ needs.prepare-info.outputs.fe_release_tag }}"
+
+      - name: Create ME in_progress status
+        id: create-me-status
+        if: needs.prepare-info.outputs.me_release_tag != ''
+        uses: ./.github/actions/tbd.create-deployment-status
+        env:
+          STATE: "in_progress"
+          REPO: student-app
+          RELEASE_TAG: "${{ needs.prepare-info.outputs.me_release_tag }}"
+
+  deploy-k8s:
+    name: deploy-backend-k8s
+    permissions:
+      contents: "read"
+      id-token: "write"
+    runs-on: ${{ fromJson(needs.prepare-info.outputs.runners)['deploy-k8s'] }}
+    needs: [prepare-info, send-deploy-alert]
+    if: ${{ !contains(toJson(needs.prepare-info.outputs.backend_k8s_orgs), '[]') }}
+    strategy:
+      fail-fast: false
+      matrix:
+        organization: ${{ fromJson(needs.prepare-info.outputs.backend_k8s_orgs) }}
+      max-parallel: ${{ fromJSON(needs.prepare-info.outputs.max_deploy_parallel) }}
+    concurrency:
+      group: deploy-k8s-${{ matrix.organization }}-${{ needs.prepare-info.outputs.env }}
+      cancel-in-progress: false
+    env:
+      ENVIRONMENT: ${{ needs.prepare-info.outputs.env }}
+    steps:
+      - uses: actions/checkout@v3
+        timeout-minutes: 5
+        with:
+          ref: "${{ needs.prepare-info.outputs.workflow_ref }}"
+
+      - name: Deploy backend (${{ needs.prepare-info.outputs.env }}.${{ matrix.organization }})
+        id: backend
+        uses: ./.github/actions/tbd.deploy-backend
+        with:
+          environment: ${{ needs.prepare-info.outputs.env }}
+          organization: ${{ matrix.organization }}
+          be_release_tag: ${{ needs.prepare-info.outputs.be_release_tag }}
+
+      - uses: actions/checkout@v3
+        if: always()
+        timeout-minutes: 5
+        with:
+          ref: "${{ needs.prepare-info.outputs.workflow_ref }}"
+
+      - uses: ./.github/actions/slack-alert-reply
+        if: always()
+        with:
+          actor: ${{ needs.send-deploy-alert.outputs.user_alert }}
+          repo: backend
+          release_tag: ${{ needs.prepare-info.outputs.be_release_tag }}
+          channel: ${{ needs.send-deploy-alert.outputs.channel_id }}
+          message-timestamp: ${{ needs.send-deploy-alert.outputs.alert_id }}
+          current-job: "Backend - ${{ matrix.organization }}"
+          job-outcome: ${{ steps.backend.outcome }}
+          SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
+
+  deploy-appsmith:
+    permissions:
+      contents: "read"
+      id-token: "write"
+    runs-on: ${{ fromJson(needs.prepare-info.outputs.runners)['deploy-appsmith'] }}
+    needs: [prepare-info, deploy-k8s]
+    if: ${{ !contains(toJson(needs.prepare-info.outputs.appsmith_orgs), '[]') && !cancelled() && needs.deploy-k8s.result != 'failure' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        organization: ${{ fromJson(needs.prepare-info.outputs.appsmith_orgs) }}
+    env:
+      ENVIRONMENT: ${{ needs.prepare-info.outputs.env }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: master
+          repository: manabie-com/appsmith-metadata
+          token: ${{ env.GITHUB_TOKEN }}
+
+      - name: convert env to sort name
+        id: convert-env
+        run: |
+          if [[ '${{ needs.prepare-info.outputs.env }}' == 'production' ]]; then
+            echo "env=prod" >> $GITHUB_OUTPUT
+          elif [[ '${{ needs.prepare-info.outputs.env }}' == 'staging' ]]; then
+            echo "env=stag" >> $GITHUB_OUTPUT
+          else
+            echo "env=${{ needs.prepare-info.outputs.env }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run appsmith action
+        uses: ./.github/actions/deploy-appsmith
+        with:
+          organizations: ${{ matrix.organization }}
+          environment: ${{ steps.convert-env.outputs.env }}
+
+  deploy-backoffice-k8s:
+    permissions:
+      contents: "read"
+      id-token: "write"
+    runs-on: ${{ fromJson(needs.prepare-info.outputs.runners)['deploy-backoffice-k8s'] }}
+    needs: [prepare-info, deploy-k8s, deploy-appsmith]
+    if: ${{ !contains(toJson(needs.prepare-info.outputs.backoffice_k8s_orgs), '[]') && !cancelled() && needs.deploy-k8s.result != 'failure' }}
+    concurrency:
+      group: deploy-backoffice-k8s-${{ matrix.organization }}-${{ needs.prepare-info.outputs.env }}
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      matrix:
+        organization: ${{ fromJson(needs.prepare-info.outputs.backoffice_k8s_orgs) }}
+    steps:
+      - uses: actions/checkout@v3
+        timeout-minutes: 5
+        with:
+          ref: "${{ needs.prepare-info.outputs.workflow_ref }}"
+
+      - name: Deploy Backoffice (${{ needs.prepare-info.outputs.env }}.${{ matrix.organization }})
+        uses: ./.github/actions/tbd.deploy-k8s-web
+        with:
+          environment: ${{ needs.prepare-info.outputs.env }}
+          organization: ${{ matrix.organization }}
+          release_tag: ${{ needs.prepare-info.outputs.fe_release_tag }}
+          service: "backoffice"
+          token: ${{ secrets.BUILD_GITHUB_TOKEN }}
+
+  deploy-frontend:
+    name: deploy-backoffice-firebase
+    runs-on: ${{ fromJson(needs.prepare-info.outputs.runners)['deploy-frontend'] }}
+    needs: [prepare-info, deploy-k8s, deploy-appsmith]
+    if: ${{ !contains(toJson(needs.prepare-info.outputs.backoffice_firebase_orgs), '[]') && !cancelled() && needs.deploy-k8s.result != 'failure' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        organization: ${{ fromJson(needs.prepare-info.outputs.backoffice_firebase_orgs) }}
+    concurrency:
+      group: deploy-frontend-${{ matrix.organization }}-${{ needs.prepare-info.outputs.env }}
+      cancel-in-progress: false
+    env:
+      ORGANIZATION: ${{ matrix.organization }}
+      RELEASE_TAG: ${{ needs.prepare-info.outputs.fe_release_tag }}
+      ENVIRONMENT: ${{ needs.prepare-info.outputs.env }}
+    steps:
+      - uses: actions/checkout@v3
+        timeout-minutes: 5
+        with:
+          ref: "${{ needs.prepare-info.outputs.workflow_ref }}"
+
+      - name: deploy firebase web
+        uses: ./.github/actions/tbd.deploy-web
+        timeout-minutes: 10
+        with:
+          docker-repository: ${{ env.DOCKER_REPOSITORY }}
+          docker-username: ${{ secrets.DOCKER_USERNAME }}
+          docker-token: ${{ secrets.DOCKER_TOKEN }}
+          github-token: ${{ env.GITHUB_TOKEN }}
+          firebase-token: ${{ env.BUILD_FIREBASE_TOKEN }}
+          repo: school-portal-admin
+          release-tag: ${{ needs.prepare-info.outputs.fe_release_tag }}
+          environment: ${{ needs.prepare-info.outputs.env }}
+          organization: ${{ matrix.organization }}
+          image-tag: ${{ env.PREFIX_IMAGE }}/school-portal-admin:${{ env.RELEASE_TAG }}-${{ env.ORGANIZATION }}-${{ env.ENVIRONMENT }}
+
+  mfe-root-shell:
+    permissions:
+      contents: "read"
+      id-token: "write"
+    runs-on: ${{ fromJson(needs.prepare-info.outputs.runners)['deploy-backoffice-k8s'] }}
+    needs: [prepare-info, deploy-k8s, deploy-appsmith]
+    if: ${{ !contains(toJson(needs.prepare-info.outputs.backoffice_k8s_orgs), '[]') && !cancelled() && needs.deploy-k8s.result != 'failure' }}
+    concurrency:
+      group: mfe-deploy-root-shell-${{ matrix.organization }}-${{ needs.prepare-info.outputs.env }}
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      matrix:
+        organization: ${{ fromJson(needs.prepare-info.outputs.backoffice_k8s_orgs) }}
+    steps:
+      - uses: actions/checkout@v3
+        timeout-minutes: 5
+        with:
+          ref: "${{ needs.prepare-info.outputs.workflow_ref }}"
+
+      - name: Deploy MFE Root Shell (${{ needs.prepare-info.outputs.env }}.${{ matrix.organization }})
+        uses: ./.github/actions/tbd.deploy-k8s-web
+        with:
+          environment: ${{ needs.prepare-info.outputs.env }}
+          organization: ${{ matrix.organization }}
+          release_tag: ${{ needs.prepare-info.outputs.fe_release_tag }}
+          service: "backoffice-mfe"
+          token: ${{ secrets.BUILD_GITHUB_TOKEN }}
+
+  mfe-entrypoint:
+    permissions:
+      contents: "read"
+      id-token: "write"
+    runs-on: ${{ fromJson(needs.prepare-info.outputs.runners)['deploy-backoffice-k8s'] }}
+    needs: [prepare-info, deploy-k8s, deploy-appsmith, mfe-root-shell]
+    if: ${{ !contains(toJson(needs.prepare-info.outputs.backoffice_k8s_orgs), '[]') && !cancelled() && needs.deploy-k8s.result != 'failure' }}
+    concurrency:
+      group: mfe-deploy-entrypoint-${{ matrix.organization }}-${{ needs.prepare-info.outputs.env }}
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      matrix:
+        organization: ${{ fromJson(needs.prepare-info.outputs.backoffice_k8s_orgs) }}
+    steps:
+      - uses: actions/checkout@v3
+        timeout-minutes: 5
+        with:
+          ref: "${{ needs.prepare-info.outputs.workflow_ref }}"
+
+      - name: Deploy MFE entrypoint for squads ${{ needs.prepare-info.outputs.mfe-squads }}, services ${{ needs.prepare-info.outputs.mfe-fragments }}
+        uses: ./.github/actions/mfe.deploy-mfe-entrypoint
+        with:
+          github-token: ${{ secrets.BUILD_GITHUB_TOKEN }}
+          env: ${{ needs.prepare-info.outputs.env }}
+          release-tag: ${{ needs.prepare-info.outputs.fe_release_tag }}
+          organization: ${{ matrix.organization }}
+          mfe-teams-args: ${{ needs.prepare-info.outputs.mfe-teams-args }}
+          fragments: ${{ needs.prepare-info.outputs.mfe-fragments }}
+          mfe-fragments-args: ${{ needs.prepare-info.outputs.mfe-fragments-args }}
+          mfe-team-infos: ${{ needs.prepare-info.outputs.mfe-team-infos }}
+          imd-password: "${{ secrets.IMD_PASSWORD }}"
+          prod-imd-password: "${{ secrets.PROD_IMD_PASSWORD }}"
+
+  update-fe-alert:
+    runs-on: ["self-hosted", "100m-400mi", "spot", "persistent"]
+    if: ${{ needs.send-deploy-alert.outputs.alert_id != '' && needs.prepare-info.outputs.fe_release_tag != '' && always() }}
+    needs:
+      [
+        prepare-info,
+        send-deploy-alert,
+        deploy-appsmith,
+        deploy-frontend,
+        deploy-backoffice-k8s,
+        mfe-entrypoint,
+        mfe-root-shell,
+      ]
+    env:
+      ENVIRONMENT: "${{ needs.prepare-info.outputs.env }}"
+    outputs:
+      status: ${{ steps.reply.outputs.status }}
+    steps:
+      - uses: actions/checkout@v3
+        timeout-minutes: 5
+        with:
+          ref: "${{ needs.prepare-info.outputs.workflow_ref }}"
+
+      - id: fe_statuses
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const statuses = {
+              'mfe-entrypoint': {
+                status: '${{ needs.mfe-entrypoint.result }}'
+              },
+              'mfe-root-shell': {
+                status: '${{ needs.mfe-root-shell.result }}'
+              },
+              'deploy-backoffice-k8s': {
+                status: '${{ needs.deploy-backoffice-k8s.result }}'
+              },
+              'deploy-frontend': {
+                status: '${{ needs.deploy-frontend.result }}'
+              },
+            }
+            core.setOutput('statuses', statuses)
+
+      - uses: ./.github/actions/slack-alert-reply
+        id: reply
+        with:
+          actor: ${{ needs.send-deploy-alert.outputs.user_alert }}
+          repo: school-portal-admin
+          release_tag: ${{ needs.prepare-info.outputs.fe_release_tag }}
+          channel: ${{ needs.send-deploy-alert.outputs.channel_id }}
+          message-timestamp: ${{ needs.send-deploy-alert.outputs.alert_id }}
+          current-job: "Frontend"
+          statuses: ${{ steps.fe_statuses.outputs.statuses }}
+          SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
+
+  deploy-teacher-k8s:
+    permissions:
+      contents: "read"
+      id-token: "write"
+    runs-on: ${{ fromJson(needs.prepare-info.outputs.runners)['deploy-teacher-k8s'] }}
+    needs: [prepare-info, deploy-k8s]
+    if: ${{ !contains(toJson(needs.prepare-info.outputs.teacher_k8s_orgs), '[]') && !cancelled() && needs.deploy-k8s.result != 'failure' }}
+    concurrency:
+      group: deploy-teacher-k8s-${{ matrix.organization }}-${{ needs.prepare-info.outputs.env }}
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      matrix:
+        organization: ${{ fromJson(needs.prepare-info.outputs.teacher_k8s_orgs) }}
+      max-parallel: ${{ fromJSON(needs.prepare-info.outputs.max_deploy_parallel) }}
+    steps:
+      - uses: actions/checkout@v3
+        timeout-minutes: 5
+        with:
+          ref: "${{ needs.prepare-info.outputs.workflow_ref }}"
+
+      - name: Deploy Teacher (${{ needs.prepare-info.outputs.env }}.${{ matrix.organization }})
+        uses: ./.github/actions/tbd.deploy-k8s-web
+        with:
+          environment: ${{ needs.prepare-info.outputs.env }}
+          organization: ${{ matrix.organization }}
+          release_tag: ${{ needs.prepare-info.outputs.me_release_tag }}
+          service: "teacher"
+          token: ${{ secrets.BUILD_GITHUB_TOKEN }}
+
+  deploy-learner-k8s:
+    permissions:
+      contents: "read"
+      id-token: "write"
+    runs-on: ${{ fromJson(needs.prepare-info.outputs.runners)['deploy-learner-k8s'] }}
+    needs: [prepare-info, deploy-k8s]
+    if: ${{ !contains(toJson(needs.prepare-info.outputs.learner_k8s_orgs), '[]') && !cancelled() && needs.deploy-k8s.result != 'failure'  }}
+    concurrency:
+      group: deploy-learner-k8s-${{ matrix.organization }}-${{ needs.prepare-info.outputs.env }}
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      matrix:
+        organization: ${{ fromJson(needs.prepare-info.outputs.learner_k8s_orgs) }}
+      max-parallel: ${{ fromJSON(needs.prepare-info.outputs.max_deploy_parallel) }}
+    steps:
+      - uses: actions/checkout@v3
+        timeout-minutes: 5
+        with:
+          ref: "${{ needs.prepare-info.outputs.workflow_ref }}"
+
+      - name: Deploy Learner (${{ needs.prepare-info.outputs.env }}.${{ matrix.organization }})
+        uses: ./.github/actions/tbd.deploy-k8s-web
+        with:
+          environment: ${{ needs.prepare-info.outputs.env }}
+          organization: ${{ matrix.organization }}
+          release_tag: ${{ needs.prepare-info.outputs.me_release_tag }}
+          service: "learner"
+          token: ${{ secrets.BUILD_GITHUB_TOKEN }}
+
+  deploy-learner-web:
+    name: deploy-learner-firebase
+    runs-on: ${{ fromJson(needs.prepare-info.outputs.runners)['deploy-learner-web'] }}
+    needs: [prepare-info, deploy-k8s]
+    if: ${{ !contains(toJson(needs.prepare-info.outputs.learner_firebase_orgs), '[]') && !cancelled() && needs.deploy-k8s.result != 'failure' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        organization: ${{ fromJson(needs.prepare-info.outputs.learner_firebase_orgs) }}
+    concurrency:
+      group: deploy-web-${{ matrix.organization }}-learner-${{ needs.prepare-info.outputs.env }}
+      cancel-in-progress: false
+    env:
+      FLAVOR: ${{ matrix.organization }}_learner_${{ needs.prepare-info.outputs.env }}
+      ORGANIZATION: ${{ matrix.organization }}
+      APP: learner
+      REPO: student-app
+      RELEASE_TAG: ${{ needs.prepare-info.outputs.me_release_tag }}
+      ENVIRONMENT: ${{ needs.prepare-info.outputs.env }}
+      PLATFORM: web
+    steps:
+      - uses: actions/checkout@v3
+        timeout-minutes: 5
+        with:
+          ref: "${{ needs.prepare-info.outputs.workflow_ref }}"
+
+      - name: deploy firebase web
+        uses: ./.github/actions/tbd.deploy-web
+        timeout-minutes: 10
+        with:
+          docker-repository: ${{ env.DOCKER_REPOSITORY }}
+          docker-username: ${{ secrets.DOCKER_USERNAME }}
+          docker-token: ${{ secrets.DOCKER_TOKEN }}
+          github-token: ${{ env.GITHUB_TOKEN }}
+          firebase-token: ${{ env.BUILD_FIREBASE_TOKEN }}
+          repo: ${{ env.REPO }}
+          app: ${{ env.APP }}
+          flavor: ${{ env.FLAVOR }}
+          release-tag: ${{ needs.prepare-info.outputs.me_release_tag }}
+          organization: ${{ matrix.organization }}
+          environment: ${{ needs.prepare-info.outputs.env }}
+          image-tag: ${{env.PREFIX_IMAGE}}/${{ env.APP }}-web:${{ env.RELEASE_TAG }}-${{ env.ORGANIZATION }}-${{ env.APP }}-${{ env.ENVIRONMENT }}
+
+  deploy-learner-android:
+    runs-on: ${{ fromJson(needs.prepare-info.outputs.runners)['deploy-learner-android'] }}
+    needs: [prepare-info]
+    if: ${{ !contains(toJson(needs.prepare-info.outputs.learner_android_orgs), '[]') }}
+    strategy:
+      fail-fast: false
+      matrix:
+        organization: ${{ fromJson(needs.prepare-info.outputs.learner_android_orgs) }}
+    concurrency:
+      group: deploy-web-android-${{ matrix.organization }}-learner-${{ needs.prepare-info.outputs.env }}
+      cancel-in-progress: false
+    env:
+      FLAVOR: ${{ matrix.organization }}_learner_${{ needs.prepare-info.outputs.env }}
+      ORGANIZATION: ${{ matrix.organization }}
+      APP: learner
+      REPO: student-app
+      RELEASE_TAG: ${{ needs.prepare-info.outputs.me_release_tag }}
+      ENVIRONMENT: ${{ needs.prepare-info.outputs.env }}
+      PLATFORM: android
+    steps:
+      - uses: actions/checkout@v3
+        timeout-minutes: 5
+        with:
+          ref: "${{ needs.prepare-info.outputs.workflow_ref }}"
+
+      - name: deploy app android
+        uses: ./.github/actions/tbd.deploy-app
+        timeout-minutes: 10
+        with:
+          github-token: ${{ env.GITHUB_TOKEN }}
+          repo: ${{ env.REPO }}
+          app: ${{ env.APP }}
+          organization: ${{ matrix.organization }}
+          environment: ${{ needs.prepare-info.outputs.env }}
+          release-tag: ${{ needs.prepare-info.outputs.me_release_tag }}
+          firebase-token: ${{ env.BUILD_FIREBASE_TOKEN }}
+          platform: ${{ env.PLATFORM }}
+
+  deploy-learner-ios:
+    runs-on: ${{ fromJson(needs.prepare-info.outputs.runners)['deploy-learner-ios'] }}
+    needs: [prepare-info]
+    if: ${{ !contains(toJson(needs.prepare-info.outputs.learner_ios_orgs), '[]') }}
+    strategy:
+      fail-fast: false
+      matrix:
+        organization: ${{ fromJson(needs.prepare-info.outputs.learner_ios_orgs) }}
+    concurrency:
+      group: deploy-web-ios-${{ matrix.organization }}-learner-${{ needs.prepare-info.outputs.env }}
+      cancel-in-progress: false
+    env:
+      FLAVOR: ${{ matrix.organization }}_learner_${{ needs.prepare-info.outputs.env }}
+      ORGANIZATION: ${{ matrix.organization }}
+      APP: learner
+      REPO: student-app
+      RELEASE_TAG: ${{ needs.prepare-info.outputs.me_release_tag }}
+      ENVIRONMENT: ${{ needs.prepare-info.outputs.env }}
+      PLATFORM: ios
+    steps:
+      - uses: actions/checkout@v3
+        timeout-minutes: 5
+        with:
+          ref: "${{ needs.prepare-info.outputs.workflow_ref }}"
+
+      - name: deploy app ios
+        uses: ./.github/actions/tbd.deploy-app
+        timeout-minutes: 10
+        with:
+          github-token: ${{ env.GITHUB_TOKEN }}
+          repo: ${{ env.REPO }}
+          app: ${{ env.APP }}
+          organization: ${{ matrix.organization }}
+          environment: ${{ needs.prepare-info.outputs.env }}
+          release-tag: ${{ needs.prepare-info.outputs.me_release_tag }}
+          firebase-token: ${{ env.BUILD_FIREBASE_TOKEN }}
+          platform: ${{ env.PLATFORM }}
+
+  deploy-teacher-web:
+    runs-on: ${{ fromJson(needs.prepare-info.outputs.runners)['deploy-teacher-web'] }}
+    needs: [prepare-info, deploy-k8s]
+    if: ${{ !contains(toJson(needs.prepare-info.outputs.teacher_firebase_orgs), '[]') && !cancelled() && needs.deploy-k8s.result != 'failure' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        organization: ${{ fromJson(needs.prepare-info.outputs.teacher_firebase_orgs) }}
+    concurrency:
+      group: deploy-web-${{ matrix.organization }}-teacher-${{ needs.prepare-info.outputs.env }}
+      cancel-in-progress: false
+    env:
+      FLAVOR: ${{ matrix.organization }}_teacher_${{ needs.prepare-info.outputs.env }}
+      ORGANIZATION: ${{ matrix.organization }}
+      APP: teacher
+      REPO: student-app
+      RELEASE_TAG: ${{ needs.prepare-info.outputs.me_release_tag }}
+      ENVIRONMENT: ${{ needs.prepare-info.outputs.env }}
+    steps:
+      - uses: actions/checkout@v3
+        timeout-minutes: 5
+        with:
+          ref: "${{ needs.prepare-info.outputs.workflow_ref }}"
+
+      - name: deploy firebase web
+        uses: ./.github/actions/tbd.deploy-web
+        timeout-minutes: 10
+        with:
+          docker-repository: ${{ env.DOCKER_REPOSITORY }}
+          docker-username: ${{ secrets.DOCKER_USERNAME }}
+          docker-token: ${{ secrets.DOCKER_TOKEN }}
+          github-token: ${{ env.GITHUB_TOKEN }}
+          firebase-token: ${{ env.BUILD_FIREBASE_TOKEN }}
+          repo: ${{ env.REPO }}
+          app: ${{ env.APP }}
+          flavor: ${{ ENV.FLAVOR }}
+          release-tag: ${{ needs.prepare-info.outputs.me_release_tag }}
+          organization: ${{ matrix.organization }}
+          environment: ${{ needs.prepare-info.outputs.env }}
+          image-tag: ${{env.PREFIX_IMAGE}}/${{ env.APP }}-web:${{ env.RELEASE_TAG }}-${{ env.ORGANIZATION }}-${{ env.APP }}-${{ env.ENVIRONMENT }}
+
+  update-me-alert:
+    runs-on: ["self-hosted", "100m-400mi", "spot", "persistent"]
+    if: ${{ needs.send-deploy-alert.outputs.alert_id != '' && needs.prepare-info.outputs.me_release_tag != '' && always() }}
+    needs:
+      [
+        prepare-info,
+        send-deploy-alert,
+        deploy-teacher-k8s,
+        deploy-teacher-web,
+        deploy-learner-k8s,
+        deploy-learner-web,
+        deploy-learner-android,
+        deploy-learner-ios,
+      ]
+    env:
+      ENVIRONMENT: "${{ needs.prepare-info.outputs.env }}"
+    outputs:
+      status: ${{ steps.reply.outputs.status }}
+    steps:
+      - uses: actions/checkout@v3
+        timeout-minutes: 5
+        with:
+          ref: "${{ needs.prepare-info.outputs.workflow_ref }}"
+
+      - id: me_statuses
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const statuses = {
+              'deploy-teacher-k8s': {
+                status: '${{ needs.deploy-teacher-k8s.result }}'
+              },
+              'deploy-teacher-web': {
+                status: '${{ needs.deploy-teacher-web.result }}'
+              },
+              'deploy-learner-k8s': {
+                status: '${{ needs.deploy-learner-k8s.result }}'
+              },
+              'deploy-learner-web': {
+                status: '${{ needs.deploy-learner-web.result }}'
+              },
+              'deploy-learner-android': {
+                status: '${{ needs.deploy-learner-android.result }}'
+              },
+              'deploy-learner-ios': {
+                status: '${{ needs.deploy-learner-ios.result }}'
+              },
+            }
+            core.setOutput('statuses', statuses)
+
+      - uses: ./.github/actions/slack-alert-reply
+        id: reply
+        with:
+          actor: ${{ needs.send-deploy-alert.outputs.user_alert }}
+          repo: student-app
+          release_tag: ${{ needs.prepare-info.outputs.me_release_tag }}
+          channel: ${{ needs.send-deploy-alert.outputs.channel_id }}
+          message-timestamp: ${{ needs.send-deploy-alert.outputs.alert_id }}
+          current-job: "Mobile"
+          statuses: ${{ steps.me_statuses.outputs.statuses }}
+          SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
+
+  update-deploy-alert:
+    runs-on: ["self-hosted", "100m-400mi", "spot", "persistent"]
+    if: ${{ needs.send-deploy-alert.outputs.alert_id != '' && always() }}
+    needs:
+      [
+        prepare-info,
+        create-status,
+        send-deploy-alert,
+        deploy-k8s,
+        update-fe-alert,
+        update-me-alert,
+      ]
+    env:
+      ENVIRONMENT: "${{ needs.prepare-info.outputs.env }}"
+    steps:
+      - uses: actions/checkout@v3
+        timeout-minutes: 5
+        with:
+          ref: "${{ needs.prepare-info.outputs.workflow_ref }}"
+
+      - uses: ./.github/actions/slack-alert-update
+        id: update
+        with:
+          be_tag: ${{ needs.prepare-info.outputs.be_release_tag }}
+          fe_tag: ${{ needs.prepare-info.outputs.fe_release_tag }}
+          me_tag: ${{ needs.prepare-info.outputs.me_release_tag }}
+          be_status: ${{ needs.deploy-k8s.result }}
+          fe_status: ${{ needs.update-fe-alert.outputs.status }}
+          me_status: ${{ needs.update-me-alert.outputs.status }}
+          message: "Deploy ${{ env.ENVIRONMENT }}"
+          channel: ${{ needs.send-deploy-alert.outputs.channel_id }}
+          message-timestamp: ${{ needs.send-deploy-alert.outputs.alert_id }}
+          orgs: ${{ needs.prepare-info.outputs.orgs }}
+          SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
+          squad_alert: ${{ needs.send-deploy-alert.outputs.squad_alert }}
+          user_alert: ${{ needs.send-deploy-alert.outputs.user_alert }}
+
+      - name: Update BE deployment status
+        if: needs.create-status.outputs.be_status_id != ''
+        uses: ./.github/actions/tbd.create-deployment-status
+        env:
+          STATE: ${{ needs.deploy-k8s.result }}
+          REPO: backend
+          DEPLOYMENT_ID: ${{ needs.create-status.outputs.be_status_id }}
+
+      - name: Update FE deployment status
+        if: needs.create-status.outputs.fe_status_id != ''
+        uses: ./.github/actions/tbd.create-deployment-status
+        env:
+          STATE: ${{ needs.update-fe-alert.outputs.status }}
+          REPO: school-portal-admin
+          DEPLOYMENT_ID: ${{ needs.create-status.outputs.fe_status_id }}
+
+      - name: Update ME deployment status
+        if: needs.create-status.outputs.me_status_id != ''
+        uses: ./.github/actions/tbd.create-deployment-status
+        env:
+          STATE: ${{ needs.update-me-alert.outputs.status }}
+          REPO: student-app
+          DEPLOYMENT_ID: ${{ needs.create-status.outputs.me_status_id }}

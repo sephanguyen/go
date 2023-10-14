@@ -1,0 +1,4 @@
+sqlProxy:
+  connName: "staging-manabie-online:asia-southeast1:manabie-common-88e1ee71=tcp:5432,staging-manabie-online:asia-southeast1:jprep-uat=tcp:5433,staging-manabie-online:asia-southeast1:manabie-lms-de12e08e=tcp:5434"
+alloydbProxy:
+  alloydbConnName: "projects/staging-manabie-online/locations/asia-southeast1/clusters/stag-alloydb/instances/stag-alloydb-w01?port=6432"

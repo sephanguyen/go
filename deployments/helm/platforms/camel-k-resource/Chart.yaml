@@ -1,0 +1,9 @@
+apiVersion: v2
+appVersion: "1.0"
+description: Camel k resource
+name: camel-k-resource
+version: 0.1.0
+dependencies:
+  - name: util
+    version: 0.1.0
+    repository: file://../../libs/util

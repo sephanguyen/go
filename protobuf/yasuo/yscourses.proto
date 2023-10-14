@@ -1,0 +1,190 @@
+syntax = "proto3";
+
+package manabie.yasuo;
+import "bob/enum.proto";
+import "ysquiz.proto";
+import "google/protobuf/timestamp.proto";
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option (gogoproto.goproto_registration) = true;
+option go_package = "github.com/manabie-com/backend/pkg/genproto/yasuo;pb";
+
+message Chapter {
+  string chapter_id = 1;
+  string chapter_name = 2;
+  manabie.bob.Country country = 3;
+  manabie.bob.Subject subject = 4;
+  string grade = 5;
+  int32 display_order = 6;
+  int32 school_id = 7;
+}
+
+message UpsertCoursesRequest {
+  message Course {
+    string id = 1;
+    string name = 2;
+    manabie.bob.Country country = 3;
+    manabie.bob.Subject subject = 4;
+    string grade = 5;
+    int32 display_order = 6;
+    repeated string chapter_ids = 7 [ deprecated = true ];
+    int32 school_id = 8;
+    repeated string book_ids = 9 [ deprecated = true ];
+    string icon = 10;
+  }
+  repeated Course courses = 1;
+}
+
+message UpsertCoursesResponse { bool successful = 1; }
+
+message DeleteCoursesRequest { repeated string course_ids = 1; }
+
+message DeleteCoursesResponse { bool successful = 1; }
+
+message CreateBrightCoveUploadUrlRequest { string name = 1; }
+
+message CreateBrightCoveUploadUrlResponse {
+  string signed_url = 1;
+  string api_request_url = 2;
+  string video_id = 3;
+}
+
+message FinishUploadBrightCoveRequest {
+  string api_request_url = 1;
+  string video_id = 2;
+}
+
+message FinishUploadBrightCoveResponse {}
+
+message CoursesUpdated { UpsertCoursesRequest req = 1; }
+
+message UpsertCourseClassesResponse { bool successful = 1; }
+
+message QuizSets {
+  string lo_id = 1;
+  string question_id = 2;
+  string display_order = 3;
+  google.protobuf.Timestamp updated_at = 4;
+  google.protobuf.Timestamp created_at = 5;
+}
+
+message UpsertQuizSetsRequest { repeated QuizSets quizsets = 1; }
+
+message UpsertQuizSetsResponse { bool successful = 1; }
+
+message QuestionV2 {
+  string id = 1;
+  string master_question_id = 2; // for localize, can be null
+  manabie.bob.Country country = 3;
+  string question = 4;         // question content
+  repeated string answers = 5; // correct answer will always be first
+  string explanation = 6;
+  int32 difficulty_level = 7;
+  google.protobuf.Timestamp updated_at = 8;
+  google.protobuf.Timestamp created_at = 9;
+  repeated string questions_tag_lo = 10;
+  string question_url = 11;
+  repeated string answers_url = 12;
+  string explanation_url = 13;
+  repeated string explanation_wrong_answer = 14;
+  repeated string explanation_wrong_answer_url = 15;
+  bool is_waiting_for_render = 16;
+}
+
+message UpsertQuestionsRequest { repeated QuestionV2 questions = 1; }
+
+message UpsertQuestionsResponse { repeated string question_ids = 1; }
+
+message UpsertLiveCourseRequest {
+  string id = 1;
+  string name = 2;
+  string grade = 3;
+  manabie.bob.Subject subject = 4;
+  repeated int32 class_ids = 5;
+  repeated string teacher_ids = 6;
+  int64 school_id = 7;
+  manabie.bob.Country country = 8;
+  google.protobuf.Timestamp start_date = 9;
+  google.protobuf.Timestamp end_date = 10;
+}
+
+message UpsertLiveCourseResponse { string id = 1; }
+
+message DeleteLiveCourseRequest { repeated string course_ids = 1; }
+
+message DeleteLiveCourseResponse {}
+
+message CreateLiveLessonRequest {
+  message Lesson {
+    string name = 1;
+    google.protobuf.Timestamp start_date = 2;
+    google.protobuf.Timestamp end_date = 3;
+    string teacher_id = 4;
+    repeated Attachment attachments = 5;
+    ControlSettingLiveLesson control_settings = 6;
+    string lesson_group = 7;
+  }
+  string course_id = 1;
+  repeated Lesson lessons = 2;
+}
+
+message CreateLiveLessonResponse {}
+
+message UpdateLiveLessonRequest {
+  string lesson_id = 1;
+  string name = 2;
+  google.protobuf.Timestamp start_date = 3;
+  google.protobuf.Timestamp end_date = 4;
+  string teacher_id = 5;
+  repeated Attachment attachments = 6;
+  ControlSettingLiveLesson control_settings = 7;
+  string course_id = 8;
+  string lesson_group = 9;
+}
+
+message UpdateLiveLessonResponse { string lesson_id = 1; }
+
+message DeleteLiveLessonRequest { repeated string lesson_ids = 1; }
+
+message DeleteLiveLessonResponse {}
+
+message Attachment {
+  string name = 1;
+  string url = 2;
+}
+
+message ControlSettingLiveLesson {
+  repeated string lectures = 1;
+  repeated string teacher_obversers = 2;
+  manabie.bob.LiveLessonView default_view = 3;
+  manabie.bob.PublishStudentVideoStatus publish_student_video_status =
+      4; // students can publish their video streams after joining a lesson
+  manabie.bob.UnmuteStudentAudioStatus unmute_student_audio_status =
+      5; // students can unmute their audio streams after joining a lesson
+}
+
+service CourseService {
+  rpc UpsertCourses(UpsertCoursesRequest) returns (UpsertCoursesResponse);
+  rpc DeleteCourses(DeleteCoursesRequest) returns (DeleteCoursesResponse);
+
+  rpc CreateBrightCoveUploadUrl(CreateBrightCoveUploadUrlRequest)
+      returns (CreateBrightCoveUploadUrlResponse);
+
+  rpc FinishUploadBrightCove(FinishUploadBrightCoveRequest)
+      returns (FinishUploadBrightCoveResponse);
+
+  rpc UpsertCourseClasses(CoursesUpdated) returns (UpsertCourseClassesResponse);
+  rpc UpsertQuizSets(UpsertQuizSetsRequest) returns (UpsertQuizSetsResponse){option deprecated = true;};
+  rpc UpsertQuestions(UpsertQuestionsRequest) returns (UpsertQuestionsResponse){option deprecated = true;};
+
+  rpc UpsertLiveCourse(UpsertLiveCourseRequest)
+      returns (UpsertLiveCourseResponse);
+  rpc DeleteLiveCourse(DeleteLiveCourseRequest)
+      returns (DeleteLiveCourseResponse);
+  rpc UpdateLiveLesson(UpdateLiveLessonRequest)
+      returns (UpdateLiveLessonResponse);
+  rpc CreateLiveLesson(CreateLiveLessonRequest)
+      returns (CreateLiveLessonResponse);
+  rpc DeleteLiveLesson(DeleteLiveLessonRequest)
+      returns (DeleteLiveLessonResponse);
+}

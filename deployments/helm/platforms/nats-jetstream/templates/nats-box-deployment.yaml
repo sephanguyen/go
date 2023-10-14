@@ -1,0 +1,109 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "nats-jetstream.fullname" . }}-box
+  labels:
+    app.kubernetes.io/name: {{ include "nats-jetstream.name" . }}-box
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "nats-jetstream.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "nats-jetstream.name" . }}-box
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      annotations:
+        checksum/controller.seed.encrypted.yaml: {{ printf "secrets/%s/%s/controller.seed.encrypted.yaml" .Values.vendor .Values.environment | .Files.Get | sha256sum }}
+        checksum/controller_v2.seed.encrypted.yaml: {{ printf "secrets/%s/%s/controller_v2.seed.encrypted.yaml" .Values.vendor .Values.environment | .Files.Get | sha256sum }}
+      {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        app.kubernetes.io/name: {{ include "nats-jetstream.name" . }}-box
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      volumes:
+      - name: decrypted-volume
+        emptyDir: {}
+      - name: controller-nkey-seed
+        secret:
+          secretName: {{ include "nats-jetstream.fullname" . }}
+          items:
+        {{ range $path, $_ := .Files.Glob (printf "secrets/%s/%s/controller*.seed.encrypted.yaml" .Values.vendor .Values.environment) }}
+          - key: {{ base $path }}
+            path: {{ base $path }}
+        {{ end }}
+  {{- if eq "local" .Values.environment }}
+      - name: service-credential
+        secret:
+          secretName: {{ include "nats-jetstream.fullname" . }}
+          items:
+          - key: service_credential.json
+            path: service_credential.json
+  {{- end }}
+      serviceAccountName: {{ include "nats-jetstream.serviceAccountName" . }}
+      {{- with .Values.natsbox.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      initContainers:
+      - name: decrypt-secrets
+        image: "{{ .Values.sopsImage.repository }}:{{ .Values.sopsImage.tag }}"
+        imagePullPolicy: IfNotPresent
+        command:
+          - /bin/sh
+          - -c
+          - |
+
+            set -e
+            code=0
+            sops --decrypt --extract '["data"]' --output /decrypted/controller.seed /configs/controller_v2.seed.encrypted.yaml || code=$?
+
+            if [ "$code" -ne 0 ]; then
+              sops --decrypt --extract '["data"]' /configs/controller.seed.encrypted.yaml > /decrypted/controller.seed
+              echo "============= decrypt old secret file"
+            fi
+
+        volumeMounts:
+        - name: decrypted-volume
+          mountPath: /decrypted/
+      {{ range $path, $_ := .Files.Glob (printf "secrets/%s/%s/controller*.seed.encrypted.yaml" .Values.vendor .Values.environment) }}
+        - name: controller-nkey-seed
+          mountPath: /configs/{{ base $path }}
+          subPath: {{ base $path }}
+          readOnly: true
+      {{ end }}
+        {{- if eq "local" .Values.environment }}
+        - name: service-credential
+          mountPath: /configs/service_credential.json
+          subPath: service_credential.json
+          readOnly: true
+        env:
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: "/configs/service_credential.json"
+        {{- end }}
+      containers:
+      - name: {{ .Chart.Name }}-box
+        image: "{{ .Values.natsbox.image.repository }}:{{ .Values.natsbox.image.tag }}"
+        imagePullPolicy: {{ .Values.natsbox.pullPolicy }}
+        lifecycle:
+          postStart:
+            exec:
+              command:
+              - /bin/sh
+              - -c
+              - nats context save --server={{ include "nats-jetstream.NatsURL" . }} --nkey=/decrypted/controller.seed local --select
+        command:
+         - "tail"
+         - "-f"
+         - "/dev/null"
+        volumeMounts:
+        - name: decrypted-volume
+          mountPath: /decrypted/
+        resources: {{ toYaml .Values.natsbox.resources | nindent 12 }}
+      {{- with .Values.natsbox }}
+      {{- $context := (mustMerge (deepCopy .) $) }}
+      affinity: {{- include "util.affinityNew" $context | nindent 8 }}
+      tolerations: {{- include "util.tolerations" $context | nindent 8 }}
+      {{- end }}

@@ -1,0 +1,57 @@
+table:
+  schema: public
+  name: e2e_scenarios
+object_relationships:
+  - name: e2e_feature
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: e2e_features
+        insertion_order: null
+        column_mapping:
+          feature_id: feature_id
+  - name: e2e_scenario_severity
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: e2e_scenario_severity
+        insertion_order: null
+        column_mapping:
+          raw_name: scenario_name
+          feature_path: feature_path
+array_relationships:
+  - name: e2e_steps
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: e2e_steps
+        insertion_order: null
+        column_mapping:
+          scenario_id: scenario_id
+select_permissions:
+  - role: user
+    permission:
+      columns:
+        - scenario_id
+        - feature_id
+        - tags
+        - keyword
+        - name
+        - description
+        - steps
+        - status
+        - pickle
+        - test_case
+        - created_at
+        - updated_at
+        - deleted_at
+        - started_at
+        - ended_at
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+      allow_aggregations: true

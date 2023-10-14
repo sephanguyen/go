@@ -1,0 +1,2 @@
+ALTER TABLE student_enrollment_status_history DROP CONSTRAINT IF EXISTS student_enrollment_status_history__location_id__fk;
+ALTER TABLE student_enrollment_status_history DROP CONSTRAINT IF EXISTS student_enrollment_status_history__student_id__fk;

@@ -1,0 +1,540 @@
+------------ Managara Demo ERP -------------
+--- Location ---
+INSERT INTO public.location_types
+(location_type_id, name, "display_name", resource_path, updated_at, created_at)
+VALUES	('01GRB92TYDRPXMVAHPYXTSHFT9','org','Manabie Demo ERP', '-2147483628', now(), now()) ON CONFLICT DO NOTHING;
+
+INSERT INTO public.locations
+(location_id, name, location_type, partner_internal_id, partner_internal_parent_id, parent_location_id, resource_path, updated_at, created_at,access_path)
+VALUES	('01GRB92TYDRPXMVAHPYXTSHFT9', 'Manabie Demo ERP','01GRB92TYDRPXMVAHPYXTSHFT9',NULL, NULL, NULL, '-2147483628', now(), now(),'01GRB92TYDRPXMVAHPYXTSHFT9') ON CONFLICT DO NOTHING;
+
+--- Organization ---
+INSERT INTO organizations (organization_id, tenant_id,               name,       resource_path, domain_name, logo_url, country,      created_at, updated_at, deleted_at)
+VALUES                    ('-2147483628',   'manabie-demo-erp-zgv2p', 'Manabie Demo ERP', '-2147483628', 'manabie-demo-erp', 'https://storage.googleapis.com/prod-tokyo-backend/user-upload/manabie_ic_splash.png',     'COUNTRY_JP', now(),      now(),      null      ) ON CONFLICT DO NOTHING;
+
+INSERT INTO public.organization_auths
+(organization_id, auth_project_id, auth_tenant_id)
+VALUES(-2147483628, 'student-coach-e1e95', 'manabie-demo-erp-zgv2p') ON CONFLICT DO NOTHING;
+
+INSERT INTO schools ( school_id,   name,        country,      city_id, district_id, point, is_system_school, created_at, updated_at, is_merge, phone_number, deleted_at, resource_path)
+VALUES              (-2147483628, 'Manabie Demo ERP', 'COUNTRY_JP', 1,       1,           null,  false,            now(),      now(),      false,    null,         null,       '-2147483628') ON CONFLICT DO NOTHING;
+
+--- Dynamic form ---
+INSERT
+	INTO
+	public.partner_form_configs (form_config_id,
+	partner_id,
+	feature_name,
+	created_at,
+	updated_at,
+	deleted_at,
+	form_config_data,
+	resource_path)
+VALUES
+		('01GRB9EHEWW3SEQ2HVPBKAW2SE',
+-2147483628,
+'FEATURE_NAME_INDIVIDUAL_LESSON_REPORT',
+now(),
+now(),
+NULL,
+'{"sections": [{"fields": [{"label": {"i18n": {"translations": {"en": "Attendance", "ja": "出席情報", "vi": "Attendance"}, "fallback_language": "ja"}}, "field_id": "attendance_label", "value_type": "VALUE_TYPE_NULL", "is_required": false, "display_config": {"size": {"md": 12, "xs": 12}}, "component_props": {"variant": "body2"}, "component_config": {"type": "TYPOGRAPHY"}}, {"field_id": "attendance_status", "value_type": "VALUE_TYPE_STRING", "is_required": true, "display_config": {"size": {"md": 6, "xs": 6}}, "component_config": {"type": "ATTENDANCE_STATUS"}}, {"field_id": "attendance_remark", "value_type": "VALUE_TYPE_STRING", "is_required": false, "display_config": {"size": {"md": 6, "xs": 6}}, "component_config": {"type": "ATTENDANCE_REMARK"}}], "section_id": "attendance_section_id", "section_name": "attendance"}, {"fields": [{"label": {"i18n": {"translations": {"en": "Homework Submission", "ja": "課題", "vi": "Homework Submission"}, "fallback_language": "ja"}}, "field_id": "homework_submission_label", "value_type": "VALUE_TYPE_NULL", "is_required": false, "display_config": {"size": {"md": 12, "xs": 12}}, "component_props": {"variant": "body2"}, "component_config": {"type": "TYPOGRAPHY"}}, {"label": {"i18n": {"translations": {"en": "Homework Status", "ja": "提出状況", "vi": "Homework Status"}, "fallback_language": "ja"}}, "field_id": "homework_submission_status", "value_type": "VALUE_TYPE_STRING", "is_required": false, "display_config": {"size": {"md": 6, "xs": 6}}, "component_props": {"options": [{"key": "COMPLETED", "label": {"i18n": {"translations": {"en": "Completed", "ja": "完了", "vi": "Completed"}, "fallback_language": "ja"}}}, {"key": "INCOMPLETE", "label": {"i18n": {"translations": {"en": "Incomplete", "ja": "未完了", "vi": "Incomplete"}, "fallback_language": "ja"}}}], "optionLabelKey": "label"}, "component_config": {"type": "AUTOCOMPLETE"}}], "section_id": "homework_submission_section_id", "section_name": "homework_submission"}, {"fields": [{"label": {"i18n": {"translations": {"en": "Lesson", "ja": "授業", "vi": "Lesson"}, "fallback_language": "ja"}}, "field_id": "lesson_label", "value_type": "VALUE_TYPE_NULL", "is_required": false, "display_config": {"size": {"md": 6, "xs": 6}}, "component_props": {"variant": "body2"}, "component_config": {"type": "TYPOGRAPHY"}}, {"field_id": "lesson_view_study_plan_action", "value_type": "VALUE_TYPE_NULL", "is_required": false, "display_config": {"size": {"md": 3, "xs": 3}}, "component_config": {"type": "LINK_VIEW_STUDY_PLAN"}}, {"field_id": "lesson_previous_report_action", "value_type": "VALUE_TYPE_NULL", "is_required": false, "display_config": {"size": {"md": 3, "xs": 3}}, "component_config": {"type": "BUTTON_PREVIOUS_REPORT"}}, {"label": {"i18n": {"translations": {"en": "Content", "ja": "追加教材", "vi": "Content"}, "fallback_language": "ja"}}, "field_id": "lesson_content", "value_type": "VALUE_TYPE_STRING", "is_required": false, "display_config": {"size": {"md": 6, "xs": 6}}, "component_props": {"InputProps": {"rows": 6, "multiline": true}}, "component_config": {"type": "TEXT_FIELD_AREA"}}, {"label": {"i18n": {"translations": {"en": "Homework", "ja": "追加課題", "vi": "Homework"}, "fallback_language": "ja"}}, "field_id": "lesson_homework", "value_type": "VALUE_TYPE_STRING", "is_required": false, "display_config": {"size": {"md": 6, "xs": 6}}, "component_props": {"InputProps": {"rows": 6, "multiline": true}}, "component_config": {"type": "TEXT_FIELD_AREA"}}], "section_id": "lesson_section_id", "section_name": "lesson"}, {"fields": [{"label": {"i18n": {"translations": {"en": "Remarks", "ja": "備考", "vi": "Remarks"}, "fallback_language": "ja"}}, "field_id": "remarks_section_label", "value_type": "VALUE_TYPE_NULL", "is_required": false, "display_config": {"size": {"md": 12, "xs": 12}}, "component_props": {"variant": "body2"}, "component_config": {"type": "TYPOGRAPHY"}}, {"label": {"i18n": {"translations": {"en": "Remarks", "ja": "備考", "vi": "Remarks"}, "fallback_language": "ja"}}, "field_id": "remarks", "value_type": "VALUE_TYPE_STRING", "is_required": false, "display_config": {"size": {"md": 12, "xs": 12}}, "component_props": {"InputProps": {"rows": 6, "multiline": true}}, "component_config": {"type": "TEXT_FIELD_AREA"}}], "section_id": "remarks_section_id", "section_name": "remarks"}]}',
+'-2147483628')
+	ON
+CONFLICT ON
+CONSTRAINT partner_form_configs_pk DO NOTHING;
+
+
+--- Role <> User Group ---
+INSERT INTO permission
+  (permission_id, permission_name, created_at, updated_at, resource_path)
+VALUES 
+  ('01GRB98DXXHBWTVDY00FYR6CJF', 'master.location.read', now(), now(), '-2147483628')
+  ON CONFLICT DO NOTHING;
+INSERT INTO role 
+  (role_id, role_name, is_system, created_at, updated_at, resource_path)
+VALUES 
+  ('01GRB95Z4F8869Q1N4SZXVY0F1', 'Teacher', false, now(), now(), '-2147483628'),
+  ('01GRB95Z4F8869Q1N4SZXVY0F2', 'School Admin', false, now(), now(), '-2147483628'),
+  ('01GRB95Z4F8869Q1N4SZXVY0F3', 'Student', true, now(), now(), '-2147483628'),
+  ('01GRB95Z4F8869Q1N4SZXVY0F4', 'Parent',  true, now(), now(), '-2147483628'),
+  ('01GRB95Z4F8869Q1N4SZXVY0F5', 'HQ Staff', false, now(), now(), '-2147483628'),
+  ('01GRB95Z4F8869Q1N4SZXVY0F6', 'Centre Lead', false, now(), now(), '-2147483628'),
+  ('01GRB95Z4F8869Q1N4SZXVY0F7', 'Teacher Lead', false, now(), now(), '-2147483628'),
+  ('01GRB95Z4F8869Q1N4SZXVY0F8', 'Centre Manager',  false, now(), now(), '-2147483628'),
+  ('01GRB95Z4F8869Q1N4SZXVY0F9', 'Centre Staff',  false, now(), now(), '-2147483628'),
+  ('01GRB95Z4F8869Q1N4SZXVY0F0', 'OpenAPI',  true, now(), now(), '-2147483628'),
+  ('01GRB95Z4F8869Q1N4SZXVY0G1', 'NotificationScheduleJob',  true, now(), now(), '-2147483628'),
+  ('01GRB95Z4F8869Q1N4SZXVY0G2', 'UsermgmtScheduleJob',  true, now(), now(), '-2147483628')
+  ON CONFLICT DO NOTHING;
+INSERT INTO permission_role
+  (permission_id, role_id, created_at, updated_at, resource_path)
+VALUES 
+  ('01GRB98DXXHBWTVDY00FYR6CJF', '01GRB95Z4F8869Q1N4SZXVY0F1', now(), now(), '-2147483628'),
+  ('01GRB98DXXHBWTVDY00FYR6CJF', '01GRB95Z4F8869Q1N4SZXVY0F2', now(), now(), '-2147483628'),
+  ('01GRB98DXXHBWTVDY00FYR6CJF', '01GRB95Z4F8869Q1N4SZXVY0F3', now(), now(), '-2147483628'),
+  ('01GRB98DXXHBWTVDY00FYR6CJF', '01GRB95Z4F8869Q1N4SZXVY0F4', now(), now(), '-2147483628'),
+  ('01GRB98DXXHBWTVDY00FYR6CJF', '01GRB95Z4F8869Q1N4SZXVY0F5', now(), now(), '-2147483628'),
+  ('01GRB98DXXHBWTVDY00FYR6CJF', '01GRB95Z4F8869Q1N4SZXVY0F6', now(), now(), '-2147483628'),
+  ('01GRB98DXXHBWTVDY00FYR6CJF', '01GRB95Z4F8869Q1N4SZXVY0F7', now(), now(), '-2147483628'),
+  ('01GRB98DXXHBWTVDY00FYR6CJF', '01GRB95Z4F8869Q1N4SZXVY0F8', now(), now(), '-2147483628'),
+  ('01GRB98DXXHBWTVDY00FYR6CJF', '01GRB95Z4F8869Q1N4SZXVY0F9', now(), now(), '-2147483628'),
+  ('01GRB98DXXHBWTVDY00FYR6CJF', '01GRB95Z4F8869Q1N4SZXVY0F0', now(), now(), '-2147483628'),
+  ('01GRB98DXXHBWTVDY00FYR6CJF', '01GRB95Z4F8869Q1N4SZXVY0G1', now(), now(), '-2147483628'),
+  ('01GRB98DXXHBWTVDY00FYR6CJF', '01GRB95Z4F8869Q1N4SZXVY0G2', now(), now(), '-2147483628')
+  ON CONFLICT DO NOTHING;
+
+INSERT INTO public.user_group
+  (user_group_id, user_group_name, is_system, created_at, updated_at, resource_path)
+VALUES
+  ('01GRB9AE84VMPC803E3FNJXH71', 'Teacher', true, now(), now(), '-2147483628'),
+  ('01GRB9AE84VMPC803E3FNJXH72', 'School Admin', true, now(), now(), '-2147483628'),
+  ('01GRB9AE84VMPC803E3FNJXH73', 'Student', true, now(), now(), '-2147483628'),
+  ('01GRB9AE84VMPC803E3FNJXH74', 'Parent',  true, now(), now(), '-2147483628'),
+  ('01GRB9AE84VMPC803E3FNJXH75', 'HQ Staff', true, now(), now(), '-2147483628'),
+  ('01GRB9AE84VMPC803E3FNJXH76', 'Centre Lead', true, now(), now(), '-2147483628'),
+  ('01GRB9AE84VMPC803E3FNJXH77', 'Teacher Lead', true, now(), now(), '-2147483628'),
+  ('01GRB9AE84VMPC803E3FNJXH78', 'Centre Manager',  true, now(), now(), '-2147483628'),
+  ('01GRB9AE84VMPC803E3FNJXH79', 'Centre Staff',  true, now(), now(), '-2147483628'),
+  ('01GRB9AE84VMPC803E3FNJXH70', 'OpenAPI',  true, now(), now(), '-2147483628'),
+  ('01GRB9AE84VMPC803E3FNJXH81', 'NotificationScheduleJob',  true, now(), now(), '-2147483628'),
+  ('01GRB9AE84VMPC803E3FNJXH82', 'UsermgmtScheduleJob',  true, now(), now(), '-2147483628')
+  ON CONFLICT DO NOTHING;
+INSERT INTO public.granted_role
+  (granted_role_id, user_group_id, role_id, created_at, updated_at, resource_path)
+VALUES
+  ('01GRB9D18G5AD6S0F8WSY4TBK1', '01GRB9AE84VMPC803E3FNJXH71', '01GRB95Z4F8869Q1N4SZXVY0F1', now(), now(), '-2147483628'),
+  ('01GRB9D18G5AD6S0F8WSY4TBK2', '01GRB9AE84VMPC803E3FNJXH72', '01GRB95Z4F8869Q1N4SZXVY0F2', now(), now(), '-2147483628'),
+  ('01GRB9D18G5AD6S0F8WSY4TBK3', '01GRB9AE84VMPC803E3FNJXH73', '01GRB95Z4F8869Q1N4SZXVY0F3', now(), now(), '-2147483628'),
+  ('01GRB9D18G5AD6S0F8WSY4TBK4', '01GRB9AE84VMPC803E3FNJXH74', '01GRB95Z4F8869Q1N4SZXVY0F4', now(), now(), '-2147483628'),
+  ('01GRB9D18G5AD6S0F8WSY4TBK5', '01GRB9AE84VMPC803E3FNJXH75', '01GRB95Z4F8869Q1N4SZXVY0F5', now(), now(), '-2147483628'),
+  ('01GRB9D18G5AD6S0F8WSY4TBK6', '01GRB9AE84VMPC803E3FNJXH76', '01GRB95Z4F8869Q1N4SZXVY0F6', now(), now(), '-2147483628'),
+  ('01GRB9D18G5AD6S0F8WSY4TBK7', '01GRB9AE84VMPC803E3FNJXH77', '01GRB95Z4F8869Q1N4SZXVY0F7', now(), now(), '-2147483628'),
+  ('01GRB9D18G5AD6S0F8WSY4TBK8', '01GRB9AE84VMPC803E3FNJXH78', '01GRB95Z4F8869Q1N4SZXVY0F8', now(), now(), '-2147483628'),
+  ('01GRB9D18G5AD6S0F8WSY4TBK9', '01GRB9AE84VMPC803E3FNJXH79', '01GRB95Z4F8869Q1N4SZXVY0F9', now(), now(), '-2147483628'),
+  ('01GRB9D18G5AD6S0F8WSY4TBK0', '01GRB9AE84VMPC803E3FNJXH70', '01GRB95Z4F8869Q1N4SZXVY0F0', now(), now(), '-2147483628'),
+  ('01GRB9D18G5AD6S0F8WSY4TBJ1', '01GRB9AE84VMPC803E3FNJXH81', '01GRB95Z4F8869Q1N4SZXVY0G1', now(), now(), '-2147483628'),
+  ('01GRB9D18G5AD6S0F8WSY4TBJ2', '01GRB9AE84VMPC803E3FNJXH82', '01GRB95Z4F8869Q1N4SZXVY0G2', now(), now(), '-2147483628')
+  ON CONFLICT DO NOTHING;
+INSERT INTO public.granted_role_access_path
+  (granted_role_id, location_id, created_at, updated_at, resource_path)
+VALUES
+  ('01GRB9D18G5AD6S0F8WSY4TBK1', '01GRB92TYDRPXMVAHPYXTSHFT9', now(), now(), '-2147483628'),
+  ('01GRB9D18G5AD6S0F8WSY4TBK2', '01GRB92TYDRPXMVAHPYXTSHFT9', now(), now(), '-2147483628'),
+  ('01GRB9D18G5AD6S0F8WSY4TBK3', '01GRB92TYDRPXMVAHPYXTSHFT9', now(), now(), '-2147483628'),
+  ('01GRB9D18G5AD6S0F8WSY4TBK4', '01GRB92TYDRPXMVAHPYXTSHFT9', now(), now(), '-2147483628'),
+  ('01GRB9D18G5AD6S0F8WSY4TBK5', '01GRB92TYDRPXMVAHPYXTSHFT9', now(), now(), '-2147483628'),
+  ('01GRB9D18G5AD6S0F8WSY4TBK6', '01GRB92TYDRPXMVAHPYXTSHFT9', now(), now(), '-2147483628'),
+  ('01GRB9D18G5AD6S0F8WSY4TBK7', '01GRB92TYDRPXMVAHPYXTSHFT9', now(), now(), '-2147483628'),
+  ('01GRB9D18G5AD6S0F8WSY4TBK8', '01GRB92TYDRPXMVAHPYXTSHFT9', now(), now(), '-2147483628'),
+  ('01GRB9D18G5AD6S0F8WSY4TBK9', '01GRB92TYDRPXMVAHPYXTSHFT9', now(), now(), '-2147483628'),
+  ('01GRB9D18G5AD6S0F8WSY4TBK0', '01GRB92TYDRPXMVAHPYXTSHFT9', now(), now(), '-2147483628'),
+  ('01GRB9D18G5AD6S0F8WSY4TBJ1', '01GRB92TYDRPXMVAHPYXTSHFT9', now(), now(), '-2147483628'),
+  ('01GRB9D18G5AD6S0F8WSY4TBJ2', '01GRB92TYDRPXMVAHPYXTSHFT9', now(), now(), '-2147483628')
+  ON CONFLICT DO NOTHING;  
+
+
+---- Role and Permission --- 
+INSERT INTO "permission" (permission_id,permission_name,created_at,updated_at,resource_path) VALUES
+	 ('01GS7PXY7JGS75MCN3Q5M6RD22','communication.conversation.read','now()','now()','-2147483628'),
+	 ('01GS7PYBJDPQ321F4YG48EBZQM','communication.conversation.write','now()','now()','-2147483628'),
+	 ('01GS7PYSZFS8QX1FE8G5QWJ6E7','communication.notification.owner','now()','now()','-2147483628'),
+	 ('01GS7PZ86DWBXBBMMK34YFAG6S','communication.notification.read','now()','now()','-2147483628'),
+	 ('01GS7PZJXW8BADJ5PDFA44G08Z','communication.notification.write','now()','now()','-2147483628'),
+	 ('01GS7PZSMWWR151F7JVPSJR5JW','entryexit.student_entryexit_records.read','now()','now()','-2147483628'),
+	 ('01GS7Q03VW3BWMCM6R6XK69GXC','entryexit.student_entryexit_records.write','now()','now()','-2147483628'),
+	 ('01GS7Q0B6311YG3TV9MV2YES0S','entryexit.student_qr.read','now()','now()','-2147483628'),
+	 ('01GS7Q0JF41Z7T4HMMH938E49C','entryexit.student_qr.write','now()','now()','-2147483628'),
+	 ('01GS7Q0YK4B0QNTN7JRJ3013N2','lesson.lessonmember.read','now()','now()','-2147483628') ON CONFLICT DO NOTHING;
+INSERT INTO "permission" (permission_id,permission_name,created_at,updated_at,resource_path) VALUES
+	 ('01GS7Q18KFXWYNN0VKWR8T6QB6','lesson.lessonmember.write','now()','now()','-2147483628'),
+	 ('01GS7Q1FS7SSE7YCEEVX1B64EC','lesson.lesson.read','now()','now()','-2147483628'),
+	 ('01GS7Q1Z9Y640GSY5FR1V48Q6H','lesson.lesson.write','now()','now()','-2147483628'),
+	 ('01GS7Q28XFAJEEDTSAFB8RVY49','lesson.reallocation.read','now()','now()','-2147483628'),
+	 ('01GS7Q2G6WH3YAF13C46YQJZ6G','lesson.reallocation.write','now()','now()','-2147483628'),
+	 ('01GS7Q2R2VSYTNJQBCZ51S7DDQ','master.class.read','now()','now()','-2147483628'),
+	 ('01GS7Q2Z9MHA37YRDPJSGDAYVK','master.class.write','now()','now()','-2147483628'),
+	 ('01GS7Q39A60P4RYD9MYXFY34KX','master.course.read','now()','now()','-2147483628'),
+	 ('01GS7Q3HKZ47YQ13JZGRK39NQK','master.course.write','now()','now()','-2147483628'),
+	 ('01GRB98DXXHBWTVDY00FYR6CJF','master.location.read','now()','now()','-2147483628') ON CONFLICT DO NOTHING;
+INSERT INTO "permission" (permission_id,permission_name,created_at,updated_at,resource_path) VALUES
+	 ('01GS7Q44E4P840B8573TA02X6X','master.location.write','now()','now()','-2147483628'),
+	 ('01GS7Q4AWJD9BS79M3CN97E57B','payment.bank_account.read','now()','now()','-2147483628'),
+	 ('01GS7Q4PA44BW5NVCVNQE40GVN','payment.bank_account.write','now()','now()','-2147483628'),
+	 ('01GS7Q4X5QZ9F0NBYY9RM8D2PY','payment.billing_address.read','now()','now()','-2147483628'),
+	 ('01GS7Q53SHR91BT7TK4B01CB6C','payment.billing_address.write','now()','now()','-2147483628'),
+	 ('01GS7Q5FGFCSW7W4H3Y3WY31WJ','payment.bill_item.read','now()','now()','-2147483628'),
+	 ('01GS7Q5Q2V5KX8WRY7AYN97QEV','payment.bill_item.write','now()','now()','-2147483628'),
+	 ('01GS7Q5YR95BF8V6MA4Z1Q723N','payment.invoice.read','now()','now()','-2147483628'),
+	 ('01GS7Q65BYK9JAC5EDV38R5R89','payment.invoice.write','now()','now()','-2147483628'),
+	 ('01GS7Q6BZ3ZHK2W6R1QQ8FACA9','payment.order.read','now()','now()','-2147483628') ON CONFLICT DO NOTHING;
+INSERT INTO "permission" (permission_id,permission_name,created_at,updated_at,resource_path) VALUES
+	 ('01GS7Q6KV9SYHJDRXQ1135WEGF','payment.order.write','now()','now()','-2147483628'),
+	 ('01GS7Q6W1NGPMCTP32B6X7GVP3','payment.payment.read','now()','now()','-2147483628'),
+	 ('01GS7Q76Y3DP1TE7R77MJKA0XT','payment.payment.write','now()','now()','-2147483628'),
+	 ('01GS7Q7EHSG86AM7SRB8DWTR35','payment.student_payment_detail.read','now()','now()','-2147483628'),
+	 ('01GS7Q7PFYCN03A6KE6QJZVT33','payment.student_payment_detail.write','now()','now()','-2147483628'),
+	 ('01GS7Q7X3NTW3QQZK15N5TQJMS','payment.student_product.read','now()','now()','-2147483628'),
+	 ('01GS7Q88JACTNCY4N8G73JH6MA','payment.student_product.write','now()','now()','-2147483628'),
+	 ('01GS7Q8FY9KJZ3NQZFBYEKE19M','user.parent.read','now()','now()','-2147483628'),
+	 ('01GS7Q9E5GVHRSZ2RRZ0TK1YR0','user.parent.write','now()','now()','-2147483628'),
+	 ('01GS7Q9PHXPJ2MEEF93MTP9DK6','user.staff.read','now()','now()','-2147483628') ON CONFLICT DO NOTHING;
+INSERT INTO "permission" (permission_id,permission_name,created_at,updated_at,resource_path) VALUES
+	 ('01GS7Q9ZR08C88B0Q9MDC6TF93','user.staff.write','now()','now()','-2147483628'),
+	 ('01GS7QAE46KZNMS3ZXZFCD61VH','user.student_course.write','now()','now()','-2147483628'),
+	 ('01GS7QAR2E9HTTEMRZCWTVB04N','user.student_enrollment_status_history.read','now()','now()','-2147483628'),
+	 ('01GS7QB4TAE176EN0X2BKS047B','user.studentpaymentdetail.read','now()','now()','-2147483628'),
+	 ('01GS7QBE0R5JB7YV3YJFVA2JQ1','user.studentpaymentdetail.write','now()','now()','-2147483628'),
+	 ('01GS7QBP78QN8TKZJPV0DN11W7','user.student.read','now()','now()','-2147483628'),
+	 ('01GS7QBZ08J2SE59TW28WQQN91','user.student.write','now()','now()','-2147483628'),
+	 ('01GS7QC79G58YJBVWXQ2FMX23M','user.usergroupmember.write','now()','now()','-2147483628'),
+	 ('01GS7QCDTPZPF1EBW3EVDV5ADJ','user.usergroup.read','now()','now()','-2147483628'),
+	 ('01GS7QCQ36Q1JC8BTC8PRKV31Q','user.usergroup.write','now()','now()','-2147483628') ON CONFLICT DO NOTHING;
+INSERT INTO "permission" (permission_id,permission_name,created_at,updated_at,resource_path) VALUES
+	 ('01GS7QD0K7AMWC6H1ZJ6KWS061','user.user.read','now()','now()','-2147483628'),
+	 ('01GS7QD8N38384X0QQAKZYJ35J','user.user.write','now()','now()','-2147483628'),
+	 ('01GS7QDFW8ZVP0YXRSWVQ4S8JJ','virtualclassroom.room_state.read','now()','now()','-2147483628'),
+	 ('01GS7QE8DTS971ACSJA7E2VMEM','virtualclassroom.room_state.write','now()','now()','-2147483628') ON CONFLICT DO NOTHING;
+	
+INSERT INTO permission_role 
+ (permission_id,role_id,created_at,updated_at,resource_path) VALUES
+	 ('01GS7PXY7JGS75MCN3Q5M6RD22','01GRB95Z4F8869Q1N4SZXVY0F1','now()','now()','-2147483628'),
+	 ('01GS7PXY7JGS75MCN3Q5M6RD22','01GRB95Z4F8869Q1N4SZXVY0F4','now()','now()','-2147483628'),
+	 ('01GS7PXY7JGS75MCN3Q5M6RD22','01GRB95Z4F8869Q1N4SZXVY0F3','now()','now()','-2147483628'),
+	 ('01GS7PYBJDPQ321F4YG48EBZQM','01GRB95Z4F8869Q1N4SZXVY0F1','now()','now()','-2147483628'),
+	 ('01GS7PYBJDPQ321F4YG48EBZQM','01GRB95Z4F8869Q1N4SZXVY0F4','now()','now()','-2147483628'),
+	 ('01GS7PYBJDPQ321F4YG48EBZQM','01GRB95Z4F8869Q1N4SZXVY0F3','now()','now()','-2147483628'),
+	 ('01GS7PYSZFS8QX1FE8G5QWJ6E7','01GRB95Z4F8869Q1N4SZXVY0F2','now()','now()','-2147483628'),
+	 ('01GS7PYSZFS8QX1FE8G5QWJ6E7','01GRB95Z4F8869Q1N4SZXVY0F1','now()','now()','-2147483628'),
+	 ('01GS7PYSZFS8QX1FE8G5QWJ6E7','01GRB95Z4F8869Q1N4SZXVY0F9','now()','now()','-2147483628'),
+	 ('01GS7PYSZFS8QX1FE8G5QWJ6E7','01GRB95Z4F8869Q1N4SZXVY0F8','now()','now()','-2147483628') ON CONFLICT DO NOTHING;
+INSERT INTO permission_role 
+ (permission_id,role_id,created_at,updated_at,resource_path) VALUES
+	 ('01GS7PYSZFS8QX1FE8G5QWJ6E7','01GRB95Z4F8869Q1N4SZXVY0F5','now()','now()','-2147483628'),
+	 ('01GS7PZ86DWBXBBMMK34YFAG6S','01GRB95Z4F8869Q1N4SZXVY0F2','now()','now()','-2147483628'),
+	 ('01GS7PZ86DWBXBBMMK34YFAG6S','01GRB95Z4F8869Q1N4SZXVY0G1','now()','now()','-2147483628'),
+	 ('01GS7PZ86DWBXBBMMK34YFAG6S','01GRB95Z4F8869Q1N4SZXVY0F1','now()','now()','-2147483628'),
+	 ('01GS7PZ86DWBXBBMMK34YFAG6S','01GRB95Z4F8869Q1N4SZXVY0F9','now()','now()','-2147483628'),
+	 ('01GS7PZ86DWBXBBMMK34YFAG6S','01GRB95Z4F8869Q1N4SZXVY0F5','now()','now()','-2147483628'),
+	 ('01GS7PZ86DWBXBBMMK34YFAG6S','01GRB95Z4F8869Q1N4SZXVY0F8','now()','now()','-2147483628'),
+	 ('01GS7PZ86DWBXBBMMK34YFAG6S','01GRB95Z4F8869Q1N4SZXVY0F4','now()','now()','-2147483628'),
+	 ('01GS7PZ86DWBXBBMMK34YFAG6S','01GRB95Z4F8869Q1N4SZXVY0F3','now()','now()','-2147483628'),
+	 ('01GS7PZJXW8BADJ5PDFA44G08Z','01GRB95Z4F8869Q1N4SZXVY0G1','now()','now()','-2147483628') ON CONFLICT DO NOTHING;
+INSERT INTO permission_role 
+ (permission_id,role_id,created_at,updated_at,resource_path) VALUES
+	 ('01GS7PZJXW8BADJ5PDFA44G08Z','01GRB95Z4F8869Q1N4SZXVY0F5','now()','now()','-2147483628'),
+	 ('01GS7PZJXW8BADJ5PDFA44G08Z','01GRB95Z4F8869Q1N4SZXVY0F2','now()','now()','-2147483628'),
+	 ('01GS7PZSMWWR151F7JVPSJR5JW','01GRB95Z4F8869Q1N4SZXVY0F8','now()','now()','-2147483628'),
+	 ('01GS7PZSMWWR151F7JVPSJR5JW','01GRB95Z4F8869Q1N4SZXVY0F1','now()','now()','-2147483628'),
+	 ('01GS7PZSMWWR151F7JVPSJR5JW','01GRB95Z4F8869Q1N4SZXVY0F3','now()','now()','-2147483628'),
+	 ('01GS7PZSMWWR151F7JVPSJR5JW','01GRB95Z4F8869Q1N4SZXVY0F9','now()','now()','-2147483628'),
+	 ('01GS7PZSMWWR151F7JVPSJR5JW','01GRB95Z4F8869Q1N4SZXVY0F4','now()','now()','-2147483628'),
+	 ('01GS7PZSMWWR151F7JVPSJR5JW','01GRB95Z4F8869Q1N4SZXVY0F6','now()','now()','-2147483628'),
+	 ('01GS7PZSMWWR151F7JVPSJR5JW','01GRB95Z4F8869Q1N4SZXVY0F5','now()','now()','-2147483628'),
+	 ('01GS7PZSMWWR151F7JVPSJR5JW','01GRB95Z4F8869Q1N4SZXVY0F2','now()','now()','-2147483628') ON CONFLICT DO NOTHING;
+INSERT INTO permission_role 
+ (permission_id,role_id,created_at,updated_at,resource_path) VALUES
+	 ('01GS7Q03VW3BWMCM6R6XK69GXC','01GRB95Z4F8869Q1N4SZXVY0F8','now()','now()','-2147483628'),
+	 ('01GS7Q03VW3BWMCM6R6XK69GXC','01GRB95Z4F8869Q1N4SZXVY0F6','now()','now()','-2147483628'),
+	 ('01GS7Q03VW3BWMCM6R6XK69GXC','01GRB95Z4F8869Q1N4SZXVY0F5','now()','now()','-2147483628'),
+	 ('01GS7Q03VW3BWMCM6R6XK69GXC','01GRB95Z4F8869Q1N4SZXVY0F2','now()','now()','-2147483628'),
+	 ('01GS7Q03VW3BWMCM6R6XK69GXC','01GRB95Z4F8869Q1N4SZXVY0F9','now()','now()','-2147483628'),
+	 ('01GS7Q03VW3BWMCM6R6XK69GXC','01GRB95Z4F8869Q1N4SZXVY0F1','now()','now()','-2147483628'),
+	 ('01GS7Q0B6311YG3TV9MV2YES0S','01GRB95Z4F8869Q1N4SZXVY0F1','now()','now()','-2147483628'),
+	 ('01GS7Q0B6311YG3TV9MV2YES0S','01GRB95Z4F8869Q1N4SZXVY0F3','now()','now()','-2147483628'),
+	 ('01GS7Q0B6311YG3TV9MV2YES0S','01GRB95Z4F8869Q1N4SZXVY0F4','now()','now()','-2147483628'),
+	 ('01GS7Q0B6311YG3TV9MV2YES0S','01GRB95Z4F8869Q1N4SZXVY0F9','now()','now()','-2147483628') ON CONFLICT DO NOTHING;
+INSERT INTO permission_role 
+ (permission_id,role_id,created_at,updated_at,resource_path) VALUES
+	 ('01GS7Q0B6311YG3TV9MV2YES0S','01GRB95Z4F8869Q1N4SZXVY0F2','now()','now()','-2147483628'),
+	 ('01GS7Q0B6311YG3TV9MV2YES0S','01GRB95Z4F8869Q1N4SZXVY0F5','now()','now()','-2147483628'),
+	 ('01GS7Q0B6311YG3TV9MV2YES0S','01GRB95Z4F8869Q1N4SZXVY0F6','now()','now()','-2147483628'),
+	 ('01GS7Q0B6311YG3TV9MV2YES0S','01GRB95Z4F8869Q1N4SZXVY0F8','now()','now()','-2147483628'),
+	 ('01GS7Q0JF41Z7T4HMMH938E49C','01GRB95Z4F8869Q1N4SZXVY0F6','now()','now()','-2147483628'),
+	 ('01GS7Q0JF41Z7T4HMMH938E49C','01GRB95Z4F8869Q1N4SZXVY0F8','now()','now()','-2147483628'),
+	 ('01GS7Q0JF41Z7T4HMMH938E49C','01GRB95Z4F8869Q1N4SZXVY0F2','now()','now()','-2147483628'),
+	 ('01GS7Q0JF41Z7T4HMMH938E49C','01GRB95Z4F8869Q1N4SZXVY0F3','now()','now()','-2147483628'),
+	 ('01GS7Q0JF41Z7T4HMMH938E49C','01GRB95Z4F8869Q1N4SZXVY0F9','now()','now()','-2147483628'),
+	 ('01GS7Q0JF41Z7T4HMMH938E49C','01GRB95Z4F8869Q1N4SZXVY0F5','now()','now()','-2147483628') ON CONFLICT DO NOTHING;
+INSERT INTO permission_role 
+ (permission_id,role_id,created_at,updated_at,resource_path) VALUES
+	 ('01GS7Q0YK4B0QNTN7JRJ3013N2','01GRB95Z4F8869Q1N4SZXVY0F5','now()','now()','-2147483628'),
+	 ('01GS7Q0YK4B0QNTN7JRJ3013N2','01GRB95Z4F8869Q1N4SZXVY0F6','now()','now()','-2147483628'),
+	 ('01GS7Q0YK4B0QNTN7JRJ3013N2','01GRB95Z4F8869Q1N4SZXVY0F8','now()','now()','-2147483628'),
+	 ('01GS7Q0YK4B0QNTN7JRJ3013N2','01GRB95Z4F8869Q1N4SZXVY0F9','now()','now()','-2147483628'),
+	 ('01GS7Q0YK4B0QNTN7JRJ3013N2','01GRB95Z4F8869Q1N4SZXVY0F1','now()','now()','-2147483628'),
+	 ('01GS7Q0YK4B0QNTN7JRJ3013N2','01GRB95Z4F8869Q1N4SZXVY0F2','now()','now()','-2147483628'),
+	 ('01GS7Q18KFXWYNN0VKWR8T6QB6','01GRB95Z4F8869Q1N4SZXVY0F7','now()','now()','-2147483628'),
+	 ('01GS7Q18KFXWYNN0VKWR8T6QB6','01GRB95Z4F8869Q1N4SZXVY0F8','now()','now()','-2147483628'),
+	 ('01GS7Q18KFXWYNN0VKWR8T6QB6','01GRB95Z4F8869Q1N4SZXVY0F9','now()','now()','-2147483628'),
+	 ('01GS7Q18KFXWYNN0VKWR8T6QB6','01GRB95Z4F8869Q1N4SZXVY0F2','now()','now()','-2147483628') ON CONFLICT DO NOTHING;
+INSERT INTO permission_role 
+ (permission_id,role_id,created_at,updated_at,resource_path) VALUES
+	 ('01GS7Q18KFXWYNN0VKWR8T6QB6','01GRB95Z4F8869Q1N4SZXVY0F1','now()','now()','-2147483628'),
+	 ('01GS7Q18KFXWYNN0VKWR8T6QB6','01GRB95Z4F8869Q1N4SZXVY0F5','now()','now()','-2147483628'),
+	 ('01GS7Q18KFXWYNN0VKWR8T6QB6','01GRB95Z4F8869Q1N4SZXVY0F6','now()','now()','-2147483628'),
+	 ('01GS7Q1FS7SSE7YCEEVX1B64EC','01GRB95Z4F8869Q1N4SZXVY0F5','now()','now()','-2147483628'),
+	 ('01GS7Q1FS7SSE7YCEEVX1B64EC','01GRB95Z4F8869Q1N4SZXVY0F9','now()','now()','-2147483628'),
+	 ('01GS7Q1FS7SSE7YCEEVX1B64EC','01GRB95Z4F8869Q1N4SZXVY0F6','now()','now()','-2147483628'),
+	 ('01GS7Q1FS7SSE7YCEEVX1B64EC','01GRB95Z4F8869Q1N4SZXVY0F1','now()','now()','-2147483628'),
+	 ('01GS7Q1FS7SSE7YCEEVX1B64EC','01GRB95Z4F8869Q1N4SZXVY0F7','now()','now()','-2147483628'),
+	 ('01GS7Q1FS7SSE7YCEEVX1B64EC','01GRB95Z4F8869Q1N4SZXVY0F3','now()','now()','-2147483628'),
+	 ('01GS7Q1FS7SSE7YCEEVX1B64EC','01GRB95Z4F8869Q1N4SZXVY0F4','now()','now()','-2147483628') ON CONFLICT DO NOTHING;
+INSERT INTO permission_role 
+ (permission_id,role_id,created_at,updated_at,resource_path) VALUES
+	 ('01GS7Q1FS7SSE7YCEEVX1B64EC','01GRB95Z4F8869Q1N4SZXVY0F2','now()','now()','-2147483628'),
+	 ('01GS7Q1FS7SSE7YCEEVX1B64EC','01GRB95Z4F8869Q1N4SZXVY0F8','now()','now()','-2147483628'),
+	 ('01GS7Q1Z9Y640GSY5FR1V48Q6H','01GRB95Z4F8869Q1N4SZXVY0F1','now()','now()','-2147483628'),
+	 ('01GS7Q1Z9Y640GSY5FR1V48Q6H','01GRB95Z4F8869Q1N4SZXVY0F2','now()','now()','-2147483628'),
+	 ('01GS7Q1Z9Y640GSY5FR1V48Q6H','01GRB95Z4F8869Q1N4SZXVY0F5','now()','now()','-2147483628'),
+	 ('01GS7Q1Z9Y640GSY5FR1V48Q6H','01GRB95Z4F8869Q1N4SZXVY0F8','now()','now()','-2147483628'),
+	 ('01GS7Q1Z9Y640GSY5FR1V48Q6H','01GRB95Z4F8869Q1N4SZXVY0F9','now()','now()','-2147483628'),
+	 ('01GS7Q1Z9Y640GSY5FR1V48Q6H','01GRB95Z4F8869Q1N4SZXVY0F3','now()','now()','-2147483628'),
+	 ('01GS7Q28XFAJEEDTSAFB8RVY49','01GRB95Z4F8869Q1N4SZXVY0F8','now()','now()','-2147483628'),
+	 ('01GS7Q28XFAJEEDTSAFB8RVY49','01GRB95Z4F8869Q1N4SZXVY0F5','now()','now()','-2147483628') ON CONFLICT DO NOTHING;
+INSERT INTO permission_role 
+ (permission_id,role_id,created_at,updated_at,resource_path) VALUES
+	 ('01GS7Q28XFAJEEDTSAFB8RVY49','01GRB95Z4F8869Q1N4SZXVY0F2','now()','now()','-2147483628'),
+	 ('01GS7Q28XFAJEEDTSAFB8RVY49','01GRB95Z4F8869Q1N4SZXVY0F1','now()','now()','-2147483628'),
+	 ('01GS7Q28XFAJEEDTSAFB8RVY49','01GRB95Z4F8869Q1N4SZXVY0F9','now()','now()','-2147483628'),
+	 ('01GS7Q28XFAJEEDTSAFB8RVY49','01GRB95Z4F8869Q1N4SZXVY0F6','now()','now()','-2147483628'),
+	 ('01GS7Q2G6WH3YAF13C46YQJZ6G','01GRB95Z4F8869Q1N4SZXVY0F5','now()','now()','-2147483628'),
+	 ('01GS7Q2G6WH3YAF13C46YQJZ6G','01GRB95Z4F8869Q1N4SZXVY0F1','now()','now()','-2147483628'),
+	 ('01GS7Q2G6WH3YAF13C46YQJZ6G','01GRB95Z4F8869Q1N4SZXVY0F8','now()','now()','-2147483628'),
+	 ('01GS7Q2G6WH3YAF13C46YQJZ6G','01GRB95Z4F8869Q1N4SZXVY0F9','now()','now()','-2147483628'),
+	 ('01GS7Q2G6WH3YAF13C46YQJZ6G','01GRB95Z4F8869Q1N4SZXVY0F2','now()','now()','-2147483628'),
+	 ('01GS7Q2R2VSYTNJQBCZ51S7DDQ','01GRB95Z4F8869Q1N4SZXVY0F4','now()','now()','-2147483628') ON CONFLICT DO NOTHING;
+INSERT INTO permission_role 
+ (permission_id,role_id,created_at,updated_at,resource_path) VALUES
+	 ('01GS7Q2R2VSYTNJQBCZ51S7DDQ','01GRB95Z4F8869Q1N4SZXVY0G1','now()','now()','-2147483628'),
+	 ('01GS7Q2R2VSYTNJQBCZ51S7DDQ','01GRB95Z4F8869Q1N4SZXVY0F6','now()','now()','-2147483628'),
+	 ('01GS7Q2R2VSYTNJQBCZ51S7DDQ','01GRB95Z4F8869Q1N4SZXVY0F8','now()','now()','-2147483628'),
+	 ('01GS7Q2R2VSYTNJQBCZ51S7DDQ','01GRB95Z4F8869Q1N4SZXVY0F5','now()','now()','-2147483628'),
+	 ('01GS7Q2R2VSYTNJQBCZ51S7DDQ','01GRB95Z4F8869Q1N4SZXVY0F2','now()','now()','-2147483628'),
+	 ('01GS7Q2R2VSYTNJQBCZ51S7DDQ','01GRB95Z4F8869Q1N4SZXVY0F9','now()','now()','-2147483628'),
+	 ('01GS7Q2R2VSYTNJQBCZ51S7DDQ','01GRB95Z4F8869Q1N4SZXVY0F7','now()','now()','-2147483628'),
+	 ('01GS7Q2R2VSYTNJQBCZ51S7DDQ','01GRB95Z4F8869Q1N4SZXVY0F1','now()','now()','-2147483628'),
+	 ('01GS7Q2R2VSYTNJQBCZ51S7DDQ','01GRB95Z4F8869Q1N4SZXVY0F3','now()','now()','-2147483628'),
+	 ('01GS7Q2Z9MHA37YRDPJSGDAYVK','01GRB95Z4F8869Q1N4SZXVY0F9','now()','now()','-2147483628') ON CONFLICT DO NOTHING;
+INSERT INTO permission_role 
+ (permission_id,role_id,created_at,updated_at,resource_path) VALUES
+	 ('01GS7Q2Z9MHA37YRDPJSGDAYVK','01GRB95Z4F8869Q1N4SZXVY0F8','now()','now()','-2147483628'),
+	 ('01GS7Q2Z9MHA37YRDPJSGDAYVK','01GRB95Z4F8869Q1N4SZXVY0F2','now()','now()','-2147483628'),
+	 ('01GS7Q2Z9MHA37YRDPJSGDAYVK','01GRB95Z4F8869Q1N4SZXVY0F5','now()','now()','-2147483628'),
+	 ('01GS7Q39A60P4RYD9MYXFY34KX','01GRB95Z4F8869Q1N4SZXVY0F2','now()','now()','-2147483628'),
+	 ('01GS7Q39A60P4RYD9MYXFY34KX','01GRB95Z4F8869Q1N4SZXVY0F3','now()','now()','-2147483628'),
+	 ('01GS7Q39A60P4RYD9MYXFY34KX','01GRB95Z4F8869Q1N4SZXVY0F4','now()','now()','-2147483628'),
+	 ('01GS7Q39A60P4RYD9MYXFY34KX','01GRB95Z4F8869Q1N4SZXVY0F1','now()','now()','-2147483628'),
+	 ('01GS7Q39A60P4RYD9MYXFY34KX','01GRB95Z4F8869Q1N4SZXVY0F7','now()','now()','-2147483628'),
+	 ('01GS7Q39A60P4RYD9MYXFY34KX','01GRB95Z4F8869Q1N4SZXVY0F9','now()','now()','-2147483628'),
+	 ('01GS7Q39A60P4RYD9MYXFY34KX','01GRB95Z4F8869Q1N4SZXVY0F6','now()','now()','-2147483628') ON CONFLICT DO NOTHING;
+INSERT INTO permission_role 
+ (permission_id,role_id,created_at,updated_at,resource_path) VALUES
+	 ('01GS7Q39A60P4RYD9MYXFY34KX','01GRB95Z4F8869Q1N4SZXVY0F8','now()','now()','-2147483628'),
+	 ('01GS7Q39A60P4RYD9MYXFY34KX','01GRB95Z4F8869Q1N4SZXVY0F5','now()','now()','-2147483628'),
+	 ('01GS7Q39A60P4RYD9MYXFY34KX','01GRB95Z4F8869Q1N4SZXVY0G1','now()','now()','-2147483628'),
+	 ('01GS7Q3HKZ47YQ13JZGRK39NQK','01GRB95Z4F8869Q1N4SZXVY0F2','now()','now()','-2147483628'),
+	 ('01GS7Q3HKZ47YQ13JZGRK39NQK','01GRB95Z4F8869Q1N4SZXVY0F5','now()','now()','-2147483628'),
+	 ('01GRB98DXXHBWTVDY00FYR6CJF','01GRB95Z4F8869Q1N4SZXVY0F0','now()','now()','-2147483628'),
+	 ('01GRB98DXXHBWTVDY00FYR6CJF','01GRB95Z4F8869Q1N4SZXVY0F9','now()','now()','-2147483628'),
+	 ('01GRB98DXXHBWTVDY00FYR6CJF','01GRB95Z4F8869Q1N4SZXVY0F8','now()','now()','-2147483628'),
+	 ('01GRB98DXXHBWTVDY00FYR6CJF','01GRB95Z4F8869Q1N4SZXVY0F6','now()','now()','-2147483628'),
+	 ('01GRB98DXXHBWTVDY00FYR6CJF','01GRB95Z4F8869Q1N4SZXVY0F5','now()','now()','-2147483628') ON CONFLICT DO NOTHING;
+INSERT INTO permission_role 
+ (permission_id,role_id,created_at,updated_at,resource_path) VALUES
+	 ('01GRB98DXXHBWTVDY00FYR6CJF','01GRB95Z4F8869Q1N4SZXVY0F4','now()','now()','-2147483628'),
+	 ('01GRB98DXXHBWTVDY00FYR6CJF','01GRB95Z4F8869Q1N4SZXVY0F2','now()','now()','-2147483628'),
+	 ('01GRB98DXXHBWTVDY00FYR6CJF','01GRB95Z4F8869Q1N4SZXVY0G1','now()','now()','-2147483628'),
+	 ('01GRB98DXXHBWTVDY00FYR6CJF','01GRB95Z4F8869Q1N4SZXVY0F7','now()','now()','-2147483628'),
+	 ('01GRB98DXXHBWTVDY00FYR6CJF','01GRB95Z4F8869Q1N4SZXVY0F3','now()','now()','-2147483628'),
+	 ('01GRB98DXXHBWTVDY00FYR6CJF','01GRB95Z4F8869Q1N4SZXVY0F1','now()','now()','-2147483628'),
+	 ('01GS7Q44E4P840B8573TA02X6X','01GRB95Z4F8869Q1N4SZXVY0F2','now()','now()','-2147483628'),
+	 ('01GS7Q4AWJD9BS79M3CN97E57B','01GRB95Z4F8869Q1N4SZXVY0F2','now()','now()','-2147483628'),
+	 ('01GS7Q4AWJD9BS79M3CN97E57B','01GRB95Z4F8869Q1N4SZXVY0F5','now()','now()','-2147483628'),
+	 ('01GS7Q4AWJD9BS79M3CN97E57B','01GRB95Z4F8869Q1N4SZXVY0F6','now()','now()','-2147483628') ON CONFLICT DO NOTHING;
+INSERT INTO permission_role 
+ (permission_id,role_id,created_at,updated_at,resource_path) VALUES
+	 ('01GS7Q4AWJD9BS79M3CN97E57B','01GRB95Z4F8869Q1N4SZXVY0F8','now()','now()','-2147483628'),
+	 ('01GS7Q4AWJD9BS79M3CN97E57B','01GRB95Z4F8869Q1N4SZXVY0F9','now()','now()','-2147483628'),
+	 ('01GS7Q4PA44BW5NVCVNQE40GVN','01GRB95Z4F8869Q1N4SZXVY0F2','now()','now()','-2147483628'),
+	 ('01GS7Q4PA44BW5NVCVNQE40GVN','01GRB95Z4F8869Q1N4SZXVY0F9','now()','now()','-2147483628'),
+	 ('01GS7Q4PA44BW5NVCVNQE40GVN','01GRB95Z4F8869Q1N4SZXVY0F8','now()','now()','-2147483628'),
+	 ('01GS7Q4PA44BW5NVCVNQE40GVN','01GRB95Z4F8869Q1N4SZXVY0F5','now()','now()','-2147483628'),
+	 ('01GS7Q4X5QZ9F0NBYY9RM8D2PY','01GRB95Z4F8869Q1N4SZXVY0F2','now()','now()','-2147483628'),
+	 ('01GS7Q4X5QZ9F0NBYY9RM8D2PY','01GRB95Z4F8869Q1N4SZXVY0F6','now()','now()','-2147483628'),
+	 ('01GS7Q4X5QZ9F0NBYY9RM8D2PY','01GRB95Z4F8869Q1N4SZXVY0F8','now()','now()','-2147483628'),
+	 ('01GS7Q4X5QZ9F0NBYY9RM8D2PY','01GRB95Z4F8869Q1N4SZXVY0F9','now()','now()','-2147483628') ON CONFLICT DO NOTHING;
+INSERT INTO permission_role 
+ (permission_id,role_id,created_at,updated_at,resource_path) VALUES
+	 ('01GS7Q4X5QZ9F0NBYY9RM8D2PY','01GRB95Z4F8869Q1N4SZXVY0F5','now()','now()','-2147483628'),
+	 ('01GS7Q53SHR91BT7TK4B01CB6C','01GRB95Z4F8869Q1N4SZXVY0F5','now()','now()','-2147483628'),
+	 ('01GS7Q53SHR91BT7TK4B01CB6C','01GRB95Z4F8869Q1N4SZXVY0F8','now()','now()','-2147483628'),
+	 ('01GS7Q53SHR91BT7TK4B01CB6C','01GRB95Z4F8869Q1N4SZXVY0F2','now()','now()','-2147483628'),
+	 ('01GS7Q53SHR91BT7TK4B01CB6C','01GRB95Z4F8869Q1N4SZXVY0F9','now()','now()','-2147483628'),
+	 ('01GS7Q5FGFCSW7W4H3Y3WY31WJ','01GRB95Z4F8869Q1N4SZXVY0F5','now()','now()','-2147483628'),
+	 ('01GS7Q5FGFCSW7W4H3Y3WY31WJ','01GRB95Z4F8869Q1N4SZXVY0F2','now()','now()','-2147483628'),
+	 ('01GS7Q5FGFCSW7W4H3Y3WY31WJ','01GRB95Z4F8869Q1N4SZXVY0F6','now()','now()','-2147483628'),
+	 ('01GS7Q5Q2V5KX8WRY7AYN97QEV','01GRB95Z4F8869Q1N4SZXVY0F2','now()','now()','-2147483628'),
+	 ('01GS7Q5Q2V5KX8WRY7AYN97QEV','01GRB95Z4F8869Q1N4SZXVY0F5','now()','now()','-2147483628') ON CONFLICT DO NOTHING;
+INSERT INTO permission_role 
+ (permission_id,role_id,created_at,updated_at,resource_path) VALUES
+	 ('01GS7Q5YR95BF8V6MA4Z1Q723N','01GRB95Z4F8869Q1N4SZXVY0F8','now()','now()','-2147483628'),
+	 ('01GS7Q5YR95BF8V6MA4Z1Q723N','01GRB95Z4F8869Q1N4SZXVY0F9','now()','now()','-2147483628'),
+	 ('01GS7Q5YR95BF8V6MA4Z1Q723N','01GRB95Z4F8869Q1N4SZXVY0F5','now()','now()','-2147483628'),
+	 ('01GS7Q5YR95BF8V6MA4Z1Q723N','01GRB95Z4F8869Q1N4SZXVY0F2','now()','now()','-2147483628'),
+	 ('01GS7Q65BYK9JAC5EDV38R5R89','01GRB95Z4F8869Q1N4SZXVY0F2','now()','now()','-2147483628'),
+	 ('01GS7Q65BYK9JAC5EDV38R5R89','01GRB95Z4F8869Q1N4SZXVY0F5','now()','now()','-2147483628'),
+	 ('01GS7Q6BZ3ZHK2W6R1QQ8FACA9','01GRB95Z4F8869Q1N4SZXVY0F8','now()','now()','-2147483628'),
+	 ('01GS7Q6BZ3ZHK2W6R1QQ8FACA9','01GRB95Z4F8869Q1N4SZXVY0F9','now()','now()','-2147483628'),
+	 ('01GS7Q6BZ3ZHK2W6R1QQ8FACA9','01GRB95Z4F8869Q1N4SZXVY0F6','now()','now()','-2147483628'),
+	 ('01GS7Q6BZ3ZHK2W6R1QQ8FACA9','01GRB95Z4F8869Q1N4SZXVY0F5','now()','now()','-2147483628') ON CONFLICT DO NOTHING;
+INSERT INTO permission_role 
+ (permission_id,role_id,created_at,updated_at,resource_path) VALUES
+	 ('01GS7Q6BZ3ZHK2W6R1QQ8FACA9','01GRB95Z4F8869Q1N4SZXVY0F2','now()','now()','-2147483628'),
+	 ('01GS7Q6KV9SYHJDRXQ1135WEGF','01GRB95Z4F8869Q1N4SZXVY0F2','now()','now()','-2147483628'),
+	 ('01GS7Q6KV9SYHJDRXQ1135WEGF','01GRB95Z4F8869Q1N4SZXVY0F5','now()','now()','-2147483628'),
+	 ('01GS7Q6KV9SYHJDRXQ1135WEGF','01GRB95Z4F8869Q1N4SZXVY0F8','now()','now()','-2147483628'),
+	 ('01GS7Q6W1NGPMCTP32B6X7GVP3','01GRB95Z4F8869Q1N4SZXVY0F5','now()','now()','-2147483628'),
+	 ('01GS7Q6W1NGPMCTP32B6X7GVP3','01GRB95Z4F8869Q1N4SZXVY0F2','now()','now()','-2147483628'),
+	 ('01GS7Q76Y3DP1TE7R77MJKA0XT','01GRB95Z4F8869Q1N4SZXVY0F5','now()','now()','-2147483628'),
+	 ('01GS7Q76Y3DP1TE7R77MJKA0XT','01GRB95Z4F8869Q1N4SZXVY0F2','now()','now()','-2147483628'),
+	 ('01GS7Q7EHSG86AM7SRB8DWTR35','01GRB95Z4F8869Q1N4SZXVY0F6','now()','now()','-2147483628'),
+	 ('01GS7Q7EHSG86AM7SRB8DWTR35','01GRB95Z4F8869Q1N4SZXVY0F5','now()','now()','-2147483628') ON CONFLICT DO NOTHING;
+INSERT INTO permission_role 
+ (permission_id,role_id,created_at,updated_at,resource_path) VALUES
+	 ('01GS7Q7EHSG86AM7SRB8DWTR35','01GRB95Z4F8869Q1N4SZXVY0F2','now()','now()','-2147483628'),
+	 ('01GS7Q7EHSG86AM7SRB8DWTR35','01GRB95Z4F8869Q1N4SZXVY0F9','now()','now()','-2147483628'),
+	 ('01GS7Q7EHSG86AM7SRB8DWTR35','01GRB95Z4F8869Q1N4SZXVY0F8','now()','now()','-2147483628'),
+	 ('01GS7Q7PFYCN03A6KE6QJZVT33','01GRB95Z4F8869Q1N4SZXVY0F9','now()','now()','-2147483628'),
+	 ('01GS7Q7PFYCN03A6KE6QJZVT33','01GRB95Z4F8869Q1N4SZXVY0F8','now()','now()','-2147483628'),
+	 ('01GS7Q7PFYCN03A6KE6QJZVT33','01GRB95Z4F8869Q1N4SZXVY0F5','now()','now()','-2147483628'),
+	 ('01GS7Q7PFYCN03A6KE6QJZVT33','01GRB95Z4F8869Q1N4SZXVY0F2','now()','now()','-2147483628'),
+	 ('01GS7Q7X3NTW3QQZK15N5TQJMS','01GRB95Z4F8869Q1N4SZXVY0F5','now()','now()','-2147483628'),
+	 ('01GS7Q7X3NTW3QQZK15N5TQJMS','01GRB95Z4F8869Q1N4SZXVY0F2','now()','now()','-2147483628'),
+	 ('01GS7Q7X3NTW3QQZK15N5TQJMS','01GRB95Z4F8869Q1N4SZXVY0F8','now()','now()','-2147483628') ON CONFLICT DO NOTHING;
+INSERT INTO permission_role 
+ (permission_id,role_id,created_at,updated_at,resource_path) VALUES
+	 ('01GS7Q7X3NTW3QQZK15N5TQJMS','01GRB95Z4F8869Q1N4SZXVY0F9','now()','now()','-2147483628'),
+	 ('01GS7Q7X3NTW3QQZK15N5TQJMS','01GRB95Z4F8869Q1N4SZXVY0F6','now()','now()','-2147483628'),
+	 ('01GS7Q88JACTNCY4N8G73JH6MA','01GRB95Z4F8869Q1N4SZXVY0F6','now()','now()','-2147483628'),
+	 ('01GS7Q88JACTNCY4N8G73JH6MA','01GRB95Z4F8869Q1N4SZXVY0F9','now()','now()','-2147483628'),
+	 ('01GS7Q88JACTNCY4N8G73JH6MA','01GRB95Z4F8869Q1N4SZXVY0F8','now()','now()','-2147483628'),
+	 ('01GS7Q88JACTNCY4N8G73JH6MA','01GRB95Z4F8869Q1N4SZXVY0F5','now()','now()','-2147483628'),
+	 ('01GS7Q88JACTNCY4N8G73JH6MA','01GRB95Z4F8869Q1N4SZXVY0F2','now()','now()','-2147483628'),
+	 ('01GS7Q8FY9KJZ3NQZFBYEKE19M','01GRB95Z4F8869Q1N4SZXVY0F8','now()','now()','-2147483628'),
+	 ('01GS7Q8FY9KJZ3NQZFBYEKE19M','01GRB95Z4F8869Q1N4SZXVY0F9','now()','now()','-2147483628'),
+	 ('01GS7Q8FY9KJZ3NQZFBYEKE19M','01GRB95Z4F8869Q1N4SZXVY0F7','now()','now()','-2147483628') ON CONFLICT DO NOTHING;
+INSERT INTO permission_role 
+ (permission_id,role_id,created_at,updated_at,resource_path) VALUES
+	 ('01GS7Q8FY9KJZ3NQZFBYEKE19M','01GRB95Z4F8869Q1N4SZXVY0F1','now()','now()','-2147483628'),
+	 ('01GS7Q8FY9KJZ3NQZFBYEKE19M','01GRB95Z4F8869Q1N4SZXVY0F2','now()','now()','-2147483628'),
+	 ('01GS7Q8FY9KJZ3NQZFBYEKE19M','01GRB95Z4F8869Q1N4SZXVY0F5','now()','now()','-2147483628'),
+	 ('01GS7Q8FY9KJZ3NQZFBYEKE19M','01GRB95Z4F8869Q1N4SZXVY0F6','now()','now()','-2147483628'),
+	 ('01GS7Q8FY9KJZ3NQZFBYEKE19M','01GRB95Z4F8869Q1N4SZXVY0F4','now()','now()','-2147483628'),
+	 ('01GS7Q9E5GVHRSZ2RRZ0TK1YR0','01GRB95Z4F8869Q1N4SZXVY0F8','now()','now()','-2147483628'),
+	 ('01GS7Q9E5GVHRSZ2RRZ0TK1YR0','01GRB95Z4F8869Q1N4SZXVY0F9','now()','now()','-2147483628'),
+	 ('01GS7Q9E5GVHRSZ2RRZ0TK1YR0','01GRB95Z4F8869Q1N4SZXVY0F4','now()','now()','-2147483628'),
+	 ('01GS7Q9E5GVHRSZ2RRZ0TK1YR0','01GRB95Z4F8869Q1N4SZXVY0F1','now()','now()','-2147483628'),
+	 ('01GS7Q9E5GVHRSZ2RRZ0TK1YR0','01GRB95Z4F8869Q1N4SZXVY0F7','now()','now()','-2147483628') ON CONFLICT DO NOTHING;
+INSERT INTO permission_role 
+ (permission_id,role_id,created_at,updated_at,resource_path) VALUES
+	 ('01GS7Q9E5GVHRSZ2RRZ0TK1YR0','01GRB95Z4F8869Q1N4SZXVY0F2','now()','now()','-2147483628'),
+	 ('01GS7Q9E5GVHRSZ2RRZ0TK1YR0','01GRB95Z4F8869Q1N4SZXVY0F5','now()','now()','-2147483628'),
+	 ('01GS7Q9E5GVHRSZ2RRZ0TK1YR0','01GRB95Z4F8869Q1N4SZXVY0F6','now()','now()','-2147483628'),
+	 ('01GS7Q9PHXPJ2MEEF93MTP9DK6','01GRB95Z4F8869Q1N4SZXVY0F8','now()','now()','-2147483628'),
+	 ('01GS7Q9PHXPJ2MEEF93MTP9DK6','01GRB95Z4F8869Q1N4SZXVY0F5','now()','now()','-2147483628'),
+	 ('01GS7Q9PHXPJ2MEEF93MTP9DK6','01GRB95Z4F8869Q1N4SZXVY0F9','now()','now()','-2147483628'),
+	 ('01GS7Q9PHXPJ2MEEF93MTP9DK6','01GRB95Z4F8869Q1N4SZXVY0F2','now()','now()','-2147483628'),
+	 ('01GS7Q9PHXPJ2MEEF93MTP9DK6','01GRB95Z4F8869Q1N4SZXVY0F1','now()','now()','-2147483628'),
+	 ('01GS7Q9PHXPJ2MEEF93MTP9DK6','01GRB95Z4F8869Q1N4SZXVY0F6','now()','now()','-2147483628'),
+	 ('01GS7Q9ZR08C88B0Q9MDC6TF93','01GRB95Z4F8869Q1N4SZXVY0F2','now()','now()','-2147483628') ON CONFLICT DO NOTHING;
+INSERT INTO permission_role 
+ (permission_id,role_id,created_at,updated_at,resource_path) VALUES
+	 ('01GS7Q9ZR08C88B0Q9MDC6TF93','01GRB95Z4F8869Q1N4SZXVY0F5','now()','now()','-2147483628'),
+	 ('01GS7QAE46KZNMS3ZXZFCD61VH','01GRB95Z4F8869Q1N4SZXVY0F2','now()','now()','-2147483628'),
+	 ('01GS7QAE46KZNMS3ZXZFCD61VH','01GRB95Z4F8869Q1N4SZXVY0F9','now()','now()','-2147483628'),
+	 ('01GS7QAE46KZNMS3ZXZFCD61VH','01GRB95Z4F8869Q1N4SZXVY0F8','now()','now()','-2147483628'),
+	 ('01GS7QAE46KZNMS3ZXZFCD61VH','01GRB95Z4F8869Q1N4SZXVY0F5','now()','now()','-2147483628'),
+	 ('01GS7QAR2E9HTTEMRZCWTVB04N','01GRB95Z4F8869Q1N4SZXVY0G2','now()','now()','-2147483628'),
+	 ('01GS7QB4TAE176EN0X2BKS047B','01GRB95Z4F8869Q1N4SZXVY0F2','now()','now()','-2147483628'),
+	 ('01GS7QB4TAE176EN0X2BKS047B','01GRB95Z4F8869Q1N4SZXVY0F5','now()','now()','-2147483628'),
+	 ('01GS7QBE0R5JB7YV3YJFVA2JQ1','01GRB95Z4F8869Q1N4SZXVY0F2','now()','now()','-2147483628'),
+	 ('01GS7QBE0R5JB7YV3YJFVA2JQ1','01GRB95Z4F8869Q1N4SZXVY0F5','now()','now()','-2147483628') ON CONFLICT DO NOTHING;
+INSERT INTO permission_role 
+ (permission_id,role_id,created_at,updated_at,resource_path) VALUES
+	 ('01GS7QBP78QN8TKZJPV0DN11W7','01GRB95Z4F8869Q1N4SZXVY0F5','now()','now()','-2147483628'),
+	 ('01GS7QBP78QN8TKZJPV0DN11W7','01GRB95Z4F8869Q1N4SZXVY0F6','now()','now()','-2147483628'),
+	 ('01GS7QBP78QN8TKZJPV0DN11W7','01GRB95Z4F8869Q1N4SZXVY0F3','now()','now()','-2147483628'),
+	 ('01GS7QBP78QN8TKZJPV0DN11W7','01GRB95Z4F8869Q1N4SZXVY0G1','now()','now()','-2147483628'),
+	 ('01GS7QBP78QN8TKZJPV0DN11W7','01GRB95Z4F8869Q1N4SZXVY0F8','now()','now()','-2147483628'),
+	 ('01GS7QBP78QN8TKZJPV0DN11W7','01GRB95Z4F8869Q1N4SZXVY0F9','now()','now()','-2147483628'),
+	 ('01GS7QBP78QN8TKZJPV0DN11W7','01GRB95Z4F8869Q1N4SZXVY0F0','now()','now()','-2147483628'),
+	 ('01GS7QBP78QN8TKZJPV0DN11W7','01GRB95Z4F8869Q1N4SZXVY0F4','now()','now()','-2147483628'),
+	 ('01GS7QBP78QN8TKZJPV0DN11W7','01GRB95Z4F8869Q1N4SZXVY0F1','now()','now()','-2147483628'),
+	 ('01GS7QBP78QN8TKZJPV0DN11W7','01GRB95Z4F8869Q1N4SZXVY0F7','now()','now()','-2147483628') ON CONFLICT DO NOTHING;
+INSERT INTO permission_role 
+ (permission_id,role_id,created_at,updated_at,resource_path) VALUES
+	 ('01GS7QBP78QN8TKZJPV0DN11W7','01GRB95Z4F8869Q1N4SZXVY0F2','now()','now()','-2147483628'),
+	 ('01GS7QBZ08J2SE59TW28WQQN91','01GRB95Z4F8869Q1N4SZXVY0F8','now()','now()','-2147483628'),
+	 ('01GS7QBZ08J2SE59TW28WQQN91','01GRB95Z4F8869Q1N4SZXVY0F3','now()','now()','-2147483628'),
+	 ('01GS7QBZ08J2SE59TW28WQQN91','01GRB95Z4F8869Q1N4SZXVY0F0','now()','now()','-2147483628'),
+	 ('01GS7QBZ08J2SE59TW28WQQN91','01GRB95Z4F8869Q1N4SZXVY0F2','now()','now()','-2147483628'),
+	 ('01GS7QBZ08J2SE59TW28WQQN91','01GRB95Z4F8869Q1N4SZXVY0F5','now()','now()','-2147483628'),
+	 ('01GS7QBZ08J2SE59TW28WQQN91','01GRB95Z4F8869Q1N4SZXVY0F9','now()','now()','-2147483628'),
+	 ('01GS7QBZ08J2SE59TW28WQQN91','01GRB95Z4F8869Q1N4SZXVY0F6','now()','now()','-2147483628'),
+	 ('01GS7QC79G58YJBVWXQ2FMX23M','01GRB95Z4F8869Q1N4SZXVY0F5','now()','now()','-2147483628'),
+	 ('01GS7QC79G58YJBVWXQ2FMX23M','01GRB95Z4F8869Q1N4SZXVY0F0','now()','now()','-2147483628') ON CONFLICT DO NOTHING;
+INSERT INTO permission_role 
+ (permission_id,role_id,created_at,updated_at,resource_path) VALUES
+	 ('01GS7QC79G58YJBVWXQ2FMX23M','01GRB95Z4F8869Q1N4SZXVY0F2','now()','now()','-2147483628'),
+	 ('01GS7QCDTPZPF1EBW3EVDV5ADJ','01GRB95Z4F8869Q1N4SZXVY0F0','now()','now()','-2147483628'),
+	 ('01GS7QCDTPZPF1EBW3EVDV5ADJ','01GRB95Z4F8869Q1N4SZXVY0F2','now()','now()','-2147483628'),
+	 ('01GS7QCDTPZPF1EBW3EVDV5ADJ','01GRB95Z4F8869Q1N4SZXVY0F9','now()','now()','-2147483628'),
+	 ('01GS7QCDTPZPF1EBW3EVDV5ADJ','01GRB95Z4F8869Q1N4SZXVY0F8','now()','now()','-2147483628'),
+	 ('01GS7QCDTPZPF1EBW3EVDV5ADJ','01GRB95Z4F8869Q1N4SZXVY0F3','now()','now()','-2147483628'),
+	 ('01GS7QCDTPZPF1EBW3EVDV5ADJ','01GRB95Z4F8869Q1N4SZXVY0F6','now()','now()','-2147483628'),
+	 ('01GS7QCDTPZPF1EBW3EVDV5ADJ','01GRB95Z4F8869Q1N4SZXVY0F1','now()','now()','-2147483628'),
+	 ('01GS7QCDTPZPF1EBW3EVDV5ADJ','01GRB95Z4F8869Q1N4SZXVY0F5','now()','now()','-2147483628'),
+	 ('01GS7QCDTPZPF1EBW3EVDV5ADJ','01GRB95Z4F8869Q1N4SZXVY0F7','now()','now()','-2147483628') ON CONFLICT DO NOTHING;
+INSERT INTO permission_role 
+ (permission_id,role_id,created_at,updated_at,resource_path) VALUES
+	 ('01GS7QCDTPZPF1EBW3EVDV5ADJ','01GRB95Z4F8869Q1N4SZXVY0F4','now()','now()','-2147483628'),
+	 ('01GS7QCQ36Q1JC8BTC8PRKV31Q','01GRB95Z4F8869Q1N4SZXVY0F2','now()','now()','-2147483628'),
+	 ('01GS7QCQ36Q1JC8BTC8PRKV31Q','01GRB95Z4F8869Q1N4SZXVY0F5','now()','now()','-2147483628'),
+	 ('01GS7QD0K7AMWC6H1ZJ6KWS061','01GRB95Z4F8869Q1N4SZXVY0F5','now()','now()','-2147483628'),
+	 ('01GS7QD0K7AMWC6H1ZJ6KWS061','01GRB95Z4F8869Q1N4SZXVY0F8','now()','now()','-2147483628'),
+	 ('01GS7QD0K7AMWC6H1ZJ6KWS061','01GRB95Z4F8869Q1N4SZXVY0F9','now()','now()','-2147483628'),
+	 ('01GS7QD0K7AMWC6H1ZJ6KWS061','01GRB95Z4F8869Q1N4SZXVY0F1','now()','now()','-2147483628'),
+	 ('01GS7QD0K7AMWC6H1ZJ6KWS061','01GRB95Z4F8869Q1N4SZXVY0G1','now()','now()','-2147483628'),
+	 ('01GS7QD0K7AMWC6H1ZJ6KWS061','01GRB95Z4F8869Q1N4SZXVY0F3','now()','now()','-2147483628'),
+	 ('01GS7QD0K7AMWC6H1ZJ6KWS061','01GRB95Z4F8869Q1N4SZXVY0F4','now()','now()','-2147483628') ON CONFLICT DO NOTHING;
+INSERT INTO permission_role 
+ (permission_id,role_id,created_at,updated_at,resource_path) VALUES
+	 ('01GS7QD0K7AMWC6H1ZJ6KWS061','01GRB95Z4F8869Q1N4SZXVY0F0','now()','now()','-2147483628'),
+	 ('01GS7QD0K7AMWC6H1ZJ6KWS061','01GRB95Z4F8869Q1N4SZXVY0G2','now()','now()','-2147483628'),
+	 ('01GS7QD0K7AMWC6H1ZJ6KWS061','01GRB95Z4F8869Q1N4SZXVY0F7','now()','now()','-2147483628'),
+	 ('01GS7QD0K7AMWC6H1ZJ6KWS061','01GRB95Z4F8869Q1N4SZXVY0F2','now()','now()','-2147483628'),
+	 ('01GS7QD0K7AMWC6H1ZJ6KWS061','01GRB95Z4F8869Q1N4SZXVY0F6','now()','now()','-2147483628'),
+	 ('01GS7QD8N38384X0QQAKZYJ35J','01GRB95Z4F8869Q1N4SZXVY0F8','now()','now()','-2147483628'),
+	 ('01GS7QD8N38384X0QQAKZYJ35J','01GRB95Z4F8869Q1N4SZXVY0F6','now()','now()','-2147483628'),
+	 ('01GS7QD8N38384X0QQAKZYJ35J','01GRB95Z4F8869Q1N4SZXVY0F0','now()','now()','-2147483628'),
+	 ('01GS7QD8N38384X0QQAKZYJ35J','01GRB95Z4F8869Q1N4SZXVY0F2','now()','now()','-2147483628'),
+	 ('01GS7QD8N38384X0QQAKZYJ35J','01GRB95Z4F8869Q1N4SZXVY0F5','now()','now()','-2147483628') ON CONFLICT DO NOTHING;
+INSERT INTO permission_role  (permission_id,role_id,created_at,updated_at,resource_path) VALUES
+	 ('01GS7QD8N38384X0QQAKZYJ35J','01GRB95Z4F8869Q1N4SZXVY0G2','now()','now()','-2147483628'),
+	 ('01GS7QD8N38384X0QQAKZYJ35J','01GRB95Z4F8869Q1N4SZXVY0F9','now()','now()','-2147483628'),
+	 ('01GS7QDFW8ZVP0YXRSWVQ4S8JJ','01GRB95Z4F8869Q1N4SZXVY0F1','now()','now()','-2147483628'),
+	 ('01GS7QDFW8ZVP0YXRSWVQ4S8JJ','01GRB95Z4F8869Q1N4SZXVY0F7','now()','now()','-2147483628'),
+	 ('01GS7QDFW8ZVP0YXRSWVQ4S8JJ','01GRB95Z4F8869Q1N4SZXVY0F5','now()','now()','-2147483628'),
+	 ('01GS7QDFW8ZVP0YXRSWVQ4S8JJ','01GRB95Z4F8869Q1N4SZXVY0F2','now()','now()','-2147483628'),
+	 ('01GS7QDFW8ZVP0YXRSWVQ4S8JJ','01GRB95Z4F8869Q1N4SZXVY0F8','now()','now()','-2147483628'),
+	 ('01GS7QDFW8ZVP0YXRSWVQ4S8JJ','01GRB95Z4F8869Q1N4SZXVY0F6','now()','now()','-2147483628'),
+	 ('01GS7QDFW8ZVP0YXRSWVQ4S8JJ','01GRB95Z4F8869Q1N4SZXVY0F9','now()','now()','-2147483628'),
+	 ('01GS7QE8DTS971ACSJA7E2VMEM','01GRB95Z4F8869Q1N4SZXVY0F6','now()','now()','-2147483628') ON CONFLICT DO NOTHING;
+INSERT INTO permission_role 
+ (permission_id,role_id,created_at,updated_at,resource_path) VALUES
+	 ('01GS7QE8DTS971ACSJA7E2VMEM','01GRB95Z4F8869Q1N4SZXVY0F8','now()','now()','-2147483628'),
+	 ('01GS7QE8DTS971ACSJA7E2VMEM','01GRB95Z4F8869Q1N4SZXVY0F9','now()','now()','-2147483628'),
+	 ('01GS7QE8DTS971ACSJA7E2VMEM','01GRB95Z4F8869Q1N4SZXVY0F1','now()','now()','-2147483628'),
+	 ('01GS7QE8DTS971ACSJA7E2VMEM','01GRB95Z4F8869Q1N4SZXVY0F2','now()','now()','-2147483628'),
+	 ('01GS7QE8DTS971ACSJA7E2VMEM','01GRB95Z4F8869Q1N4SZXVY0F5','now()','now()','-2147483628'),
+	 ('01GS7QE8DTS971ACSJA7E2VMEM','01GRB95Z4F8869Q1N4SZXVY0F7','now()','now()','-2147483628') ON CONFLICT DO NOTHING;

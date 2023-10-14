@@ -1,0 +1,205 @@
+{
+	"schema": [
+		{
+			"column_name": "amount",
+			"data_type": "numeric",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "bulk_payment_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "invoice_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "is_exported",
+			"data_type": "boolean",
+			"column_default": "false",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "migrated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "payment_date",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "payment_due_date",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "payment_expiry_date",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "payment_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "payment_method",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "payment_reference_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "payment_sequence_number",
+			"data_type": "integer",
+			"column_default": "nextval('payment_sequence_number_seq'::regclass)",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "payment_status",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "receipt_date",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "result",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "result_code",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "student_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "validated_date",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "payment",
+			"policyname": "rls_payment_location",
+			"qual": "(student_id IN ( SELECT usp.user_id\n   FROM (granted_permissions p\n     JOIN user_access_paths usp ON ((usp.location_id = p.location_id)))\n  WHERE ((p.user_id = current_setting('app.user_id'::text)) AND (p.permission_id = ( SELECT p2.permission_id\n           FROM permission p2\n          WHERE ((p2.permission_name = 'payment.payment.read'::text) AND (p2.resource_path = current_setting('permission.resource_path'::text))))) AND (usp.deleted_at IS NULL))))",
+			"with_check": "(student_id IN ( SELECT usp.user_id\n   FROM (granted_permissions p\n     JOIN user_access_paths usp ON ((usp.location_id = p.location_id)))\n  WHERE ((p.user_id = current_setting('app.user_id'::text)) AND (p.permission_id = ( SELECT p2.permission_id\n           FROM permission p2\n          WHERE ((p2.permission_name = 'payment.payment.write'::text) AND (p2.resource_path = current_setting('permission.resource_path'::text))))) AND (usp.deleted_at IS NULL))))",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "payment",
+			"policyname": "rls_payment_restrictive",
+			"qual": "permission_check(resource_path, 'payment'::text)",
+			"with_check": "permission_check(resource_path, 'payment'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "payment_invoice_fk",
+			"column_name": "invoice_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "payment_pk",
+			"column_name": "payment_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "payment_sequence_number_resource_path_unique",
+			"column_name": "payment_sequence_number",
+			"constraint_type": "UNIQUE"
+		},
+		{
+			"constraint_name": "payment_sequence_number_resource_path_unique",
+			"column_name": "resource_path",
+			"constraint_type": "UNIQUE"
+		}
+	],
+	"table_name": "payment",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

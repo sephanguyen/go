@@ -1,0 +1,23 @@
+{
+  "name": "prod_jprep_bob_to_lessonmgmt_virtual_classroom_log_sink_connector",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+    "tasks.max": "1",
+    "topics": "prod.jprep.bob.public.virtual_classroom_log",
+    "connection.url": "${file:/config/kafka-connect-config.properties:lessonmgmt_url}",
+    "auto.create": "false",
+    "insert.mode": "upsert",
+    "table.name.format": "virtual_classroom_log",
+    "fields.whitelist": "attendee_ids,created_at,deleted_at,is_completed,lesson_id,log_id,resource_path,total_times_getting_room_state,total_times_reconnection,total_times_updating_room_state,updated_at",
+    "transforms": "unwrap,route",
+    "transforms.route.type": "org.apache.kafka.connect.transforms.RegexRouter",
+    "transforms.route.regex": "([^.]+).([^.]+).([^.]+).([^.]+).([^.]+)",
+    "transforms.route.replacement": "$5",
+    "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+    "delete.enabled": "false",
+    "pk.mode": "record_value",
+    "pk.fields": "log_id",
+    "transforms.unwrap.drop.tombstones": "true",
+    "transforms.unwrap.delete.handling.mode": "drop"
+  }
+}

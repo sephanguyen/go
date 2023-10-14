@@ -1,0 +1,38 @@
+table:
+  schema: public
+  name: student_entryexit_records
+object_relationships:
+  - name: students
+    using:
+      foreign_key_constraint_on: student_id
+select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+        - deleted_at
+        - entry_at
+        - entryexit_id
+        - exit_at
+        - student_id
+      filter:
+        _and:
+          - resource_path:
+              _eq: X-Hasura-Resource-Path
+          - deleted_at:
+              _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+        - deleted_at
+        - entry_at
+        - entryexit_id
+        - exit_at
+        - student_id
+      filter:
+        _and:
+          - resource_path:
+              _eq: X-Hasura-Resource-Path
+          - deleted_at:
+              _is_null: true
+      allow_aggregations: true

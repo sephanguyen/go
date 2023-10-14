@@ -1,0 +1,36 @@
+common:
+  remote_trace:
+  google_cloud_project: dev-manabie-online
+route_checker_hosts:
+  - web-api.prod.aic.manabie.io
+  - web-api.prod.ga.manabie.io
+  - web-api.prod.jprep.manabie.io
+  - web-api.prod.kec.manabie.io
+  - web-api.prod.manabie-vn.manabie.io
+  - web-api.prod.nsg.manabie.io
+  - web-api.prod.renseikai.manabie.io
+  - web-api.synersia.manabie.io
+  - web-api.staging.jprep.manabie.io
+  - web-api.staging.manabie.io
+  - web-api.staging-green.manabie.io
+  - web-api.staging-blue.manabie.io
+  - web-api.uat.jprep.manabie.io
+  - web-api.uat2.jprep.manabie.io
+  - web-api.uat.manabie.io
+  - web-api.uat2.manabie.io
+route_checker_services:
+  - manabie.bob.UserService
+  - manabie.tom.ChatService
+  - manabie.yasuo.SchoolService
+  - eureka.v1.AssignmentReaderService
+  - usermgmt.v2.UserModifierService
+  - fatima.v1.SubscriptionModifierService
+  # - bob.UserService # "rpc error: code = Unimplemented desc = unknown service bob.UserService"
+  # - manabie.bob.Internal.UserService # "failed to send the request: request failed: 403 Forbidden"
+  # - tom.ChatService # "rpc error: code = Unimplemented desc = unknown service tom.ChatService"
+  # - yasuo.SchoolService # "rpc error: code = Unimplemented desc = unknown service yasuo.SchoolService"
+  # - manabie.eureka.v1.AssignmentReaderService # "rpc error: code = Unimplemented desc = unknown service manabie.eureka.v1.AssignmentReaderService"
+jira:
+  email: hoangnh3018@gmail.com
+  api_base_url: https://hnltd.atlassian.net/rest/api/3/version/
+  api_time_format: "2006-01-02"

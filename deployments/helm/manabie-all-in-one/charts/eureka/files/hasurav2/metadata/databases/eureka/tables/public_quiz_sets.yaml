@@ -1,0 +1,64 @@
+table:
+  schema: public
+  name: quiz_sets
+select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+        - quiz_set_id
+        - lo_id
+        - quiz_external_ids
+        - status
+        - updated_at
+        - created_at
+        - deleted_at
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+        - lo_id
+        - quiz_set_id
+        - status
+        - quiz_external_ids
+        - created_at
+        - deleted_at
+        - updated_at
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+        - lo_id
+        - quiz_set_id
+        - status
+        - quiz_external_ids
+        - created_at
+        - deleted_at
+        - updated_at
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+        - lo_id
+        - quiz_set_id
+        - status
+        - quiz_external_ids
+        - created_at
+        - deleted_at
+        - updated_at
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+      allow_aggregations: true

@@ -1,0 +1,130 @@
+name: "tbd.release-uat-and-prod-on-merge"
+description: "Build (and deploy) UAT and Prod when merging hotfix"
+
+inputs:
+  github-token:
+    description: github token
+    required: true
+  current-branch:
+    description: name of the destination branch
+    required: true
+  repo:
+    description: repo of the merge
+    required: true
+  tag-name:
+    description: tag to build and deploy
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Get hotfix branches on UAT
+      id: uat-hotfix
+      uses: ./.github/actions/tbd.get-current-hotfix-branch
+      with:
+        github-token: ${{ inputs.github-token }}
+        organization: manabie
+        environment: uat
+        repo: ${{ inputs.repo }}
+
+    - name: Check if branch is for UAT
+      id: uat
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const uat_hotfix_branch = "${{ steps.uat-hotfix.outputs.branch }}"
+          if (uat_hotfix_branch === '${{ inputs.current-branch }}')
+            core.setOutput('isHotfixEnv', 'true')
+
+    - name: Get hotfix branches on Production
+      if: steps.uat.outputs.isHotfixEnv != 'true'
+      id: prod-hotfix
+      uses: ./.github/actions/tbd.get-current-hotfix-branch
+      with:
+        github-token: ${{ inputs.github-token }}
+        organization: tokyo
+        environment: production
+        repo: ${{ inputs.repo }}
+
+    - name: Check if branch is for production
+      if: steps.uat.outputs.isHotfixEnv != 'true'
+      id: production
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const prod_hotfix_branch = "${{ steps.prod-hotfix.outputs.branch }}"
+          if (prod_hotfix_branch === '${{ inputs.current-branch }}')
+            core.setOutput('isHotfixEnv', 'true')
+
+    - name: Determine hotfix env
+      id: get-env
+      uses: actions/github-script@v6
+      with:
+        script: |
+          if ('${{ steps.uat.outputs.isHotfixEnv }}' == 'true') {
+            core.setOutput('env', 'uat')
+            return
+          }
+            
+          if ('${{ steps.production.outputs.isHotfixEnv }}' == 'true') {
+            core.setOutput('env', 'production')
+          }
+
+    - name: Build and deploy for UAT / Build only for Prod
+      uses: actions/github-script@v6
+      if: steps.get-env.outputs.env == 'uat' || steps.get-env.outputs.env == 'production'
+      env:
+        BE_REPO: "backend"
+        FE_REPO: "school-portal-admin"
+        ME_REPO: "student-app"
+      with:
+        github-token: ${{ inputs.github-token }}
+        script: |
+          const repo = "${{ inputs.repo }}"
+          const commit_sha = context.sha;
+          console.log("commit_sha", commit_sha);
+
+          const workflowNames = {
+            'backend': 'tbd.build_be',
+            'school-portal-admin': 'tbd.build_fe',
+            'student-app': 'tbd.build_me',
+          }
+
+          const { data } = await github.rest.git.getCommit({
+              owner: context.repo.owner,
+              repo: "${{ inputs.repo }}",
+              commit_sha,
+          });
+
+          const { name, email } = data.author;
+          console.log("author name", name)
+          console.log("author email", email)
+
+          const env = '${{ steps.get-env.outputs.env }}'
+
+          await github.rest.repos.createDispatchEvent({
+            owner: context.repo.owner,
+            repo: "${{ env.BE_REPO }}",
+            event_type: workflowNames[repo],
+            client_payload: {
+                repo: repo,
+                commit_sha,
+                author: {
+                    name,
+                    email,
+                },
+                payload: {
+                    be_release_tag: repo === "${{ env.BE_REPO }}" ? "${{ inputs.tag-name }}" : "",
+                    fe_release_tag: repo === "${{ env.FE_REPO }}" ? "${{ inputs.tag-name }}" : "",
+                    me_release_tag: repo === "${{ env.ME_REPO }}" ? "${{ inputs.tag-name }}" : "",
+                    env: env,
+                    orgs: 'manabie, jprep, tokyo, synersia, renseikai, ga, aic',
+                    me_apps: "learner, teacher",
+                    me_platforms: "android, ios, web",
+                    auto_deploy: env === 'uat',
+                    slack_alert: {
+                      actor: "${{ github.triggering_actor }}",
+                    },
+                },
+            },
+          });

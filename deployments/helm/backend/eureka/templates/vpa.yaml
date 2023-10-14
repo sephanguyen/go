@@ -1,0 +1,45 @@
+{{- if .Values.enabled -}}
+{{- if .Values.global.vpa.enabled }}
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: {{ include "util.fullname" . }}-all-consumers
+  labels:
+{{ include "eureka.allConsumersLabels" . | indent 4 }}
+spec:
+  targetRef:
+    apiVersion: "apps/v1"
+    kind: Deployment
+    name: {{ include "util.fullname" . }}-all-consumers
+  updatePolicy:
+    updateMode: {{ include "util.vpaUpdatePolicy" . | quote }}
+---
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: {{ include "util.fullname" . }}-jprep-sync-course-student
+  labels:
+{{ include "eureka.JPREPSyncCourseStudentLabels" . | indent 4 }}
+spec:
+  targetRef:
+    apiVersion: "apps/v1"
+    kind: Deployment
+    name: {{ include "util.fullname" . }}-jprep-sync-course-student
+  updatePolicy:
+    updateMode: {{ include "util.vpaUpdatePolicy" . | quote }}
+---
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: {{ include "util.fullname" . }}-monitors
+  labels:
+{{ include "eureka.monitorsLabels" . | indent 4 }}
+spec:
+  targetRef:
+    apiVersion: "apps/v1"
+    kind: Deployment
+    name: {{ include "util.fullname" . }}-monitors
+  updatePolicy:
+    updateMode: {{ include "util.vpaUpdatePolicy" . | quote }}
+{{- end }}
+{{- end -}}

@@ -1,0 +1,19 @@
+table:
+  schema: public
+  name: activity_logs
+select_permissions:
+  - role: user
+    permission:
+      columns:
+        - payload
+        - action_type
+        - activity_log_id
+        - resource_path
+        - status
+        - user_id
+        - created_at
+        - deleted_at
+        - request_at
+        - updated_at
+      filter: {}
+      allow_aggregations: true

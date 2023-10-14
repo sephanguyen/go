@@ -1,0 +1,22 @@
+{{- if .Values.enabled -}}
+{{ include "util.configMap" . }}
+---
+{{ include "util.secret" . }}
+---
+{{ include "util.pdb" . }}
+---
+{{ include "util.serviceAccount" . }}
+---
+{{ include "util.service" . }}
+{{- if .Values.apiHttp }}
+---
+{{ include "virtualservice.api.tpl" . }}
+{{- end }}
+{{- if .Values.webHttp }}
+---
+{{ include "virtualservice.web.tpl" . }}
+{{- end }}
+---
+{{ include "util.jobs" . }}
+
+{{- end -}}

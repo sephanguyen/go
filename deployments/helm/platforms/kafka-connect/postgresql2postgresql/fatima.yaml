@@ -1,0 +1,82 @@
+defaultHeartBeatQuery: SELECT 1
+customHeartbeatQuery: INSERT INTO public.debezium_heartbeat (id, updated_at) VALUES (1, NOW()) ON CONFLICT(id) DO UPDATE SET updated_at=EXCLUDED.updated_at
+dbUseCustomHeartBeat: []
+envs: [local, stag, uat, prod]
+orgs: [e2e, manabie, jprep, aic, ga, renseikai, synersia, tokyo]
+database: fatima
+schema: public
+preProductionEnabled: true
+datapipelines:
+- name: bill_item
+  table: bill_item
+  sinks:
+  - database: invoicemgmt
+    captureDeleteAll: true
+  - name: fatima_to_invoicemgmt_bill_item_sink_connector_v2
+    database: invoicemgmt
+    captureDeleteAll: true
+
+- name: discount
+  table: discount
+  sinks:
+  - database: invoicemgmt
+    captureDeleteAll: true
+
+- name: order
+  table: order
+  sinks:
+  - database: invoicemgmt
+    captureDeleteAll: true
+
+- name: student_product
+  table: student_product
+  sinks:
+  - database: bob
+
+- name: student_course
+  table: student_course
+  sinks:
+  - database: bob
+    deployEnv: [local, stag, uat, prod]
+  - database: lessonmgmt
+    deployOrg: [ e2e, manabie, aic, ga, renseikai, synersia, tokyo ]
+    deployEnv: [ local, stag, uat, prod ]
+
+- name: product
+  table: product
+  sinks:
+  - database: bob
+    deployEnv: [local, stag, uat, prod]
+
+- name: package
+  table: package
+  sinks:
+  - database: bob
+    deployEnv: [local, stag, uat, prod]
+
+- name: packages
+  table: packages
+  sinks:
+  - database: bob
+    deployEnv: [local, stag, uat, prod]
+
+- name: package_course
+  table: package_course
+  sinks:
+  - database: bob
+    deployEnv: [local, stag, uat, prod]
+
+- name: student_packages
+  table: student_packages
+  sinks:
+    - database: bob
+      deployEnv: [local, stag, uat, prod]
+    - database: lessonmgmt
+      deployOrg: [ e2e, manabie, tokyo ]
+      deployEnv: [local, stag, uat, prod]
+
+- name: student_package_class
+  table: student_package_class
+  sinks:
+    - database: bob
+      deployEnv: [local, stag, uat, prod]

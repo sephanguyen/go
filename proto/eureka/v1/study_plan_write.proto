@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package eureka.v1;
+
+import "eureka/v1/enums.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/eureka/v1;epb";
+
+message ImportStudyPlanRequest {
+  string course_id = 1;
+  string name = 2;
+  bytes payload = 3;
+  int32 school_id = 4;
+  repeated string student_ids = 5;
+  StudyPlanType type = 6;
+  ImportMode mode = 7;
+  repeated string study_plan_ids = 8;
+}
+
+message ImportStudyPlanResponse {
+  string study_plan_id = 1;
+  string task_id = 2;
+}
+
+service StudyPlanWriteService {
+  rpc ImportStudyPlan(ImportStudyPlanRequest) //TODO: remove it
+      returns (ImportStudyPlanResponse);
+
+}

@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package calendar.v1;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/calendar/v1";
+
+enum Frequency {
+    ONCE = 0;
+    WEEKLY = 1;
+}

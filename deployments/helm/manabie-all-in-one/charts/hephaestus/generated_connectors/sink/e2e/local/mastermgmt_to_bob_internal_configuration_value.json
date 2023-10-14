@@ -1,0 +1,23 @@
+{
+  "name": "local_e2e_mastermgmt_to_bob_internal_configuration_value_sink_connector",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+    "tasks.max": "1",
+    "topics": "local.e2e.mastermgmt.public.internal_configuration_value",
+    "connection.url": "${file:/config/kafka-connect-config.properties:bob_url}",
+    "auto.create": "false",
+    "insert.mode": "upsert",
+    "table.name.format": "internal_configuration_value",
+    "fields.whitelist": "config_key,config_value,config_value_type,configuration_id,created_at,deleted_at,last_editor,resource_path,updated_at",
+    "transforms": "unwrap,route",
+    "transforms.route.type": "org.apache.kafka.connect.transforms.RegexRouter",
+    "transforms.route.regex": "([^.]+).([^.]+).([^.]+).([^.]+).([^.]+)",
+    "transforms.route.replacement": "$5",
+    "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+    "delete.enabled": "false",
+    "pk.mode": "record_value",
+    "pk.fields": "configuration_id",
+    "transforms.unwrap.drop.tombstones": "true",
+    "transforms.unwrap.delete.handling.mode": "drop"
+  }
+}

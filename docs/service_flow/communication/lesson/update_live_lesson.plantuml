@@ -1,0 +1,22 @@
+@startuml communication_simplified
+hide circle
+
+actor User as User order 10
+participant NATS as NATS order 30
+participant Bob as Bob order 20
+participant Tom as Tom order 40
+User   -> Bob:  Call "LessonModifierServices.UpdateLiveLesson"
+activate Bob
+Bob -> NATS: Publish "lesson_event"
+deactivate Bob
+NATS -> Tom: \
+Publish "lesson_event"\nwith "EvtLesson_UpdateLesson_" \n
+activate Tom
+note right Tom
+1. Upsert to table "conversations" with name is lesson name, conversation_type is CONVERSATION_LESSON
+2. Upsert to table "conversation_lesson" with lesson_id
+3. Upsert to table "conversation_members" with user_id in (learner_ids) status ACTIVE
+4. Upsert to table "conversation_members" with user_id not in (learner_ids) status INACTIVE
+end note
+deactivate Tom
+@enduml

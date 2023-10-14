@@ -1,0 +1,9 @@
+common:
+  google_cloud_project: staging-manabie-online
+issuers:
+  - issuer: manabie
+    audience: 803wsd1dyl3x5jz22t
+    jwks_endpoint: http://shamir:5680/.well-known/jwks.json
+  - issuer: https://securetoken.google.com/staging-manabie-online
+    audience: staging-manabie-online
+    jwks_endpoint: https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com

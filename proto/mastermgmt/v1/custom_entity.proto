@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package mastermgmt.v1;
+import "google/api/annotations.proto";
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/mastermgmt/v1;mpb";
+
+
+message ExecuteCustomEntityRequest {
+    string sql = 1;
+}
+
+message ExecuteCustomEntityResponse {
+  bool success = 1;
+  string error = 2;
+}
+
+service CustomEntityService {
+  rpc ExecuteCustomEntity (ExecuteCustomEntityRequest) returns (ExecuteCustomEntityResponse) {
+      option (google.api.http) = {
+        post: "/mastermgmt/api/v1/proxy/entity",
+        body: "*"
+      };
+  };
+}

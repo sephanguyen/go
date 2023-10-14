@@ -1,0 +1,16 @@
+
+@startuml refresh_lesson_session
+hide circle
+
+actor User as User order 10
+participant Tom as Tom order 40
+User -> Tom:  Call "LessonChatReader.RefreshLiveLessonSession"
+note over User,Tom
+request payload: lession_id
+end note
+activate Tom
+note right Tom
+Update conversation_lesson.latest_start_time=now() where lesson_id = request.lesson_id
+end note
+deactivate Tom
+@enduml

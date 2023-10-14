@@ -1,0 +1,1 @@
+ALTER TABLE ONLY public.billing_address ALTER COLUMN prefecture_name DROP NOT NULL;

@@ -1,0 +1,7 @@
+elasticsearch:
+  addresses:
+    - https://elasticsearch-elastic.dorp-synersia-elastic.svc.cluster.local:9200
+partner:
+  domain_bo: "https://backoffice.prep.synersia.manabie.io/"
+  domain_teacher: "https://teacher.prep.synersia.manabie.io/"
+  domain_learner: "https://learner.prep.synersia.manabie.io/"

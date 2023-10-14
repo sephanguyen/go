@@ -1,0 +1,156 @@
+name: check_certs
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '45 3 * * *' # run at 10:45 Vietnam Time Daily
+
+jobs:
+  check-certs-manabie-production:
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    runs-on: ["self-hosted", "100m-400mi", "spot", "persistent"]
+    steps:
+      - name: Collect Workflow Telemetry
+        continue-on-error: true
+        timeout-minutes: 5
+        uses: manabie-com/workflow-telemetry-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.BUILD_GITHUB_TOKEN }}
+        with:
+          comment_on_pr: false
+
+      - uses: actions/checkout@v3
+        timeout-minutes: 5
+
+      - name: Manabie Production - Setup Cloud SDK
+        uses: ./.github/actions/setup-k8s
+        with:
+          organization: manabie
+          environment: production
+
+      - name: Manabie Production - Check Certificates
+        shell: bash
+        run: |
+          ./deployments/k8s_check_certs.bash
+            
+      - if: failure()
+        name: Manabie Production - Slack Notification
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: https://hooks.slack.com/services/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
+          SLACK_CHANNEL: '#prod-monitoring'
+          SLACK_USERNAME: "Github Action Cert-Check Job"
+          SLACK_TITLE: Manabie Production - Check Certificates
+
+  check-certs-jprep-production:
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    runs-on: ["self-hosted", "100m-400mi", "spot", "persistent"]
+    steps:
+      - name: Collect Workflow Telemetry
+        continue-on-error: true
+        timeout-minutes: 5
+        uses: manabie-com/workflow-telemetry-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.BUILD_GITHUB_TOKEN }}
+        with:
+          comment_on_pr: false
+
+      - uses: actions/checkout@v3
+        timeout-minutes: 5
+      - name: JPREP Production - Setup Cloud SDK
+        uses: ./.github/actions/setup-k8s
+        with:
+          organization: jprep
+          environment: production
+
+      - name: JPREP Production - Check Certificates
+        run: |
+          ./deployments/k8s_check_certs.bash
+            
+      - if: failure()
+        name: JPREP Production Certs - Slack Notification
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: https://hooks.slack.com/services/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
+          SLACK_CHANNEL: '#prod-monitoring'
+          SLACK_USERNAME: "Github Action Cert-Check Job"
+          SLACK_TITLE: JPREP Production - Check Certificates
+
+  # jp-partners: synersia renseikai ga aic
+  check-certs-jp-partners-production:
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    runs-on: ["self-hosted", "100m-400mi", "spot", "persistent"]
+    steps:
+      - name: Collect Workflow Telemetry
+        continue-on-error: true
+        timeout-minutes: 5
+        uses: manabie-com/workflow-telemetry-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.BUILD_GITHUB_TOKEN }}
+        with:
+          comment_on_pr: false
+
+      - uses: actions/checkout@v3
+        timeout-minutes: 5
+      
+      - name: JP Partners Production - Setup Cloud SDK
+        uses: ./.github/actions/setup-k8s
+        with:
+          organization: aic
+          environment: production
+
+      - name: JP Partners Production - Check Certificates
+        run: |
+          ./deployments/k8s_check_certs.bash
+            
+      - if: failure()
+        name: JP Partners Production Certs - Slack Notification
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: https://hooks.slack.com/services/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
+          SLACK_CHANNEL: '#prod-monitoring'
+          SLACK_USERNAME: "Github Action Cert-Check Job"
+          SLACK_TITLE: JP Partners Production - Check Certificates
+
+  # tokyo, the multi-tenant cluster
+  check-certs-tokyo-production:
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    runs-on: ["self-hosted", "100m-400mi", "spot", "persistent"]
+    steps:
+      - name: Collect Workflow Telemetry
+        continue-on-error: true
+        timeout-minutes: 5
+        uses: manabie-com/workflow-telemetry-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.BUILD_GITHUB_TOKEN }}
+        with:
+          comment_on_pr: false
+
+      - uses: actions/checkout@v3
+        timeout-minutes: 5
+      
+      - name: Tokyo Production - Setup Cloud SDK
+        uses: ./.github/actions/setup-k8s
+        with:
+          organization: tokyo
+          environment: production
+
+      - name: Tokyo Production - Check Certificates
+        run: |
+          ./deployments/k8s_check_certs.bash
+            
+      - if: failure()
+        name: Tokyo Production Certs - Slack Notification
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: https://hooks.slack.com/services/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
+          SLACK_CHANNEL: '#prod-monitoring'
+          SLACK_USERNAME: "Github Action Cert-Check Job"
+          SLACK_TITLE: Tokyo Production - Check Certificates

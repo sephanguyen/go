@@ -1,0 +1,117 @@
+{
+	"schema": [
+		{
+			"column_name": "bill_item_sequence_number",
+			"data_type": "integer",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "invoice_bill_item_id",
+			"data_type": "text",
+			"column_default": "nextval('invoice_bill_item_id_seq'::regclass)",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "invoice_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "migrated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "past_billing_status",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "invoice_bill_item",
+			"policyname": "rls_invoice_bill_item",
+			"qual": "permission_check(resource_path, 'invoice_bill_item'::text)",
+			"with_check": "permission_check(resource_path, 'invoice_bill_item'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "invoice_bill_item",
+			"policyname": "rls_invoice_bill_item_restrictive",
+			"qual": "permission_check(resource_path, 'invoice_bill_item'::text)",
+			"with_check": "permission_check(resource_path, 'invoice_bill_item'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "invoice_bill_item_invoice_fk",
+			"column_name": "invoice_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "invoice_bill_item_pk",
+			"column_name": "invoice_bill_item_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "invoice_bill_item",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

@@ -1,0 +1,11 @@
+common:
+  google_cloud_project: staging-manabie-online
+issuers:
+  - issuer: manabie
+    audience: manabie-stag
+    jwks_endpoint: http://shamir:5680/.well-known/jwks.json
+storage:
+  bucket: stag-manabie-backend
+invoice_schedule_config:
+  slack_webhook: https://hooks.slack.com/services/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
+  slack_channel: C035EC89UG1 # squad-adobo-alerts channel

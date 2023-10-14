@@ -1,0 +1,87 @@
+syntax = "proto3";
+
+package mastermgmt.v1;
+
+import "common/v1/requests.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/mastermgmt/v1;mpb";
+
+message ExternalConfiguration {
+  string id = 1;
+  string config_key = 2;
+  string config_value = 3;
+  string created_at = 4;
+  string updated_at = 5;
+  string config_value_type = 6;
+}
+
+message GetExternalConfigurationByKeyRequest {
+  string key = 1;
+}
+
+message GetExternalConfigurationByKeyResponse {
+  ExternalConfiguration configuration = 1;
+}
+
+message GetExternalConfigurationsRequest {
+  common.v1.Paging paging = 1;
+  string keyword = 2;
+}
+
+message GetExternalConfigurationsResponse {
+  repeated ExternalConfiguration items = 1;
+  common.v1.Paging next_page = 2;
+  common.v1.Paging previous_page = 3;
+}
+
+message CreateMultiConfigurationsRequest {
+  message ExternalConfiguration {
+    string key = 1;
+    string value = 2;
+    string value_type = 3;
+  }
+  repeated ExternalConfiguration externalConfigurations = 1;
+}
+
+message CreateMultiConfigurationsResponse {
+  bool successful = 1;
+}
+
+message LocationConfiguration {
+  string id = 1;
+  string config_key = 2;
+  string location_id = 3;
+  string config_value = 4;
+  string config_value_type = 5;
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp updated_at = 7;
+}
+
+message GetConfigurationByKeysAndLocationsRequest {
+  repeated string keys = 1;
+  repeated string locations_ids = 2;
+}
+
+message GetConfigurationByKeysAndLocationsResponse {
+  repeated LocationConfiguration configurations = 1;
+}
+
+message GetConfigurationByKeysAndLocationsV2Request {
+  repeated string keys = 1;
+  repeated string location_ids = 2;
+}
+
+message GetConfigurationByKeysAndLocationsV2Response {
+  repeated LocationConfiguration configurations = 1;
+}
+
+service ExternalConfigurationService {
+  rpc GetExternalConfigurationByKey(GetExternalConfigurationByKeyRequest) returns (GetExternalConfigurationByKeyResponse);
+  rpc GetExternalConfigurations(GetExternalConfigurationsRequest) returns (GetExternalConfigurationsResponse);
+  rpc CreateMultiConfigurations(CreateMultiConfigurationsRequest) returns (CreateMultiConfigurationsResponse);
+  // Deprecated: please use GetConfigurationByKeysAndLocationsV2 which support optional locations
+  rpc  GetConfigurationByKeysAndLocations(GetConfigurationByKeysAndLocationsRequest) returns (GetConfigurationByKeysAndLocationsResponse);
+
+  rpc GetConfigurationByKeysAndLocationsV2(GetConfigurationByKeysAndLocationsV2Request) returns (GetConfigurationByKeysAndLocationsV2Response);
+}

@@ -1,0 +1,147 @@
+{
+	"schema": [
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "finished_quiz_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "first_attempt_score",
+			"data_type": "smallint",
+			"column_default": "0",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "first_quiz_correctness",
+			"data_type": "real",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "highest_quiz_score",
+			"data_type": "real",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "is_finished_quiz",
+			"data_type": "boolean",
+			"column_default": "false",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "is_finished_study_guide",
+			"data_type": "boolean",
+			"column_default": "false",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "is_finished_video",
+			"data_type": "boolean",
+			"column_default": "false",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "lo_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "preset_study_plan_weekly_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "student_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "students_learning_objectives_completeness",
+			"policyname": "rls_students_learning_objectives_completeness",
+			"qual": "permission_check(resource_path, 'students_learning_objectives_completeness'::text)",
+			"with_check": "permission_check(resource_path, 'students_learning_objectives_completeness'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "students_learning_objectives_completeness",
+			"policyname": "rls_students_learning_objectives_completeness_restrictive",
+			"qual": "permission_check(resource_path, 'students_learning_objectives_completeness'::text)",
+			"with_check": "permission_check(resource_path, 'students_learning_objectives_completeness'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "students_learning_objectives_completeness_pk",
+			"column_name": "lo_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "students_learning_objectives_completeness_pk",
+			"column_name": "student_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "students_learning_objectives_completeness",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

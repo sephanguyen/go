@@ -1,0 +1,108 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "j4.fullname" . }}
+  labels: 
+{{ include "j4.labels" . | indent 4 }}
+spec:
+  podManagementPolicy: Parallel
+  replicas: {{ .Values.j4.replicas }}
+  serviceName: {{ include "j4.fullname" . }}-headless
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "j4.fullname" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "j4.fullname" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+      annotations:
+{{- if .Values.metrics.podAnnotations }}
+{{ toYaml .Values.metrics.podAnnotations | indent 8 }}
+{{- end }}
+    spec:
+      serviceAccountName: {{ include "util.serviceAccountName" . }}
+      volumes:
+      - name: config-volume
+        configMap:
+          name: {{ include "j4.fullname" . }}
+          items:
+          - key: j4.config.yaml
+            path: j4.config.yaml
+      - name: wait-for-discovery-script
+        configMap:
+          name: {{ include "j4.fullname" . }}
+          defaultMode: 0655
+          items:
+          - key: wait_for_discovery.sh
+            path: wait_for_discovery.sh
+      - name: j4-secrets
+        secret:
+          secretName: {{ include "j4.fullname" . }}
+          items:
+          - key: j4.secrets.encrypted.yaml
+            path: j4.secrets.encrypted.yaml
+{{- if eq "local" .Values.global.environment }}
+      - name: service-credential
+        secret:
+          secretName: {{ include "j4.fullname" . }}
+          items:
+          - key: service_credential.json
+            path: service_credential.json
+{{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+            {{- if .Values.global.sqlProxy.enabled }}
+              echo "Running cloud-sql-proxy asynchronously"
+              /cloud_sql_proxy {{ printf "-instances=%s=tcp:5432" .Values.global.sqlProxy.connName }} \
+                -structured_logs \
+                -log_debug_stdout=true \
+                -enable_iam_login &
+
+              until nc -z 127.0.0.1 5432; do
+                echo "Waiting for the proxy to run..."
+                sleep 2
+              done
+            {{- end }}
+              /j4 \
+                --configPath=/configs/j4.config.yaml \
+                --secretPath=/configs/j4.secrets.encrypted.yaml \
+                --dataPath=/nodeData \
+                --hostname=$(CURRENT_POD_IP)
+              exitcode=$?
+            {{- if .Values.global.sqlProxy.enabled }}
+              echo "Sending SIGTERM to cloud-sql-proxy process"
+              fuser -k -TERM 5432/tcp
+            {{- end }}
+              exit $exitcode
+          volumeMounts:
+          - name: config-volume
+            mountPath: /configs/j4.config.yaml
+            subPath: j4.config.yaml
+            readOnly: true
+          - name: j4-secrets
+            mountPath: /configs/j4.secrets.encrypted.yaml
+            subPath: j4.secrets.encrypted.yaml
+            readOnly: true
+{{- if eq "local" .Values.global.environment }}
+          - name: service-credential
+            mountPath: /configs/service_credential.json
+            subPath: service_credential.json
+            readOnly: true
+{{- end }}
+          env:
+          - name: CURRENT_POD_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP
+{{- if eq "local" .Values.global.environment }}
+          - name: GOOGLE_APPLICATION_CREDENTIALS
+            value: "/configs/service_credential.json"
+{{- end }}

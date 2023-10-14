@@ -1,0 +1,32 @@
+namespaces:
+  - prod-tokyo-services
+  - prod-tokyo-backoffice-mfe
+  - prod-tokyo-frontend
+  - prod-tokyo-backend
+  - prod-tokyo-unleash
+  - prod-tokyo-nats-jetstream
+  - prod-jprep-services
+  - prod-jprep-backoffice-mfe
+  - prod-jprep-frontend
+  - prod-jprep-backend
+  - prod-jprep-unleash
+  - prod-jprep-nats-jetstream
+
+  # dorp/tokyo
+  - dorp-tokyo-data-warehouse
+  - dorp-tokyo-backend
+  - dorp-tokyo-elastic
+  - dorp-tokyo-frontend
+  - dorp-tokyo-kafka
+  - dorp-tokyo-nats-jetstream
+  - dorp-tokyo-services
+  - dorp-tokyo-unleash
+
+  # dorp/jprep
+  - dorp-jprep-data-warehouse
+  - dorp-jprep-backend
+  - dorp-jprep-elastic
+  - dorp-jprep-kafka
+  - dorp-jprep-nats-jetstream
+  - dorp-jprep-services
+  - dorp-jprep-unleash

@@ -1,0 +1,117 @@
+{
+	"schema": [
+		{
+			"column_name": "conversation_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "conversation_type",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "lesson_conversation_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "lesson_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "participant_list",
+			"data_type": "ARRAY",
+			"column_default": "'{}'::text[]",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "live_lesson_conversation",
+			"policyname": "rls_live_lesson_conversation",
+			"qual": "permission_check(resource_path, 'live_lesson_conversation'::text)",
+			"with_check": "permission_check(resource_path, 'live_lesson_conversation'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "live_lesson_conversation",
+			"policyname": "rls_live_lesson_conversation_restrictive",
+			"qual": "permission_check(resource_path, 'live_lesson_conversation'::text)",
+			"with_check": "permission_check(resource_path, 'live_lesson_conversation'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "live_lesson_conversation_pkey",
+			"column_name": "lesson_conversation_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "live_lesson_conversation_conversation_id_key",
+			"column_name": "conversation_id",
+			"constraint_type": "UNIQUE"
+		}
+	],
+	"table_name": "live_lesson_conversation",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

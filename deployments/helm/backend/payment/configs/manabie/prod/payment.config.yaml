@@ -1,0 +1,12 @@
+common:
+  google_cloud_project: production-manabie-vn
+  identity_platform_project: student-coach-e1e95
+issuers:
+  - issuer: manabie
+    audience: prod-manabie
+    jwks_endpoint: http://shamir:5680/.well-known/jwks.json
+elasticsearch:
+  addresses:
+    - https://elasticsearch-elastic.prod-manabie-elastic.svc.cluster.local:9200
+storage:
+  bucket: stag-manabie-backend

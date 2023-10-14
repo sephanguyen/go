@@ -1,0 +1,108 @@
+name: 'tbd.build-backend'
+description: |
+  Builds Docker image for backend and push it to container registry.
+  An internal checkout@v3 action will be run to ensure checking out at
+  the correct tag.
+inputs:
+  be_release_tag:
+    description: 'Backend tag to build image with'
+    required: true
+  token:
+    description: |
+      Personal Access Token (PAT) used to fetch Go modules to build.
+      Should be "secrets.BUILD_GITHUB_TOKEN".
+    required: true
+  registry:
+    description: 'Server address of the Container Registry. Defaults to "asia.gcr.io".'
+    default: 'asia.gcr.io'
+  ar_registry:
+    description: 'Server address of the Artifact Registry. Defaults to "asia-docker.pkg.dev".'
+    default: 'asia-docker.pkg.dev'
+  gcp_project:
+    description: 'The GCP project to use the registry. Defaults to "student-coach-e1e95".'
+    default: 'student-coach-e1e95'
+  workload_identity_provider:
+    description: |
+      The full identifier of the Workload Identity Provider.
+      Defaults to the build-bot-provider created by Terraform in "learner" project.
+      Reference: https://github.com/docker/login-action#workload-identity-federation-based-authentication-1
+    default: 'projects/418860883682/locations/global/workloadIdentityPools/gh-action-pool/providers/build-bot-provider'
+  service_account:
+    description: |
+      Email of the service account which will be used to push to registry.
+      Defaults to "prod-build-bot@student-coach-e1e95.iam.gserviceaccount.com".
+    default: 'prod-build-bot@student-coach-e1e95.iam.gserviceaccount.com'
+runs:
+  using: 'composite'
+  steps:
+    - uses: actions/checkout@v3
+      with:
+        repository: ${{github.repository_owner}}/backend
+        ref: ${{ inputs.be_release_tag }}
+
+    - name: Authenticate to Google Cloud using Workload Identity Federation
+      id: auth
+      uses: google-github-actions/auth@v1
+      with:
+        token_format: access_token
+        workload_identity_provider: ${{ inputs.workload_identity_provider }}
+        service_account: ${{ inputs.service_account }}
+
+    - name: Login to GCR
+      uses: docker/login-action@v2
+      with:
+        registry: ${{ inputs.registry }}
+        username: oauth2accesstoken
+        password: '${{ steps.auth.outputs.access_token }}'
+
+    - name: Login to AR
+      uses: docker/login-action@v2
+      with:
+        registry: '${{ inputs.ar_registry }}'
+        username: 'oauth2accesstoken'
+        password: '${{ steps.auth.outputs.access_token }}'
+
+    - name: Check Backend Runner Image availability
+      id: availability
+      shell: bash
+      run: |
+        set -eu
+        IMAGE_TAG=${{ inputs.registry }}/${{ inputs.gcp_project }}/backend:${{ inputs.be_release_tag }}
+        EXIT_CODE=0
+        docker manifest inspect ${IMAGE_TAG} > /dev/null || EXIT_CODE=$?
+        if [ $EXIT_CODE -eq 0 ]; then
+          echo "Image ${IMAGE_TAG} already exists, skipping builds"
+          echo "build=0" >> $GITHUB_OUTPUT
+        else
+          echo "Image ${IMAGE_TAG} is not available"
+          echo "build=1" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Set up Docker Context for Buildx
+      if: steps.availability.outputs.build == '1'
+      shell: bash
+      run: |
+        docker context create builders || true
+
+    - name: Set up Docker Buildx
+      id: buildx
+      if: steps.availability.outputs.build == '1'
+      uses: docker/setup-buildx-action@v2
+      with:
+        version: latest
+        endpoint: builders
+
+    - name: Build Runner Image
+      if: steps.availability.outputs.build == '1'
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        file: ./developments/release.Dockerfile
+        builder: ${{ steps.buildx.outputs.name }}
+        tags: ${{ inputs.registry }}/${{ inputs.gcp_project }}/backend:${{ inputs.be_release_tag }}
+        target: runner
+        push: true
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        build-args: |
+          GITHUB_TOKEN=${{ inputs.token }}

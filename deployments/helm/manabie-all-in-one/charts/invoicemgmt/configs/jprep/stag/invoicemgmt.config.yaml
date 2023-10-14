@@ -1,0 +1,10 @@
+common:
+  google_cloud_project: staging-manabie-online
+  firebase_project: staging-manabie-online
+  identity_platform_project: staging-manabie-online
+issuers:
+  - issuer: manabie
+    audience: jprep-stag
+    jwks_endpoint: http://shamir:5680/.well-known/jwks.json
+storage:
+  bucket: stag-manabie-backend

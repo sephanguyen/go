@@ -1,0 +1,122 @@
+{
+	"schema": [
+		{
+			"column_name": "action",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "action_detail",
+			"data_type": "jsonb",
+			"column_default": "'{}'::jsonb",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "student_payment_detail_action_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "student_payment_detail_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "user_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "student_payment_detail_action_log",
+			"policyname": "rls_student_payment_detail_action_log",
+			"qual": "permission_check(resource_path, 'student_payment_detail_action_log'::text)",
+			"with_check": "permission_check(resource_path, 'student_payment_detail_action_log'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "student_payment_detail_action_log",
+			"policyname": "rls_student_payment_detail_action_log_restrictive",
+			"qual": "permission_check(resource_path, 'student_payment_detail_action_log'::text)",
+			"with_check": "permission_check(resource_path, 'student_payment_detail_action_log'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "student_payment_detail_action_log__student_payment_detail__fk",
+			"column_name": "student_payment_detail_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "student_payment_detail_action_log_user_basic_info__fk",
+			"column_name": "user_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "student_payment_detail_action_log__pk",
+			"column_name": "student_payment_detail_action_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "student_payment_detail_action_log",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

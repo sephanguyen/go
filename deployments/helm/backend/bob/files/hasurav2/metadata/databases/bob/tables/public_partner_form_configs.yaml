@@ -1,0 +1,84 @@
+table:
+  schema: public
+  name: partner_form_configs
+object_relationships:
+  - name: school
+    using:
+      foreign_key_constraint_on: partner_id
+array_relationships:
+  - name: lesson_reports
+    using:
+      foreign_key_constraint_on:
+        column: form_config_id
+        table:
+          schema: public
+          name: lesson_reports
+select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+        - form_config_id
+        - partner_id
+        - feature_name
+        - created_at
+        - updated_at
+        - deleted_at
+        - form_config_data
+        - resource_path
+      filter:
+        _and:
+          - resource_path:
+              _eq: X-Hasura-Resource-Path
+          - deleted_at:
+              _is_null: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+        - partner_id
+        - form_config_data
+        - feature_name
+        - form_config_id
+        - resource_path
+        - created_at
+        - deleted_at
+        - updated_at
+      filter:
+        _and:
+          - resource_path:
+              _eq: X-Hasura-Resource-Path
+          - deleted_at:
+              _is_null: true
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+        - partner_id
+        - form_config_data
+        - feature_name
+        - form_config_id
+        - resource_path
+        - created_at
+        - deleted_at
+        - updated_at
+      filter:
+        _and:
+          - resource_path:
+              _eq: X-Hasura-Resource-Path
+          - deleted_at:
+              _is_null: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+        - form_config_id
+        - partner_id
+        - feature_name
+        - created_at
+        - updated_at
+        - deleted_at
+        - form_config_data
+        - resource_path
+      filter:
+        _and:
+          - resource_path:
+              _eq: X-Hasura-Resource-Path
+          - deleted_at:
+              _is_null: true

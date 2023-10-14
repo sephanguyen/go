@@ -1,0 +1,188 @@
+syntax = "proto3";
+
+package eureka.v1;
+
+import "eureka/v1/enums.proto";
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/eureka/v1;epb";
+
+message Comment {
+  string comment = 1;
+  google.protobuf.Duration duration = 2;
+}
+
+message AssignmentSetting {
+  bool allow_late_submission = 1;
+  bool allow_resubmission = 2;
+  bool require_attachment = 3;
+  bool require_assignment_note = 4;
+  bool require_video_submission = 5;
+  bool require_complete_date = 6;
+  bool require_duration = 7;
+  bool require_correctness = 8;
+  bool require_understanding_level = 9;
+}
+
+message CheckListItem {
+  string content = 1;
+  bool is_checked = 2;
+}
+
+message CheckList { repeated CheckListItem items = 1; }
+
+message AssignmentContent {
+  string topic_id = 1;
+  repeated string lo_id = 2;
+}
+
+message AssignmentEvent {
+  message Assigned {
+    string assignment_id = 1;
+    int32 class_id = 2;
+    // student_ids is null when teacher assigns for whole class
+    // and not null when teacher assigns for students in class.
+    repeated string student_ids = 3;
+  }
+
+  message Returned {
+    string submission_id = 1;
+    float given_score = 2;
+    float total_score = 3;
+  }
+
+  // student submitted assignment
+  message Submitted { string submission_id = 1; }
+
+  // teacher update start date, end date
+  message Updated {
+    string assignment_id = 1;
+    google.protobuf.Timestamp start_date = 2;
+    google.protobuf.Timestamp end_date = 3;
+  }
+
+  oneof event {
+    Assigned assigned = 1;
+    Returned returned = 2;
+    Submitted submitted = 3;
+    Updated updated = 4;
+  }
+}
+
+message Assignment {
+  string assignment_id = 1;
+  AssignmentContent content = 2;
+  repeated string attachments = 3;
+  AssignmentType assignment_type = 4;
+  AssignmentSetting setting = 5;
+  AssignmentStatus assignment_status = 6;
+  CheckList check_list = 7;
+  int64 max_grade = 8;
+  string instruction = 9;
+  string name = 10;
+  bool required_grade = 11;
+  int32 display_order = 12;
+}
+
+message ContentStructure {
+  string course_id = 1;
+  string book_id = 2;
+  string chapter_id = 3;
+  string topic_id = 4;
+  oneof item_id {
+    google.protobuf.StringValue assignment_id = 5;
+    google.protobuf.StringValue lo_id = 6;
+  }
+}
+
+message Content {
+  StudyPlanItem study_plan_item = 1;
+  string resource_id = 2;
+  ContentType type = 3;
+}
+
+message AssignmentWithDate {
+  Assignment assignment = 1;
+  StudyPlanItem study_plan_item = 2;
+}
+
+message StudyPlanItem {
+  string study_plan_id = 1;
+  string study_plan_item_id = 2;
+  google.protobuf.Timestamp available_from = 3;
+  google.protobuf.Timestamp available_to = 4;
+  google.protobuf.Timestamp start_date = 5;
+  google.protobuf.Timestamp end_date = 6;
+  ContentStructure content_structure = 7;
+  google.protobuf.Timestamp completed_at = 8;
+  int32 display_order = 9;
+  string content_structure_flatten = 10;
+  StudyPlanItemStatus status = 11;
+  google.protobuf.Timestamp school_date = 12;
+}
+
+enum StudyPlanItemStatus {
+  STUDY_PLAN_ITEM_STATUS_NONE = 0;
+  STUDY_PLAN_ITEM_STATUS_ACTIVE = 1;
+  STUDY_PLAN_ITEM_STATUS_ARCHIVED = 2;
+}
+
+message ToDoItem {
+  StudyPlanItem study_plan_item = 1;
+  string resource_id = 2;
+  ToDoItemType type = 3;
+  ToDoStatus status = 4;
+}
+
+message StudentSubmission {
+  string submission_id = 1;
+  string assignment_id = 2;
+  string study_plan_item_id = 3;
+  string student_id = 4;
+  string note = 5;
+  // array of media id
+  repeated SubmissionContent submission_content = 6;
+  google.protobuf.Timestamp created_at = 7;
+  google.protobuf.Timestamp updated_at = 8;
+  SubmissionStatus status = 9;
+  // empty if not grade yet
+  google.protobuf.StringValue submission_grade_id = 10;
+  string course_id = 11;
+  google.protobuf.Timestamp start_date = 12;
+  google.protobuf.Timestamp end_date = 13;
+  google.protobuf.Timestamp complete_date = 14;
+  int32 duration = 15;
+  float correct_score = 16;
+  float total_score = 17;
+  SubmissionUnderstandingLevel understanding_level = 18;
+}
+
+message StudyPlan {
+  string study_plan_id = 1;
+  string name = 2;
+  string book_id = 3;
+  StudyPlanStatus status = 4;
+  bool track_school_progress = 5;
+  repeated int32 grades = 6;
+}
+
+enum SubmissionUnderstandingLevel {
+  SUBMISSION_UNDERSTANDING_LEVEL_NONE = 0;
+  SUBMISSION_UNDERSTANDING_LEVEL_SAD = 1;
+  SUBMISSION_UNDERSTANDING_LEVEL_NEUTRAL = 2;
+  SUBMISSION_UNDERSTANDING_LEVEL_HAPPY = 3;
+}
+
+message SubmissionContent {
+  string submit_media_id = 1;
+  string attachment_media_id = 2;
+}
+
+message SubmissionGrade {
+  string submission_id = 1;
+  string note = 2;
+  double grade = 3;
+  repeated SubmissionContent grade_content = 4;
+}

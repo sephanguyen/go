@@ -1,0 +1,72 @@
+syntax = "proto3";
+
+package timesheet.v1;
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/timesheet/v1;tpb";
+
+service TimesheetConfirmationService{
+  rpc GetConfirmationPeriodByDate(GetTimesheetConfirmationPeriodByDateRequest) returns (GetTimesheetConfirmationPeriodByDateResponse);
+  rpc ConfirmTimesheet(ConfirmTimesheetWithLocationRequest) returns (ConfirmTimesheetWithLocationResponse);
+  rpc GetTimesheetLocationList(GetTimesheetLocationListRequest) returns (GetTimesheetLocationListResponse);
+  rpc GetNonConfirmedLocationCount(GetNonConfirmedLocationCountRequest) returns (GetNonConfirmedLocationCountResponse);
+}
+
+message GetTimesheetConfirmationPeriodByDateRequest{
+  google.protobuf.Timestamp date = 1;
+}
+
+message GetTimesheetConfirmationPeriodByDateResponse{
+  TimesheetConfirmationPeriod timesheet_confirmation_period = 1;
+}
+
+message TimesheetConfirmationPeriod{
+  string id = 1;
+  google.protobuf.Timestamp start_date = 2;
+  google.protobuf.Timestamp end_date = 3;
+}
+
+message TimesheetLocation {
+  string location_id = 1;
+  string name = 2;
+  bool is_confirmed = 3;
+  int32 draft_count = 4;
+  int32 submitted_count = 5;
+  int32 approved_count = 6;
+  int32 confirmed_count = 7;
+  int32 unconfirmed_count = 8;
+}
+
+message TimesheetLocationAggregate {
+  int32 count = 1;
+}
+
+message ConfirmTimesheetWithLocationRequest {
+  string period_id = 1;
+  repeated string location_ids = 2;
+} 
+
+message ConfirmTimesheetWithLocationResponse {
+  bool success = 1;
+}
+
+message GetTimesheetLocationListRequest{
+  google.protobuf.Timestamp from_date = 1;
+  google.protobuf.Timestamp to_date = 2;
+  string keyword = 3;
+  int32 limit = 4;
+  int32 offset = 5;
+}
+
+message GetTimesheetLocationListResponse{
+  repeated TimesheetLocation locations = 1;
+  TimesheetLocationAggregate locations_aggregate = 2;
+}
+
+message GetNonConfirmedLocationCountRequest{
+  google.protobuf.Timestamp period_date = 1;
+}
+
+message GetNonConfirmedLocationCountResponse{
+  int32 non_confirmed_location_count = 1;
+}

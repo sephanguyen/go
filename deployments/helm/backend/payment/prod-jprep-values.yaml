@@ -1,0 +1,10 @@
+onDemandNodeDeployment:
+    enabled: true
+podAnnotations:
+    cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+    sidecar.istio.io/proxyCPU: 2m
+    sidecar.istio.io/proxyMemory: 50Mi
+resources:
+    requests:
+        cpu: 2m
+        memory: 50Mi

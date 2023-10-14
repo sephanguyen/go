@@ -1,0 +1,12 @@
+apiVersion: "serving.kserve.io/v1beta1"
+kind: "InferenceService"
+metadata:
+  name: "ml-manabie"
+spec:
+  predictor:
+    serviceAccountName: local-kserve
+    model:
+      modelFormat:
+        name: mlflow
+      protocolVersion: v2
+      storageUri: "gs://dev-manabie-data/mlflow/0/7700b8d2070f42cb9cb7e40a19a2ff72/artifacts/model"

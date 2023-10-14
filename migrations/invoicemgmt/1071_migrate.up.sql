@@ -1,0 +1,1 @@
+ALTER TABLE ONLY public.invoice_schedule ADD COLUMN IF NOT EXISTS user_id TEXT;

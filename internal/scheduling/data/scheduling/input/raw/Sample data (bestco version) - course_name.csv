@@ -1,0 +1,15 @@
+course_name,type_course,total_slot,math,english,literature,social_science,science
+c1,regular_course,6,3,3,0,0,0
+c2,regular_course,6,0,0,2,2,2
+c3,regular_course,6,2,0,2,0,2
+c4,regular_course,4,2,2,0,0,0
+c5,regular_course,3,1,1,0,0,1
+c6,seasonal_course,4,0,1,2,0,1
+c7,seasonal_course,6,3,3,0,0,0
+c8,seasonal_course,7,0,2,2,2,1
+c9,seasonal_course,3,1,0,1,1,0
+c10,seasonal_course,5,2,2,1,0,0
+c11,seasonal_course,5,0,2,2,1,0
+c12,seasonal_course,5,1,1,1,1,1
+c13,seasonal_course,3,1,1,1,0,0
+c14,seasonal_course,4,0,1,1,1,1

@@ -1,0 +1,950 @@
+{
+   "__inputs": [ ],
+   "__requires": [ ],
+   "annotations": {
+      "list": [
+         {
+            "builtIn": 1,
+            "datasource": "-- Grafana --",
+            "enable": true,
+            "hide": true,
+            "iconColor": "rgba(0, 211, 255, 1)",
+            "name": "Annotations & Alerts",
+            "type": "dashboard"
+         }
+      ]
+   },
+   "editable": true,
+   "gnetId": null,
+   "graphTooltip": 1,
+   "hideControls": false,
+   "id": null,
+   "links": [ ],
+   "panels": [
+      {
+         "collapse": false,
+         "collapsed": false,
+         "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 0
+         },
+         "id": 2,
+         "panels": [ ],
+         "repeat": null,
+         "repeatIteration": null,
+         "repeatRowId": null,
+         "showTitle": true,
+         "title": "Basic statistics",
+         "titleSize": "h6",
+         "type": "row"
+      },
+      {
+         "aliasColors": { },
+         "bars": false,
+         "dashLength": 10,
+         "dashes": false,
+         "datasource": {
+            "type": "prometheus",
+            "uid": "${cluster}"
+         },
+         "fill": 1,
+         "fillGradient": 0,
+         "gridPos": {
+            "h": 10,
+            "w": 24,
+            "x": 0,
+            "y": 1
+         },
+         "hiddenSeries": false,
+         "id": 3,
+         "legend": {
+            "alignAsTable": true,
+            "avg": true,
+            "current": true,
+            "max": true,
+            "min": false,
+            "rightSide": true,
+            "show": true,
+            "sideWidth": null,
+            "total": false,
+            "values": true
+         },
+         "lines": true,
+         "linewidth": 1,
+         "links": [ ],
+         "nullPointMode": "null",
+         "percentage": false,
+         "pointradius": 2,
+         "points": false,
+         "renderer": "flot",
+         "repeat": null,
+         "seriesOverrides": [
+            {
+               "alias": "current",
+               "bars": true
+            }
+         ],
+         "spaceLength": 10,
+         "stack": false,
+         "steppedLine": false,
+         "targets": [
+            {
+               "expr": "sum(rate(istio_requests_total{destination_service_name=~\"timesheet-hasura\", destination_service_namespace=\"$namespace\"}[$__rate_interval]))",
+               "legendFormat": "current",
+               "refId": "A"
+            },
+            {
+               "expr": "sum(rate(istio_requests_total{destination_service_name=~\"timesheet-hasura\", destination_service_namespace=\"$namespace\"}[$__rate_interval] offset $__range))",
+               "legendFormat": "last",
+               "refId": "B"
+            }
+         ],
+         "thresholds": [ ],
+         "timeFrom": null,
+         "timeShift": null,
+         "title": "rpc/s",
+         "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+         },
+         "type": "graph",
+         "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": [ ]
+         },
+         "yaxes": [
+            {
+               "format": "short",
+               "label": null,
+               "logBase": 1,
+               "max": null,
+               "min": null,
+               "show": true
+            },
+            {
+               "format": "short",
+               "label": null,
+               "logBase": 1,
+               "max": null,
+               "min": null,
+               "show": true
+            }
+         ],
+         "yaxis": {
+            "align": false,
+            "alignLevel": null
+         }
+      },
+      {
+         "aliasColors": {
+            "FailedPrecondition": "semi-dark-red",
+            "NotFound": "dark-orange",
+            "OK": "dark-green"
+         },
+         "bars": true,
+         "dashLength": 10,
+         "dashes": false,
+         "datasource": {
+            "type": "prometheus",
+            "uid": "${cluster}"
+         },
+         "fill": 1,
+         "fillGradient": 0,
+         "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 11
+         },
+         "hiddenSeries": false,
+         "id": 4,
+         "legend": {
+            "alignAsTable": true,
+            "avg": true,
+            "current": true,
+            "max": true,
+            "min": false,
+            "rightSide": true,
+            "show": true,
+            "sideWidth": null,
+            "sort": "current",
+            "sortDesc": true,
+            "total": false,
+            "values": true
+         },
+         "lines": true,
+         "linewidth": 1,
+         "links": [ ],
+         "nullPointMode": "null",
+         "percentage": true,
+         "pointradius": 2,
+         "points": false,
+         "renderer": "flot",
+         "repeat": null,
+         "seriesOverrides": [ ],
+         "spaceLength": 10,
+         "stack": true,
+         "steppedLine": false,
+         "targets": [
+            {
+               "expr": "sum(rate(istio_requests_total{destination_service_name=~\"timesheet-hasura\", destination_service_namespace=\"$namespace\"}[$__rate_interval])) by (response_code) / ignoring(response_code) group_left sum(rate(istio_requests_total{destination_service_name=~\"timesheet-hasura\", destination_service_namespace=\"$namespace\"}[$__rate_interval])) * 100 > 0",
+               "legendFormat": "{{ grpc_server_status }}",
+               "refId": "A"
+            }
+         ],
+         "thresholds": [ ],
+         "timeFrom": null,
+         "timeShift": null,
+         "title": "Status code Rate",
+         "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+         },
+         "type": "graph",
+         "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": [ ]
+         },
+         "yaxes": [
+            {
+               "format": "short",
+               "label": null,
+               "logBase": 1,
+               "max": "100",
+               "min": "0",
+               "show": true
+            },
+            {
+               "format": "short",
+               "label": null,
+               "logBase": 1,
+               "max": null,
+               "min": null,
+               "show": true
+            }
+         ],
+         "yaxis": {
+            "align": false,
+            "alignLevel": null
+         }
+      },
+      {
+         "aliasColors": { },
+         "bars": false,
+         "dashLength": 10,
+         "dashes": false,
+         "datasource": {
+            "type": "prometheus",
+            "uid": "${cluster}"
+         },
+         "fieldConfig": {
+            "defaults": {
+               "unit": "ms"
+            }
+         },
+         "fill": 1,
+         "fillGradient": 0,
+         "gridPos": {
+            "h": 10,
+            "w": 24,
+            "x": 0,
+            "y": 19
+         },
+         "hiddenSeries": false,
+         "id": 5,
+         "legend": {
+            "alignAsTable": true,
+            "avg": true,
+            "current": true,
+            "max": true,
+            "min": false,
+            "rightSide": true,
+            "show": true,
+            "sideWidth": null,
+            "sort": "max",
+            "sortDesc": true,
+            "total": false,
+            "values": true
+         },
+         "lines": true,
+         "linewidth": 1,
+         "links": [ ],
+         "nullPointMode": "null",
+         "percentage": false,
+         "pointradius": 2,
+         "points": false,
+         "renderer": "flot",
+         "repeat": null,
+         "seriesOverrides": [
+            {
+               "alias": "current",
+               "bars": true
+            }
+         ],
+         "spaceLength": 10,
+         "stack": false,
+         "steppedLine": false,
+         "targets": [
+            {
+               "expr": "histogram_quantile(0.90, sum(rate(istio_request_duration_milliseconds_bucket{destination_service_name=~\"timesheet-hasura\",destination_service_namespace=\"$namespace\"}[$__rate_interval])) by (le))",
+               "legendFormat": "current",
+               "refId": "A"
+            },
+            {
+               "expr": "histogram_quantile(0.90, sum(rate(istio_request_duration_milliseconds_bucket{destination_service_name=~\"timesheet-hasura\",destination_service_namespace=\"$namespace\"}[$__rate_interval] offset $__range)) by (le))",
+               "legendFormat": "last",
+               "refId": "B"
+            }
+         ],
+         "thresholds": [ ],
+         "timeFrom": null,
+         "timeShift": null,
+         "title": "P90 Latency",
+         "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+         },
+         "type": "graph",
+         "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": [ ]
+         },
+         "yaxes": [
+            {
+               "format": "ms",
+               "label": null,
+               "logBase": 1,
+               "max": null,
+               "min": null,
+               "show": true
+            },
+            {
+               "format": "short",
+               "label": null,
+               "logBase": 1,
+               "max": null,
+               "min": null,
+               "show": true
+            }
+         ],
+         "yaxis": {
+            "align": false,
+            "alignLevel": null
+         }
+      },
+      {
+         "aliasColors": { },
+         "bars": false,
+         "dashLength": 10,
+         "dashes": false,
+         "datasource": {
+            "type": "prometheus",
+            "uid": "${cluster}"
+         },
+         "fieldConfig": {
+            "defaults": {
+               "unit": "ms"
+            }
+         },
+         "fill": 1,
+         "fillGradient": 0,
+         "gridPos": {
+            "h": 10,
+            "w": 24,
+            "x": 0,
+            "y": 29
+         },
+         "hiddenSeries": false,
+         "id": 6,
+         "legend": {
+            "alignAsTable": true,
+            "avg": true,
+            "current": true,
+            "max": true,
+            "min": false,
+            "rightSide": true,
+            "show": true,
+            "sideWidth": null,
+            "sort": "max",
+            "sortDesc": true,
+            "total": false,
+            "values": true
+         },
+         "lines": true,
+         "linewidth": 1,
+         "links": [ ],
+         "nullPointMode": "null",
+         "percentage": false,
+         "pointradius": 2,
+         "points": false,
+         "renderer": "flot",
+         "repeat": null,
+         "seriesOverrides": [
+            {
+               "alias": "current",
+               "bars": true
+            }
+         ],
+         "spaceLength": 10,
+         "stack": false,
+         "steppedLine": false,
+         "targets": [
+            {
+               "expr": "histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{destination_service_name=~\"timesheet-hasura\",destination_service_namespace=\"$namespace\"}[$__rate_interval])) by (le))",
+               "legendFormat": "current",
+               "refId": "A"
+            },
+            {
+               "expr": "histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{destination_service_name=~\"timesheet-hasura\",destination_service_namespace=\"$namespace\"}[$__rate_interval] offset $__range)) by (le))",
+               "legendFormat": "last",
+               "refId": "B"
+            }
+         ],
+         "thresholds": [ ],
+         "timeFrom": null,
+         "timeShift": null,
+         "title": "P99 Latency",
+         "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+         },
+         "type": "graph",
+         "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": [ ]
+         },
+         "yaxes": [
+            {
+               "format": "ms",
+               "label": null,
+               "logBase": 1,
+               "max": null,
+               "min": null,
+               "show": true
+            },
+            {
+               "format": "short",
+               "label": null,
+               "logBase": 1,
+               "max": null,
+               "min": null,
+               "show": true
+            }
+         ],
+         "yaxis": {
+            "align": false,
+            "alignLevel": null
+         }
+      },
+      {
+         "aliasColors": { },
+         "bars": false,
+         "dashLength": 10,
+         "dashes": false,
+         "datasource": {
+            "type": "prometheus",
+            "uid": "${cluster}"
+         },
+         "fill": 1,
+         "fillGradient": 0,
+         "gridPos": {
+            "h": 9,
+            "w": 24,
+            "x": 0,
+            "y": 39
+         },
+         "hiddenSeries": false,
+         "id": 7,
+         "legend": {
+            "alignAsTable": true,
+            "avg": true,
+            "current": true,
+            "max": true,
+            "min": false,
+            "rightSide": true,
+            "show": true,
+            "sideWidth": 430,
+            "total": false,
+            "values": true
+         },
+         "lines": true,
+         "linewidth": 1,
+         "links": [ ],
+         "nullPointMode": "null",
+         "percentage": false,
+         "pointradius": 2,
+         "points": false,
+         "renderer": "flot",
+         "repeat": null,
+         "seriesOverrides": [
+            {
+               "alias": "Requests",
+               "color": "#73BF69",
+               "legend": false,
+               "nullPointMode": "connected"
+            },
+            {
+               "alias": "Limits",
+               "color": "#F2495C",
+               "legend": false,
+               "nullPointMode": "connected"
+            }
+         ],
+         "spaceLength": 10,
+         "stack": false,
+         "steppedLine": false,
+         "targets": [
+            {
+               "expr": "sum(rate(container_cpu_usage_seconds_total{image!=\"\",container!=\"POD\",pod=~\"^(timesheet-hasura-[^hasuramigrateproxyjprep]).*\",namespace=\"$namespace\"}[5m])) by (pod)",
+               "legendFormat": "{{ pod }}",
+               "refId": "A"
+            },
+            {
+               "expr": "sum(kube_pod_container_resource_requests{container!=\"POD\",pod=~\"^(timesheet-hasura-[^hasuramigrateproxyjprep]).*\",namespace=\"$namespace\",unit=\"core\"}) / count(kube_pod_info{namespace=\"$namespace\",pod=~\"^(bob-[^hasuramigrateproxyjprep]).*\"})",
+               "legendFormat": "Requests",
+               "refId": "B"
+            },
+            {
+               "expr": "sum(kube_pod_container_resource_limits{container!=\"POD\",pod=~\"^(timesheet-hasura-[^hasuramigrateproxyjprep]).*\",namespace=\"$namespace\",unit=\"core\"}) / count(kube_pod_info{namespace=\"$namespace\",pod=~\"^(bob-[^hasuramigrateproxyjprep]).*\"})",
+               "legendFormat": "Limits",
+               "refId": "C"
+            }
+         ],
+         "thresholds": [ ],
+         "timeFrom": null,
+         "timeShift": null,
+         "title": "Pod CPU usage",
+         "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+         },
+         "type": "graph",
+         "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": [ ]
+         },
+         "yaxes": [
+            {
+               "decimals": 3,
+               "format": "short",
+               "label": null,
+               "logBase": 1,
+               "max": null,
+               "min": null,
+               "show": true
+            },
+            {
+               "format": "short",
+               "label": null,
+               "logBase": 1,
+               "max": null,
+               "min": null,
+               "show": true
+            }
+         ],
+         "yaxis": {
+            "align": false,
+            "alignLevel": null
+         }
+      },
+      {
+         "aliasColors": { },
+         "bars": false,
+         "dashLength": 10,
+         "dashes": false,
+         "datasource": {
+            "type": "prometheus",
+            "uid": "${cluster}"
+         },
+         "decimals": 1,
+         "fill": 1,
+         "fillGradient": 0,
+         "gridPos": {
+            "h": 9,
+            "w": 24,
+            "x": 0,
+            "y": 48
+         },
+         "hiddenSeries": false,
+         "id": 8,
+         "legend": {
+            "alignAsTable": true,
+            "avg": true,
+            "current": true,
+            "max": true,
+            "min": false,
+            "rightSide": true,
+            "show": true,
+            "sideWidth": 430,
+            "total": false,
+            "values": true
+         },
+         "lines": true,
+         "linewidth": 1,
+         "links": [ ],
+         "nullPointMode": "null",
+         "percentage": false,
+         "pointradius": 2,
+         "points": false,
+         "renderer": "flot",
+         "repeat": null,
+         "seriesOverrides": [
+            {
+               "alias": "Requests",
+               "color": "#73BF69",
+               "legend": false,
+               "nullPointMode": "connected"
+            },
+            {
+               "alias": "Limits",
+               "color": "#F2495C",
+               "legend": false,
+               "nullPointMode": "connected"
+            }
+         ],
+         "spaceLength": 10,
+         "stack": false,
+         "steppedLine": false,
+         "targets": [
+            {
+               "expr": "sum (container_memory_working_set_bytes{image!=\"\",container!=\"POD\",pod=~\"^(timesheet-hasura-[^hasuramigrateproxyjprep]).*\",namespace=\"$namespace\"}) by (pod)",
+               "format": "time_series",
+               "intervalFactor": 1,
+               "legendFormat": "{{ pod }}",
+               "refId": "A"
+            },
+            {
+               "expr": "sum(kube_pod_container_resource_requests{container!=\"POD\",pod=~\"^(timesheet-hasura-[^hasuramigrateproxyjprep]).*\",namespace=\"$namespace\",unit=\"byte\"}) / count(kube_pod_info{namespace=\"$namespace\",pod=~\"^(bob-[^hasuramigrateproxyjprep]).*\"})",
+               "legendFormat": "Requests",
+               "refId": "B"
+            },
+            {
+               "expr": "sum(kube_pod_container_resource_limits{container!=\"POD\",pod=~\"^(timesheet-hasura-[^hasuramigrateproxyjprep]).*\",namespace=\"$namespace\",unit=\"core\"}) / count(kube_pod_info{namespace=\"$namespace\",pod=~\"^(bob-[^hasuramigrateproxyjprep]).*\"})",
+               "legendFormat": "Limits",
+               "refId": "C"
+            }
+         ],
+         "thresholds": [ ],
+         "timeFrom": null,
+         "timeShift": null,
+         "title": "Pod Memory usage",
+         "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+         },
+         "type": "graph",
+         "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": [ ]
+         },
+         "yaxes": [
+            {
+               "format": "bytes",
+               "label": null,
+               "logBase": 1,
+               "max": null,
+               "min": null,
+               "show": true
+            },
+            {
+               "format": "short",
+               "label": null,
+               "logBase": 1,
+               "max": null,
+               "min": null,
+               "show": false
+            }
+         ],
+         "yaxis": {
+            "align": false,
+            "alignLevel": null
+         }
+      },
+      {
+         "aliasColors": { },
+         "bars": false,
+         "dashLength": 10,
+         "dashes": false,
+         "datasource": {
+            "type": "prometheus",
+            "uid": "${cluster}"
+         },
+         "decimals": 1,
+         "fill": 1,
+         "fillGradient": 0,
+         "gridPos": {
+            "h": 10,
+            "w": 24,
+            "x": 0,
+            "y": 57
+         },
+         "hiddenSeries": false,
+         "id": 9,
+         "legend": {
+            "alignAsTable": true,
+            "avg": true,
+            "current": true,
+            "max": true,
+            "min": false,
+            "rightSide": true,
+            "show": true,
+            "sideWidth": 430,
+            "total": false,
+            "values": true
+         },
+         "lines": true,
+         "linewidth": 1,
+         "links": [ ],
+         "nullPointMode": "null",
+         "percentage": false,
+         "pointradius": 2,
+         "points": false,
+         "renderer": "flot",
+         "repeat": null,
+         "seriesOverrides": [
+            {
+               "alias": "current",
+               "bars": true
+            }
+         ],
+         "spaceLength": 10,
+         "stack": false,
+         "steppedLine": false,
+         "targets": [
+            {
+               "expr": "histogram_quantile(0.99, sum(rate(istio_request_bytes_bucket{destination_service_name=~\"timesheet-hasura\",destination_service_namespace=\"$namespace\"}[$__rate_interval])) by (le))",
+               "legendFormat": "current",
+               "refId": "A"
+            },
+            {
+               "expr": "histogram_quantile(0.99, sum(rate(istio_request_bytes_bucket{destination_service_name=~\"timesheet-hasura\",destination_service_namespace=\"$namespace\"}[$__rate_interval] offset $__range)) by (le))",
+               "legendFormat": "last",
+               "refId": "B"
+            }
+         ],
+         "thresholds": [ ],
+         "timeFrom": null,
+         "timeShift": null,
+         "title": "Receive Bytes",
+         "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+         },
+         "type": "graph",
+         "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": [ ]
+         },
+         "yaxes": [
+            {
+               "format": "bytes",
+               "label": null,
+               "logBase": 1,
+               "max": null,
+               "min": null,
+               "show": true
+            },
+            {
+               "format": "short",
+               "label": null,
+               "logBase": 1,
+               "max": null,
+               "min": null,
+               "show": false
+            }
+         ],
+         "yaxis": {
+            "align": false,
+            "alignLevel": null
+         }
+      },
+      {
+         "aliasColors": { },
+         "bars": false,
+         "dashLength": 10,
+         "dashes": false,
+         "datasource": {
+            "type": "prometheus",
+            "uid": "${cluster}"
+         },
+         "decimals": 1,
+         "fill": 1,
+         "fillGradient": 0,
+         "gridPos": {
+            "h": 10,
+            "w": 24,
+            "x": 0,
+            "y": 67
+         },
+         "hiddenSeries": false,
+         "id": 10,
+         "legend": {
+            "alignAsTable": true,
+            "avg": true,
+            "current": true,
+            "max": true,
+            "min": false,
+            "rightSide": true,
+            "show": true,
+            "sideWidth": 430,
+            "total": false,
+            "values": true
+         },
+         "lines": true,
+         "linewidth": 1,
+         "links": [ ],
+         "nullPointMode": "null",
+         "percentage": false,
+         "pointradius": 2,
+         "points": false,
+         "renderer": "flot",
+         "repeat": null,
+         "seriesOverrides": [
+            {
+               "alias": "current",
+               "bars": true
+            }
+         ],
+         "spaceLength": 10,
+         "stack": false,
+         "steppedLine": false,
+         "targets": [
+            {
+               "expr": "histogram_quantile(0.99, sum(rate(istio_response_bytes_bucket{destination_service_name=~\"timesheet-hasura\",destination_service_namespace=\"$namespace\"}[$__rate_interval])) by (le))",
+               "legendFormat": "current",
+               "refId": "A"
+            },
+            {
+               "expr": "histogram_quantile(0.99, sum(rate(istio_response_bytes_bucket{destination_service_name=~\"timesheet-hasura\",destination_service_namespace=\"$namespace\"}[$__rate_interval] offset $__range)) by (le))",
+               "legendFormat": "last",
+               "refId": "B"
+            }
+         ],
+         "thresholds": [ ],
+         "timeFrom": null,
+         "timeShift": null,
+         "title": "Sent Bytes",
+         "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+         },
+         "type": "graph",
+         "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": [ ]
+         },
+         "yaxes": [
+            {
+               "format": "bytes",
+               "label": null,
+               "logBase": 1,
+               "max": null,
+               "min": null,
+               "show": true
+            },
+            {
+               "format": "short",
+               "label": null,
+               "logBase": 1,
+               "max": null,
+               "min": null,
+               "show": false
+            }
+         ],
+         "yaxis": {
+            "align": false,
+            "alignLevel": null
+         }
+      }
+   ],
+   "refresh": "5s",
+   "rows": [ ],
+   "schemaVersion": 27,
+   "style": "dark",
+   "tags": [ ],
+   "templating": {
+      "list": [
+         {
+            "current": {
+               "text": "Thanos",
+               "value": "Thanos"
+            },
+            "hide": 0,
+            "label": null,
+            "name": "cluster",
+            "options": [ ],
+            "query": "prometheus",
+            "refresh": 1,
+            "regex": "",
+            "type": "datasource"
+         },
+         {
+            "allValue": null,
+            "current": { },
+            "datasource": "${cluster}",
+            "definition": "label_values(grpc_io_server_completed_rpcs, namespace)",
+            "hide": 0,
+            "includeAll": false,
+            "label": "Namespace",
+            "multi": false,
+            "name": "namespace",
+            "options": [ ],
+            "query": {
+               "query": "label_values(grpc_io_server_completed_rpcs, namespace)",
+               "refId": "StandardVariableQuery"
+            },
+            "refresh": 1,
+            "regex": "",
+            "sort": 0,
+            "tagValuesQuery": "",
+            "tags": [ ],
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+         }
+      ]
+   },
+   "time": {
+      "from": "now-6h",
+      "to": "now"
+   },
+   "timepicker": { },
+   "timezone": "browser",
+   "title": "Dashboard is generated for timesheet-hasura service",
+   "uid": "UID_01GDYWNQYR0N7HBRABJPD3RM20",
+   "version": 0
+}

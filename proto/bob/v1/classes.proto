@@ -1,0 +1,255 @@
+syntax = "proto3";
+
+package bob.v1;
+
+import "bob/v1/media.proto";
+import "common/v1/enums.proto";
+import "common/v1/profiles.proto";
+import "common/v1/requests.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/bob/v1;bpb";
+
+message CreateClassRequest {
+  int32 school_id = 1;
+  string class_name = 2;
+  repeated string grades = 3;              // for admin only
+  repeated common.v1.Subject subjects = 4; // for admin only
+  repeated string owner_ids = 5;           // for admin only
+}
+
+message CreateClassResponse { int32 class_id = 1; }
+
+message JoinClassRequest { string class_code = 1; }
+
+message JoinClassResponse { int32 class_id = 1; }
+
+message Class {
+  string id = 1;
+  string name = 2;
+  string avatar = 3;
+  int32 school_id = 4;
+  string class_code = 5;
+  repeated common.v1.Subject subject = 6;
+  repeated string grades = 7;
+  repeated string owner_ids = 8;
+  uint32 total_student = 9;
+}
+
+message RemoveClassMemberRequest {
+  int32 class_id = 1;
+  repeated string user_ids = 2;
+}
+
+message RemoveClassMemberResponse {}
+
+message LeaveClassRequest { int32 class_id = 1; }
+
+message LeaveClassResponse {}
+
+message ListClassRequest { common.v1.Paging paging = 1; }
+
+message ListClassResponse {
+  common.v1.Paging next_page = 2;
+  repeated Class items = 1;
+}
+
+message AddClassOwnerRequest {
+  int32 class_id = 1;
+  string user_id = 2;
+}
+
+message AddClassOwnerResponse {}
+
+message RetrieveClassMembersRequest {
+  common.v1.Paging paging = 1;
+  repeated string class_ids = 2;
+  common.v1.UserGroup user_group = 3;
+}
+
+message RetrieveClassMembersResponse {
+  message Member {
+    string user_id = 1;
+    common.v1.UserGroup user_group = 2;
+    google.protobuf.Timestamp join_at = 3;
+  }
+  common.v1.Paging paging = 1;
+  repeated Member members = 2;
+}
+
+message RetrieveClassLearningStatisticsRequest {
+  int32 class_id = 1;
+  string topic_id = 2;
+}
+
+message StudentLearningStatistics {
+  message ByTopic {
+    string student_id = 1;
+    string student_name = 2;
+    float completion = 4;
+    int32 time_spent = 5;
+    float accuracy = 6;
+    google.protobuf.Timestamp date = 7;
+  }
+
+  oneof data { ByTopic by_topic = 1; }
+}
+
+message RetrieveClassLearningStatisticsResponse {
+  repeated StudentLearningStatistics stats = 1;
+  int32 total_completion = 2;
+  float average_score = 3;
+  int32 total_submitted = 4;
+}
+
+message RetrieveStudentLearningStatisticsRequest {
+  int32 class_id = 1;
+  string topic_id = 2;
+  string student_id = 3;
+}
+
+message RetrieveStudentLearningStatisticsResponse {
+  repeated StudentLearningStatistics stats = 1;
+}
+
+message RegisterTeacherRequest {
+  string email = 1;
+  string name = 2;
+  string school_name = 3;
+  common.v1.Country country = 4;
+}
+
+message RegisterTeacherResponse { bool successful = 1; }
+
+message UpdateClassCodeRequest { int32 class_id = 1; }
+
+message UpdateClassCodeResponse {
+  int32 class_id = 1;
+  string class_code = 2;
+}
+
+message AddClassMemberRequest {
+  int32 class_id = 1;
+  repeated string teacher_ids = 2;
+}
+
+message AddClassMemberResponse {}
+
+message EndLiveLessonRequest { string lesson_id = 1; }
+
+message EndLiveLessonResponse {}
+
+message JoinLessonRequest { string lesson_id = 1; }
+
+message JoinLessonResponse {
+  string stream_token = 1;
+  string whiteboard_token = 2;
+  string room_id = 3;
+  string stm_token = 4;
+  string video_token = 5;
+  string agora_app_id = 6;
+  string whiteboard_app_id = 7;
+  string screen_recording_token = 8;
+}
+
+message LeaveLessonRequest {
+  string user_id = 1;
+  string lesson_id = 2;
+}
+
+message LeaveLessonResponse {}
+
+message RetrieveClassByIDsRequest { repeated string class_ids = 1; }
+
+message RetrieveClassByIDsResponse { repeated Class classes = 1; }
+
+message ConvertMediaRequest { repeated Media media = 1; }
+
+message ConvertMediaResponse {}
+
+message ListStudentsByLessonRequest {
+  string lesson_id = 1;
+  common.v1.Paging paging = 2;
+}
+
+message EnrollmentStatus {
+  string student_id = 1;
+  message EnrollmentStatusInfo {
+    string location_id = 1;
+    google.protobuf.Timestamp start_date = 2;
+    google.protobuf.Timestamp end_date = 3;
+  }
+  repeated EnrollmentStatusInfo info = 2;
+}
+
+message ListStudentsByLessonResponse {
+  repeated common.v1.BasicProfile students = 1;
+  common.v1.Paging next_page = 2;
+  repeated EnrollmentStatus enrollment_status = 3;
+}
+
+message RetrieveWhiteboardTokenRequest { string lesson_id = 1; }
+
+message RetrieveWhiteboardTokenResponse {
+  string whiteboard_token = 1;
+  string room_id = 2;
+  string whiteboard_app_id = 3;
+}
+
+message RetrieveClassMembersWithFiltersRequest {
+  common.v1.Paging paging = 1;
+  repeated string class_ids = 2;
+  repeated string student_tag_ids = 3;
+  oneof school {
+      bool all_school = 4;
+      bool unassigned = 5;
+      string school_id = 6;
+  }
+  string course_id = 7;
+  repeated string location_ids = 8;
+  repeated string study_plan_ids = 9;
+  repeated string lo_ids = 10;  
+}
+
+message RetrieveClassMembersWithFiltersResponse {
+  common.v1.Paging paging = 1;
+  repeated string user_ids = 2;
+}
+
+service ClassReaderService {
+  rpc ListClass(ListClassRequest) returns (ListClassResponse);
+
+  rpc RetrieveClassMembers(RetrieveClassMembersRequest)
+      returns (RetrieveClassMembersResponse);
+
+  rpc RetrieveClassLearningStatistics(RetrieveClassLearningStatisticsRequest)
+      returns (RetrieveClassLearningStatisticsResponse);
+  rpc RetrieveStudentLearningStatistics(
+      RetrieveStudentLearningStatisticsRequest)
+      returns (RetrieveStudentLearningStatisticsResponse);
+  rpc RetrieveClassByIDs(RetrieveClassByIDsRequest)
+      returns (RetrieveClassByIDsResponse);
+  rpc ListStudentsByLesson(ListStudentsByLessonRequest)
+      returns (ListStudentsByLessonResponse);
+  rpc RetrieveClassMembersWithFilters(RetrieveClassMembersWithFiltersRequest) 
+      returns (RetrieveClassMembersWithFiltersResponse);
+}
+
+service ClassModifierService {
+  rpc CreateClass(CreateClassRequest) returns (CreateClassResponse);
+  rpc UpdateClassCode(UpdateClassCodeRequest) returns (UpdateClassCodeResponse);
+
+  rpc JoinClass(JoinClassRequest) returns (JoinClassResponse);
+  rpc LeaveClass(LeaveClassRequest) returns (LeaveClassResponse);
+
+  rpc AddClassOwner(AddClassOwnerRequest) returns (AddClassOwnerResponse);
+  rpc AddClassMember(AddClassMemberRequest) returns (AddClassMemberResponse);
+  rpc RemoveClassMember(RemoveClassMemberRequest)
+      returns (RemoveClassMemberResponse);
+
+  rpc EndLiveLesson(EndLiveLessonRequest) returns (EndLiveLessonResponse);
+  rpc JoinLesson(JoinLessonRequest) returns (JoinLessonResponse);
+  rpc LeaveLesson(LeaveLessonRequest) returns (LeaveLessonResponse);
+  rpc ConvertMedia(ConvertMediaRequest) returns (ConvertMediaResponse) {};
+  rpc RetrieveWhiteboardToken(RetrieveWhiteboardTokenRequest) returns (RetrieveWhiteboardTokenResponse){};
+}

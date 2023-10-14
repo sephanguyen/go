@@ -1,0 +1,149 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "import-map-deployer.fullname" . }}
+  labels:
+    {{- include "import-map-deployer.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "import-map-deployer.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/importap.json: {{ tpl ("configs/{{ .Values.global.environment }}/importap.json" | .Files.Get) . | sha256sum }}
+        checksum/config.js: {{ tpl ("configs/{{ .Values.global.environment }}/config.js" | .Files.Get) . | sha256sum }}
+        checksum/import-map-deployer.secrets.env.encrypted.yaml: {{ printf "secrets/%s/%s/import-map-deployer.secrets.env.encrypted.yaml" .Values.global.vendor .Values.global.environment | .Files.Get | sha256sum }}
+      {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "import-map-deployer.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "import-map-deployer.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      volumes:
+      - name: imd-configjs
+        configMap:
+          name: {{ include "import-map-deployer.fullname" . }}
+          items:
+          - key: config.js
+            path: config.js
+      - name: importmap
+        configMap:
+          name: {{ include "import-map-deployer.fullname" . }}
+          items:
+          - key: importmap.json
+            path: importmap.json
+      - name: imd-secret
+        secret:
+          secretName: {{ include "import-map-deployer.fullname" . }}
+          items:
+          - key: import-map-deployer.secrets.env.encrypted.yaml
+            path: import-map-deployer.secrets.env.encrypted.yaml
+      - name: decrypted-secret
+        emptyDir: {}
+      {{- if eq "local" .Values.global.environment }}
+      - name: service-credential
+        secret:
+          secretName: {{ include "import-map-deployer.fullname" . }}
+          items:
+          - key: service_credential.json
+            path: service_credential.json
+      {{- end }}
+      initContainers:
+      - name: decrypt-secret
+        image: {{ .Values.sopsImage }}
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+        - name: decrypted-secret
+          mountPath: /decrypted
+        - name: imd-secret
+          mountPath: /secrets/import-map-deployer.secrets.env.encrypted.yaml
+          subPath: import-map-deployer.secrets.env.encrypted.yaml
+        {{- if eq "local" .Values.global.environment }}
+        - name: service-credential
+          mountPath: /configs/service_credential.json
+          subPath: service_credential.json
+          readOnly: true
+        env:
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: "/configs/service_credential.json"
+        {{- end }}
+        command:
+          - /bin/sh
+          - -c
+          - |
+            sops -d /secrets/import-map-deployer.secrets.env.encrypted.yaml >> /decrypted/import-map-deployer.secrets.env.encrypted.yaml
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          volumeMounts:
+          - name: decrypted-secret
+            mountPath: /decrypted
+          - name: imd-configjs
+            mountPath: /www/config.js
+            subPath: config.js
+          - name: importmap
+            mountPath: /www/importmap.json
+            subPath: importmap.json
+          command:
+            - /bin/sh
+            - -c
+            - |
+
+              export IMD_USERNAME=$(grep IMD_USERNAME /decrypted/import-map-deployer.secrets.env.encrypted.yaml | awk '{print$2}')
+              export IMD_PASSWORD=$(grep IMD_PASSWORD /decrypted/import-map-deployer.secrets.env.encrypted.yaml | awk '{print$2}')
+
+
+              yarn start config.js
+          env:
+          - name: PORT
+            value: "5000"
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.service.port }}
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.livenessProbe.successThreshold }}
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+          readinessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.service.port }}
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.readinessProbe.successThreshold }}
+            failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

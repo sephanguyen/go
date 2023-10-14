@@ -1,0 +1,16 @@
+@startuml communication_simplified
+hide circle
+
+User   -> notificationmgmt:  Call "NotificationModifierService.DiscardNotification"
+activate notificationmgmt
+notificationmgmt -> DB: discard notification
+note right DB
+    1. soft delete **questionnaire** data if exists
+    2. soft delete data in table **notification_class_filter, notification_course_filter, notification_location_filter**
+    3. set status = DISCARD and deleted_at = NOW()
+    4. soft delete **info_notification_msg** data
+    5. soft delete **info_notifications_access_paths** data
+end note
+notificationmgmt -> User: OK or Error status in response
+deactivate notificationmgmt
+@endumlstatus

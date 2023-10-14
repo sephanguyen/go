@@ -1,0 +1,48 @@
+table:
+  schema: public
+  name: parents
+object_relationships:
+  - name: user
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: users
+        insertion_order: null
+        column_mapping:
+          parent_id: user_id
+array_relationships:
+  - name: student_parents
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: student_parents
+        insertion_order: null
+        column_mapping:
+          parent_id: parent_id
+select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+        - parent_id
+        - school_id
+        - updated_at
+        - created_at
+        - deleted_at
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+        - school_id
+        - parent_id
+        - created_at
+        - deleted_at
+        - updated_at
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true

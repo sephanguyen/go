@@ -1,0 +1,11 @@
+- template: 1
+  tableName: student_entryexit_records
+  locationCol: location_id
+  accessPathTable:
+    name: user_access_paths
+    columnMapping:
+      student_id: user_id
+  permissionPrefix: entryexit.student_entryexit_records
+  permissions:
+    postgres: []
+    hasura: []

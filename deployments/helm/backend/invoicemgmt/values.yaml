@@ -1,0 +1,217 @@
+adminHttp:
+    - corsPolicy:
+        allowHeaders:
+            - authorization
+            - grpc-timeout
+            - content-type
+            - keep-alive
+            - user-agent
+            - cache-control
+            - content-transfer-encoding
+            - token
+            - x-accept-content-transfer-encoding
+            - x-accept-response-streaming
+            - x-request-id
+            - x-user-agent
+            - x-graphql-mesh-authorization
+            - x-grpc-web
+            - if-none-match
+            - pkg
+            - version
+            - connect-timeout-ms
+            - connect-protocol-version
+            - connect-content-encoding
+            - connect-accept-encoding
+        allowMethods:
+            - POST
+            - GET
+            - OPTIONS
+            - PUT
+            - DELETE
+        allowOrigins:
+            - regex: .*
+        exposeHeaders:
+            - grpc-status
+            - grpc-message
+            - etag
+        maxAge: 100s
+      match:
+        - uri:
+            prefix: /invoicemgmt/
+      rewrite:
+        uri: /
+      route:
+        - destination:
+            host: invoicemgmt-hasura
+            port:
+                number: 8080
+affinity: {}
+affinityOverride: {}
+apiHttp:
+    - fault:
+        abort:
+            httpStatus: 403
+            percentage:
+                value: 100
+      match:
+        - uri:
+            prefix: /invoicemgmt.v1.InternalService
+      route:
+        - destination:
+            host: invoicemgmt
+            port:
+                number: 6650
+    - match:
+        - uri:
+            prefix: /invoicemgmt.v1
+        - uri:
+            prefix: /manabie.invoicemgmt
+      route:
+        - destination:
+            host: invoicemgmt
+            port:
+                number: 6650
+    - match:
+        - uri:
+            prefix: /api/invoicemgmt
+      route:
+        - destination:
+            host: invoicemgmt
+            port:
+                number: 6680
+clientVersion: v0.30.0
+cronjobs:
+    import-invoice-checker:
+        cmd: invoicemgmt_import_invoice_checker
+        schedule: 0 15 * * *
+enabled: true
+grpcPort: 6650
+hasura:
+    anonymous:
+        enabled: false
+    enableConsole: true
+    enabledApis: metadata,graphql
+    image:
+        pullPolicy: IfNotPresent
+        repository: hasura/graphql-engine
+        tag: v1.3.3.cli-migrations-v2
+    pgConnections: 8
+    pgTimeout: 10
+    resources:
+        requests:
+            memory: 256Mi
+    service:
+        port: 8080
+        type: ClusterIP
+hasuraEnabled: true
+httpPort: 6680
+jobs:
+    import-invoice-checker:
+        cmd: invoicemgmt_import_invoice_checker
+    migrate-invoice-bill-item:
+        cmd: invoicemgmt_migrate_invoice_bill_item
+    upload-existing-payment-request-file:
+        cmd: invoicemgmt_upload_existing_payment_request_file
+metrics:
+    enabled: true
+    podAnnotations:
+        prometheus.io/port: "8888"
+        prometheus.io/scheme: http
+        prometheus.io/scrape: "true"
+migrationEnabled: true
+nodeSelector: {}
+pdb:
+    enabled: false
+podAnnotations:
+    sidecar.istio.io/proxyCPU: 10m
+    sidecar.istio.io/proxyMemory: 50Mi
+readinessProbe:
+    enabled: true
+resources:
+    requests:
+        memory: 120Mi
+service:
+    port: 6650
+    type: ClusterIP
+tolerations: null
+webHttp:
+    - corsPolicy:
+        allowHeaders:
+            - authorization
+            - grpc-timeout
+            - content-type
+            - keep-alive
+            - user-agent
+            - cache-control
+            - content-transfer-encoding
+            - token
+            - x-accept-content-transfer-encoding
+            - x-accept-response-streaming
+            - x-request-id
+            - x-user-agent
+            - x-graphql-mesh-authorization
+            - x-grpc-web
+            - if-none-match
+            - pkg
+            - version
+            - connect-timeout-ms
+            - connect-protocol-version
+            - connect-content-encoding
+            - connect-accept-encoding
+        allowMethods:
+            - POST
+            - GET
+            - OPTIONS
+            - PUT
+            - DELETE
+        allowOrigins:
+            - regex: .*
+        exposeHeaders:
+            - grpc-status
+            - grpc-message
+            - etag
+        maxAge: 100s
+      match:
+        - uri:
+            prefix: /invoicemgmt.v1
+      route:
+        - destination:
+            host: invoicemgmt
+            port:
+                number: 6650
+    - corsPolicy:
+        allowCredentials: true
+        allowHeaders:
+            - grpc-timeout
+            - content-type
+            - keep-alive
+            - user-agent
+            - cache-control
+            - content-type
+            - content-transfer-encoding
+            - token
+            - x-accept-content-transfer-encoding
+            - x-accept-response-streaming
+            - x-user-agent
+            - x-grpc-web
+            - pkg
+            - version
+            - JPREP-Signature
+            - CloudConvert-Signature
+        allowMethods:
+            - POST
+            - GET
+            - OPTIONS
+            - PUT
+            - DELETE
+        allowOrigins:
+            - regex: .*
+        maxAge: 100s
+      match:
+        - uri:
+            prefix: /api/invoicemgmt
+      route:
+        - destination:
+            host: invoicemgmt
+            port:
+                number: 6680

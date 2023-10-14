@@ -1,0 +1,21 @@
+pilot:
+  podAnnotations:
+    cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+
+  resources:
+    requests:
+      cpu: 50m
+      memory: 256Mi
+
+meshConfig:
+  outboundTrafficPolicy:
+    mode: ALLOW_ANY
+  enableAutoMtls: false
+  accessLogFile: ""
+  accessLogEncoding: JSON
+  defaultConfig:
+    holdApplicationUntilProxyStarts: true
+    tracing:
+      zipkin:
+        address: opentelemetry-collector.monitoring:9411
+      sampling: 100.0

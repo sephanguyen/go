@@ -1,0 +1,9 @@
+ALTER TABLE IF EXISTS exam_lo_submission
+    ADD COLUMN IF NOT EXISTS last_action TEXT NOT NULL DEFAULT 'APPROVE_ACTION_NONE',
+    ADD COLUMN IF NOT EXISTS last_action_at TIMESTAMP WITH TIME ZONE,
+    ADD COLUMN IF NOT EXISTS last_action_by TEXT,
+    DROP CONSTRAINT IF EXISTS last_action_check,
+    ADD CONSTRAINT last_action_check CHECK (last_action = ANY (ARRAY[
+        'APPROVE_ACTION_NONE'::text,
+        'APPROVE_ACTION_APPROVED'::text,
+        'APPROVE_ACTION_REJECTED'::text]));

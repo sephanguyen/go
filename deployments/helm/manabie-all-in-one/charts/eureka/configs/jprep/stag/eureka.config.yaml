@@ -1,0 +1,15 @@
+common:
+  google_cloud_project: staging-manabie-online
+issuers:
+  - issuer: manabie
+    audience: jprep-stag
+    jwks_endpoint: http://shamir:5680/.well-known/jwks.json
+keycloak_auth:
+  path: https://ji-sso.jprep.jp
+  realm: jprep
+  client_id: manabie
+school_information:
+  school_id: -2147483647
+  school_name: JPREP School
+storage:
+  bucket: stag-manabie-backend

@@ -1,0 +1,53 @@
+name: "Pull Request Labeler"
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - develop
+      - hotfix/202**
+      - hotfixes/202**
+    paths-ignore:
+      - ".githooks/**"
+      - ".github/**"
+      - ".vscode/**"
+      - "deployments/terraform/**"
+      - "docs/**"
+      - "examples/**"
+      - "features/**"
+      - "mock/**"
+      - "scripts/**"
+      - ".golangci.yml"
+      - ".sops.yaml"
+      - "atlantis.yaml"
+      - "Makefile"
+      - "README.md"
+
+jobs:
+  triage:
+    if: github.event.pull_request.merged == true
+    permissions:
+      contents: read
+      pull-requests: write
+    runs-on: ["self-hosted", "100m-400mi", "spot", "persistent"]
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/labeler@v4
+        id: label-the-PR
+        with:
+          pr-number: ${{ github.event.pull_request.number }}
+          configuration-path: .github/features_directories.yml
+
+      - uses: actions/github-script@v6
+        name: Add feature-unuset label
+        if: ${{ steps.label-the-PR.outputs.new-labels == '' }}
+        with:
+          script: |
+            github.rest.issues.addLabels({
+              issue_number: ${{ github.event.pull_request.number }},
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: ["feature-unset"]
+            })
+  

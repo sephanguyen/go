@@ -1,0 +1,10 @@
+#!/bin/bash
+
+root_dir=$(git rev-parse --show-toplevel)
+. ${root_dir}/.githooks/prepare-commit-msg.bash
+
+
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+message_file_name=$1
+MESSAGE=$(cat ${message_file_name})
+get_id "$MESSAGE" "$CURRENT_BRANCH" "$message_file_name"

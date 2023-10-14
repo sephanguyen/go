@@ -1,0 +1,10 @@
+{
+  "name": "local_manabie_bob_source_connector",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "database.password": "${file:/config/kafka-connect-config.properties:password}",
+    "database.hostname": "${file:/config/kafka-connect-config.properties:hostname}",
+    "database.port": "5432",
+    "database.sslmode": "disable"
+  }
+}

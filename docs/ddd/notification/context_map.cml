@@ -1,0 +1,39 @@
+ContextMap DDDSampleMap {
+    contains UserMgmt
+    contains Syllabus
+    contains EntryExit
+    contains Notification
+    contains MasterMgmt
+
+    Notification [D]<-[U] UserMgmt {
+        implementationTechnology = "Database schema"
+    }
+
+    Notification [U, OHS, PL]->[D] Syllabus {
+        implementationTechnology = "NATS Jestream"
+    }
+
+    Notification [U, OHS, PL]->[D] EntryExit {
+        implementationTechnology = "NATS Jestream"
+    }
+
+    MasterMgmt [U, PL] -> [D] Notification {
+        implementationTechnology = "NATS Jestream"
+    }
+}
+
+BoundedContext UserMgmt {
+}
+
+BoundedContext Syllabus {
+}
+
+BoundedContext Notification {
+}
+
+BoundedContext MasterMgmt {
+}
+
+BoundedContext EntryExit {
+}
+

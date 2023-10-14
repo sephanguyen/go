@@ -1,0 +1,23 @@
+{
+  "name": "prod_jprep_bob_to_lessonmgmt_lesson_reports_sink_connector",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+    "tasks.max": "1",
+    "topics": "prod.jprep.bob.public.lesson_reports",
+    "connection.url": "${file:/config/kafka-connect-config.properties:lessonmgmt_url}",
+    "auto.create": "false",
+    "insert.mode": "upsert",
+    "table.name.format": "lesson_reports",
+    "fields.whitelist": "created_at,deleted_at,form_config_id,lesson_id,lesson_report_id,report_submitting_status,resource_path,updated_at",
+    "transforms": "unwrap,route",
+    "transforms.route.type": "org.apache.kafka.connect.transforms.RegexRouter",
+    "transforms.route.regex": "([^.]+).([^.]+).([^.]+).([^.]+).([^.]+)",
+    "transforms.route.replacement": "$5",
+    "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+    "delete.enabled": "false",
+    "pk.mode": "record_value",
+    "pk.fields": "lesson_report_id",
+    "transforms.unwrap.drop.tombstones": "true",
+    "transforms.unwrap.delete.handling.mode": "drop"
+  }
+}

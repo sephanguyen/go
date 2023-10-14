@@ -1,0 +1,167 @@
+syntax = "proto3";
+
+package usermgmt.v2;
+
+import "common/v1/enums.proto";
+import "usermgmt/v2/enums.proto";
+import "usermgmt/v2/school_info.proto";
+import "usermgmt/v2/users.proto";
+import "google/protobuf/timestamp.proto";
+
+option java_package = "com.manabie.libs.proto.usermgmt.v2";
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/usermgmt/v2;upb";
+
+
+message StudentPhoneNumbers {
+  repeated StudentPhoneNumberWithID student_phone_number_with_ids = 1;
+  StudentContactPreference contact_preference = 2;
+}
+
+message StudentProfile {
+  string id = 1;
+  string name = 2;
+  common.v1.Country country = 3;
+  string phone = 4;
+  string email = 5;
+  string grade = 6;
+  string avatar = 7;
+  google.protobuf.Timestamp birthday = 8;
+  google.protobuf.Timestamp created_at = 9;
+  repeated int64 divs = 10;
+  School school = 11;
+  string grade_name = 12;
+}
+
+message StudentProfileV2 {
+  string id = 1;
+  string student_external_id = 2 [deprecated = true];
+  string first_name = 3;
+  string last_name = 4;
+  string first_name_phonetic = 5;
+  string last_name_phonetic = 6;
+  string email = 7;
+  string grade_id = 8;
+  string student_note = 9;
+  google.protobuf.Timestamp birthday = 10;
+  Gender gender = 11;
+  StudentPhoneNumber student_phone_number = 12 [deprecated = true];
+  repeated string tag_ids = 13;
+  repeated string location_ids = 14;
+  repeated SchoolHistory school_histories = 15;
+  repeated EnrollmentStatusHistory enrollment_status_histories = 16;
+  repeated UserAddress user_addresses = 17;
+  StudentEnrollmentStatus enrollment_status = 18;
+  string enrollment_status_str = 19;
+  string password = 20;
+  string external_user_id = 21;
+  StudentPhoneNumbers student_phone_numbers = 22;
+  string username = 23;
+}
+
+message StudentComment {
+  string comment_id = 1;
+  string coach_id = 2;
+  string student_id = 3;
+  string comment_content = 4;
+  google.protobuf.Timestamp updated_at = 5;
+  google.protobuf.Timestamp created_at = 6;
+}
+
+message ImportStudentRequest {
+  bytes payload = 1;
+}
+
+message ImportStudentResponse {
+  message ImportStudentError {
+    int32 row_number = 1;
+    string error = 2;
+    string field_name = 3;
+  }
+  repeated ImportStudentError errors = 1;
+}
+
+message GenerateImportStudentTemplateRequest {
+}
+
+message GenerateImportStudentTemplateResponse {
+  bytes data = 1;
+}
+
+message GetStudentProfileRequest {repeated string student_ids = 1;}
+
+message GetStudentProfileResponse {repeated StudentProfile profiles = 1;}
+
+message UpsertStudentCommentRequest {StudentComment student_comment = 1;}
+
+message UpsertStudentCommentResponse {bool successful = 1;}
+
+message DeleteStudentCommentsRequest {repeated string comment_ids = 1;}
+
+message DeleteStudentCommentsResponse {bool successful = 1;}
+
+message RetrieveStudentCommentRequest {string student_id = 1;}
+
+message RetrieveStudentCommentResponse {repeated CommentInfo comment = 1;}
+
+message CommentInfo {
+  string coach_name = 1 [deprecated = true];
+  StudentComment student_comment = 2;
+}
+
+message ErrorMessage {
+  string field_name = 1;
+  string error = 2;
+  int32 code = 3;
+  int32 index = 4;
+}
+
+message ErrorMessages {
+  repeated ErrorMessage messages = 1;
+}
+
+message UpsertStudentRequest {
+  repeated StudentProfileV2 student_profiles = 1;
+}
+
+message UpsertStudentResponse {
+  repeated StudentProfileV2 student_profiles = 1;
+  repeated ErrorMessage messages = 2;
+}
+
+service StudentService {
+  rpc GetStudentProfile(GetStudentProfileRequest)
+      returns (GetStudentProfileResponse);
+
+  rpc UpsertStudentComment(UpsertStudentCommentRequest)
+      returns (UpsertStudentCommentResponse);
+
+  rpc DeleteStudentComments(DeleteStudentCommentsRequest)
+      returns (DeleteStudentCommentsResponse);
+
+  rpc GenerateImportStudentTemplate(GenerateImportStudentTemplateRequest)
+      returns (GenerateImportStudentTemplateResponse);
+
+  rpc ImportStudent(ImportStudentRequest)
+      returns (ImportStudentResponse) {option deprecated = true;};
+
+  rpc ImportStudentV2(ImportStudentRequest)
+      returns (UpsertStudentResponse);
+
+  rpc UpsertStudent(UpsertStudentRequest)
+      returns (UpsertStudentResponse);
+
+  rpc RetrieveStudentComment(RetrieveStudentCommentRequest)
+      returns (RetrieveStudentCommentResponse);
+}
+
+message ImportWithusManagaraBaseCSVRequest {
+  bytes payload = 1;
+}
+message ImportWithusManagaraBaseCSVResponse {
+  repeated ErrorMessage messages = 2;
+}
+
+service WithusStudentService {
+  rpc ImportWithusManagaraBaseCSV(ImportWithusManagaraBaseCSVRequest)
+      returns (ImportWithusManagaraBaseCSVResponse);
+}

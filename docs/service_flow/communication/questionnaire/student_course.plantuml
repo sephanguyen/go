@@ -1,0 +1,20 @@
+#Deprecate
+@startuml StudentCourse
+hide circle
+
+actor Fatima as Fatima order 10
+participant Yasuo as Yasuo order 40
+Fatima -> Yasuo:  publish "EventStudentPackage" to topic StudentPackage.Upserted
+note over Fatima
+payload: {
+    student_id,is_active,
+    course_ids,...
+}
+
+end note
+activate Yasuo
+note right Yasuo
+Upsert information in events to table notification_student_course
+end note
+deactivate Yasuo
+@enduml

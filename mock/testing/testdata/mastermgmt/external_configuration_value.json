@@ -1,0 +1,132 @@
+{
+	"schema": [
+		{
+			"column_name": "config_key",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "config_value",
+			"data_type": "text",
+			"column_default": "''::text",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "config_value_type",
+			"data_type": "text",
+			"column_default": "'string'::text",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "configuration_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "last_editor",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "external_configuration_value",
+			"policyname": "rls_external_configuration_value",
+			"qual": "permission_check(resource_path, 'external_configuration_value'::text)",
+			"with_check": "permission_check(resource_path, 'external_configuration_value'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "external_configuration_value",
+			"policyname": "rls_external_configuration_value_restrictive",
+			"qual": "permission_check(resource_path, 'external_configuration_value'::text)",
+			"with_check": "permission_check(resource_path, 'external_configuration_value'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "external_configuration_value_key",
+			"column_name": "config_key",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "fk_config_value_external_org_id",
+			"column_name": "resource_path",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "external_configuration_value__pk",
+			"column_name": "configuration_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "external_configuration_value_resource_unique",
+			"column_name": "config_key",
+			"constraint_type": "UNIQUE"
+		},
+		{
+			"constraint_name": "external_configuration_value_resource_unique",
+			"column_name": "resource_path",
+			"constraint_type": "UNIQUE"
+		}
+	],
+	"table_name": "external_configuration_value",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

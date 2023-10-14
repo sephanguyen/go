@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+
+package draft.v1;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/draft/v1;dpb";
+
+
+//Define send coverage request be sent from utils command
+message SendCoverageRequest {
+    float coverage = 1; // coverage get from utils cmd
+    string branchName = 2;
+    string repository = 3;
+    string key = 4;
+    string targetBranch = 5;
+    bool integration = 6;
+}
+
+//Define send coverage response
+message SendCoverageResponse {
+    enum Message {
+        FAIL = 0;
+        PASS = 1;
+    }
+    Message message = 1;
+}
+
+message CreateTargetCoverageRequest {
+    string branchName = 1;
+    string repository = 2;
+    string key = 3;
+    float coverage = 4;
+    bool integration = 6;
+}
+
+message CreateTargetCoverageResponse {
+}
+
+message UpdateTargetCoverageRequest {
+    string branchName = 1;
+    string repository = 2;
+    string key = 3;
+    float coverage = 4;
+    bool integration = 6;
+}
+
+message UpdateTargetCoverageResponse {
+}
+
+// Define gRPC service 
+service SendCoverageService {
+    rpc SendCoverage(SendCoverageRequest) returns (SendCoverageResponse);
+    rpc CreateTargetCoverage(CreateTargetCoverageRequest) returns (CreateTargetCoverageResponse);
+    rpc UpdateTargetCoverage(UpdateTargetCoverageRequest) returns (UpdateTargetCoverageResponse);
+}

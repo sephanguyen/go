@@ -1,0 +1,134 @@
+syntax = "proto3";
+
+package eureka.v1;
+
+import "eureka/v1/assignments.proto";
+import "common/v1/requests.proto";
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/eureka/v1;epb";
+
+message ListStudyPlanByCourseRequest{
+    common.v1.Paging paging = 1;
+    string course_id = 2;
+}
+
+message ListStudyPlanByCourseResponse{
+    common.v1.Paging next_page = 1;
+    repeated StudyPlan study_plans = 2;
+}
+
+message GetBookIDsBelongsToStudentStudyPlanRequest {
+    string student_id = 1;
+    repeated string book_ids = 2;
+}
+
+message GetBookIDsBelongsToStudentStudyPlanResponse {
+    repeated string book_ids = 1;
+}
+
+message StudentTopicStudyProgress {
+    string topic_id = 1;
+    google.protobuf.Int32Value completed_study_plan_item = 2;
+    google.protobuf.Int32Value total_study_plan_item = 3;
+    google.protobuf.Int32Value average_score = 4;
+}
+
+message StudentChapterStudyProgress {
+    string chapter_id = 1;
+    google.protobuf.Int32Value average_score = 2;
+}
+
+message StudentBookStudyProgressRequest {
+    string course_id = 1;
+    string book_id = 2;
+    string student_id = 3;
+}
+
+message StudentBookStudyProgressResponse {
+    repeated StudentTopicStudyProgress topic_progress = 1;
+    repeated StudentChapterStudyProgress chapter_progress = 2;
+}
+
+message RetrieveStudyPlanItemEventLogsRequest {
+    repeated string study_plan_item_id = 1;
+}
+  
+message RetrieveStudyPlanItemEventLogsResponse {
+    message Log {
+        string session_id = 1;
+        int32 learning_time = 2;
+        google.protobuf.Timestamp created_at = 3;
+        google.protobuf.Timestamp completed_at = 4;
+    }
+    message StudyPlanItemLog {
+        string study_plan_item_id = 1;
+        repeated Log logs = 2;
+    }
+    repeated StudyPlanItemLog items = 1;
+}
+
+message GetLOHighestScoresByStudyPlanItemIDsRequest {
+  repeated string study_plan_item_ids = 1;
+}
+
+message GetLOHighestScoresByStudyPlanItemIDsResponse {
+  message LOHighestScore {
+    string study_plan_item_id = 1;
+    float percentage = 2;
+  }
+
+  repeated LOHighestScore lo_highest_scores = 1;
+}
+
+message StudentStatCrown {
+    string AchievementCrown = 1;
+    int32 total = 2;
+}
+
+message StudentStat {
+    int32 total_learning_time = 1;
+    int32 total_lo_finished = 2;
+    repeated StudentStatCrown crowns = 3;
+}
+  
+message RetrieveStatRequest {
+    string student_id = 1;
+}
+  
+message RetrieveStatResponse {
+    StudentStat student_stat = 1;
+}
+
+message GetStudentStudyPlanRequest {
+    repeated string study_plan_ids = 1;
+    repeated string student_ids = 2;
+    repeated string learning_material_ids = 3;
+}
+
+message GetStudentStudyPlanResponse {
+    message StudentStudyPlan {
+        string study_plan_id = 1;
+        string student_id = 2;
+    }
+    repeated StudentStudyPlan student_study_plans = 1;
+}
+
+service StudyPlanReaderService {
+    rpc ListStudyPlanByCourse(ListStudyPlanByCourseRequest) //TODO: x SP team
+        returns (ListStudyPlanByCourseResponse);
+    rpc GetBookIDsBelongsToStudentStudyPlan(GetBookIDsBelongsToStudentStudyPlanRequest) // TODO: seem deprecated-verify again SP team
+        returns (GetBookIDsBelongsToStudentStudyPlanResponse);
+    rpc StudentBookStudyProgress(StudentBookStudyProgressRequest) //TODO: x -SP team, stat
+        returns (StudentBookStudyProgressResponse);
+    rpc RetrieveStudyPlanItemEventLogs(RetrieveStudyPlanItemEventLogsRequest)//TODO: x SP team
+        returns (RetrieveStudyPlanItemEventLogsResponse);
+    rpc GetLOHighestScoresByStudyPlanItemIDs(GetLOHighestScoresByStudyPlanItemIDsRequest) //TODO: x SP team
+        returns (GetLOHighestScoresByStudyPlanItemIDsResponse);
+    rpc RetrieveStat(RetrieveStatRequest) returns (RetrieveStatResponse);
+    rpc RetrieveStatV2(RetrieveStatRequest) returns (RetrieveStatResponse);
+    rpc GetStudentStudyPlan(GetStudentStudyPlanRequest)
+        returns (GetStudentStudyPlanResponse);
+}
+  

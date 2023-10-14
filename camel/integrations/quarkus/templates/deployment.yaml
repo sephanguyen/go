@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "quarkus.fullname" . }}
+  labels:
+    {{- include "quarkus.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "quarkus.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "quarkus.selectorLabels" . | nindent 8 }}
+      annotations:
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+        sidecar.istio.io/inject: "false"
+        rand: "{{ randNumeric 3 }}"
+    spec:
+      serviceAccountName: camel-k-demo-runner
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ include "util.fullname" . }}
+        - name: secret-volume
+          secret:
+            secretName: {{ include "util.fullname" . }}
+        - name: decrypted-secret-volume
+          emptyDir: {}
+      initContainers:
+        - name: decrypt-secret
+          image: mozilla/sops:v3.7.3-alpine #TODO replace with cached image
+          command:
+            - sops
+            - -d
+            - --output=/decrypted/application.secrets.properties
+            - --output-type=dotenv
+            - /secrets/application.secrets.encrypted.env
+          volumeMounts:
+            - name: secret-volume
+              mountPath: /secrets
+            - name: decrypted-secret-volume
+              mountPath: /decrypted
+          {{- if eq "local" (include "util.environment" .) }}
+          env:
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: "/secrets/service_credential.json"
+          {{- end }}
+      containers:
+        - name: "{{ include "util.fullname" . }}"
+          image: "{{ .Values.global.image.repository }}:{{ .Values.global.image.tag }}"
+          imagePullPolicy: "{{ .Values.global.image.pullPolicy }}"
+          volumeMounts:
+            - name: config-volume
+              mountPath: /configs/
+              readOnly: true
+            - name: secret-volume
+              mountPath: /secrets/
+              readOnly: true
+            - name: decrypted-secret-volume
+              mountPath: /decrypted
+          env:
+          - name: SMALLRYE_CONFIG_LOCATIONS
+            value: "file:///decrypted/application.secrets.properties,file:///configs/application.properties"
+          - name: SMALLRYE_CONFIG_LOG_VALUES
+            value: "true"
+          {{- if eq "local" (include "util.environment" .) }}
+          - name: GOOGLE_APPLICATION_CREDENTIALS
+            value: "/secrets/service_credential.json"
+          {{- end }}
+      {{- with .Values.global.affinity }}
+      affinity: {{- . | toYaml | nindent 8 }}
+      {{- end }}
+      {{- with .Values.global.tolerations }}
+      tolerations: {{- . |toYaml | nindent 8 }}
+      {{- end }}

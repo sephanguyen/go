@@ -1,0 +1,308 @@
+syntax = "proto3";
+
+package syllabus.v1;
+
+import "common/v1/requests.proto";
+import "syllabus/v1/study_plan.proto";
+import "syllabus/v1/enums.proto";
+import "google/protobuf/timestamp.proto";
+import "syllabus/v1/learning_material.proto";
+import "syllabus/v1/statistics_service.proto";
+
+import "options/annotations.proto";
+option (transformer.go_repo_package) = "entities";
+option (transformer.go_protobuf_package) = "sspb";
+option (transformer.go_models_file_path) =
+    "../internal/eureka/entities/study_plan.go";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/syllabus/v1;sspb";
+
+// ** BEGIN DEFINE FOR MODIFIER ** //
+message UpsertMasterInfoRequest { repeated MasterStudyPlan master_items = 1; }
+
+message UpsertMasterInfoResponse {}
+
+message UpsertIndividualInfoRequest {
+  repeated StudyPlanItem individual_items =
+      1; // field student_id should required in API
+}
+
+message UpsertIndividualInfoResponse {}
+
+message UpsertAllocateMarkerRequest {
+  message AllocateMarkerItem {
+    string teacher_id = 1;
+    int32 number_allocated = 2;
+  }
+
+  message SubmissionItem {
+    string submission_id = 1;
+    StudyPlanItemIdentity study_plan_item_identity = 2;
+  }
+
+  repeated SubmissionItem submissions = 1;
+  repeated AllocateMarkerItem allocate_markers = 2;
+  string created_by = 3;
+}
+
+message UpsertAllocateMarkerResponse {}
+
+message UpdateStudentLearningItemTimeRequest {
+  repeated StudyPlanItem master_items = 1;
+  string student_id = 2;
+  google.protobuf.Timestamp start_date = 3;
+  google.protobuf.Timestamp end_date = 4;
+}
+message UpdateStudentLearningItemTimeResponse {}
+
+message DeleteRequest { string study_plan_id = 1; }
+
+message DeleteResponse {}
+
+message BulkUpdateStudyPlanItemSchoolDateRequest {
+  repeated StudyPlanItemIdentity study_plan_item_identities = 1;
+  google.protobuf.Timestamp school_date = 2;
+}
+
+message BulkUpdateStudyPlanItemSchoolDateResponse {}
+message BulkUpdateStudyPlanItemStatusRequest {
+  repeated StudyPlanItemIdentity study_plan_item_identities = 1;
+  StudyPlanItemStatus study_plan_item_status = 2;
+}
+message BulkUpdateStudyPlanItemStatusResponse {}
+
+message InsertStudyPlanRequest {
+  option (transformer.go_struct) = "StudyPlan";
+  string study_plan_id = 1 [ (transformer.map_to) = "ID" ];
+  int32 school_id = 2;
+  string name = 3;
+  string course_id = 4;
+  // New fields
+  string book_id = 5;
+  StudyPlanStatus status = 6 [ (transformer.skip) = true ];
+  bool track_school_progress = 7;
+  repeated int32 grades = 8;
+}
+
+message InsertStudyPlanResponse { string study_plan_id = 1; }
+
+message UpdateStudyPlanRequest {
+  string study_plan_id = 1;
+  int32 school_id = 2;
+  string name = 3;
+  // New fields
+  StudyPlanStatus status = 6;
+  bool track_school_progress = 7;
+  repeated int32 grades = 8;
+}
+
+message UpdateStudyPlanResponse {}
+
+enum UpdateStudyPlanItemsStartEndDateFields {
+  ALL = 0;
+  START_DATE = 1;
+  END_DATE = 2;
+}
+
+message UpdateStudyPlanItemsStartEndDateRequest {
+  repeated StudyPlanItemIdentity study_plan_item_identities = 1;
+  UpdateStudyPlanItemsStartEndDateFields fields = 2;
+  google.protobuf.Timestamp start_date = 3;
+  google.protobuf.Timestamp end_date = 4;
+}
+
+message UpdateStudyPlanItemsStartEndDateResponse {}
+
+message UpsertSchoolDateRequest {
+  repeated StudyPlanItemIdentity study_plan_item_identities = 1;
+  google.protobuf.Timestamp school_date = 2;
+}
+
+message UpsertSchoolDateResponse {}
+// ** END DEFINE FOR MODIFIER ** //
+
+// ** BEGIN DEFINE FOR READER ** //
+message ListStudentStudyPlansRequest {
+  common.v1.Paging paging = 1;
+  repeated string student_ids = 2;
+  string course_id = 3;
+  string search = 4;
+  string status = 5;
+  repeated string book_ids = 6;
+  repeated int32 grades = 7;
+}
+
+message ListStudentStudyPlansResponse {
+  common.v1.Paging next_page = 1;
+  repeated StudentStudyPlanData study_plans = 2;
+}
+
+message ListToDoItemRequest {
+  common.v1.Paging page = 1;
+  string student_id = 2;
+  StudyPlanItemToDoStatus status = 3;
+  repeated string course_ids = 4;
+}
+
+message ListToDoItemResponse {
+  common.v1.Paging next_page = 1;
+  repeated StudyPlanToDoItem todo_items = 2;
+}
+
+message ListStudentStudyPlanItemRequest {
+  StudyPlanItem master_study_plan_item = 1;
+  repeated string student_ids = 2;
+}
+
+message ListStudentStudyPlanItemResponse {
+  repeated StudyPlanItem individual_items =
+      1; // field student_id should required
+}
+
+message ListByCourseRequest {
+  common.v1.Paging paging = 1;
+  string course_id = 2;
+}
+
+message ListByCourseResponse {
+  common.v1.Paging next_page = 1;
+  repeated StudyPlanData study_plans = 2;
+}
+
+message StudyPlanItemImport {
+  string study_plan_id = 1;
+  string learning_material_id = 2;
+  google.protobuf.Timestamp available_from = 3;
+  google.protobuf.Timestamp available_to = 4;
+  google.protobuf.Timestamp start_date = 5;
+  google.protobuf.Timestamp end_date = 6;
+}
+
+message ImportStudyPlanRequest {
+  repeated StudyPlanItemImport study_plan_items = 1;
+}
+
+message RowError {
+  int32 row_number = 1;
+  string err = 2;
+}
+
+message ImportStudyPlanResponse {
+  string task_id = 1;
+  repeated RowError row_errors = 2;
+}
+
+message RetrieveStudyPlanIdentityRequest {
+  repeated string study_plan_item_ids = 1;
+}
+
+message RetrieveStudyPlanIdentityResponse {
+  repeated StudyPlanIdentity study_plan_identities = 1;
+}
+
+message ListAllocateTeacherRequest { repeated string location_ids = 1; }
+
+message ListAllocateTeacherResponse {
+  message AllocateTeacherItem {
+    string teacher_id = 1;
+    string teacher_name = 2;
+    int32 number_assigned_submission = 3;
+  }
+
+  repeated AllocateTeacherItem allocate_teachers = 1;
+}
+
+// ListToDoItemByBookTree will sort the item by chapter_display_order,
+// topic_display_order and lm_display_order
+message ListToDoItemStructuredBookTreeRequest {
+  common.v1.Paging page = 1;
+  StudyPlanIdt study_plan_identity = 2;
+}
+
+// StudentStudyPlanItem wrapper LMbase and the study plan item fields
+message StudentStudyPlanItem {
+  LearningMaterialBase learning_material = 1;
+  google.protobuf.Timestamp start_date = 2;
+  google.protobuf.Timestamp end_date = 3;
+  google.protobuf.Timestamp completed_at = 4;
+  google.protobuf.Timestamp school_date = 5;
+  StudyPlanItemStatus study_plan_item_status = 6;
+  google.protobuf.Timestamp available_from = 7;
+  google.protobuf.Timestamp available_to = 8;
+  string book_id = 9;
+}
+// item should be order by chapter_display_order, topic_display_order,
+// lm_display_order. Use offset + limit (must: sort) len(todo_items) >=
+// len(topic_progresses)
+message ListToDoItemStructuredBookTreeResponse {
+  common.v1.Paging next_page = 1;
+  repeated StudentStudyPlanItem todo_items = 2;
+  repeated StudentTopicStudyProgress topic_progresses = 3;
+}
+
+message RetrieveAllocateMarkerRequest {
+  StudyPlanItemIdentity study_plan_item_identity = 1;
+}
+
+message RetrieveAllocateMarkerResponse {
+  string marker_id = 1;
+}
+// ** END DEFINE FOR READER ** //
+
+service StudyPlan {
+  // ** BEGIN MODIFIER ** //
+  rpc UpsertMasterInfo(UpsertMasterInfoRequest)
+      returns (UpsertMasterInfoResponse);
+  rpc UpsertIndividual(UpsertIndividualInfoRequest)
+      returns (UpsertIndividualInfoResponse);
+  rpc UpdateStudentLearningItemTime(
+      UpdateStudentLearningItemTimeRequest) // EditAssignmentTime
+      returns (UpdateStudentLearningItemTimeResponse);
+  rpc Delete(DeleteRequest) // DeleteStudyPlanBelongsToACourse
+      returns (DeleteResponse);
+  rpc BulkUpdateStudyPlanItemSchoolDate(
+      BulkUpdateStudyPlanItemSchoolDateRequest) // UpdateStudyPlanItemsSchoolDate
+      returns (BulkUpdateStudyPlanItemSchoolDateResponse);
+  rpc BulkUpdateStudyPlanItemStatus(
+      BulkUpdateStudyPlanItemStatusRequest) // UpdateStudyPlanItemsStatus
+      returns (BulkUpdateStudyPlanItemStatusResponse);
+  rpc InsertStudyPlan(InsertStudyPlanRequest) // split from UpsertStudyPlan
+      returns (InsertStudyPlanResponse);
+  rpc UpdateStudyPlan(UpdateStudyPlanRequest) // split from UpsertStudyPlan
+      returns (UpdateStudyPlanResponse);
+  rpc UpdateStudyPlanItemsStartEndDate(UpdateStudyPlanItemsStartEndDateRequest)
+      returns (UpdateStudyPlanItemsStartEndDateResponse);
+  rpc UpsertSchoolDate(UpsertSchoolDateRequest)
+      returns (UpsertSchoolDateResponse);
+  rpc UpsertAllocateMarker(UpsertAllocateMarkerRequest)
+      returns (UpsertAllocateMarkerResponse);
+  rpc ImportStudyPlan(ImportStudyPlanRequest)
+      returns (ImportStudyPlanResponse);
+  // ** END MODIFIER ** //
+
+  // ** BEGIN READER **//
+  rpc ListStudentStudyPlan(ListStudentStudyPlansRequest) // ListStudentStudyPlans 
+      returns (ListStudentStudyPlansResponse);
+  rpc ListToDoItem(
+      ListToDoItemRequest) // ListStudentToDoItems //
+      returns (ListToDoItemResponse);
+  rpc ListStudentStudyPlanItem(
+      ListStudentStudyPlanItemRequest) // GetChildStudyPlanItems
+      returns (ListStudentStudyPlanItemResponse);
+
+  rpc ListByCourse(ListByCourseRequest) // ListStudyPlanByCourse
+      returns (ListByCourseResponse);
+  rpc RetrieveStudyPlanIdentity(
+      RetrieveStudyPlanIdentityRequest) // GetStudyPlanIdentity
+      returns (RetrieveStudyPlanIdentityResponse);
+  rpc ListToDoItemStructuredBookTree(
+      ListToDoItemStructuredBookTreeRequest) // TODO: define it. teacher call
+                                             // it, ListToDoItemsByTopics +
+                                             // ListTopicsByStudyPlan
+      returns (ListToDoItemStructuredBookTreeResponse);
+  rpc ListAllocateTeacher(ListAllocateTeacherRequest)
+      returns (ListAllocateTeacherResponse);
+  rpc RetrieveAllocateMarker(RetrieveAllocateMarkerRequest)
+      returns (RetrieveAllocateMarkerResponse);
+  // ** END READER ** //
+}

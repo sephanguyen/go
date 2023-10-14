@@ -1,0 +1,38 @@
+version: '3'
+
+services:
+  schema_generator:
+    container_name: schema_generator
+    build:
+      context: ..
+      dockerfile: ./developments/dbschema.Dockerfile
+    environment: 
+      - WAIT_HOSTS=postgres:5432
+    volumes:
+      - ../mock/testing/testdata:/backend/mock/testing/testdata
+      - ../internal:/backend/internal
+      - ../migrations:/backend/migrations
+    depends_on:
+      - postgres
+    networks:
+      - local
+
+  postgres:
+    image: postgres:11.9-alpine
+    container_name: postgres
+    command: postgres -c 'max_connections=200'
+    environment: 
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=testdb
+      - DATABASE_HOST=localhost
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    networks:
+      - local
+  
+volumes:
+  postgres:
+networks:
+  local:
+    driver: bridge

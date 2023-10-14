@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+package timesheet.v1;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/timesheet/v1;tpb";
+
+service TimesheetStateMachineService{
+  rpc DeleteTimesheet(DeleteTimesheetRequest) returns (DeleteTimesheetResponse);
+  rpc SubmitTimesheet(SubmitTimesheetRequest) returns (SubmitTimesheetResponse);
+  rpc ApproveTimesheet(ApproveTimesheetRequest) returns (ApproveTimesheetResponse);
+  rpc CancelApproveTimesheet(CancelApproveTimesheetRequest) returns (CancelApproveTimesheetResponse);
+  rpc ConfirmTimesheet(ConfirmTimesheetRequest) returns (ConfirmTimesheetResponse);
+  rpc CancelSubmissionTimesheet(CancelSubmissionTimesheetRequest) returns (CancelSubmissionTimesheetResponse);
+}
+
+
+message DeleteTimesheetRequest {
+  string timesheet_id = 1;
+}
+
+message DeleteTimesheetResponse {
+  bool success = 1;
+}
+
+message SubmitTimesheetRequest {
+  string timesheet_id = 1;
+}
+
+message SubmitTimesheetResponse {
+  bool success = 1;
+}
+
+message ApproveTimesheetRequest {
+  repeated string timesheet_ids = 1;
+}
+
+message ApproveTimesheetResponse {
+  bool success = 1;
+}
+
+message TimesheetLessonLockEvt {
+  repeated string lesson_ids = 1;
+}
+
+message CancelApproveTimesheetRequest {
+  string timesheet_id = 1;
+}
+
+message CancelApproveTimesheetResponse {
+  bool success = 1;
+}
+
+message ConfirmTimesheetRequest {
+  repeated string timesheet_ids = 2;
+} 
+
+message ConfirmTimesheetResponse {
+  bool success = 1;
+}
+
+message CancelSubmissionTimesheetRequest{
+  string timesheet_id = 1;
+}
+
+message CancelSubmissionTimesheetResponse{
+  bool success = 1;
+}

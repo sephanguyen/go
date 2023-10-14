@@ -1,0 +1,10 @@
+enabled: true
+podAnnotations:
+    sidecar.istio.io/proxyCPU: 4m
+    sidecar.istio.io/proxyMemory: 64Mi
+replicaCount: 2
+resources:
+    requests:
+        cpu: 4m
+        memory: 60Mi
+useGlobalCronScheduledScaling: true

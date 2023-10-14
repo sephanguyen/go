@@ -1,0 +1,56 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio-{{ include "infras.fullname" . }}
+  labels:
+    app.kubernetes.io/name: minio-{{ include "infras.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "infras.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.minio.service.type }}
+  ports:
+    - port: {{ .Values.minio.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: minio-{{ include "infras.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-{{ include "infras.fullname" . }}
+  labels:
+    app.kubernetes.io/name: postgres-{{ include "infras.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "infras.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.postgres.service.type }}
+  ports:
+    - port: {{ .Values.postgres.service.port }}
+      targetPort: tcp
+      protocol: TCP
+      name: tcp
+  selector:
+    app.kubernetes.io/name: postgres-{{ include "infras.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: alloydb-{{ include "infras.fullname" . }}
+  labels:
+    app.kubernetes.io/name: alloydb-{{ include "infras.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "infras.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.alloydb.service.type }}
+  ports:
+    - port: {{ .Values.alloydb.service.port }}
+      targetPort: tcp
+      protocol: TCP
+      name: tcp
+  selector:
+    app.kubernetes.io/name: alloydb-{{ include "infras.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}

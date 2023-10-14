@@ -1,0 +1,133 @@
+# suite: eureka hasurav2 deployment yaml file
+# templates:
+#   - charts/eureka/templates/app.yaml
+# values:
+#   - ../charts/eureka/values.yaml
+#   - ../values.yaml
+#   - ../local-manabie-values.yaml
+#   - ../../platforms/gateway/local-manabie-values.yaml
+# tests:
+#   - it: First template should be hasurav2-configmaps
+#     set: &defaultHelmSet
+#       global.eureka.enabled: true
+#       global.eureka.sops.enabled: true
+#       global.environment: local
+#       global.vendor: manabie
+#       global.image.repository: local
+#       eureka.image.tag: v1
+#       eurekav2.service.port: 5450
+#       global.sqlProxy.enabled: true
+#     documentIndex: 13
+#     asserts:
+#       - isKind:
+#           of: ConfigMap
+#       - isNotNull:
+#           path: data.[files-hasurav2-metadata-databases-eureka-functions-public_find_quiz_by_lo_id.yaml]
+#       - isNotNull:
+#           path: data.[files-hasurav2-metadata-databases-eureka-tables-public_scheduler_items.yaml]
+#   - it: 2nd template should be hasurav2-secret
+#     set:
+#       <<: *defaultHelmSet
+#     documentIndex: 14
+#     asserts:
+#       - isKind:
+#           of: Secret
+#       - isNotNull:
+#           path: data.[hasura2.secrets.encrypted.yaml]
+#   - it: 3rd template should be hasura-pdb
+#     set:
+#       <<: *defaultHelmSet
+#     documentIndex: 15
+#     asserts:
+#       - isKind:
+#           of: PodDisruptionBudget
+#       - equal:
+#           path: spec.maxUnavailable
+#           value: 1
+#   - it: 4th template should be hasurav2 service account
+#     set:
+#       <<: *defaultHelmSet
+#     documentIndex: 16
+#     asserts:
+#       - isKind:
+#           of: ServiceAccount
+#       - equal:
+#           path: metadata.name
+#           value: eureka-hasura
+#       - isNotNull:
+#           path: metadata.annotations.[iam.gke.io/gcp-service-account]
+#   - it: 5th template should be hasura-deployment
+#     set:
+#       <<: *defaultHelmSet
+#     documentIndex: 17
+#     asserts:
+#       - isKind:
+#           of: Deployment
+#       - equal:
+#           path: spec.template.spec.initContainers[0].name
+#           value: wait-for-shamir
+#       # metadata
+#       - equal:
+#           path: spec.template.metadata.labels.[app.kubernetes.io/name]
+#           value: "eureka-hasurav2"
+
+#       # containers
+#       - equal:
+#           path: spec.template.spec.containers[0].name
+#           value: hasura
+#       - equal:
+#           path: spec.template.spec.containers[0].image
+#           value: asia.gcr.io/student-coach-e1e95/customized-graphql-engine:v2.8.1.cli-migrations-v3
+#       - contains:
+#           path: spec.template.spec.containers[0].ports
+#           content:
+#             name: http
+#             containerPort: 8080
+#             protocol: TCP
+#       # volumes
+#       - equal:
+#           path: spec.template.spec.volumes[0].name
+#           value: hasurav2-secrets-decrypted-volume
+#       - equal:
+#           path: spec.template.spec.volumes[1].configMap.name
+#           value: eureka-hasurav2-metadata
+#       #affinity
+#       - contains:
+#           path: spec.template.spec.affinity.nodeAffinity.preferredDuringSchedulingIgnoredDuringExecution
+#           content:
+#             weight: 10
+#             preference:
+#               matchExpressions:
+#               - key: cloud.google.com/gke-spot
+#                 operator: In
+#                 values:
+#                 - "true"
+#       - contains:
+#           path: spec.template.spec.affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution
+#           content:
+#             weight: 100
+#             podAffinityTerm:
+#               labelSelector:
+#                   matchLabels:
+#                     app.kubernetes.io/name: eureka-hasurav2
+#               topologyKey: kubernetes.io/hostname
+#       - contains:
+#           path: spec.template.spec.tolerations
+#           content:
+#             effect: NoSchedule
+#             key: "cloud.google.com/gke-spot"
+#             operator: Exists
+#   - it: 6th template should be hasura-service
+#     set:
+#       <<: *defaultHelmSet
+#     documentIndex: 18
+#     asserts:
+#       - isKind:
+#           of: Service
+#       - contains:
+#           path: spec.ports
+#           content:
+#             name: http
+#             protocol: TCP
+#             targetPort: http
+#             port: 8080

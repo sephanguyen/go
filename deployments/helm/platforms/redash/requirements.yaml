@@ -1,0 +1,9 @@
+dependencies:
+  - name: redis
+    version: "^16.8.5"
+    repository: "https://charts.bitnami.com/bitnami"
+    condition: redis.enabled
+  - name: virtualservice
+    repository: file://../../libs/virtualservice
+    version: 0.1.0
+

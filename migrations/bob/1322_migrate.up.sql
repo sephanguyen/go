@@ -1,0 +1,1 @@
+ALTER TABLE tagged_user DROP CONSTRAINT IF EXISTS tagged_user__parent_id__fk;

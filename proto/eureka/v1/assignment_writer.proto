@@ -1,0 +1,148 @@
+syntax = "proto3";
+
+package eureka.v1;
+
+import "common/v1/enums.proto";
+import "eureka/v1/assignments.proto";
+import "eureka/v1/enums.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/empty.proto";
+
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/eureka/v1;epb";
+
+message UpsertStudyPlansRequest {
+  message StudyPlan {
+    google.protobuf.StringValue study_plan_id = 1;
+    int32 school_id = 2;
+    string name = 3;
+    StudyPlanType type = 4;
+    common.v1.Country country = 5;
+    string course_id = 6;
+    string book_id = 7;
+  }
+  repeated StudyPlan study_plans = 1;
+}
+
+message UpsertStudyPlansResponse {
+  repeated string study_plan_ids = 1;
+}
+
+message UpsertAssignmentsRequest {
+  repeated Assignment assignments = 1;
+}
+
+message UpsertAssignmentsResponse {
+  repeated string assignment_ids = 1;
+}
+
+message StudentList {
+  repeated string student_ids = 1;
+}
+message AssignStudyPlanRequest {
+  string study_plan_id = 1;
+  oneof data {
+    string course_id = 2;
+    int32 class_id = 3;
+    string student_id = 4;
+  }
+}
+
+message AssignStudyPlanResponse {}
+
+message UpsertStudyPlanItemRequest {
+  repeated StudyPlanItem study_plan_items = 1;
+}
+
+message UpsertStudyPlanItemResponse {
+  repeated string study_plan_item_ids = 1;
+}
+
+message ScheduleStudyPlan {
+  string study_plan_item_id = 1;
+  oneof item {
+    string assignment_id = 2;
+    string lo_id = 3;
+    string lesson_id = 4;
+  }
+}
+
+message ScheduleStudyPlanRequest {
+  repeated ScheduleStudyPlan schedule = 1;
+}
+
+message ScheduleStudyPlanResponse {}
+
+message DeleteAssignmentsRequest {
+  repeated string assignment_ids = 1;
+}
+
+message DeleteAssignmentsResponse {}
+
+message EditAssignmentTimeRequest {
+  repeated string study_plan_item_ids = 1;
+  string student_id = 2;
+  google.protobuf.Timestamp start_date = 3;
+  google.protobuf.Timestamp end_date = 4;
+  UpdateType update_type = 5;
+}
+
+enum UpdateType {
+  UPDATE_START_DATE_END_DATE = 0;
+  UPDATE_START_DATE = 1;
+  UPDATE_END_DATE = 2;
+}
+
+message EditAssignmentTimeResponse {}
+
+message AssignAssignmentsToTopicRequest {
+  string topic_id = 1;
+
+  message Assignment {
+    string assignment_id = 2;
+    int32 display_order = 3;
+  }
+
+  repeated Assignment assignment = 4;
+}
+
+message AssignAssignmentsToTopicResponse {}
+
+message UpsertAssignmentsDataRequest {
+  repeated Assignment assignments = 1;
+}
+
+message UpsertAdHocAssignmentRequest {
+  string student_id = 1;
+  string course_id = 2;
+  string chapter_name = 3;
+  string topic_name = 4;
+  string book_name = 5;
+  string study_plan_name = 6;
+  google.protobuf.Timestamp start_date = 7;
+  google.protobuf.Timestamp end_date = 8;
+  Assignment assignment = 9;
+}
+
+message UpsertAdHocAssignmentResponse {
+  string assignment_id = 1;
+}
+
+service AssignmentModifierService {
+  rpc UpsertStudyPlanItem(UpsertStudyPlanItemRequest) //TODO: remove it
+      returns (UpsertStudyPlanItemResponse);
+  rpc AssignStudyPlan(AssignStudyPlanRequest) returns (AssignStudyPlanResponse);//TODO: remove it
+  rpc DeleteAssignments(DeleteAssignmentsRequest) // TODO: LM team - noneed anymore since have DeleteLearningMaterial
+      returns (DeleteAssignmentsResponse);
+  rpc EditAssignmentTime(EditAssignmentTimeRequest) //TODO: SP team
+      returns (EditAssignmentTimeResponse);
+  rpc AssignAssignmentsToTopic(AssignAssignmentsToTopicRequest) //TODO: remove it
+      returns (AssignAssignmentsToTopicResponse);
+  rpc UpsertAssignmentsData(UpsertAssignmentsDataRequest) // TODO: remove it
+      returns (google.protobuf.Empty);
+  rpc UpsertAssignments(UpsertAssignmentsRequest) //TODO: LM team -- no need
+      returns (UpsertAssignmentsResponse);
+  rpc UpsertAdHocAssignment(UpsertAdHocAssignmentRequest) // TODO: LM team
+      returns (UpsertAdHocAssignmentResponse);
+}

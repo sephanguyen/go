@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package manabie.tom;
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option (gogoproto.goproto_registration) = true;
+option go_package = "github.com/manabie-com/backend/pkg/genproto/tom;pb";
+
+message GetStudentQuestionShouldExpiredSolvedRequest {
+  string duration = 1; // using golang time duration: 1m, 10m, 1h, 24h...
+}
+
+message GetStudentQuestionShouldExpiredSolvedResponse {
+  repeated string student_question_ids = 1;
+}
+
+service Internal {
+  rpc GetStudentQuestionShouldExpiredSolved(
+      GetStudentQuestionShouldExpiredSolvedRequest)
+      returns (GetStudentQuestionShouldExpiredSolvedResponse){option deprecated = true;};
+}

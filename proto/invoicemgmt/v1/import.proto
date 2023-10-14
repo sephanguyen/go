@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package invoicemgmt.v1;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/invoicemgmt/v1;invoice_pb";
+
+message ImportInvoiceScheduleRequest {
+  bytes payload = 1;
+}
+
+message ImportInvoiceScheduleResponse {
+  message ImportInvoiceScheduleError {
+    int32 row_number = 1;
+    string error = 2;
+  }
+  repeated ImportInvoiceScheduleError errors = 1;
+}
+
+message ImportPartnerBankRequest {
+  bytes payload = 1;
+}
+
+message ImportPartnerBankResponse {
+  message ImportPartnerBankError {
+    int32 row_number = 1;
+    string error = 2;
+  }
+  repeated ImportPartnerBankError errors = 1;
+}
+
+service ImportMasterDataService {
+    rpc ImportInvoiceSchedule(ImportInvoiceScheduleRequest)
+        returns (ImportInvoiceScheduleResponse);
+    rpc ImportPartnerBank(ImportPartnerBankRequest)
+        returns (ImportPartnerBankResponse);
+}

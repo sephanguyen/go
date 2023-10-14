@@ -1,0 +1,102 @@
+# This workflow belongs to the Tiered Quality Gate.
+# See https://manabie.atlassian.net/browse/LT-25865 for more information.
+name: tiered.post_merge_unit_test
+on:
+  push:
+    branches:
+      - develop
+      - release/*
+    paths:
+      - '**.go'
+  workflow_dispatch:
+
+# Use branch name for concurrency.group, to limit only one run per branch
+concurrency:
+  group: ${{ github.ref }}
+
+jobs:
+  post-merge-unit-test:
+    # runs-on: ["self-hosted", "go", "backend", "unit-test", "spot"]
+    runs-on: ["self-hosted", "8-32-large-runner"]
+    permissions:
+        contents: 'read'
+        id-token: 'write'
+        actions: 'read'
+        pull-requests: write
+    timeout-minutes: 30
+    steps:
+      - name: Collect Workflow Telemetry
+        continue-on-error: true
+        timeout-minutes: 5
+        uses: manabie-com/workflow-telemetry-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.BUILD_GITHUB_TOKEN }}
+        with:
+          comment_on_pr: false
+
+      - name: Checkout source
+        uses: actions/checkout@v3
+        timeout-minutes: 5
+
+      - name: Check cache exists
+        id: check-cache-exists
+        run: |
+          set -eu
+
+          DIR="/home/runner/go/pkg/mod"
+          if [ -d "$DIR" ]
+          then
+            if [ "$(ls -A $DIR)" ]; then
+              echo "Take action $DIR is not Empty"
+              echo "is-cache-exist=true" >> $GITHUB_OUTPUT
+            else
+              echo "$DIR is Empty"
+              echo "is-cache-exist=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "Directory $DIR not found."
+            echo "is-cache-exist=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Authenticate to Google Cloud
+        if: steps.check-cache-exists.outputs.is-cache-exist == 'false'
+        uses: google-github-actions/auth@v0
+        with:
+          workload_identity_provider: "projects/456005132078/locations/global/workloadIdentityPools/eibanam-identity/providers/eibanam-identity"
+          service_account: "stag-identity-hook-runner@staging-manabie-online.iam.gserviceaccount.com"
+
+      - name: Cache go libs
+        if: steps.check-cache-exists.outputs.is-cache-exist == 'false'
+        id: go-libs-cache
+        uses: mansagroup/gcs-cache-action@v1.0.3
+        with:
+          bucket: stag-manabie-cache
+          path: |
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-postmerge-unitest-${{ hashFiles('go.sum', '*/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-postmerge-unitest-
+
+      - name: Run unit tests
+        # env:
+        #   GOCACHE: /home/runner/.cache/go-unit-test/go-build
+        run: |
+          make test-unit-for-coverage
+          mv cover.func cover.$GITHUB_SHA.func
+
+      - name: Update branch unit test coverage
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download coverage-v0.0.3 \
+            --pattern 'coverage-linux-amd64' \
+            --clobber \
+            --output coverage
+          chmod +x ./coverage
+          ./coverage update \
+            --coverfile=cover.$GITHUB_SHA.func \
+            --ref=${{ github.ref_name }} \
+            --repo=${{ github.repository }} \
+            --address=api.staging.manabie.io:443 \
+            --key=${{ secrets.DRAFT_SERVICE_SECRET_KEY }} \
+            --verbosity=debug

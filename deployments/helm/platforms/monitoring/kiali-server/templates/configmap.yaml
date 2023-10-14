@@ -1,0 +1,120 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kiali
+  namespace: istio-system
+  labels:
+    helm.sh/chart: kiali-server-1.45.0
+    app: kiali
+    app.kubernetes.io/name: kiali
+    app.kubernetes.io/instance: kiali
+    version: "v1.45.0"
+    app.kubernetes.io/version: "v1.45.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: "kiali"
+data:
+  config.yaml: |
+  {{- with .Values.auth }}
+    auth:
+    {{- toYaml . | nindent 6 }}
+  {{- end }}
+    deployment:
+      accessible_namespaces:
+      - '**'
+      additional_service_yaml: {}
+      affinity:
+        node: {}
+        pod: {}
+        pod_anti: {}
+      custom_secrets: []
+      host_aliases: []
+      hpa:
+        api_version: autoscaling/v2beta2
+        spec: {}
+      image_digest: ""
+      image_name: quay.io/kiali/kiali
+      image_pull_policy: Always
+      image_pull_secrets: []
+      image_version: v1.45
+      ingress:
+        additional_labels: {}
+        class_name: nginx
+        override_yaml:
+          metadata: {}
+      ingress_enabled: false
+      instance_name: kiali
+      logger:
+        log_format: text
+        log_level: info
+        sampler_rate: "1"
+        time_field_format: 2006-01-02T15:04:05Z07:00
+      namespace: istio-system
+      node_selector: {}
+      pod_annotations: {}
+      pod_labels:
+        sidecar.istio.io/inject: "false"
+      priority_class_name: ""
+      replicas: 1
+      resources:
+        limits:
+          memory: 1Gi
+        requests:
+          cpu: 10m
+          memory: 64Mi
+      secret_name: kiali
+      service_annotations: {}
+      service_type: ""
+      tolerations: []
+      version_label: v1.45.0
+      view_only_mode: false
+    external_services:
+      custom_dashboards:
+        enabled: true
+      istio:
+        istiod_deployment_name: {{ .Values.external_services.istio.istiod_deployment_name }}
+        root_namespace: {{ .Values.external_services.istio.root_namespace }}
+        config_map_name: {{ .Values.external_services.istio.config_map_name }}
+      prometheus:
+        auth:
+          type: basic
+          username: "admin"
+          password: {{ .Values.external_services.prometheus.auth.password }}
+        url: "{{ .Values.external_services.prometheus.url }}"
+      grafana:
+        enabled : true
+        url: "{{ .Values.external_services.grafana.url }}"
+        auth:
+          type: basic
+          username: "{{ .Values.external_services.grafana.auth.username }}"
+          password: "{{ .Values.external_services.grafana.auth.password }}"
+      tracing:
+        enabled: true
+        auth:
+          type: "none"
+        in_cluster_url: "{{ .Values.external_services.tracing.in_cluster_url }}"
+        use_grpc: {{ .Values.external_services.tracing.use_grpc }}
+        service: {{ .Values.external_services.tracing.service }}
+    identity:
+      cert_file: ""
+      private_key_file: ""
+    istio_namespace: istio-system
+    kiali_feature_flags:
+      certificates_information_indicators:
+        enabled: true
+        secrets:
+        - cacerts
+        - istio-ca-secret
+      clustering:
+        enabled: true
+    login_token:
+      signing_key: CHANGEME
+    server:
+      metrics_enabled: true
+      metrics_port: 9090
+      port: 20001
+      web_root: /
+    {{- if ne "local" .Values.environment }}
+      web_port: 443
+    {{- end }}
+...

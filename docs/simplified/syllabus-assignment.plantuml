@@ -1,0 +1,132 @@
+@startuml
+hide circle
+
+namespace Syllabus-Assignment {
+
+    class Assignment <<entity>>  {
+        name string
+        content jsonb
+        attachment []string
+        settings jsonb
+        max_grade int
+        check_list jsonb
+        instruction string
+        type string
+        original_topic string
+        is_required_grade bool
+        ' display_order int
+        ' updated_at: timestamp
+        ' created_at: timestamp
+        ' deleted_at: timestamp
+    }
+
+    class StudyPlan <<entity>> {
+        study_plan_id string
+        name string
+        master_study_plan_id string
+        name string
+        study_plan_type string
+        course_id string
+        ' updated_at: timestamp
+        ' created_at: timestamp
+        ' deleted_at: timestamp
+
+    }
+
+    class StudyPlanItem <<entity>> {
+        study_plan_item_id string
+        study_plan_id string
+        available_from datetime
+        available_to dateimte
+        start_date datetime
+        end_date dateimte
+        copy_study_plan_item_id string
+        content_structure jsonb
+        content_structure_flatten string
+        ' updated_at: timestamp
+        ' created_at: timestamp
+        ' deleted_at: timestamp
+    }
+
+    class AssignmentsStudyPlanItems <<value object>> {
+        assignment_id string
+        study_plan_item_id string
+        ' updated_at: timestamp
+        ' created_at: timestamp
+        ' deleted_at: timestamp
+    }
+
+
+    class Student <<value object>> {}
+
+    class StudentSubmission <<entity>> {
+        student_submission_id string
+        study_plan_item_id string
+        assignment_id string
+        student_id string
+        submission_content jsonb
+        student_submission_grade_id string
+        ' updated_at: timestamp
+        ' created_at: timestamp
+        ' deleted_at: timestamp
+    }
+    note right of StudentSubmission::submission_content
+    student media attachment ids
+    end note
+
+    class StudentSubmissionGrade <<entity>> {
+        student_submission_grade_id string
+        student_submission_id string
+        grade int
+        grade_content jsonb
+        status string
+        ' updated_at: timestamp
+        ' created_at: timestamp
+        ' deleted_at: timestamp
+    }
+    note right of StudentSubmissionGrade::grade_content
+    teacher media attachment ids
+    end note
+    note right of StudentSubmissionGrade::status
+    one of
+    * SUBMISSION_STATUS_IN_PROGRESS
+    * SUBMISSION_STATUS_MARKED
+    * SUBMISSION_STATUS_NOT_MARKED
+    * SUBMISSION_STATUS_RETURNED
+    end note
+ 
+    class Media <<entity>> {
+        media_id string
+        name string
+        resource string
+        comments jsonb
+        type string
+        ' updated_at: timestamp
+        ' created_at: timestamp
+        ' deleted_at: timestamp
+    }
+    note right of Media::resource
+    brigthcove video id for video
+    google storage link for other types
+    end note
+    note right of Media::type
+    one of
+    * MEDIA_TYPE_NONE
+    * MEDIA_TYPE_AUDIO
+    * MEDIA_TYPE_IMAGE
+    * MEDIA_TYPE_PDF
+    * MEDIA_TYPE_VIDEO
+    end note
+
+    StudyPlan "1" *-- "n" StudyPlanItem
+    StudyPlanItem "1" .. "n" AssignmentsStudyPlanItems
+    AssignmentsStudyPlanItems "n" .. "1" Assignment
+    StudentSubmission "1" .. "n" StudentSubmissionGrade
+    Student --> StudyPlanItem : submit assignment
+    Student "1" .. "n" StudentSubmission
+    StudyPlanItem "n" .. "n" StudentSubmission
+    Assignment "1" *.. "n" Media
+    StudentSubmission "1" *.. "n" Media
+    StudentSubmissionGrade "1" *.. "n" Media
+}
+@enduml

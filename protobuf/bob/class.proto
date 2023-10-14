@@ -1,0 +1,361 @@
+syntax = "proto3";
+
+package manabie.bob;
+
+import "enum.proto";
+import "courses.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option (gogoproto.goproto_registration) = true;
+option go_package = "github.com/manabie-com/backend/pkg/genproto/bob;pb";
+
+message CreateClassRequest {
+  int32 school_id = 1;
+  string class_name = 2;
+  repeated string grades = 3;                // for admin only
+  repeated Subject subjects = 4;             // for admin only
+  string owner_id = 5 [ deprecated = true ]; // for admin only
+  repeated string owner_ids = 6;             // for admin only
+}
+
+message CreateClassResponse { int32 class_id = 1; }
+
+message EditClassRequest {
+  int32 class_id = 1;
+  string class_name = 2;
+}
+
+message EditClassResponse {}
+
+message JoinClassRequest { string class_code = 1; }
+
+message JoinClassResponse { int32 class_id = 1; }
+
+message ClassEntity {
+  int32 id = 1;
+  string name = 2;
+  string avatar = 3;
+  int32 school_id = 4;
+  string class_code = 5;
+  repeated Subject subject = 6;
+  repeated string grades = 7;
+  repeated string owner_ids = 8;
+  uint32 total_student = 9;
+}
+
+message RemoveMemberRequest {
+  int32 class_id = 1;
+  repeated string user_ids = 2;
+}
+
+message RemoveMemberResponse {}
+
+message LeaveClassRequest { int32 class_id = 1; }
+
+message LeaveClassResponse {}
+
+message AssignPresetStudyPlanResponse {}
+
+message RetrieveAssignedPresetStudyPlanRequest { int32 class_id = 1; }
+
+message RetrieveAssignedPresetStudyPlanResponse {
+  repeated PresetStudyPlan preset_study_plans = 1;
+}
+
+message RetrieveClassMemberRequest { int32 class_id = 1; }
+
+message RetrieveClassMemberResponse {
+  message Member {
+    string user_id = 1;
+    UserGroup user_group = 2;
+    google.protobuf.Timestamp join_at = 3;
+  }
+  repeated Member members = 10;
+}
+message TeacherAssignClassWithTopicRequest {
+  int32 class_id = 1;
+  string topic_id = 2;
+  google.protobuf.Timestamp start_date = 3;
+  google.protobuf.Timestamp end_date = 4;
+}
+
+message TeacherAssignClassWithTopicResponse { string assignment_id = 1; }
+
+message RetrieveActiveClassAssignmentRequest {
+  int32 class_id = 1;
+  int32 limit = 2;
+  int32 page = 3;
+}
+
+message Assignment {
+  string assignment_id = 1;
+  Topic topic = 2;
+  AssignmentStatus status = 3;
+  google.protobuf.Timestamp start_date = 4;
+  google.protobuf.Timestamp end_date = 5;
+  repeated string student_ids = 6;
+}
+
+message RetrieveActiveClassAssignmentResponse {
+  repeated Assignment assignments = 1;
+  int32 total = 2;
+}
+
+message RetrievePastClassAssignmentRequest {
+  int32 class_id = 1;
+  int32 limit = 2;
+  int32 page = 3;
+}
+
+message RetrievePastClassAssignmentResponse {
+  repeated Assignment assignments = 1;
+  int32 total = 2;
+}
+
+message RemoveAssignedTopicRequest { string assignment_id = 1; }
+
+message RemoveAssignedTopicResponse {}
+
+message EditAssignedTopicRequest {
+  string assignment_id = 1;
+  google.protobuf.Timestamp start_date = 2;
+  google.protobuf.Timestamp end_date = 3;
+}
+
+message EditAssignedTopicResponse { string new_assignment_id = 1; }
+
+message RetrieveClassLearningStatisticsRequest {
+  int32 class_id = 1;
+  string topic_id = 2;
+}
+
+message StudentLearningStatistics {
+  message ByTopic {
+    string student_id = 1;
+    string student_name = 2;
+    float completion = 4;
+    int32 time_spent = 5;
+    float accuracy = 6;
+    google.protobuf.Timestamp date = 7;
+  }
+
+  oneof data { ByTopic by_topic = 1; }
+}
+
+message RetrieveClassLearningStatisticsResponse {
+  repeated StudentLearningStatistics stats = 1;
+  int32 total_completion = 2;
+  float average_score = 3;
+  int32 total_submitted = 4;
+}
+
+message RetrieveStudentLearningStatisticsRequest {
+  int32 class_id = 1;
+  string topic_id = 2;
+  string student_id = 3;
+}
+
+message RetrieveStudentLearningStatisticsResponse {
+  repeated StudentLearningStatistics stats = 1;
+}
+
+message RegisterTeacherRequest {
+  string email = 1;
+  string name = 2;
+  string school_name = 3;
+  Country country = 4;
+}
+
+message RegisterTeacherResponse { bool successful = 1; }
+
+message SubmissionScore {
+  string submission_id = 1;
+  float given_score = 2;
+  float total_score = 3;
+  string notes = 4;
+}
+
+message MarkTheSubmissionsRequest { repeated SubmissionScore scores = 1; }
+
+message MarkTheSubmissionsResponse { bool successful = 1; }
+
+message CreateCustomAssignmentRequest {
+  int32 class_id = 1;
+  Country country = 2;
+  Subject subject = 3;
+  google.protobuf.StringValue name = 4;
+  google.protobuf.StringValue grade = 5;
+  google.protobuf.StringValue copied_topic_id = 6;
+  google.protobuf.StringValue instruction = 7;
+  repeated Attachment attachments = 8;
+  bool essay_required = 9;
+  google.protobuf.Timestamp start_date = 10;
+  google.protobuf.Timestamp end_date = 11;
+  // null will copy all lo ids
+  repeated string selected_lo_ids = 12;
+}
+
+message CreateCustomAssignmentResponse {
+  string topic_id = 1;
+  string assignment_id = 2;
+}
+
+message UpdateClassCodeRequest { int32 class_id = 1; }
+
+message UpdateClassCodeResponse {
+  int32 class_id = 1;
+  string class_code = 2;
+}
+
+message AddClassMemberRequest {
+  int32 class_id = 1;
+  repeated string teacher_ids = 2;
+}
+
+message AddClassMemberResponse {}
+
+message RetrieveScoreRequest {
+  oneof filter {
+    string student_id = 1;
+    int32 class_id = 2;
+  }
+  string topic_id = 3;
+}
+
+message RetrieveScoreResponse {
+  message Score {
+    string student_id = 1;
+    float given_score = 2;
+    float total_score = 3;
+  }
+  repeated Score scores = 1;
+  float average_score = 2;
+}
+
+message TeacherRetrieveStreamTokenRequest { string lesson_id = 1; }
+
+message TeacherRetrieveStreamTokenResponse {
+  string stream_token = 2;
+  string video_token = 1;
+}
+
+message StudentRetrieveStreamTokenRequest { string lesson_id = 1; }
+
+message StudentRetrieveStreamTokenResponse { string stream_token = 2; }
+
+message EndLiveLessonRequest { string lesson_id = 1; }
+
+message EndLiveLessonResponse {}
+
+message JoinLessonRequest { string lesson_id = 1; }
+
+message JoinLessonResponse {
+  string stream_token = 1;
+  string whiteboard_token = 2;
+  string room_id = 3;
+  string video_token = 4;
+}
+
+message LeaveLessonRequest {
+  string user_id = 1;
+  string lesson_id = 2;
+}
+
+message LeaveLessonResponse {}
+
+message TeacherAssignStudentWithTopicRequest {
+  repeated string student_ids = 1;
+  string topic_id = 2;
+  google.protobuf.Timestamp start_date = 3;
+  google.protobuf.Timestamp end_date = 4;
+  int32 class_id = 5;
+}
+
+message TeacherAssignStudentWithTopicResponse { string assignment_id = 1; }
+
+message Comment {
+  string comment = 1;
+  google.protobuf.Duration duration = 2;
+}
+
+message ConvertedImage {
+  int32 width = 1;
+  int32 height = 2;
+  string image_url = 3;
+}
+
+message Media {
+  string media_id = 1;
+  string name = 2;
+  string resource = 3;
+  repeated Comment comments = 4;
+  MediaType type = 5;
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp updated_at = 7;
+  repeated ConvertedImage images = 8;
+}
+
+message RetrieveMediaRequest { repeated string media_ids = 1; }
+
+message RetrieveMediaResponse { repeated Media media = 1; }
+
+message UpsertMediaRequest { repeated Media media = 1; }
+
+message UpsertMediaResponse { repeated string media_ids = 1; }
+
+service Class {
+  rpc RegisterTeacher(RegisterTeacherRequest)
+      returns (RegisterTeacherResponse) {
+    option deprecated = true;
+  };
+  rpc CreateClass(CreateClassRequest) returns (CreateClassResponse) {}
+  rpc EditClass(EditClassRequest) returns (EditClassResponse) {}
+  rpc JoinClass(JoinClassRequest) returns (JoinClassResponse) {}
+  rpc RemoveMember(RemoveMemberRequest) returns (RemoveMemberResponse) {}
+  rpc LeaveClass(LeaveClassRequest) returns (LeaveClassResponse) {}
+  rpc RetrieveAssignedPresetStudyPlan(RetrieveAssignedPresetStudyPlanRequest)
+      returns (RetrieveAssignedPresetStudyPlanResponse) {}
+  rpc RetrieveClassMember(RetrieveClassMemberRequest)
+      returns (RetrieveClassMemberResponse) {}
+  rpc TeacherAssignClassWithTopic(TeacherAssignClassWithTopicRequest)
+      returns (TeacherAssignClassWithTopicResponse) {}
+  rpc RemoveAssignedTopic(RemoveAssignedTopicRequest)
+      returns (RemoveAssignedTopicResponse) {option deprecated=true;};
+  rpc EditAssignedTopic(EditAssignedTopicRequest)
+      returns (EditAssignedTopicResponse) {option deprecated=true;};
+  rpc RetrieveActiveClassAssignment(RetrieveActiveClassAssignmentRequest)
+      returns (RetrieveActiveClassAssignmentResponse) {option deprecated=true;};
+  rpc RetrievePastClassAssignment(RetrievePastClassAssignmentRequest)
+      returns (RetrievePastClassAssignmentResponse) {option deprecated=true;};
+
+  rpc RetrieveClassLearningStatistics(RetrieveClassLearningStatisticsRequest)
+      returns (RetrieveClassLearningStatisticsResponse){option deprecated=true;};
+  rpc RetrieveStudentLearningStatistics(
+      RetrieveStudentLearningStatisticsRequest)
+      returns (RetrieveStudentLearningStatisticsResponse){option deprecated=true;};
+
+  rpc CreateCustomAssignment(CreateCustomAssignmentRequest)
+      returns (CreateCustomAssignmentResponse) {option deprecated = true;};
+  rpc MarkTheSubmissions(MarkTheSubmissionsRequest)
+      returns (MarkTheSubmissionsResponse){option deprecated = true;};
+  rpc ListSubmissions(ListSubmissionsRequest) returns (ListSubmissionsResponse){option deprecated = true;};
+  rpc RetrieveScore(RetrieveScoreRequest) returns (RetrieveScoreResponse) {option deprecated=true;};
+
+  rpc UpdateClassCode(UpdateClassCodeRequest) returns (UpdateClassCodeResponse);
+
+  rpc AddClassMember(AddClassMemberRequest) returns (AddClassMemberResponse) {}
+  rpc TeacherRetrieveStreamToken(TeacherRetrieveStreamTokenRequest)
+      returns (TeacherRetrieveStreamTokenResponse);
+  rpc StudentRetrieveStreamToken(StudentRetrieveStreamTokenRequest)
+      returns (StudentRetrieveStreamTokenResponse);
+  rpc EndLiveLesson(EndLiveLessonRequest) returns (EndLiveLessonResponse);
+  rpc JoinLesson(JoinLessonRequest) returns (JoinLessonResponse) {};
+  rpc LeaveLesson(LeaveLessonRequest) returns (LeaveLessonResponse) {};
+  rpc TeacherAssignStudentWithTopic(TeacherAssignStudentWithTopicRequest)
+      returns (TeacherAssignStudentWithTopicResponse) {option deprecated = true;};
+  rpc RetrieveMedia(RetrieveMediaRequest) returns (RetrieveMediaResponse) {};
+  rpc UpsertMedia(UpsertMediaRequest) returns (UpsertMediaResponse) {};
+}

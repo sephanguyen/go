@@ -1,0 +1,84 @@
+name: pull_request.syllabus_allow_pr_by_limit
+
+on:
+  pull_request:
+    types: [opened, reopened, ready_for_review]
+    branches:
+      - develop
+
+jobs:
+  label_syllabus_pr:
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'syllabus-open-pr-from-queue') && contains(github.event.action, 'opened') }}
+    runs-on: ["self-hosted", "100m-400mi", "spot", "persistent"]
+    outputs:
+      teams: ${{ steps.actorTeams.outputs.teams }}
+    steps:
+      - uses: tspascoal/get-user-teams-membership@v2
+        id: actorTeams
+        with:
+          username: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.READ_ORG }}
+
+      - if: ${{ contains(steps.actorTeams.outputs.teams, 'squad-syllabus') }}
+        name: squad-syllabus
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          labels: |
+            squad-syllabus
+  allow_pr:
+    if: ${{ contains(needs.label_syllabus_pr.outputs.teams, 'squad-syllabus') || contains(github.event.pull_request.labels.*.name, 'squad-syllabus') && !github.event.pull_request.draft }}
+    runs-on: ["self-hosted", "100m-400mi", "spot", "persistent"]
+    needs: label_syllabus_pr
+    steps:
+      - name: Check pull request and close if over the limit
+        id: allow_pr
+        uses: actions/github-script@v6
+        env:
+          PR_LIMIT: 12
+        with:
+          github-token: ${{ secrets.BUILD_GITHUB_TOKEN }}
+          script: |
+            const SYLLABUS_SQUAD_LABEL = 'squad-syllabus';
+            const SYLLABUS_PR_QUEUE_LABEL = 'syllabus-pr-queue';
+            const { PR_LIMIT: prLimit, GITHUB_TOKEN } = process.env;
+            const PRInfo = context.payload.pull_request;
+            const query = `query($owner:String!, $name:String!, $baseRefName: String!) {
+              repository(owner:$owner, name:$name){
+                pullRequests(first:100, baseRefName: $baseRefName, labels: ["${SYLLABUS_SQUAD_LABEL}"], states: OPEN) {
+                  nodes {
+                    id,
+                    isDraft,
+                  }
+                }
+              }
+            }`;
+            const variables = {
+              owner: context.repo.owner,
+              name: context.repo.repo,
+              baseRefName: context.payload.pull_request.base.ref,
+            };
+            const result = await github.graphql(query, variables);
+            const count = result.repository.pullRequests.nodes.filter(node => !node.isDraft).length;
+            if (count <= prLimit) return;
+            const mutation =`mutation ConvertToDraft($pullRequestId: ID!) {
+              convertPullRequestToDraft(input: {clientMutationId: "github-action", pullRequestId: $pullRequestId}) {
+                __typename
+              }
+            }` ;
+            await Promise.all([
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: `Change pull request to draft because it is over the limit: <b>${SYLLABUS_SQUAD_LABEL}</b> has reached <b>${prLimit}</b> pull request.
+                       We will auto open your pull request if open PRs total < ${prLimit}.
+                `,
+              }),
+              github.rest.issues.addLabels({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                labels: [SYLLABUS_PR_QUEUE_LABEL],
+              }),
+              github.graphql(mutation, { pullRequestId: context.payload.pull_request.node_id }),
+            ]);

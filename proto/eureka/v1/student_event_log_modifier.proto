@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+package eureka.v1;
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/eureka/v1;epb";
+
+message StudentEventLogPayload {
+  float correct = 1;
+  bool correctness = 2;
+  string event = 3;
+  string lo_id = 4;
+  string question_id = 5;
+  float selected_answer_index = 6;
+  string session_id = 7;
+  string study_plan_item_id = 8; 
+  float time_spent = 9;
+  string topic_id = 10;
+  float total_questions = 11;
+}
+
+message StudentEventLog {
+  string event_id = 1;
+  string event_type = 2;
+  google.protobuf.Timestamp created_at = 3;
+  StudentEventLogPayload payload = 4;
+  // will be added to payload without modifying payload
+  map<string, string> extra_payload = 5;
+}
+
+message CreateStudentEventLogsRequest {
+  repeated StudentEventLog student_event_logs = 1;
+
+  // Previously in the CreateStudentEventLogs API,
+  // the student_id is extracted from the token, so
+  // this message doesn't need to have the student_id field.
+  // Now this field is added, but for internal usage only, like
+  // pushing the event logs with student_id to NATS
+  // for background processing.
+  // Setting this field from the client side (e.g mobile)
+  // won't have any effect.
+  string student_id = 2;
+}
+
+message CreateStudentEventLogsResponse {
+  bool successful = 1;
+}
+
+service StudentEventLogModifierService {
+  rpc CreateStudentEventLogs(CreateStudentEventLogsRequest) returns (CreateStudentEventLogsResponse); //TODO: refactor then
+}

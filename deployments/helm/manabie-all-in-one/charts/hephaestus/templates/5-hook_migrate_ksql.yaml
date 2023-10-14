@@ -1,0 +1,140 @@
+{{- if .Values.postHookUpsertKsqlMigration }}
+# Add configmap for source kafka connectors
+# These source kafka connectors contain no secret
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+{{ include "util.labels" . | indent 4 }}
+  name: ksql-migration-config
+data:
+{{- tpl (.Files.Glob "ksql/ksql-migrations.properties").AsConfig . | nindent 2 }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+{{ include "util.labels" . | indent 4 }}
+  name: ksql-migration-file
+data:
+{{- (tpl (.Files.Glob (printf "ksql/migrations/%s/%s/**.sql" .Values.global.vendor .Values.global.environment)).AsConfig . )| nindent 2 }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "util.fullname" . }}-migrate-ksql-schema
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "5"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+  labels:
+    helm.sh/chart: {{ include "util.chart" . }}
+    app.kubernetes.io/name: {{ include "util.name" . }}-migrate-ksql-schema
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- if .Chart.AppVersion }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+    {{- end }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "util.name" . }}-migrate-ksql-schema
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        sidecar.istio.io/inject: "false"
+    spec:
+      restartPolicy: Never
+      serviceAccountName: {{ include "util.serviceAccountName" . }}
+      {{- with (default .Values.global.imagePullSecrets .Values.imagePullSecrets) }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+      # hephaestus config map
+      - name: hephaestus-config
+        configMap:
+          name: {{ include "util.fullname" . }}
+          items:
+          - key: hephaestus.common.config.yaml
+            path: hephaestus.common.config.yaml
+          - key: hephaestus.config.yaml
+            path: hephaestus.config.yaml
+      - name: ksql-migration-config
+        configMap:
+          name: ksql-migration-config
+          defaultMode: 0777
+      - name: ksql-migration-file
+        configMap:
+          name: ksql-migration-file
+          defaultMode: 0777
+{{- if eq "local" .Values.global.environment }}
+      - name: service-credential
+        secret:
+          secretName: {{ include "util.fullname" . }}
+          items:
+          - key: service_credential.json
+            path: service_credential.json
+{{- end }}
+      # hephaestus secret volume
+      - name: hephaestus-secrets
+        secret:
+          secretName: {{ include "util.fullname" . }}
+          items:
+          - key: hephaestus.secrets.encrypted.yaml
+            path: hephaestus.secrets.encrypted.yaml
+      initContainers:
+        {{- include "util.workloadInitContainers" . | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}-migrate-ksql
+          image: "{{ .Values.ksqldb.migrate.image.repository }}:{{ .Values.ksqldb.migrate.image.tag }}"
+          imagePullPolicy: IfNotPresent
+          command:
+            - ksql-migrations
+            - apply
+            - -a
+            - -c
+            - /ksql/ksql-migrations.properties
+          volumeMounts:
+          # hephaestus config volumes
+          - name: hephaestus-config
+            mountPath: /configs/hephaestus.common.config.yaml
+            subPath: hephaestus.common.config.yaml
+            readOnly: true
+          - name: hephaestus-config
+            mountPath: /configs/hephaestus.config.yaml
+            subPath: hephaestus.config.yaml
+            readOnly: true
+          - name: ksql-migration-config
+            mountPath: /ksql/ksql-migrations.properties
+            subPath: ksql-migrations.properties
+          - name: ksql-migration-file
+            mountPath: /ksql/migrations
+          # hephaestus secret volume
+          - name: hephaestus-secrets
+            mountPath: /configs/hephaestus.secrets.encrypted.yaml
+            subPath: hephaestus.secrets.encrypted.yaml
+            readOnly: true
+{{- if eq "local" .Values.global.environment }}
+          - name: service-credential
+            mountPath: /configs/service_credential.json
+            subPath: service_credential.json
+            readOnly: true
+          env:
+          - name: GOOGLE_APPLICATION_CREDENTIALS
+            value: "/configs/service_credential.json"
+{{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+{{- end }}

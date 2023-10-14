@@ -1,0 +1,35 @@
+apiVersion: skaffold/v2beta29
+kind: Config
+metadata:
+  name: appsmith
+profiles:
+  - name: appsmith
+    activation:
+      - env: APPSMITH_DEPLOYMENT_ENABLED=true
+    deploy:
+      helm:
+        releases:
+          - name: mongodb
+            chartPath: deployments/helm/appsmith/mongodb
+            namespace: '{{.ENV}}-{{.ORG}}-appsmith'
+            createNamespace: true
+            skipBuildDependencies: true
+            wait: true
+            valuesFiles:
+              - deployments/helm/appsmith/appsmith/{{.ENV}}-{{.ORG}}-values.yaml
+            setValueTemplates:
+                vendor: '{{.ORG}}'
+                environment: '{{.ENV}}'
+          - name: appsmith
+            chartPath: deployments/helm/appsmith/appsmith
+            repo: https://charts.bitnami.com/bitnami
+            namespace: '{{.ENV}}-{{.ORG}}-appsmith'
+            skipBuildDependencies: true
+            createNamespace: true
+            valuesFiles:
+              - deployments/helm/platforms/gateway/{{.ENV}}-{{.ORG}}-values.yaml
+              - deployments/helm/manabie-all-in-one/{{.ENV}}-{{.ORG}}-values.yaml
+              - deployments/helm/appsmith/appsmith/{{.ENV}}-{{.ORG}}-values.yaml
+            setValueTemplates:
+                vendor: '{{.ORG}}'
+                environment: '{{.ENV}}'

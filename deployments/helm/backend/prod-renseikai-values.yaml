@@ -1,0 +1,32 @@
+global:
+  dbPrefix: ""
+  dbUserPrefix: "prod-"
+  serviceAccountEmailSuffix: "production-renseikai"
+  replicaCount: 2
+  cloudSQLUsePublicIP: true
+  cloudSQLCommonInstance: "production-renseikai:asia-northeast1:renseikai-83fc"
+  cloudSQLLMSInstance: "production-renseikai:asia-northeast1:renseikai-83fc"
+  cloudSQLAuthInstance: "production-renseikai:asia-northeast1:renseikai-83fc"
+  hasura:
+    replicaCount: 2
+    cronScheduledScaling:
+      - timezone: UTC
+        start: "0 17 * * *" # 0h00  ICT
+        end: "59 4 * * *"   # 11h59 ICT
+        desiredReplicas: "2"
+      - timezone: UTC
+        start: "0 5 * * *"  # 12h00 ICT
+        end: "59 16 * * *"  # 23h59 ICT
+        desiredReplicas: "3"
+  requirePodAntiAffinity: true
+  cronScheduledScaling:
+    - timezone: UTC
+      start: "0 17 * * *" # 0h00  ICT
+      end: "59 4 * * *"   # 11h59 ICT
+      desiredReplicas: "2"
+    - timezone: UTC
+      start: "0 5 * * *"  # 12h00 ICT
+      end: "59 16 * * *"  # 23h59 ICT
+      desiredReplicas: "3"
+  kedaScaledObjectMinReplicas: 2
+  kedaScaledObjectMaxReplicas: 3

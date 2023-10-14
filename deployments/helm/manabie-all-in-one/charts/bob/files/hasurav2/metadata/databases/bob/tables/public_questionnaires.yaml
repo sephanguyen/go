@@ -1,0 +1,48 @@
+table:
+  schema: public
+  name: questionnaires
+array_relationships:
+  - name: info_notifications
+    using:
+      foreign_key_constraint_on:
+        column: questionnaire_id
+        table:
+          schema: public
+          name: info_notifications
+  - name: questionnaire_questions
+    using:
+      foreign_key_constraint_on:
+        column: questionnaire_id
+        table:
+          schema: public
+          name: questionnaire_questions
+select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+        - created_at
+        - deleted_at
+        - expiration_date
+        - questionnaire_id
+        - resubmit_allowed
+        - updated_at
+      filter:
+        deleted_at:
+          _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+        - created_at
+        - deleted_at
+        - expiration_date
+        - questionnaire_id
+        - resubmit_allowed
+        - updated_at
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+          - resource_path:
+              _eq: X-Hasura-Resource-Path
+      allow_aggregations: true

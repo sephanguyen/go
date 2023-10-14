@@ -1,0 +1,116 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: migrate
+  namespace: stag-manabie-yugabyte
+data:
+  migrate.sh: |-
+    #!/bin/bash
+
+    set -e
+
+    if [[ ! -f /data/eureka.orig.sql ]]; then
+      PGPASSWORD=c2b27854113f3e01 /home/yugabyte/postgres/bin/ysql_dump \
+        -h 10.111.7.3 -p 5432 -U postgres -d eureka --schema public --data-only --format=plain --no-owner --no-acl > /data/eureka.orig.sql
+
+      sed -i -E 's/(DROP|CREATE|COMMENT ON) EXTENSION/-- \1 EXTENSION/g' /data/eureka.orig.sql
+    fi
+
+    rm -f /data/eureka.sql
+    cp /data/eureka.orig.sql /data/eureka.sql
+    sed -i "/COPY public\.schema_migrations/,/^--/d" /data/eureka.sql
+
+    export PGPASSWORD=yugabyte
+
+    tables=(
+      "assign_study_plan_tasks"
+      "assignment_study_plan_items"
+      "assignments"
+      "brands"
+      "centers"
+      "class_students"
+      "class_study_plans"
+      "course_classes"
+      "course_students"
+      "course_study_plans"
+      "lesson_study_plan_items"
+      "lo_study_plan_items"
+      "orgs"
+      "scheduler_items"
+      "scheduler_patterns"
+      "student_study_plans"
+      "student_submission_grades"
+      "student_submissions"
+      "study_plan_items"
+      "study_plans"
+    )
+    for table in "${tables[@]}"; do
+      ysqlsh -h yugabyte.stag-manabie-yugabyte.svc.cluster.local -p 5433 -d eureka -c "truncate table $table cascade"
+      ysqlsh -h yugabyte.stag-manabie-yugabyte.svc.cluster.local -p 5433 -d eureka -c "alter table $table disable trigger all"
+    done
+
+    copy() {
+      rm -f /data/eureka_$1.sql
+      rm -f /data/$1*
+
+      echo "extract $1 data..."
+      sed -n "/COPY public\.$1/,/^--/p" /data/eureka.sql > /data/eureka_$1.sql
+      sed -i -e '1d' -e '/^$/d' -e '/^--/d' /data/eureka_$1.sql
+      split -l $2 /data/eureka_$1.sql /data/$1
+
+      sed -i "/COPY public\.$1/,/^--/d" /data/eureka.sql
+
+      date
+      for file in /data/$1*; do
+        ls -lh $file
+        ysqlsh -h yugabyte.stag-manabie-yugabyte.svc.cluster.local -U yugabyte -d eureka -v ON_ERROR_STOP=1 -c "\copy $1 from '/$file' with (null '\N', rows_per_transaction 1000);" &
+      done
+
+      echo "waiting for all jobs to be finished..."
+      wait
+      echo "all jobs are done"
+      date
+    }
+
+    copy study_plan_items 6000000
+    copy assignment_study_plan_items 2000000
+    copy lo_study_plan_items 3000000
+
+    ls -lh /data/eureka.sql
+
+    ysqlsh -h yugabyte.stag-manabie-yugabyte.svc.cluster.local -U yugabyte -d eureka -v ON_ERROR_STOP=1 -f /data/eureka.sql
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pg-to-yugabyte
+  namespace: stag-manabie-yugabyte
+spec:
+  serviceAccountName: stag-yugabyte
+  restartPolicy: Never
+  containers:
+  - image: yugabytedb/yugabyte:2.5.3.1-b10
+    imagePullPolicy: IfNotPresent
+    name: migrate-db
+    command:
+    - /home/yugabyte/migrate.sh
+    volumeMounts:
+    - name: migrate
+      mountPath: /home/yugabyte/migrate.sh
+      readOnly: true
+      subPath: migrate.sh
+    - name: data
+      mountPath: /data
+  tolerations:
+    - key: "db-pool"
+      operator: "Equal"
+      value: "true"
+      effect: "NoSchedule"
+  volumes:
+    - name: migrate
+      configMap:
+        defaultMode: 0700
+        name: migrate
+    - name: data
+      persistentVolumeClaim:
+        claimName: data-yugabyte-2

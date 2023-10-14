@@ -1,0 +1,294 @@
+global:
+  dbPrefix: ""
+  dbUserPrefix: "prod-jprep-"
+  serviceAccountEmailSuffix: "student-coach-e1e95"
+  replicaCount: 2
+  hasura:
+    replicaCount: 2
+    cronScheduledScaling:
+      - timezone: UTC
+        start: "0 17 * * *" # 0h00  ICT
+        end: "59 4 * * *"   # 11h59 ICT
+        desiredReplicas: "2"
+      - timezone: UTC
+        start: "0 5 * * *"  # 12h00 ICT
+        end: "59 16 * * *"  # 23h59 ICT
+        desiredReplicas: "3"
+  entryexitmgmt:
+    enabled: false
+  calendar:
+    enabled: false
+  cloudSQLCommonInstance: "student-coach-e1e95:asia-northeast1:prod-jprep-d995522c"
+  cloudSQLLMSInstance: "student-coach-e1e95:asia-northeast1:prod-jprep-d995522c"
+  cloudSQLAuthInstance: "student-coach-e1e95:asia-northeast1:prod-jprep-d995522c"
+  requirePodAntiAffinity: true
+
+  kedaScaledObjectMinReplicas: 2
+  kedaScaledObjectMaxReplicas: 3
+
+  onDemandNodeDeployment:
+    replicaCount: 1
+    cronScheduledScaling:
+      - timezone: UTC
+        start: "0 13 * * *" # 20h ICT
+        end: "0 20 * * *" # 3h  ICT
+        desiredReplicas: "0"
+      - timezone: UTC
+        start: "1 20 * * *" # 3h01  ICT
+        end: "59 12 * * *" # 19h59 ICT
+        desiredReplicas: "1"
+
+backoffice:
+  resources:
+    requests:
+      cpu: 1m
+      memory: 6Mi
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "2m"
+    sidecar.istio.io/proxyMemory: "50Mi"
+    cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+  onDemandNodeDeployment:
+    enabled: true
+bob:
+  resources:
+    requests:
+      cpu: 5m
+      memory: 100Mi
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "5m"
+    sidecar.istio.io/proxyMemory: "50Mi"
+    cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+  onDemandNodeDeployment:
+    enabled: true
+  hasura:
+    onDemandNodeDeployment:
+      enabled: true
+    resources:
+      requests:
+        memory: 360Mi
+        cpu: 15m
+enigma:
+  resources:
+    requests:
+      cpu: 1m
+      memory: 45Mi
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "2m"
+    sidecar.istio.io/proxyMemory: "50Mi"
+    cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+  onDemandNodeDeployment:
+    enabled: true
+  hasura:
+    onDemandNodeDeployment:
+      enabled: true
+eureka:
+  resources:
+    requests:
+      cpu: 4m
+      memory: 80Mi
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "5m"
+    sidecar.istio.io/proxyMemory: "50Mi"
+    cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+  onDemandNodeDeployment:
+    enabled: true
+  hasura:
+    onDemandNodeDeployment:
+      enabled: true
+    resources:
+      requests:
+        cpu: 10m
+        memory: 200Mi
+fatima:
+  resoures:
+    requests:
+      cpu: 3m
+      memory: 50Mi
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "2m"
+    sidecar.istio.io/proxyMemory: "50Mi"
+    cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+  onDemandNodeDeployment:
+    enabled: true
+  hasura:
+    onDemandNodeDeployment:
+      enabled: true
+    resources:
+      requests:
+        cpu: 8m
+        memory: 200Mi
+invoicemgmt:
+  resoures:
+    requests:
+      cpu: 3m
+      memory: 50Mi
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "2m"
+    sidecar.istio.io/proxyMemory: "50Mi"
+    cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+  onDemandNodeDeployment:
+    enabled: true
+  hasura:
+    onDemandNodeDeployment:
+      enabled: true
+    resources:
+      requests:
+        cpu: 8m
+        memory: 200Mi
+learner-web:
+  resources:
+    requests:
+      cpu: 2m
+      memory: 5Mi
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "1m"
+    sidecar.istio.io/proxyMemory: "50Mi"
+    cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+  onDemandNodeDeployment:
+    enabled: true
+lessonmgmt:
+  resources:
+    requests:
+      cpu: 4m
+      memory: 50Mi
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "2m"
+    sidecar.istio.io/proxyMemory: "50Mi"
+    cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+  onDemandNodeDeployment:
+    enabled: true
+  hasura:
+    onDemandNodeDeployment:
+      enabled: true
+virtualclassroom:
+  resources:
+    requests:
+      cpu: 4m
+      memory: 80Mi
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "2m"
+    sidecar.istio.io/proxyMemory: "50Mi"
+    cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+  onDemandNodeDeployment:
+    enabled: true
+mastermgmt:
+  resources:
+    requests:
+      cpu: 4m
+      memory: 50Mi
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "5m"
+    sidecar.istio.io/proxyMemory: "50Mi"
+    cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+  onDemandNodeDeployment:
+    enabled: true
+  hasura:
+    onDemandNodeDeployment:
+      enabled: true
+    resources:
+      requests:
+        memory: 150Mi
+        cpu: 4m
+notificationmgmt:
+  resources:
+    requests:
+      cpu: 4m
+      memory: 55Mi
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "3m"
+    sidecar.istio.io/proxyMemory: "50Mi"
+    cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+  onDemandNodeDeployment:
+    enabled: true
+payment:
+  resources:
+    requests:
+      cpu: 2m
+      memory: 50Mi
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "2m"
+    sidecar.istio.io/proxyMemory: "50Mi"
+    cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+  onDemandNodeDeployment:
+    enabled: true
+shamir:
+  resources:
+    requests:
+      cpu: 1m
+      memory: 50Mi
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "2m"
+    sidecar.istio.io/proxyMemory: "50Mi"
+    cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+  onDemandNodeDeployment:
+    enabled: true
+  migrationEnabled: true
+teacher-web:
+  resources:
+    requests:
+      cpu: 1m
+      memory: 5Mi
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "1m"
+    sidecar.istio.io/proxyMemory: "50Mi"
+    cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+  onDemandNodeDeployment:
+    enabled: true
+usermgmt:
+  resources:
+    requests:
+      cpu: 4m
+      memory: 55Mi
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "2m"
+    sidecar.istio.io/proxyMemory: "50Mi"
+    cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+  onDemandNodeDeployment:
+    enabled: true
+  cronjobs:
+    check-enrollment-status-date:
+      cmd: usermgmt_cronjob_check_enrollment_status_date
+      schedule: "0 0 * * *"
+      disabled: true
+    cronjob-itee-download-data-file:
+      cmd: usermgmt_itee_download_data_file
+      schedule: "13 19 * * *"
+      disabled: true
+    cronjob-withus-download-data-file:
+      cmd: usermgmt_withus_download_data_file
+      schedule: "13 19 * * *"
+      disabled: true
+yasuo:
+  resources:
+    requests:
+      cpu: 4m
+      memory: 60Mi
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "3m"
+    sidecar.istio.io/proxyMemory: "50Mi"
+    cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+  onDemandNodeDeployment:
+    enabled: true
+zeus:
+  resources:
+    requests:
+      cpu: 3m
+      memory: 45Mi
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "3m"
+    sidecar.istio.io/proxyMemory: "50Mi"
+    cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+timesheet:
+  resources:
+    requests:
+      cpu: 4m
+      memory: 50Mi
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "2m"
+    sidecar.istio.io/proxyMemory: "50Mi"
+    cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+  onDemandNodeDeployment:
+    enabled: true
+  hasura:
+    onDemandNodeDeployment:
+      enabled: true

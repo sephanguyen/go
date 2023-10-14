@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package eureka.v1;
+
+import "common/v1/requests.proto";
+import "common/v1/contents.proto";
+
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/eureka/v1;epb";
+
+message ListBooksRequest {
+    common.v1.Paging paging = 1;
+    common.v1.CommonFilter filter = 2;
+}
+
+message ListBooksResponse {
+    common.v1.Paging next_page = 1;
+    repeated common.v1.Book items = 2;
+}
+
+service BookReaderService {
+    rpc ListBooks(ListBooksRequest) returns (ListBooksResponse);
+}  

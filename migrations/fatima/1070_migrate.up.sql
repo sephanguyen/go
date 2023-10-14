@@ -1,0 +1,2 @@
+ALTER TABLE public.package_quantity_type_mapping DROP CONSTRAINT IF EXISTS package_quantity_type_mapping_pk;
+ALTER TABLE public.package_quantity_type_mapping ADD CONSTRAINT package_quantity_type_mapping_pk PRIMARY KEY (package_type, resource_path);

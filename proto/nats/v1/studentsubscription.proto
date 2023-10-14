@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package nats.v1;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/nats/v1;npb";
+
+import "google/protobuf/timestamp.proto";
+
+message SyncStudentSubscriptionJobData {
+  message CourseStudent {
+    string course_id = 1;
+    string student_id = 2;
+    string course_student_id = 3;
+    google.protobuf.Timestamp start_at = 4;
+    google.protobuf.Timestamp end_at = 5;
+    google.protobuf.Timestamp created_at = 6;
+    google.protobuf.Timestamp updated_at = 7;
+    google.protobuf.Timestamp deleted_at = 8;
+  }
+  repeated CourseStudent course_students = 1;
+}

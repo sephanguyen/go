@@ -1,0 +1,40 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "yugabyte.fullname" . }}-encrypt-db
+spec:
+  backoffLimit: 1
+  template:
+    spec:
+      restartPolicy: Never
+      serviceAccountName: {{ include "yugabyte.serviceAccountName" . }}
+      containers:
+      - name: encrypt-db
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: IfNotPresent
+        command:
+          - /bin/bash
+          - -c
+          - |
+            # svc={{ include "yugabyte.fullname" . }}-master-headless.{{ .Release.Namespace }}.svc.cluster.local
+            svc={{ include "yugabyte.fullname" . }}-headless.{{ .Release.Namespace }}.svc.cluster.local
+
+            until nslookup $svc; do
+              echo "Waiting for $svc..."
+              sleep 5
+            done
+
+            ips=""
+            while read ip; do
+              ips="${ips}${ip}:7100,"
+              echo "Checking host ${ip}..."
+              until [ $(curl -s -o /dev/null -w "%{http_code}" http://${ip}:7000/status) = "200" ]; do
+                echo "Host $ip is not ready..."
+                sleep 5
+              done
+            done <<< "$(dig +short $svc)"
+            ips=$(echo $ips | sed 's/,$//g')
+
+            /home/yugabyte/bin/yb-admin -master_addresses $ips rotate_universe_key /data/yb-data/master/universe_key
+            /home/yugabyte/bin/yb-admin -master_addresses $ips is_encryption_enabled
+

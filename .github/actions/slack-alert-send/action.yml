@@ -1,0 +1,209 @@
+name: "slack-alert-send"
+description: "Send a message to Slack to the status of the build/deploy job."
+
+inputs:
+  be_tag:
+    required: false
+    description: Release tag of BE
+  fe_tag:
+    required: false
+    description: Release tag of FE
+  me_tag:
+    required: false
+    description: Release tag of ME
+  message:
+    required: true
+    description: Title of alert message
+  orgs:
+    required: true
+    description: Organizations affect by the workflow
+  SLACK_TOKEN:
+    required: true
+    description: Slack token
+  reply_thread_channel:
+    required: false
+    description: The alert's channel of the workflow that trigger this workflow
+  reply_thread_id:
+    required: false
+    description: The alert's timestamp of the workflow that trigger this workflow
+  actor:
+    required: false
+    description: github username of the user that trigger the first workflow in the chain
+
+outputs:
+  channel_id:
+    description: channel to reply/update message to
+    value: ${{ steps.message-data.outputs.channel_id }}
+  alert_id:
+    description: alert message id
+    value: ${{ steps.message-data.outputs.alert_id }}
+  squad_alert:
+    description: Mentioning a team when certain conditions are met
+    value: ${{ steps.squad-alert.outputs.squadAlert }}
+  user_alert:
+    description: Mentioning a user when certain conditions are met
+    value: ${{ steps.actor.outputs.mention }}
+
+runs:
+  using: composite
+  steps:
+    - id: channel
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const message = '${{ inputs.message }}'
+          let channel = 'C03KM6DBNUD' //release-alert-channel
+          if (process.env.ENVIRONMENT == 'production' && message.toLowerCase().includes('deploy')) {
+            channel = 'CR2AR72SZ' //dev-release
+          }
+          core.setOutput('channelID', channel)
+
+    - id: generate-alert-content
+      uses: actions/github-script@v6
+      with:
+        script: |
+          function genReleaseLink(repo, releaseTag) {
+            if (!releaseTag) return
+            const space = repo === 'student-app' ? "   " : ""
+            return `${space}<https://github.com/manabie-com/${repo}/releases/tag/${releaseTag}|${releaseTag}>`
+          }
+
+          function genAlert(tag) {
+            if (!tag) return ""
+            const icon = ":github_pending:"
+            let repo = ""
+            let name = ""
+
+            if (tag === "${{ inputs.be_tag }}") {
+              name = "Backend"
+              repo = "backend"
+            }
+            if (tag === "${{ inputs.fe_tag }}") {
+              name = "Frontend"
+              repo = "school-portal-admin"
+            }
+            if (tag === "${{ inputs.me_tag }}") {
+              name = "Mobile"
+              repo = "student-app"
+            }
+
+            const link = genReleaseLink(repo, tag)
+            return `${icon} ${name} ${link}\n`
+          }
+
+          const alert_content = [
+            {
+              "text": `${genAlert("${{ inputs.be_tag }}")}${genAlert("${{ inputs.fe_tag }}")}${genAlert("${{ inputs.me_tag }}")}`,
+              "type": "mrkdwn"
+            }
+          ]
+          core.setOutput('alert_content', alert_content)
+
+    - id: squad-alert
+      if: (env.ENVIRONMENT == 'production' || env.ENVIRONMENT == 'uat')
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const squadAlertMessage = "Team Alert: @tech-func-automation"
+          core.setOutput('squadAlert', squadAlertMessage)
+
+    - id: get-slack-user-id
+      if: inputs.actor != 'manaops'
+      uses: ./.github/actions/get-slack-user-id
+      with:
+        actor: ${{ inputs.actor }}
+        SLACK_TOKEN: ${{ inputs.SLACK_TOKEN }}
+
+    - id: actor
+      if: steps.get-slack-user-id.outputs.userId != ''
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const userId = "${{ steps.get-slack-user-id.outputs.userId }}"
+          const mention = `Actor: <@${userId}>` 
+          core.setOutput('mention', mention)
+
+    - id: metadata
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const content = "${{ steps.actor.outputs.mention }}\n" +
+                          "Orgs: ${{ inputs.orgs }}\n" + 
+                          "Workflow Run: <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|#${{ github.run_id }}>\n" + 
+                          "${{ steps.squad-alert.outputs.squadAlert }}"
+          core.setOutput('content', content)
+
+    - name: Send message
+      uses: archive/github-actions-slack@master
+      id: send
+      with:
+        slack-bot-user-oauth-access-token: ${{ inputs.SLACK_TOKEN }}
+        slack-channel: ${{ steps.channel.outputs.channelID }}
+        slack-blocks: >-
+          [
+            {
+              "type": "section",
+              "text": {
+                "type": "mrkdwn",
+                "text": ":github_running: *${{ inputs.message }}* `running`"
+              }
+            },
+            {
+              "type": "context",
+              "elements": [
+                {
+                  "text": "${{ steps.metadata.outputs.content }}",
+                  "type": "mrkdwn"
+                }
+              ]
+            },
+            {
+              "type": "context",
+              "elements": ${{ steps.generate-alert-content.outputs.alert_content }}
+            }
+          ]
+
+    - id: message-data
+      uses: actions/github-script@v6
+      with:
+        script: |
+          console.log(${{ steps.send.outputs.slack-result }})
+          core.setOutput('channel_id', '${{ fromJson(steps.send.outputs.slack-result).response.channel }}')
+          core.setOutput('alert_id', '${{ fromJson(steps.send.outputs.slack-result).response.message.ts }}')
+
+    - id: prepare-reply
+      if: inputs.reply_thread_id != ''
+      uses: actions/github-script@v6
+      with:
+        script: |
+          function genSlackLink(channel, timestamp) {
+            if (!channel || !timestamp) return
+            const timestampString = 'p' + timestamp.split('.').join('')
+            return `https://manabie.slack.com/archives/${channel}/${timestampString}`
+          }
+
+          const buildThreadLink = genSlackLink('${{ inputs.reply_thread_channel }}', '${{ inputs.reply_thread_id }}')
+          const deployThreadLink = genSlackLink('${{ steps.message-data.outputs.channel_id }}', '${{ steps.message-data.outputs.alert_id }}')
+
+          core.setOutput('buildThreadLink', buildThreadLink)
+          core.setOutput('deployThreadLink', deployThreadLink)
+
+    - name: Send reply to build thread
+      if: inputs.reply_thread_id != ''
+      uses: archive/github-actions-slack@master
+      with:
+        slack-function: send-message
+        slack-bot-user-oauth-access-token: ${{ inputs.SLACK_TOKEN }}
+        slack-channel: ${{ inputs.reply_thread_channel }}
+        slack-optional-thread_ts: ${{ inputs.reply_thread_id }}
+        slack-text: ${{ steps.prepare-reply.outputs.deployThreadLink }}
+
+    - name: Send reply to deploy thread
+      if: inputs.reply_thread_id != ''
+      uses: archive/github-actions-slack@master
+      with:
+        slack-function: send-message
+        slack-bot-user-oauth-access-token: ${{ inputs.SLACK_TOKEN }}
+        slack-channel: ${{ steps.message-data.outputs.channel_id }}
+        slack-optional-thread_ts: ${{ steps.message-data.outputs.alert_id }}
+        slack-text: ${{ steps.prepare-reply.outputs.buildThreadLink }}

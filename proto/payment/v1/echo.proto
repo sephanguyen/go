@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package payment.v1;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/payment/v1;pmpb";
+
+message EchoRequest {
+  string message = 1;
+}
+
+message EchoResponse {
+  string message = 1;
+}
+service EchoService {
+  rpc Echo(EchoRequest)
+      returns (EchoResponse);
+}

@@ -1,0 +1,17 @@
+rules:
+  - name: all
+    paths: ['.+']
+  - name: go
+    paths: ['.*\.go$']
+  - name: goOnly
+    run_only: true
+    paths: ['.*\.go$']
+  - name: multipleValues
+    values: ['README.md', 'helloworld.go', '.gitignore']
+    paths: ['{{.VALUE}}']
+  - name: unit-test
+    paths: ['unit-test.go']
+  - name: integration-blocker-test
+    paths: ['integration/features/file.feature']
+  - name: e2e-test
+    paths: ['some-e2e-test.file']

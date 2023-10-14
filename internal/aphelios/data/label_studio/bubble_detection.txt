@@ -1,0 +1,7 @@
+<View>
+  <Image name="image" value="$image"/>
+  <RectangleLabels name="label" toName="image">
+
+
+  <Label value="background" background="#D4380D"/><Label value="confirmed" background="#49f03d"/><Label value="empty_bubble" background="#24237b"/></RectangleLabels>
+</View>

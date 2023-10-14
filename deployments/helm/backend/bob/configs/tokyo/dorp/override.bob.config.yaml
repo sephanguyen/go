@@ -1,0 +1,4 @@
+partner:
+  domain_bo: "https://backoffice.prep.tokyo.manabie.io/"
+  domain_teacher: "https://teacher.prep.tokyo.manabie.io/"
+  domain_learner: "https://learner.prep.tokyo.manabie.io/"

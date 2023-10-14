@@ -1,0 +1,245 @@
+unleash:
+  featureFlags:
+    calendar:
+      - name: Lesson_ScheduleManagement_BackOffice_ScheduleMenu
+        description: "A feature flag to enable show Schedule Menu (LT-14046)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Calendar_ScheduleManagement_BackOffice_MonthlyView
+        description: "A feature flag to enable calendar month view (LT-16877)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Calendar_ScheduleManagement_BackOffice_DailyView
+        description: "A feature flag to enable calendar daily view (LT-21205)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Calendar_MasterManagement_BackOffice_RegisterDayInfo
+        description: "A feature flag to enable calendar register day info (LT-24320)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Calendar_ScheduleManagement_BackOffice_WeeklyView
+        description: "A feature flag to enable calendar weekly view (LT-21204)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Calendar_ScheduleManagement_BackOffice_AccessControlLocationFiler
+        description: "A feature flag to enable access control for location filter on calendar (LT-21662)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Calendar_ScheduleManagement_BackOffice_DuplicateLesson
+        description: "A feature flag to enable duplicate on calendar (LT-30840)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Calendar_ScheduleManagement_BackOffice_UpdateLessonStatus
+        description: "A feature flag to enable update lesson status on calendar (LT-30851)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Calendar_ScheduleManagement_BackOffice_BulkPublishCancelLessons
+        description: "A feature flag to enable bulk publish & cancel lessons on calendar (LT-23901)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "none"
+            constraints: []
+      - name: Calendar_MasterManagement_BackOffice_RegisterDayType
+        description: "A feature flag to enable calendar register day type (LT-28259)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Calendar_ScheduleManagement_PrintOutDailyView
+        description: "A feature flag to enable Calendar export pdf data in daily view (LT-24669)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Calendar_ScheduleManagement_ImprovementV2
+        description: "A feature flag to enable Calendar Improvement 2.0 (LT-34608)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Calendar_ScheduleManagement_ImprovementV2P2
+        description: "A feature flag to enable Calendar Improvement 2.0 - P2 (LT-45615)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+      - name: Calendar_ScheduleManagement_LessonCapacity
+        description: "A feature flag to Show & filter the lesson capacity in the calendar (LT-23902)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Calendar_MasterManagement_AcademicYear
+        description: "A feature flag to toggle Calendar Academic Year feature (LT-36334)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Calendar_ScheduleManagement_ShowAllLessonByTeacher
+        description: "A feature flag to toggle display all lesson by teacher in teacher view of Daily view (LT-40164)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Calendar_ScheduleManagement_CalendarAppConfig
+        description: "A feature flag to toggle use calendarAppConfig instead root config (LT-40299)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Calendar_ScheduleManagement_TemporaryFixFilterLesson
+        description: "A feature flag to toggle temporary update filter lessons on calendar (LT-42876)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Calendar_ScheduleManagement_LessonMemberCountByStatus
+        description: "A feature flag to toggle count lesson member by lesson member status (LT-45856)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Calendar_ScheduleManagement_BackOffice_SchedulingMenu
+        description: "A feature flag to toggle show job status (scheduling) menu item (LT-34141)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: Calendar_ScheduleManagement_FilterNoneAssignedTeacher
+        description: "A feature flag to toggle show filter option none assigned teacher (LT-44070)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: Calendar_ScheduleManagement_LessonCardParticularIcon
+        description: "A feature flag to toggle show calendar legend and lesson card particular icon (LT-44068)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []

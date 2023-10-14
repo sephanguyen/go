@@ -1,0 +1,131 @@
+service:
+  type: ClusterIP
+  port: 6350
+
+grpcPort: 6350
+
+resources:
+  requests:
+    memory: "120Mi"
+
+metrics:
+  enabled: true
+  podAnnotations:
+    prometheus.io/scheme: "http"
+    prometheus.io/port: "8888"
+    prometheus.io/scrape: "true"
+
+clientVersion: "v0.30.0"
+
+
+apiHttp:
+  - match:
+    - uri:
+        prefix: /entryexitmgmt.v1.InternalService
+    route:
+      - destination:
+          host: entryexitmgmt
+          port:
+            number: 6350
+    fault:
+      abort:
+        percentage:
+          value: 100
+        httpStatus: 403
+  - match:
+    - uri:
+        prefix: /entryexitmgmt.v1
+    - uri:
+        prefix: /manabie.entryexitmgmt
+    route:
+      - destination:
+          host: entryexitmgmt
+          port:
+            number: 6350
+
+webHttp:
+  - match:
+    - uri:
+        prefix: /entryexitmgmt.v1
+    route:
+    - destination:
+        host: entryexitmgmt
+        port:
+          number: 6350
+    corsPolicy: &CORSPolicy
+      allowOrigins:
+        - regex: ".*"
+      allowMethods:
+        - POST
+        - GET
+        - OPTIONS
+        - PUT
+        - DELETE
+      allowHeaders:
+        - authorization
+        - grpc-timeout
+        - content-type
+        - keep-alive
+        - user-agent
+        - cache-control
+        - content-transfer-encoding
+        - token
+        - x-accept-content-transfer-encoding
+        - x-accept-response-streaming
+        - x-request-id
+        - x-user-agent
+        - x-graphql-mesh-authorization
+        - x-grpc-web
+        - if-none-match
+        - pkg
+        - version
+        - connect-timeout-ms
+        - connect-protocol-version
+        - connect-content-encoding
+        - connect-accept-encoding
+      maxAge: 100s
+      exposeHeaders:
+        - grpc-status
+        - grpc-message
+        - etag
+
+hasura:
+  enableConsole: true
+  enabledApis: "metadata,graphql"
+  service:
+    type: ClusterIP
+    port: 8080
+  resources:
+    requests:
+      memory: 256Mi
+  pgConnections: 8
+  pgTimeout: 10
+  anonymous:
+    enabled: false
+
+adminHttp:
+  - match:
+    - uri:
+        prefix: /entryexitmgmt/ # accessing hasura by /entryexitmgmt/console path
+    rewrite:
+      uri: /
+    route:
+    - destination:
+        host: entryexitmgmt-hasura
+        port:
+          number: 8080
+    corsPolicy: *CORSPolicy
+
+nodeSelector: {}
+
+tolerations:
+
+affinity: {}
+affinityOverride: {}
+
+pdb:
+  enabled: false
+
+podAnnotations:
+  sidecar.istio.io/proxyCPU: "10m"
+  sidecar.istio.io/proxyMemory: "50Mi"

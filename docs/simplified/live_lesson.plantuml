@@ -1,0 +1,52 @@
+@startuml live_lesson_simplified
+hide circle
+
+rectangle {
+    namespace LessonScheduling {
+        class Lesson <<entity>> {
+            start datetime
+            end datetime
+            AgoraToken string
+            WhiteboardToken string
+        }
+        class LessonReport <<entity>> {}
+
+        class StudentCourse <<value object>> {
+            start datetime
+            end datetime
+        }
+        note bottom: Copied from \nOrganization.StudentEnrollment
+        
+        class Student <<value object>> {}
+        class Course <<value object>> {}
+
+        (Student, Course) .. StudentCourse
+        class Teacher <<value object>> {}
+        class Student <<value object>> {}
+        Lesson "?" -- "?" Course
+        Teacher "many" *-- "many" Lesson : host
+        Student "many" *-- "many" Lesson : join
+    }
+
+    namespace Agora {
+        class LiveRoom {
+            WhiteBoard()
+            ShareScreen()
+            Pooling()
+        }
+        class Teacher {
+            broadcast()
+        }
+        class Student {
+            raiseHand()
+        }
+
+        LiveRoom *-- Teacher
+        LiveRoom *-- Student
+    }
+
+    LessonScheduling.Lesson "1" *-- "1" Agora.LiveRoom : scheduled
+    ' layout
+    Agora.LiveRoom -up[hidden]-> LessonScheduling.Course
+}
+@enduml

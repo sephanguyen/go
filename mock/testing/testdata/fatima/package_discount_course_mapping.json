@@ -1,0 +1,166 @@
+{
+	"schema": [
+		{
+			"column_name": "course_combination_ids",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "discount_tag_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "is_archived",
+			"data_type": "boolean",
+			"column_default": "false",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "package_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "product_group_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "package_discount_course_mapping",
+			"policyname": "rls_package_discount_course_mapping",
+			"qual": "permission_check(resource_path, 'package_discount_course_mapping'::text)",
+			"with_check": "permission_check(resource_path, 'package_discount_course_mapping'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "package_discount_course_mapping",
+			"policyname": "rls_package_discount_course_mapping_restrictive",
+			"qual": "permission_check(resource_path, 'package_discount_course_mapping'::text)",
+			"with_check": "permission_check(resource_path, 'package_discount_course_mapping'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "package_discount_course_mapping_discount_tag_fk",
+			"column_name": "discount_tag_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "package_discount_course_mapping_package_fk",
+			"column_name": "package_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "package_discount_course_mapping_product_group_fk",
+			"column_name": "product_group_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "package_discount_course_mapping__pk",
+			"column_name": "discount_tag_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "package_discount_course_mapping__pk",
+			"column_name": "package_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "package_discount_course_mapping__pk",
+			"column_name": "product_group_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "unique__package_id_course_combination_ids_discount_tag_id",
+			"column_name": "course_combination_ids",
+			"constraint_type": "UNIQUE"
+		},
+		{
+			"constraint_name": "unique__package_id_course_combination_ids_discount_tag_id_produ",
+			"column_name": "course_combination_ids",
+			"constraint_type": "UNIQUE"
+		},
+		{
+			"constraint_name": "unique__package_id_course_combination_ids_discount_tag_id",
+			"column_name": "discount_tag_id",
+			"constraint_type": "UNIQUE"
+		},
+		{
+			"constraint_name": "unique__package_id_course_combination_ids_discount_tag_id_produ",
+			"column_name": "discount_tag_id",
+			"constraint_type": "UNIQUE"
+		},
+		{
+			"constraint_name": "unique__package_id_course_combination_ids_discount_tag_id",
+			"column_name": "package_id",
+			"constraint_type": "UNIQUE"
+		},
+		{
+			"constraint_name": "unique__package_id_course_combination_ids_discount_tag_id_produ",
+			"column_name": "package_id",
+			"constraint_type": "UNIQUE"
+		},
+		{
+			"constraint_name": "unique__package_id_course_combination_ids_discount_tag_id_produ",
+			"column_name": "product_group_id",
+			"constraint_type": "UNIQUE"
+		}
+	],
+	"table_name": "package_discount_course_mapping",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

@@ -1,0 +1,23 @@
+{
+  "name": "prod_synersia_bob_to_fatima_students_sink_connector",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+    "tasks.max": "1",
+    "topics": "prod.synersia.bob.public.students",
+    "connection.url": "${file:/config/kafka-connect-config.properties:fatima_url}",
+    "auto.create": "false",
+    "insert.mode": "upsert",
+    "table.name.format": "students",
+    "fields.whitelist": "created_at,current_grade,deleted_at,enrollment_status,grade_id,resource_path,student_id,updated_at",
+    "transforms": "unwrap,route",
+    "transforms.route.type": "org.apache.kafka.connect.transforms.RegexRouter",
+    "transforms.route.regex": "([^.]+).([^.]+).([^.]+).([^.]+).([^.]+)",
+    "transforms.route.replacement": "$5",
+    "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+    "delete.enabled": "false",
+    "pk.mode": "record_value",
+    "pk.fields": "student_id",
+    "transforms.unwrap.drop.tombstones": "true",
+    "transforms.unwrap.delete.handling.mode": "drop"
+  }
+}

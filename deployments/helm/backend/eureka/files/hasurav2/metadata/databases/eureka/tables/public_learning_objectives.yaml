@@ -1,0 +1,124 @@
+table:
+  schema: public
+  name: learning_objectives
+array_relationships:
+  - name: quiz_sets
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: quiz_sets
+        insertion_order: null
+        column_mapping:
+          lo_id: lo_id
+select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+        - lo_id
+        - name
+        - country
+        - grade
+        - subject
+        - topic_id
+        - master_lo_id
+        - display_order
+        - prerequisites
+        - video
+        - study_guide
+        - video_script
+        - updated_at
+        - created_at
+        - school_id
+        - deleted_at
+        - copied_from
+        - type
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+        - display_order
+        - grade
+        - school_id
+        - copied_from
+        - country
+        - lo_id
+        - master_lo_id
+        - name
+        - study_guide
+        - subject
+        - topic_id
+        - type
+        - video
+        - video_script
+        - prerequisites
+        - created_at
+        - deleted_at
+        - updated_at
+      filter:
+        _and:
+          - school_id:
+              _in: X-Hasura-School-Ids
+          - deleted_at:
+              _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+        - display_order
+        - grade
+        - school_id
+        - copied_from
+        - country
+        - lo_id
+        - master_lo_id
+        - name
+        - study_guide
+        - subject
+        - topic_id
+        - type
+        - video
+        - video_script
+        - prerequisites
+        - created_at
+        - deleted_at
+        - updated_at
+      filter:
+        _and:
+          - school_id:
+              _in: X-Hasura-School-Ids
+          - deleted_at:
+              _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+        - display_order
+        - grade
+        - school_id
+        - copied_from
+        - country
+        - lo_id
+        - master_lo_id
+        - name
+        - study_guide
+        - subject
+        - topic_id
+        - type
+        - video
+        - video_script
+        - prerequisites
+        - created_at
+        - deleted_at
+        - updated_at
+      filter:
+        _and:
+          - school_id:
+              _in: X-Hasura-School-Ids
+          - deleted_at:
+              _is_null: true
+      allow_aggregations: true

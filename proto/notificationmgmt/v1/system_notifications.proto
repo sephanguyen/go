@@ -1,0 +1,76 @@
+syntax = "proto3";
+
+package notificationmgmt.v1;
+import "google/protobuf/timestamp.proto";
+import "common/v1/requests.proto";
+import "google/api/annotations.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/notificationmgmt/v1;npb";
+
+enum SystemNotificationStatus {
+  SYSTEM_NOTIFICATION_STATUS_NONE = 0;
+  SYSTEM_NOTIFICATION_STATUS_NEW = 1;
+  SYSTEM_NOTIFICATION_STATUS_DONE = 2;
+}
+
+message RetrieveSystemNotificationsRequest {
+    common.v1.Paging paging = 1;
+    string keyword = 2;
+    SystemNotificationStatus status = 3;
+    string language = 4;
+}
+
+message RetrieveSystemNotificationsResponse {
+    message SystemNotificationContent {
+        string language = 1;
+        string text = 2;
+    }
+
+    message SystemNotification {
+        string system_notification_id = 1;
+        repeated SystemNotificationContent content = 2;
+        string url = 3;
+        google.protobuf.Timestamp valid_from = 4;
+        google.protobuf.Timestamp valid_to = 5;
+        SystemNotificationStatus status = 6;
+    }
+
+    message TotalSystemNotificationForStatus {
+        SystemNotificationStatus status = 1;
+        uint32 total_items = 2;
+    }
+
+    repeated SystemNotification system_notifications = 1;
+    uint32 total_items = 2;
+    common.v1.Paging next_page = 3;
+    common.v1.Paging previous_page= 4;
+    repeated TotalSystemNotificationForStatus total_items_for_status = 5;
+}
+
+service SystemNotificationReaderService {
+    rpc RetrieveSystemNotifications(RetrieveSystemNotificationsRequest)
+        returns (RetrieveSystemNotificationsResponse) {
+            option (google.api.http) = {
+                post: "/notificationmgmt/api/v1/proxy/notificationmgmts/retrieve_system_notifications",
+                body: "*"
+            };
+        };
+}
+
+service SystemNotificationModifierService {
+    rpc SetSystemNotificationStatus(SetSystemNotificationStatusRequest)
+        returns (SetSystemNotificationStatusResponse) {
+            option (google.api.http) = {
+                post: "/notificationmgmt/api/v1/proxy/notificationmgmts/set_system_notifications_status",
+                body: "*"
+            };
+        };
+}
+
+message SetSystemNotificationStatusRequest {
+    string system_notification_id = 1;
+    SystemNotificationStatus status = 2;
+}
+
+message SetSystemNotificationStatusResponse {
+}

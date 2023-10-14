@@ -1,0 +1,21 @@
+name: "tbd.create-deployment-status"
+description: "Create/update deployment status"
+
+outputs:
+    deployment_id:
+        description: "Deployment Id"
+        value: ${{ steps.create-status.outputs.deployment_id }}
+
+runs:
+    using: "composite"
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/github-script@v6
+        id: create-status
+        name: Create pending deployment on Github for '${{ env.REPO }}'
+        with:
+          github-token: ${{ env.GITHUB_TOKEN }}
+          result-encoding: string
+          script: |
+            const {createDeploymentStatus} = require('${{ github.workspace }}/.github/scripts/create_deployment_status.js');
+            await createDeploymentStatus({github, core});

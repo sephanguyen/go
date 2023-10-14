@@ -1,0 +1,29 @@
+common:
+  google_cloud_project: staging-manabie-online
+postgres_migrate:
+  source: file:///migrations/auth
+  database:
+    # use `auth` service account for migration for now.
+    # We will replace `shamir` to `auth` service later.
+    user: 'uat-auth-m@staging-manabie-online.iam'
+    cloudsql_impersonate_service_account_email: 'uat-auth-m@staging-manabie-online.iam.gserviceaccount.com'
+postgres_v2:
+  auth:
+    cloudsql_instance: '{{ .Values.global.cloudSQLAuthInstance }}'
+    cloudsql_use_public_ip: {{ .Values.global.cloudSQLUsePublicIP }}
+    cloudsql_auto_iam_authn: true
+    user: '{{ include "util.databaseUser" . }}'
+    host: '{{ include "util.databaseHost" . }}'
+    port: '5432'
+    dbname: '{{ .Values.global.dbPrefix }}auth'
+    max_conns: 8
+    retry_attempts: 10
+    retry_wait_interval: '5s'
+vendor: jprep
+issuers:
+  - issuer: https://d2020-ji-sso.jprep.jp/auth/realms/manabie-test
+    audience: manabie-app
+    jwks_endpoint: https://d2020-ji-sso.jprep.jp/auth/realms/manabie-test/protocol/openid-connect/certs
+  - issuer: https://securetoken.google.com/staging-manabie-online
+    audience: staging-manabie-online
+    jwks_endpoint: https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com

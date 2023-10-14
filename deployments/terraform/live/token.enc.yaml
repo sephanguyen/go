@@ -1,0 +1,22 @@
+github: ENC[AES256_GCM,data:rDNScwBkwvRYQthS+sjXtpbk4jUMCf0wDZ7Ppo8Gr2r1wKoAIgU5zg==,iv:SC560Yegb7946dhmxkv7+34pOFQ6zDiGbULMY5WzSJQ=,tag:lMaI71Jn2YIOMikIZDXBtQ==,type:str]
+slack: ENC[AES256_GCM,data:nOP8ud7ylLr3PqhDPVZnFZHexqV4UQs6M2naiW0HXEMlcGu4SFNQ4YhhBNmPyvpvqkfNDEhV1AM=,iv:4syLCr4QT/ggfRgk4+94Vw8Dqv42/q5Sr6dmOa25WYc=,tag:jVsTA6KQ5PKr4UOtvhUUjQ==,type:str]
+jira: ENC[AES256_GCM,data:qBLil0Y1+bYvwK+WeAUq73aNPUUe+4Ng,iv:y1H7+g1t4rSP9MJoGAli37cVgkitXUM19D/58r9/TfA=,tag:3Rip++f+rGnIWrZW7KDAQQ==,type:str]
+#ENC[AES256_GCM,data:nB5Bo5uEbPyDvi0Y45dMEZ/DD4uhS5wFG9Z8WR/0kv8qvihMub4a+X2NHcteOpfckL3sGrBcPwcP9Otjg5iDJ20Ts6b8QpJl5b+3tU1NY3q7jYI8u1qirjLDkIjAgw==,iv:mpgai4TppGTAYJrOUBgzVN/g6v7nklRFyjcuS0szMy8=,tag:Xf8/bewP2uYQVkYnNS4q5g==,type:comment]
+#ENC[AES256_GCM,data:3OTyEjtWFjEBP3lWmYmV53RHc/BZzBuiolxOv/7qfprWlFydWp2PGg==,iv:Bz5RLDDs9Mea4TjR2strxMYV8oZFO+ZilurJx28b9sk=,tag:nX1eeUuDQanr1jfclltZgQ==,type:comment]
+#ENC[AES256_GCM,data:4CaA4IQ7mDMVBvuOBB5qVCM0+fi39+gN6OUJBeb4hTEWvTPhiGHNPI2VmPAAHWkiLbv1A8Ztaw==,iv:cbEMWWfHdJKD2YUQ5X9mkn0NrzOAVUGJ+2XYF1Jz4c8=,tag:Kng6L94Kqr20ubzYKbFvuA==,type:comment]
+#ENC[AES256_GCM,data:axJag6HzBeZI2iE/He9lcrgVMxPtJarz//YJBGg9VnnG,iv:FSTikUOF/80j8tsNkxlcg3wRiXK1Ce3ofsJidoTQrWg=,tag:QREtvaWkZwe9Tbe70c955g==,type:comment]
+cloudflare: ENC[AES256_GCM,data:HFU9a6klOIoxeH6ug79oSSqlhHcvzwkg7oVKK5xVwL6vuhDW05SZeQ==,iv:Z9GJi/Yp8+/XupgWKP1r78JHjBHLuT3TmOS6VfYAY1w=,tag:Ul3v88Gi3Gcm+adp6RZk/A==,type:str]
+sops:
+    kms: []
+    gcp_kms:
+        - resource_id: projects/student-coach-e1e95/locations/asia-southeast1/keyRings/manabie/cryptoKeys/prod-manabie
+          created_at: "2021-10-30T11:03:08Z"
+          enc: CiQAd2se7YKRjXy0wU1R2ZhXIWr1mwStGF3lGcm83hIy0Y5SEGESSQAZohg6yMlV5nd1lJyrJJX5pYjrHC+1sppxLUQau4b/0oBGHmYw6TJGMGqWu2jP5eLyOVo8oUfpIzDuwo6BIYeGekdWwCs1fbE=
+    azure_kv: []
+    hc_vault: []
+    age: []
+    lastmodified: "2023-06-16T07:36:54Z"
+    mac: ENC[AES256_GCM,data:HGQsp3+ogUOfSyNORgR5MhMr7NcwavcJqtOhYER6BcnhWAp8q9ep/cgeO5BSdRlJR32opWi8WYfW2Kgp07czJuezikaZIA5bi4yQKH7O5XcVp4XvSGpSvD4XO6iHdjn/cLW9HxOA5Cjqckw7UU1M3FNphBbVtPUgEEk4raw2rkw=,iv:+NV/9U4pckVMcv7n806wRkB1SqbKvtP3K0qPlKmr0kY=,tag:tlQ4jErn/48jooIWJ+yD4Q==,type:str]
+    pgp: []
+    unencrypted_suffix: _unencrypted
+    version: 3.7.3

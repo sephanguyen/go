@@ -1,0 +1,139 @@
+{
+	"schema": [
+		{
+			"column_name": "bulk_payment_validations_detail_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "bulk_payment_validations_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "invoice_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "payment_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "payment_status",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "previous_result_code",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "validated_result_code",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "bulk_payment_validations_detail",
+			"policyname": "rls_bulk_payment_validations_detail",
+			"qual": "permission_check(resource_path, 'bulk_payment_validations_detail'::text)",
+			"with_check": "permission_check(resource_path, 'bulk_payment_validations_detail'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "bulk_payment_validations_detail",
+			"policyname": "rls_bulk_payment_validations_detail_restrictive",
+			"qual": "permission_check(resource_path, 'bulk_payment_validations_detail'::text)",
+			"with_check": "permission_check(resource_path, 'bulk_payment_validations_detail'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "bulk_payment_validations_detail_bulk_payment_validations_fk",
+			"column_name": "bulk_payment_validations_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "bulk_payment_validations_detail_invoice_fk",
+			"column_name": "invoice_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "bulk_payment_validations_detail_payment_fk",
+			"column_name": "payment_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "bulk_payment_validations_detail__pk",
+			"column_name": "bulk_payment_validations_detail_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "bulk_payment_validations_detail",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

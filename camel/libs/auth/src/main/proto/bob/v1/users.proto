@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option java_package = "com.manabie.libs.bob.v1";
+
+package bob.v1;
+
+service UserModifierService {
+  rpc ExchangeToken(ExchangeTokenRequest) returns (ExchangeTokenResponse);
+}
+
+message ExchangeTokenRequest {
+  string token = 1;
+}
+
+message ExchangeTokenResponse {
+  string token = 1;
+}

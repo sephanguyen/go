@@ -1,0 +1,10 @@
+global:
+  sqlProxy:
+    connName: "production-renseikai:asia-northeast1:renseikai-83fc"
+  cloudSQLUsePublicIP: true
+  cloudSQLCommonInstance: "production-renseikai:asia-northeast1:renseikai-83fc"
+  cloudSQLLMSInstance: "production-renseikai:asia-northeast1:renseikai-83fc"
+serviceAccountEmailSuffix: "production-renseikai"
+cloudSQLUsePublicIP: true
+cloudSQLCommonInstance: "production-renseikai:asia-northeast1:renseikai-83fc"
+cloudSQLLMSInstance: "production-renseikai:asia-northeast1:renseikai-83fc"

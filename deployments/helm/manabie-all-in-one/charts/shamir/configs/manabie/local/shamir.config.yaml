@@ -1,0 +1,30 @@
+common:
+  grpc:
+    client_name: shamir
+  google_cloud_project: dev-manabie-online
+vendor: manabie
+issuers:
+  - issuer: http://firebase.emulator.svc.cluster.local:40401/fake_aud
+    audience: fake_aud
+    jwks_endpoint: http://firebase.emulator.svc.cluster.local:40401/jwkset
+  - issuer: https://d2020-ji-sso.jprep.jp/auth/realms/manabie-test
+    audience: manabie-app
+    jwks_endpoint: https://d2020-ji-sso.jprep.jp/auth/realms/manabie-test/protocol/openid-connect/certs
+  - issuer: https://securetoken.google.com/dev-manabie-online
+    audience: dev-manabie-online
+    jwks_endpoint: https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com
+postgres_v2:
+  auth:
+    cloudsql_instance: '{{ .Values.global.cloudSQLAuthInstance }}'
+    cloudsql_use_public_ip: {{ .Values.global.cloudSQLUsePublicIP }}
+    cloudsql_auto_iam_authn: true
+    user: '{{ include "util.databaseUser" . }}'
+    host: '{{ include "util.databaseHost" . }}'
+    port: '5432'
+    dbname: '{{ .Values.global.dbPrefix }}auth'
+    max_conns: 8
+    retry_attempts: 10
+    retry_wait_interval: '5s'
+salesforce:
+  access_token_endpoint: https://login.salesforce.com/services/oauth2/token
+  aud: https://login.salesforce.com

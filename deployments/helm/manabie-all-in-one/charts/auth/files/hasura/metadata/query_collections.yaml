@@ -1,0 +1,14 @@
+- name: allowed-queries
+  definition:
+    queries: 
+      - name: Users_GetOrganizationsByDomainName
+        query: |
+          query Users_GetOrganizationsByDomainName($domain_name: String) {
+            organizations(where: {domain_name: {_eq: $domain_name}}) {
+              tenant_id
+              domain_name
+              logo_url
+              organization_id
+              name
+            }
+          }

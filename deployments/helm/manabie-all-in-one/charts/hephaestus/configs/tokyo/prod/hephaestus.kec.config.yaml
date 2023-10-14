@@ -1,0 +1,12 @@
+common:
+  google_cloud_project: student-coach-e1e95
+
+datalake:
+  alloydb:
+    user: 'prod-dwh-kafka-connect@student-coach-e1e95.iam'
+    dbname: 'alloydb'
+
+datawarehouses:
+  kec:
+    user: 'prod-dwh-kafka-connect@student-coach-e1e95.iam'
+    dbname: 'kec'

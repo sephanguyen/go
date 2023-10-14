@@ -1,0 +1,13 @@
+hasura:
+    onDemandNodeDeployment:
+        enabled: true
+onDemandNodeDeployment:
+    enabled: true
+podAnnotations:
+    cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+    sidecar.istio.io/proxyCPU: 2m
+    sidecar.istio.io/proxyMemory: 50Mi
+resources:
+    requests:
+        cpu: 4m
+        memory: 50Mi

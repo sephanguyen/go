@@ -1,0 +1,89 @@
+apiVersion: skaffold/v4beta5
+kind: Config
+metadata:
+  name: emulator
+profiles:
+  - name: local
+    activation:
+      - env: ENV=local
+    deploy:
+      kubeContext: kind-kind
+      helm:
+        hooks:
+          before:
+            - host:
+                command:
+                  - /bin/bash
+                  - -c
+                  - |
+                    set -eu
+
+                    . ./deployments/setup_istio.bash
+
+                    setup_backend_namespace ${NAMESPACE:-backend}
+                    setup_backend_namespace local-${ORG:-manabie}-backend
+        releases:
+          - name: istio-base
+            namespace: istio-system
+            createNamespace: true
+            chartPath: deployments/helm/platforms/istio/base-1.18.0.tgz
+            skipBuildDependencies: true
+            valuesFiles:
+              - deployments/helm/platforms/istio/base-local-values.yaml
+            setValues:
+              defaultRevision: 1-18-0
+          - name: istiod
+            namespace: istio-system
+            createNamespace: true
+            chartPath: deployments/helm/platforms/istio/istiod-1.18.0.tgz
+            skipBuildDependencies: true
+            valuesFiles:
+              - deployments/helm/platforms/istio/istiod-local-values.yaml
+            setValues:
+              revision: 1-18-0
+          - name: istio-ingressgateway
+            namespace: istio-system
+            createNamespace: true
+            chartPath: deployments/helm/platforms/istio/gateway-1.18.0.tgz
+            skipBuildDependencies: true
+            valuesFiles:
+              - deployments/helm/platforms/istio/gateway-local-values.yaml
+            setValues:
+              revision: 1-18-0
+          - name: infras
+            chartPath: deployments/helm/emulators/infras
+            namespace: emulator
+            createNamespace: true
+            valuesFiles:
+              - 'deployments/helm/platforms/gateway/{{.ENV}}-{{.ORG}}-values.yaml'
+            setValueTemplates:
+              minio:
+                environment: '{{.ENV}}'
+                vendor: '{{.ORG}}'
+              postgresqlPersistentEnabled: '{{if eq "true" .E2E}}true{{else}}false{{end}}'
+          - name: firebase
+            chartPath: deployments/helm/emulators/firebase
+            namespace: emulator
+            createNamespace: true
+          - name: letsencrypt
+            chartPath: deployments/helm/emulators/letsencrypt
+            namespace: emulator
+            createNamespace: true
+      statusCheck: false
+
+  # Installs Calico, which handles Kubernetes Network Policies.
+  # It is pre-bundled with GKE so we don't need to install this in stag/uat/prod.
+  - name: calico
+    activation:
+      - kubeContext: kind-kind
+        env: NETWORK_POLICY_ENABLED=true
+    patches:
+      - op: add
+        path: /deploy/helm/releases/-
+        value:
+          name: calico
+          chartPath: deployments/helm/platforms/calico
+          namespace: tigera-operator
+          createNamespace: true
+          valuesFiles:
+            - 'deployments/helm/platforms/calico/{{.ENV}}-{{.ORG}}-values.yaml'

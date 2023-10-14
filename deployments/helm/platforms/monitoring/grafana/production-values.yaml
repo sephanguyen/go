@@ -1,0 +1,87 @@
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+      - name: Thanos
+        type: prometheus
+        url: http://thanos-query-frontend:9090
+        access: proxy
+        isDefault: true
+        basicAuth: true
+        basicAuthUser: admin
+        secureJsonData:
+          basicAuthPassword: fcc8ac4253cb8fae31eff402
+        jsonData:
+          timeInterval: 60s
+      - name: Google Cloud Monitoring
+        type: stackdriver
+        access: proxy
+        jsonData:
+          authenticationType: gce
+
+grafana.ini:
+  auth:
+    disable_login_form: false
+  auth.github:
+    enabled: true
+    allow_sign_up: true
+    scopes: user:email,read:org
+    auth_url: https://github.com/login/oauth/authorize
+    token_url: https://github.com/login/oauth/access_token
+    api_url: https://api.github.com/user
+    team_ids: 3317843,3581477,3274109
+    allowed_organizations: manabie-com
+    client_id: "4b820df5e98acb77ed00"
+    client_secret: "aef50e99e62b23387db70d63920eb644e552cd04"
+  database:
+    type: postgres
+    host: 127.0.0.1:5432
+    name: grafana
+    user: grafana@student-coach-e1e95.iam
+    ssl_mode: disable
+    max_open_conn: 6
+    max_idle_conn: 4
+  server:
+    domain: grafana.manabie.io
+    root_url: https://grafana.manabie.io
+
+persistence:
+  enabled: false
+
+plugins:
+  - grafana-oncall-app v1.3.26
+
+extraContainers: |
+  - name: cloud-sql-proxy
+    command:
+    - /cloud_sql_proxy
+    - -instances=student-coach-e1e95:asia-northeast1:prod-tokyo=tcp:5432
+    - -structured_logs
+    - -log_debug_stdout=true
+    - -enable_iam_login
+    image: gcr.io/cloudsql-docker/gce-proxy:1.31.2
+    imagePullPolicy: IfNotPresent
+    resources:
+      requests:
+        cpu: 5m
+        memory: 8Mi
+    securityContext:
+      runAsNonRoot: true
+
+serviceAccount:
+  annotations:
+    iam.gke.io/gcp-service-account: grafana@student-coach-e1e95.iam.gserviceaccount.com
+
+livenessProbe:
+  httpGet:
+    path: /api/health
+    port: 3000
+  initialDelaySeconds: 90
+  timeoutSeconds: 30
+  failureThreshold: 30
+
+rbac:
+  pspEnabled: false
+
+testFramework:
+  enabled: false

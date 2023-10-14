@@ -1,0 +1,15 @@
+common:
+  google_cloud_project: production-renseikai
+  firebase_project: production-renseikai
+  identity_platform_project: student-coach-e1e95
+jwt_applicant: prod-renseikai
+issuers:
+  - issuer: manabie
+    audience: prod-renseikai
+    jwks_endpoint: http://shamir:5680/.well-known/jwks.json
+agora:
+  app_id: 4ce88e1ddf8b4be9beeb87d32138fe22
+whiteboard:
+  app_id: V7mZoJt9Eeqxp_kxzbwYqQ/a2ayE1XY7HIteQ
+storage:
+  bucket: renseikai-backend

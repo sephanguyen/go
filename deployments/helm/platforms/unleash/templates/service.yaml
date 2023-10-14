@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "unleash.fullname" . }}
+  labels:
+    {{- include "unleash.labels" . | nindent 4 }}
+{{- if .Values.service.annotations }}
+{{- with .Values.service.annotations }}
+  annotations:
+{{ toYaml . | indent 4 }}
+{{- end }}
+{{- end }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: unleash
+      protocol: TCP
+      name: unleash
+  selector:
+    {{- include "unleash.selectorLabels" . | nindent 4 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "unleash.fullname" . }}-proxy
+  labels:
+    {{- include "unleashProxy.labels" . | nindent 4 }}
+{{- if .Values.service.annotations }}
+{{- with .Values.service.annotations }}
+  annotations:
+{{ toYaml . | indent 4 }}
+{{- end }}
+{{- end }}
+spec:
+  type: {{ .Values.unleashProxy.service.type }}
+  ports:
+    - port: {{ .Values.unleashProxy.service.port }}
+      targetPort: unleash-proxy
+      protocol: TCP
+      name: unleash-proxy
+  selector:
+    {{- include "unleashProxy.selectorLabels" . | nindent 4 }}

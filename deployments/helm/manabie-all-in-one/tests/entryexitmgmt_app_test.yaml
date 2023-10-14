@@ -1,0 +1,246 @@
+suite: entryexitmgmt app yaml file
+templates:
+  - charts/entryexitmgmt/templates/app.yaml
+values:
+  - ../charts/entryexitmgmt/values.yaml
+  - ../values.yaml
+  - ../local-manabie-values.yaml
+  - ../../platforms/gateway/local-manabie-values.yaml
+tests:
+  - it: first template should be ConfigMap
+    set:
+      global.entryexitmgmt.enabled: true
+      global.entryexitmgmt.sops.enabled: true
+      global.environment: local
+      global.vendor: manabie
+      global.image.repository: local
+      entryexitmgmt.image.tag: v1
+      entryexitmgmt.service.port: 1234
+      global.sqlProxy.enabled: true
+    documentIndex: 0
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - isNotNull:
+          path: data.[entryexitmgmt.common.config.yaml]
+      - isNotNull:
+          path: data.[entryexitmgmt.config.yaml]
+
+  - it: second template should be Secret
+    set:
+      global.entryexitmgmt.enabled: true
+      global.entryexitmgmt.sops.enabled: true
+      global.environment: local
+      global.vendor: manabie
+      global.image.repository: local
+      entryexitmgmt.image.tag: v1
+      entryexitmgmt.service.port: 1234
+      global.sqlProxy.enabled: true
+    documentIndex: 1
+    asserts:
+      - isKind:
+          of: Secret
+      - isNotNull:
+          path: data.[entryexitmgmt.secrets.encrypted.yaml]
+      - isNotNull:
+          path: data.[entryexitmgmt_migrate.secrets.encrypted.yaml]
+      - isNotNull:
+          path: data.[hasura.secrets.encrypted.yaml]
+
+  - it: third template should be PodDisruptionBudget
+    set:
+      global.entryexitmgmt.enabled: true
+      global.entryexitmgmt.sops.enabled: true
+      global.environment: local
+      global.vendor: manabie
+      global.image.repository: local
+      entryexitmgmt.image.tag: v1
+      entryexitmgmt.service.port: 1234
+      global.sqlProxy.enabled: true
+    documentIndex: 2
+    asserts:
+      - isKind:
+          of: PodDisruptionBudget
+      - equal:
+          path: spec.maxUnavailable
+          value: 1
+
+  - it: fourth template should be ServiceAccount
+    set:
+      global.entryexitmgmt.enabled: true
+      global.entryexitmgmt.sops.enabled: true
+      global.environment: local
+      global.vendor: manabie
+      global.image.repository: local
+      entryexitmgmt.image.tag: v1
+      entryexitmgmt.service.port: 1234
+      global.sqlProxy.enabled: true
+    documentIndex: 3
+    asserts:
+      - isKind:
+          of: ServiceAccount
+      - equal:
+          path: metadata.name
+          value: local-entryexitmgmt
+
+  - it: fifth template should be Deployment
+    set:
+      global.entryexitmgmt.enabled: true
+      global.entryexitmgmt.sops.enabled: true
+      global.environment: local
+      global.vendor: manabie
+      global.image.repository: local
+      entryexitmgmt.image.tag: v1
+      global.sqlProxy.enabled: true
+    documentIndex: 4
+    asserts:
+      - isKind:
+          of: Deployment
+
+      # init containers
+      - equal:
+          path: spec.template.spec.initContainers[0].name
+          value: wait-for-shamir
+      - equal:
+          path: spec.template.spec.initContainers[1].name
+          value: entryexitmgmt-migrate
+      - equal:
+          path: spec.template.spec.initContainers[1].volumeMounts[0].mountPath
+          value: /configs/entryexitmgmt.common.config.yaml
+      - equal:
+          path: spec.template.spec.initContainers[1].volumeMounts[1].mountPath
+          value: /configs/entryexitmgmt.config.yaml
+      - equal:
+          path: spec.template.spec.initContainers[1].volumeMounts[2].mountPath
+          value: /configs/entryexitmgmt_migrate.secrets.encrypted.yaml
+      - equal:
+          path: spec.template.spec.initContainers[1].volumeMounts[3].mountPath
+          value: /configs/service_credential.json
+
+      # metadata
+      - equal:
+          path: spec.template.metadata.labels.[app.kubernetes.io/name]
+          value: "entryexitmgmt"
+      - equal:
+          path: spec.template.metadata.annotations.[sidecar.istio.io/proxyCPU]
+          value: "5m"
+      - isNotEmpty:
+          path: spec.template.metadata.annotations.[checksum/entryexitmgmt.config.yaml]
+      - isNotEmpty:
+          path: spec.template.metadata.annotations.[checksum/entryexitmgmt.secrets.encrypted.yaml]
+      - isNotEmpty:
+          path: spec.template.metadata.annotations.[checksum/entryexitmgmt_migrate.secrets.encrypted.yaml]
+
+      # containers
+      - equal:
+          path: spec.template.spec.containers[0].name
+          value: entryexitmgmt
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: local:v1
+      - equal:
+          path: spec.template.spec.containers[0].command
+          value:
+            - /bin/sh
+            - -c
+            - |
+              #!/bin/bash
+              set -eu
+              cat <<EOF > modd.conf
+              /server {
+                daemon +sigterm: /server \\
+                  gserver \\
+                  entryexitmgmt \\
+                  --commonConfigPath=/configs/entryexitmgmt.common.config.yaml \\
+                  --configPath=/configs/entryexitmgmt.config.yaml \\
+                  --secretsPath=/configs/entryexitmgmt.secrets.encrypted.yaml
+              }
+              EOF
+              exec modd
+      - contains:
+          path: spec.template.spec.containers[0].ports
+          content:
+            name: grpc
+            containerPort: 6350
+            protocol: TCP
+      - matchRegex:
+          path: spec.template.spec.containers[0].readinessProbe.exec.command[2]
+          pattern: .*localhost:6350.*
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.periodSeconds
+          value: 10
+
+      # volumes
+      - equal:
+          path: spec.template.spec.volumes[0].secret.secretName
+          value: entryexitmgmt
+      - equal:
+          path: spec.template.spec.volumes[0].secret.items[0].key
+          value: entryexitmgmt.secrets.encrypted.yaml
+      - equal:
+          path: spec.template.spec.volumes[0].secret.items[1].key
+          value: entryexitmgmt_migrate.secrets.encrypted.yaml
+      - equal:
+          path: spec.template.spec.volumes[0].secret.items[2].key
+          value: hasura.secrets.encrypted.yaml
+      - equal:
+          path: spec.template.spec.volumes[1].name
+          value: hasura-secrets-decrypted-volume
+      - equal:
+          path: spec.template.spec.volumes[2].configMap.name
+          value: entryexitmgmt-hasura-metadata
+      - equal:
+          path: spec.template.spec.volumes[3].name
+          value: service-credential
+      - equal:
+          path: spec.template.spec.volumes[4].configMap.name
+          value: entryexitmgmt
+
+      #affinity
+      - contains:
+          path: spec.template.spec.affinity.nodeAffinity.preferredDuringSchedulingIgnoredDuringExecution
+          content:
+            weight: 10
+            preference:
+              matchExpressions:
+              - key: cloud.google.com/gke-spot
+                operator: In
+                values:
+                - "true"
+      - contains:
+          path: spec.template.spec.affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution
+          content:
+            weight: 100
+            podAffinityTerm:
+              labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: entryexitmgmt
+              topologyKey: kubernetes.io/hostname
+      - contains:
+          path: spec.template.spec.tolerations
+          content:
+            effect: NoSchedule
+            key: "cloud.google.com/gke-spot"
+            operator: Exists
+
+  - it: sixth template should be Service
+    set:
+      global.entryexitmgmt.enabled: true
+      global.entryexitmgmt.sops.enabled: true
+      global.environment: local
+      global.vendor: manabie
+      global.image.repository: local
+      entryexitmgmt.image.tag: v1
+      entryexitmgmt.service.port: 1234
+      global.sqlProxy.enabled: true
+    documentIndex: 5
+    asserts:
+      - isKind:
+          of: Service
+      - contains:
+          path: spec.ports
+          content:
+            name: grpc-web-port
+            protocol: TCP
+            targetPort: grpc
+            port: 6350

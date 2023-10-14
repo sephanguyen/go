@@ -1,0 +1,115 @@
+syntax = "proto3";
+
+package syllabus.v1;
+
+import "google/api/annotations.proto";
+import "google/protobuf/duration.proto";
+import "syllabus/v1/enums.proto";
+import "common/v1/requests.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/syllabus/v1;sspb";
+
+message ImportItemsRequest {
+    bytes payload = 1;
+  }
+ 
+message ImportItemsResponseError {
+    int32 row_number = 1;
+    ItemsBankErrorCode error_code = 2;
+    string error_description = 3;
+  }
+
+message ImportItemsResponse {
+    repeated ImportItemsResponseError errors = 1;
+}
+
+message ItemBankResumableUploadURLRequest {
+  string file_name = 1;
+  google.protobuf.Duration expiry = 2;    // maximum 30 minutes
+  string allow_origin = 3;
+}
+
+message ItemBankResumableUploadURLResponse {
+  message FileStoreURL {
+    string resumable_upload_url = 1;
+    string public_url = 2;
+  }
+  FileStoreURL file_store_url = 1;
+  google.protobuf.Duration expiry = 2;    // maximum 30 minutes
+}
+
+enum FileStoreURLErrorCode {
+  FIRE_STORE_URL_ERR_UNKNOWN = 0;
+  FIRE_STORE_URL_ERR_DUPLICATE_FILE_NAME = 1;
+}
+
+message FileStoreURLError {
+  string file_name = 1;
+  FileStoreURLErrorCode error_code = 2;
+  string error_description = 3;
+}
+
+message FileStoreURL {
+  string resumable_upload_url = 1;
+  string public_url = 2;
+  google.protobuf.Duration expiry = 3;    // maximum 30 minutes
+  FileStoreURLError error = 4;
+}
+
+message ListItemBankResumableUploadURLRequest {
+  repeated string file_names = 1;
+  google.protobuf.Duration expiry = 2;    // maximum 30 minutes
+  string allow_origin = 3;
+}
+
+message ListItemBankResumableUploadURLResponse {
+  repeated FileStoreURL file_store_urls = 1;
+}
+
+message Media {
+  string name = 1;
+  string resource = 2;
+  MediaType type = 3;
+  float file_size = 4;
+}
+
+message UpsertMediaRequest{ Media media = 1; }
+
+message UpsertMediaResponse{ string media_id = 1; }
+
+message DeleteMediaRequest{ string media_id = 1; }
+
+message DeleteMediaResponse{}
+
+message GetItemsByLMRequest {
+  repeated string learning_material_id = 1;
+  common.v1.Paging paging = 2;
+}
+
+message GetItemsByLMResponse {
+  message Items{
+    string reference = 1;
+    string title = 2;
+  }
+  repeated Items items = 1;
+  common.v1.Paging next_page = 2;
+}
+
+service ItemsBankService {
+    rpc ImportItems (ImportItemsRequest) returns (ImportItemsResponse){
+      option (google.api.http) = {
+        post: "/syllabus/api/v1/proxy/items_bank_service/import_items",
+        body: "*"
+    };
+    }
+
+    rpc GenerateItemBankResumableUploadURL(ItemBankResumableUploadURLRequest) returns (ItemBankResumableUploadURLResponse);
+
+    rpc GenerateListItemBankResumableUploadURL(ListItemBankResumableUploadURLRequest) returns (ListItemBankResumableUploadURLResponse);
+
+    rpc UpsertMedia(UpsertMediaRequest) returns (UpsertMediaResponse);
+
+    rpc DeleteMedia(DeleteMediaRequest) returns (DeleteMediaResponse);
+
+    rpc GetItemsByLM(GetItemsByLMRequest) returns (GetItemsByLMResponse);
+}

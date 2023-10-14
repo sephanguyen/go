@@ -1,0 +1,88 @@
+
+replicaCount: 1
+
+resources:
+  requests:
+    memory: 128Mi
+
+service:
+  type: ClusterIP
+  port: 6050
+httpPort: 6080
+grpcPort: 6050
+
+hasurav2: #hasura v2
+  enableConsole: true
+  enableRemoteSchemaPermission: false #we dont use it now
+  experimentFeatures: "naming_convention"
+  allowList: true
+  namingConvention: "hasura-default"
+  enabledApis: "metadata,graphql"
+  unauthorized:
+    enable: false
+    role: anonymous
+  service:
+    type: ClusterIP
+    port: 8080
+  resources:
+    requests:
+      memory: 256Mi
+
+
+apiHttp:
+  - match:
+    - uri:
+        prefix: /draft
+    - uri:
+        prefix: /manabie.draft
+    route:
+      - destination:
+          host: draft
+          port:
+            number: 6050
+
+adminHttpV2: #hasura v2
+  - match:
+    - uri:
+        prefix: /draft/ # rm later
+    - uri:
+        prefix: /draftv2/ # accessing hasura by /draftv2/console path
+    rewrite:
+      uri: /
+    route:
+    - destination:
+        host: draft-hasurav2
+        port:
+          number: 8080
+
+
+webHttp:
+  - match:
+    - uri:
+        prefix: /draft-http/v1
+    route:
+    - destination:
+        host: draft
+        port:
+          number: 6080
+
+
+nodeSelector: {}
+
+tolerations:
+
+affinity: {}
+affinityOverride: {}
+
+pdb:
+  enabled: true
+
+# needed for hasura deployment
+hasuraPodAnnotations:
+  sidecar.istio.io/proxyCPU: "50m"
+  sidecar.istio.io/proxyMemory: "50Mi"
+  cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+
+jobs:
+  clean-data:
+    cmd: clean_test_data

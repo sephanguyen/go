@@ -1,0 +1,13 @@
+ALTER PUBLICATION alloydb_publication ADD TABLE
+public.timesheet,
+public.other_working_hours,
+public.transportation_expense,
+public.staff_transportation_expense,
+public.lessons,
+public.timesheet_lesson_hours,
+public.auto_create_flag_activity_log,
+public.auto_create_timesheet_flag,
+public.timesheet_confirmation_cut_off_date,
+public.timesheet_confirmation_info,
+public.timesheet_confirmation_period,
+public.timesheet_config;

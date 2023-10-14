@@ -1,0 +1,52 @@
+{
+  "took": 11,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 1,
+      "relation": "eq"
+    },
+    "max_score": 1.0,
+    "hits": [{
+      "_index": "lesson",
+      "_type": "_doc",
+      "_id": "01G26MFE7TGYHRWPXEYP6CGRC4",
+      "_score": 1.0,
+      "_source": {
+        "resource_path": "1",
+        "lesson_id": "01G26MFE7TGYHRWPXEYP6CGRC4",
+        "location_id": "01G26MFE7S82930BC5SHBA7WXX",
+        "teaching_medium": "LESSON_TEACHING_MEDIUM_OFFLINE",
+        "teaching_method": "LESSON_TEACHING_METHOD_INDIVIDUAL",
+        "deleted_at": null,
+        "updated_at": "2022-05-04T04:15:29.574542Z",
+        "created_at": "2022-05-04T04:15:29.530512Z",
+        "lesson_members": [{
+            "id": "01G26MFDWBQ89JT41H7X6C5PVH",
+            "name": "valid-student-01G26MFDWD9DHV49BSVJ20Q6N4",
+            "current_grade": 12,
+            "course_id": "01G26MFDVXCFQ72PF4A2AK3JBX"
+          },
+          {
+            "id": "01G26MFDWBQ89JT41H7W36ZVDM",
+            "name": "valid-student-01G26MFDWBQ89JT41H7ZJQQ28Q",
+            "current_grade": 12,
+            "course_id": "01G26MFDVXCFQ72PF4A2AK3JBX"
+          }
+        ],
+        "lesson_teachers": [
+          "01G26MFDW3XH6191A2BRR98AFP",
+          "01G26MFDW7X8GNF5R7WFN1QT5X"
+        ],
+        "start_time": "2022-05-03T16:15:29.53051Z",
+        "end_time": "2022-05-03T16:17:29.530511Z"
+      }
+    }]
+  }
+}

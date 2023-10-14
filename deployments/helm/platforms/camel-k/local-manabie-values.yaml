@@ -1,0 +1,23 @@
+camel-k:
+  operator:
+    image: asia-southeast1-docker.pkg.dev/student-coach-e1e95/ci/apache/camel-k:1.12.0
+  platform:
+    build:
+      baseImage: kind-registry:5000/eclipse-temurin:11.0.19_7-jdk-jammy
+      buildStrategy: routine
+      publishStrategy: Spectrum
+      registry:
+        address: kind-registry:5000
+        organization: ""
+        insecure: true
+        secret: ""
+    kamelet: {}
+    traits:
+      logging:
+        color: true
+        json: false
+      prometheus:
+        enabled: true
+        podMonitor: false
+      quarkus:
+        packageTypes: ["fast-jar"]

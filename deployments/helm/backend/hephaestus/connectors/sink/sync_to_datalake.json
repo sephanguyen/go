@@ -1,0 +1,37 @@
+{{- if or (eq .Values.global.environment "local") (eq .Values.global.environment "stag") (eq .Values.global.environment "dorp") }}
+{{- if or (eq .Values.global.vendor "manabie") (eq .Values.global.vendor "tokyo") }}
+{
+  "name": "{{ .Values.global.environment }}_{{ .Values.global.vendor }}_sync_datalake_sink_connector",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+    "tasks.max": "20",
+    "topics.regex": "{{ .Values.global.environment }}.{{ .Values.global.vendor }}.alloydb_([^.]+).public.([^.]+)",
+    "connection.url": "${file:/decrypted/kafka-connect.secrets.properties:datalake_url}",
+    "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+    "transforms.unwrap.drop.tombstones": "false",
+    "transforms.unwrap.delete.handling.mode": "none",
+    "transforms.route.type": "org.apache.kafka.connect.transforms.RegexRouter",
+    "transforms.route.regex": "([^.]+).([^.]+).alloydb_([^.]+).([^.]+).([^.]+)",
+    "transforms.route.replacement": "$3.$5",
+    "auto.create": "true",
+    "auto.evolve": "true",
+    "insert.mode": "upsert",
+    "delete.enabled": "true",
+    "pk.mode": "record_key",
+    "transforms.ReplaceField.type": "org.apache.kafka.connect.transforms.ReplaceField$Value",
+    "table.name.format": "${topic}",
+    "transforms": "unwrap,route,ReplaceField",
+    "transforms.ReplaceField.blacklist": "point",
+    "consumer.override.max.poll.records": "500",
+    "offset.flush.interval.ms": "200000",
+    "offset.flush.timeout.ms": "20000",
+{{- if or (eq .Values.global.environment "stag") (eq .Values.global.environment "dorp") }}
+    "errors.tolerance": "all",
+    "errors.deadletterqueue.topic.name": "dlq_sync_datalake_sink_connector",
+    "errors.deadletterqueue.context.headers.enable": "true",
+{{- end }}
+    "consumer.override.max.poll.interval.ms": "600000"
+  }
+}
+{{- end }}
+{{- end }}

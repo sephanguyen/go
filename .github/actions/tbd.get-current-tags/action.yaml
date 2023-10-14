@@ -1,0 +1,94 @@
+name: "Get current tags"
+description: |
+  A composite action that get the tag that is currently live on Kubernetes:
+      - BE: from bob deployment
+      - FE: from backoffice deployment
+      - ME: from learner-web deployment
+
+  Requires:
+    - the checkout action "actions/checkout" to run first
+    - current kubecontext must be set to the desired context
+    - kubectl tools
+
+inputs:
+  summary:
+    description: "Whether to export finalized tags to Github Action Job Summaries"
+    default: "true"
+  environment:
+    description: "Environment to get the current tags"
+    default: "uat"
+    required: true
+  organization:
+    description: "Organization to get the current tags"
+    default: "manabie"
+    required: true
+outputs:
+  be_release_tag:
+    description: "Current backend release tag"
+    value: ${{ steps.run.outputs.BE_TAG }}
+  fe_release_tag:
+    description: "Current front end release tag"
+    value: ${{ steps.run.outputs.FE_TAG }}
+  me_release_tag:
+    description: "Current mobile release tag"
+    value: ${{ steps.run.outputs.ME_TAG }}
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Kubernetes for ${{ inputs.environment }}-${{ inputs.organization }}
+      if: inputs.environment != 'production' && inputs.environment != 'preproduction'
+      uses: ./.github/actions/setup-k8s
+      with:
+        organization: ${{ inputs.organization }}
+        environment: ${{ inputs.environment }}
+        workload_identity_provider: "projects/456005132078/locations/global/workloadIdentityPools/gh-action-pool/providers/get-release-tag-provider"
+        service_account: "stag-get-release-tag-bot@staging-manabie-online.iam.gserviceaccount.com"
+
+    - name: Setup Kubernetes for ${{ inputs.environment }}-${{ inputs.organization }}
+      if: inputs.environment == 'production' || inputs.environment == 'preproduction'
+      uses: ./.github/actions/setup-k8s
+      with:
+        organization: ${{ inputs.organization }}
+        environment: ${{ inputs.environment }}
+        workload_identity_provider: "projects/418860883682/locations/global/workloadIdentityPools/gh-action-pool/providers/get-release-tag-provider"
+        service_account: "prod-get-release-tag-bot@student-coach-e1e95.iam.gserviceaccount.com"
+
+    - name: Run script
+      id: run
+      env:
+        BE_TAG: ${{ inputs.be_release_tag }}
+        FE_TAG: ${{ inputs.fe_release_tag }}
+        ME_TAG: ${{ inputs.me_release_tag }}
+      run: ./.github/actions/tbd.get-current-tags/get-current-tags.sh
+      shell: bash
+
+    - name: Summary output
+      if: inputs.summary == 'true' || inputs.summary == 'yes' || inputs.summary == '1'
+      shell: bash
+      run: |
+        set -e
+        if [[ -z "${{ inputs.be_release_tag }}" && -z "${{ inputs.fe_release_tag }}" && -z "${{ inputs.be_release_tag }}" ]]; then
+          # All inputs are empty, will not print "Input tag" column
+          cat <<EOF > $GITHUB_STEP_SUMMARY
+          ### tags on ${{ inputs.environment }} - ${{ inputs.organization }}
+
+          | Type     | Current tag                                                                                                                        |
+          | -------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+          | backend  | [${{ steps.run.outputs.BE_TAG }}](https://github.com/manabie-com/backend/releases/tag/${{ steps.run.outputs.BE_TAG }})             |
+          | frontend | [${{ steps.run.outputs.FE_TAG }}](https://github.com/manabie-com/school-portal-admin/releases/tag/${{ steps.run.outputs.FE_TAG }}) |
+          | mobile   | [${{ steps.run.outputs.ME_TAG }}](https://github.com/manabie-com/student-app/releases/tag/${{ steps.run.outputs.ME_TAG }})         |
+
+          
+        EOF
+        else
+          cat <<EOF > $GITHUB_STEP_SUMMARY
+          ### tags
+
+          | Type     | Input tag                                                                                                                    | Finalized tag                   |
+          | -------- | ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
+          | backend  | [${{ inputs.be_release_tag }}](https://github.com/manabie-com/backend/releases/tag/${{ inputs.be_release_tag }})             | [${{ steps.run.outputs.BE_TAG }}](https://github.com/manabie-com/backend/releases/tag/${{ steps.run.outputs.BE_TAG }})  |
+          | frontend | [${{ inputs.fe_release_tag }}](https://github.com/manabie-com/school-portal-admin/releases/tag/${{ inputs.be_release_tag }}) | [${{ steps.run.outputs.FE_TAG }}](https://github.com/manabie-com/school-portal-admin/releases/tag/${{ steps.run.outputs.FE_TAG }}) |
+          | mobile   | [${{ inputs.me_release_tag }}](https://github.com/manabie-com/student-app/releases/tag/${{ inputs.be_release_tag }})         | [${{ steps.run.outputs.ME_TAG }}](https://github.com/manabie-com/student-app/releases/tag/${{ steps.run.outputs.ME_TAG }}) |
+
+        EOF
+        fi

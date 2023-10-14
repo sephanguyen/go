@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package mastermgmt.v1;
+import "google/api/annotations.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/mastermgmt/v1;mpb";
+
+message ImportSubjectsRequest {
+    bytes payload = 1;
+}
+
+message ImportSubjectsResponse {
+}
+
+message ExportSubjectsRequest {
+}
+
+message ExportSubjectsResponse {
+    bytes data = 1;
+}
+
+service SubjectService {
+    rpc ImportSubjects(ImportSubjectsRequest) returns (ImportSubjectsResponse){
+        option (google.api.http) = {
+            post: "/mastermgmt/api/v1/proxy/subjects",
+            body: "*"
+        };
+    };
+    rpc ExportSubjects(ExportSubjectsRequest) returns (ExportSubjectsResponse) {
+        option (google.api.http) = {
+            get: "/mastermgmt/api/v1/proxy/subjects/export"
+        };
+    };
+}

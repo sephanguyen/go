@@ -1,0 +1,21 @@
+CREATE SINK CONNECTOR IF NOT EXISTS SINK_ORDER_PUBLIC_INFO WITH (
+      'connector.class'='io.confluent.connect.jdbc.JdbcSinkConnector',
+      'transforms.unwrap.delete.handling.mode'='drop',
+      'tasks.max'='1',
+      'topics'='{{ .Values.topicPrefix }}ORDER_PUBLIC_INFO_V1',
+      'fields.whitelist'='bill_item_sequence_number,order_id,product_description,product_pricing,discount_amount_type,discount_amount_value,bill_type,billing_status,billing_date,billing_from,billing_to,billing_schedule_period_id,discount_amount,tax_amount,final_price,student_id,student_product_id,billing_approval_status,billing_item_description,location_id,discount_id,previous_bill_item_sequence_number,previous_bill_item_status,adjustment_price,is_latest_bill_item,price,old_price,billing_ratio_numerator,billing_ratio_denominator,bill_item_is_reviewed,raw_discount_amount,bill_item_created_at,bill_item_updated_at,bill_item_deleted_at,order_sequence_number,order_comment,order_status,order_type,student_full_name,order_is_reviewed,withdrawal_effective_date,background,future_measures,loa_start_date,loa_end_date,order_created_at,order_updated_at,order_deleted_at,tax_id,tax_name,tax_percentage,tax_category,default_flag,is_archived,tax_created_at,tax_updated_at,tax_deleted_at',
+      'key.converter'='org.apache.kafka.connect.storage.StringConverter',
+      'value.converter'='io.confluent.connect.avro.AvroConverter',
+      'value.converter.schema.registry.url'='{{ .Values.cpRegistryHost }}',
+      'delete.enabled'='false',
+      'transforms.unwrap.drop.tombstones'='true',
+      'auto.create'='true',
+      'connection.url'='${file:/decrypted/kafka-connect.secrets.properties:kec_url}',
+      'insert.mode'='upsert',
+      'table.name.format'='public.order',
+      'pk.mode'='record_value',
+      'transforms'='RenameField',
+      'transforms.RenameField.type'= 'org.apache.kafka.connect.transforms.ReplaceField$Value',
+      'transforms.RenameField.renames'='BILL_ITEM_SEQUENCE_NUMBER:bill_item_sequence_number,ORDER_ID:order_id,PRODUCT_DESCRIPTION:product_description,PRODUCT_PRICING:product_pricing,DISCOUNT_AMOUNT_TYPE:discount_amount_type,DISCOUNT_AMOUNT_VALUE:discount_amount_value,BILL_TYPE:bill_type,BILLING_STATUS:billing_status,BILLING_DATE:billing_date,BILLING_FROM:billing_from,BILLING_TO:billing_to,BILLING_SCHEDULE_PERIOD_ID:billing_schedule_period_id,DISCOUNT_AMOUNT:discount_amount,TAX_AMOUNT:tax_amount,FINAL_PRICE:final_price,STUDENT_ID:student_id,STUDENT_PRODUCT_ID:student_product_id,BILLING_APPROVAL_STATUS:billing_approval_status,BILLING_ITEM_DESCRIPTION:billing_item_description,LOCATION_ID:location_id,DISCOUNT_ID:discount_id,PREVIOUS_BILL_ITEM_SEQUENCE_NUMBER:previous_bill_item_sequence_number,PREVIOUS_BILL_ITEM_STATUS:previous_bill_item_status,ADJUSTMENT_PRICE:adjustment_price,IS_LATEST_BILL_ITEM:is_latest_bill_item,PRICE:price,BILLING_RATIO_NUMERATOR:billing_ratio_numerator,BILLING_RATIO_DENOMINATOR:billing_ratio_denominator,BILL_ITEM_IS_REVIEWED:bill_item_is_reviewed,RAW_DISCOUNT_AMOUNT:raw_discount_amount,BILL_ITEM_CREATED_AT:bill_item_created_at,BILL_ITEM_UPDATED_AT:bill_item_updated_at,BILL_ITEM_DELETED_AT:bill_item_deleted_at,TAX_ID:tax_id,TAX_CATEGORY:tax_category,TAX_PERCENTAGE:tax_percentage,TAX_NAME:tax_name,DEFAULT_FLAG:default_flag,IS_ARCHIVED:is_archived,TAX_CREATED_AT:tax_created_at,TAX_UPDATED_AT:tax_updated_at,TAX_DELETED_AT:tax_deleted_at,ORDER_SEQUENCE_NUMBER:order_sequence_number,ORDER_COMMENT:order_comment,ORDER_STATUS:order_status,ORDER_TYPE:order_type,STUDENT_FULL_NAME:student_full_name,ORDER_IS_REVIEWED:order_is_reviewed,WITHDRAWAL_EFFECTIVE_DATE:withdrawal_effective_date,BACKGROUND:background,FUTURE_MEASURES:future_measures,LOA_START_DATE:loa_start_date,LOA_END_DATE:loa_end_date,ORDER_CREATED_AT:order_created_at,ORDER_UPDATED_AT:order_updated_at,ORDER_DELETED_AT:order_deleted_at',
+      'pk.fields'='bill_item_sequence_number,order_id'
+);

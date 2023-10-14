@@ -1,0 +1,10 @@
+image: asia-southeast1-docker.pkg.dev/student-coach-e1e95/ci/confluentinc/cp-ksqldb-server
+resources:
+  requests:
+    cpu: 100m
+    memory: 800Mi
+  limits:
+    cpu: 1000m
+    memory: 800Mi
+imagePullSecrets:
+  - name: regcred

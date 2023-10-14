@@ -1,0 +1,157 @@
+# This file contains the rules used to trigger tests on CI.
+# If a rule is triggered, it sets the output using the rule's name to Github Action.
+# Other steps in Github Action workflow are expected to use that output
+# to decide whether to run respective tests.
+#
+# Documentation: https://manabie.atlassian.net/l/cp/bHZvgBwz
+# Run "go run cmd/citools/diff/main.go --help" for more information on the tool.
+rules:
+  - name: integration-blocker-test
+    paths:
+      - '.github/workflows/tiered.pre_merge.yml'
+      - 'cmd/server'
+      - 'deployments/helm'
+      - 'deployments/istio'
+      - 'deployments/versions/(go|helm|kind|skaffold|skaffoldv2)'
+      - 'deployments/.*\.bash'
+      - 'developments/development.Dockerfile'
+      - 'developments/python.Dockerfile'
+      - 'features/'
+      - 'internal/'
+      - 'migrations/'
+      - 'pkg/'
+      - 'skaffold\..*\.yaml'
+      - 'skaffold2\..*\.yaml'
+      - 'go.mod'
+      - 'go.sum'
+    paths-ignore:
+      - '(configs|secrets)/.+/(stag|uat|prod)/.+'
+      - '.sops.yaml'
+      - '.py'
+      - 'deployments/helm/(frontend|mobile)'
+      - 'skaffold2.camel-k.yaml'
+      - 'deployments/helm/platforms/camel-k/'
+      - 'deployments/helm/integrations'
+
+  - name: unit-test
+    paths:
+      - '.github/workflows/tiered.pre_merge.yml'
+      - 'internal/'
+      - 'migrations/'
+      - 'mock/'
+      - 'pkg/'
+      - 'deployments/helm/manabie-all-in-one/charts/hephaestus'
+      - 'deployments/versions/(go|skaffold|skaffoldv2)'
+      - 'go.mod'
+      - 'go.sum'
+      - 'accesscontrol/'
+  - name: proto-check
+    paths:
+      - '.github/workflows/tiered.pre_merge.yml'
+      - 'proto/'
+  - name: skaffold-test
+    paths:
+      - '.github/workflows/tiered.pre_merge.yml'
+      - 'deployments/decl/(stag|uat|prod)-defs.yaml'
+      - 'deployments/helm/'
+      - 'deployments/tests/'
+      - 'deployments/versions/(go|helm|skaffold|skaffoldv2)'
+      - 'skaffold\..+\.yaml'
+      - 'go.mod'
+      - 'go.sum'
+      - 'deployments/helm/platforms/machinelearning/mlflow/mlflow.skaffold.yaml'
+      - 'deployments/helm/platforms/aphelios/skaffold.aphelios.yaml'
+  - name: lint
+    paths:
+      - '.github/workflows/tiered.pre_merge.yml'
+      - 'deployments/versions/go'
+      - '.+\.go'
+  - name: repository-test
+    paths:
+      - '.github/workflows/tiered.pre_merge.yml'
+      - 'cmd/server/eureka'
+      - 'cmd/utils'
+      - 'deployments/k8s_run_repository_test.bash'
+      - 'deployments/helm/manabie-all-in-one/charts/eureka'
+      - 'developments/development.Dockerfile'
+      - 'features/repository/'
+      - 'internal/eureka'
+      - 'internal/golibs'
+      - 'migrations/eureka'
+      - 'mock/eureka'
+      - 'skaffold\..+\.yaml'
+      - 'go.mod'
+      - 'go.sum'
+    enabled_squads:
+      - squad-syllabus
+  - name: helm-test
+    paths:
+      - '.github/workflows/tiered.pre_merge.yml'
+      - 'deployments/helm/manabie-all-in-one/.+\.(ya?ml|tpl)'
+      - 'deployments/helm/platforms/.+\.(ya?ml|tpl)'
+      - 'deployments/versions/helm'
+    force_value: '1'
+  # - name: convert_hcl2sql
+  #   paths:
+  #     - "deployments/decl/stag-defs.yaml"
+  # - name: convert_hcl2sops
+  #   paths:
+  #     - "deployments/terraform/live/_env/*-service-defs.hcl"
+  - name: dbschema-test
+    paths:
+      - '.github/workflows/tiered.pre_merge.yml'
+      - 'deployments/versions/go'
+      - 'developments/dbschema.Dockerfile'
+      - 'migrations/'
+      - 'mock/testing/testdata/'
+  - name: hasura-metadata-test
+    paths:
+      - '.github/workflows/tiered.pre_merge.yml'
+      - 'deployments/helm/manabie-all-in-one/charts/[a-z]+/files/(hasura|hasurav2)/'
+      - 'migrations/'
+    force_value: '0'
+  - name: hasura_metadata_only
+    paths:
+      - 'deployments/helm/manabie-all-in-one/charts/[a-z]+/files/(hasura|hasurav2)/'
+    run_only: true
+    force_value: '0'
+  - name: unleash_flags_only
+    paths:
+      - feature_flags/
+  - name: svcs_change
+    values:
+      - bob
+      - calendar
+      - entryexitmgmt
+      - eureka
+      - fatima
+      - invoicemgmt
+      - lessonmgmt
+      - mastermgmt
+      - timesheet
+      - tom
+      - zeus
+      - payment
+      - usermgmt
+      - virtualclassroom
+      - yasuo
+      - enigma
+      - accesscontrol
+      - communication
+      - syllabus
+      - gandalf
+      - unleash
+    paths:
+      - cmd/server/{{.VALUE}}/
+      - deployments/helm/manabie-all-in-one/charts/{{.VALUE}}/
+      - features/{{.VALUE}}/
+      - internal/{{.VALUE}}/
+      - migrations/{{.VALUE}}
+      - pkg/manabuf/{{.VALUE}}/
+  - name: e2e-test
+    paths: ['.+']
+    enabled_squads:
+      - squad-communication
+      - squad-adobo
+  - name: check-commit-messages
+    paths: ['.+']

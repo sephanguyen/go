@@ -1,0 +1,23 @@
+{
+  "name": "prod_jprep_bob_to_eureka_users_groups_sink_connector",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+    "tasks.max": "1",
+    "topics": "prod.jprep.bob.public.users_groups",
+    "connection.url": "${file:/config/kafka-connect-config.properties:eureka_url}",
+    "auto.create": "false",
+    "insert.mode": "upsert",
+    "table.name.format": "users_groups",
+    "fields.whitelist": "created_at,group_id,is_origin,resource_path,status,updated_at,user_id",
+    "transforms": "unwrap,route",
+    "transforms.route.type": "org.apache.kafka.connect.transforms.RegexRouter",
+    "transforms.route.regex": "([^.]+).([^.]+).([^.]+).([^.]+).([^.]+)",
+    "transforms.route.replacement": "$5",
+    "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+    "delete.enabled": "false",
+    "pk.mode": "record_value",
+    "pk.fields": "group_id,user_id",
+    "transforms.unwrap.drop.tombstones": "true",
+    "transforms.unwrap.delete.handling.mode": "drop"
+  }
+}

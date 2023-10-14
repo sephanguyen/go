@@ -1,0 +1,108 @@
+SET 'auto.offset.reset' = 'earliest';
+
+DROP CONNECTOR IF EXISTS ORDER_ITEM_PUBLIC_INFO;
+DROP CONNECTOR IF EXISTS SINK_DISCOUNT_PUBLIC_INFO;
+DROP TABLE IF EXISTS DISCOUNT_PUBLIC_INFO_V1;
+DROP TABLE IF EXISTS ORDER_ITEM_TABLE_FORMATTED_V1;
+DROP STREAM IF EXISTS ORDER_ITEM_STREAM_FORMATTED_V1;
+
+CREATE STREAM IF NOT EXISTS ORDER_ITEM_STREAM_FORMATTED_V2
+    AS SELECT
+        ORDER_ITEM_STREAM_ORIGIN_V1.AFTER->ORDER_ITEM_ID AS KEY,
+        AS_VALUE(ORDER_ITEM_STREAM_ORIGIN_V1.AFTER->ORDER_ITEM_ID) AS ORDER_ITEM_ID,
+        ORDER_ITEM_STREAM_ORIGIN_V1.AFTER->ORDER_ID AS ORDER_ID,
+        ORDER_ITEM_STREAM_ORIGIN_V1.AFTER->PRODUCT_ID AS PRODUCT_ID,
+        ORDER_ITEM_STREAM_ORIGIN_V1.AFTER->DISCOUNT_ID AS DISCOUNT_ID,
+        ORDER_ITEM_STREAM_ORIGIN_V1.AFTER->START_DATE AS START_DATE,
+        ORDER_ITEM_STREAM_ORIGIN_V1.AFTER->STUDENT_PRODUCT_ID AS STUDENT_PRODUCT_ID,
+        ORDER_ITEM_STREAM_ORIGIN_V1.AFTER->PRODUCT_NAME AS PRODUCT_NAME,
+        ORDER_ITEM_STREAM_ORIGIN_V1.AFTER->EFFECTIVE_DATE AS EFFECTIVE_DATE,
+        ORDER_ITEM_STREAM_ORIGIN_V1.AFTER->CANCELLATION_DATE AS CANCELLATION_DATE,
+        ORDER_ITEM_STREAM_ORIGIN_V1.AFTER->END_DATE AS END_DATE,
+        ORDER_ITEM_STREAM_ORIGIN_V1.AFTER->CREATED_AT AS ORDER_ITEM_CREATED_AT,
+        CAST(NULL AS VARCHAR) AS ORDER_ITEM_UPDATED_AT,
+        CAST(NULL AS VARCHAR) AS ORDER_ITEM_DELETED_AT
+    FROM ORDER_ITEM_STREAM_ORIGIN_V1
+    WHERE ORDER_ITEM_STREAM_ORIGIN_V1.AFTER->RESOURCE_PATH = '{{ .Values.kecResourcePath }}'
+    PARTITION BY AFTER->ORDER_ITEM_ID
+    EMIT CHANGES;
+
+
+CREATE TABLE IF NOT EXISTS ORDER_ITEM_TABLE_FORMATTED_V2 (KEY VARCHAR PRIMARY KEY) with (kafka_topic='{{ .Values.topicPrefix }}ORDER_ITEM_STREAM_FORMATTED_V2', value_format='AVRO');
+
+CREATE TABLE IF NOT EXISTS DISCOUNT_PUBLIC_INFO_V2
+AS SELECT
+    ORDER_ITEM_TABLE_FORMATTED_V2.KEY AS ORDER_ITEM_ID,
+    ORDER_ITEM_TABLE_FORMATTED_V2.ORDER_ID AS ORDER_ID,
+    ORDER_ITEM_TABLE_FORMATTED_V2.PRODUCT_ID AS PRODUCT_ID,
+    ORDER_ITEM_TABLE_FORMATTED_V2.START_DATE AS START_DATE,
+    ORDER_ITEM_TABLE_FORMATTED_V2.STUDENT_PRODUCT_ID AS STUDENT_PRODUCT_ID,
+    ORDER_ITEM_TABLE_FORMATTED_V2.PRODUCT_NAME AS PRODUCT_NAME,
+    ORDER_ITEM_TABLE_FORMATTED_V2.EFFECTIVE_DATE AS EFFECTIVE_DATE,
+    ORDER_ITEM_TABLE_FORMATTED_V2.CANCELLATION_DATE AS CANCELLATION_DATE,
+    ORDER_ITEM_TABLE_FORMATTED_V2.END_DATE AS END_DATE,
+    ORDER_ITEM_TABLE_FORMATTED_V2.ORDER_ITEM_CREATED_AT AS ORDER_ITEM_CREATED_AT,
+    ORDER_ITEM_TABLE_FORMATTED_V2.ORDER_ITEM_UPDATED_AT AS ORDER_ITEM_UPDATED_AT,
+    ORDER_ITEM_TABLE_FORMATTED_V2.ORDER_ITEM_DELETED_AT AS ORDER_ITEM_DELETED_AT,
+    AS_VALUE(DISCOUNT_TABLE_FORMATTED_V1.KEY) AS DISCOUNT_ID,
+    DISCOUNT_TABLE_FORMATTED_V1.DISCOUNT_NAME AS DISCOUNT_NAME,
+    DISCOUNT_TABLE_FORMATTED_V1.DISCOUNT_TYPE AS DISCOUNT_TYPE,
+    DISCOUNT_TABLE_FORMATTED_V1.DISCOUNT_AMOUNT_TYPE AS DISCOUNT_AMOUNT_TYPE,
+    DISCOUNT_TABLE_FORMATTED_V1.DISCOUNT_AMOUNT_VALUE AS DISCOUNT_AMOUNT_VALUE,
+    DISCOUNT_TABLE_FORMATTED_V1.RECURRING_VALID_DURATION AS RECURRING_VALID_DURATION,
+    DISCOUNT_TABLE_FORMATTED_V1.AVAILABLE_FROM AS AVAILABLE_FROM,
+    DISCOUNT_TABLE_FORMATTED_V1.AVAILABLE_UNTIL AS AVAILABLE_UNTIL,
+    DISCOUNT_TABLE_FORMATTED_V1.REMARKS AS REMARKS,
+    DISCOUNT_TABLE_FORMATTED_V1.IS_ARCHIVED AS IS_ARCHIVED,
+    DISCOUNT_TABLE_FORMATTED_V1.STUDENT_TAG_ID_VALIDATION AS STUDENT_TAG_ID_VALIDATION,
+    DISCOUNT_TABLE_FORMATTED_V1.PARENT_TAG_ID_VALIDATION AS PARENT_TAG_ID_VALIDATION,
+    DISCOUNT_TABLE_FORMATTED_V1.DISCOUNT_CREATED_AT AS DISCOUNT_CREATED_AT,
+    DISCOUNT_TABLE_FORMATTED_V1.DISCOUNT_UPDATED_AT AS DISCOUNT_UPDATED_AT,
+    DISCOUNT_TABLE_FORMATTED_V1.DISCOUNT_DELETED_AT AS DISCOUNT_DELETED_AT
+FROM ORDER_ITEM_TABLE_FORMATTED_V2
+JOIN DISCOUNT_TABLE_FORMATTED_V1
+ON ORDER_ITEM_TABLE_FORMATTED_V2.DISCOUNT_ID = DISCOUNT_TABLE_FORMATTED_V1.KEY;
+
+CREATE SINK CONNECTOR IF NOT EXISTS SINK_DISCOUNT_PUBLIC_INFO_V2 WITH (
+      'connector.class'='io.confluent.connect.jdbc.JdbcSinkConnector',
+      'transforms.unwrap.delete.handling.mode'='drop',
+      'tasks.max'='1',
+      'topics'='{{ .Values.topicPrefix }}DISCOUNT_PUBLIC_INFO_V2',
+      'fields.whitelist'='order_item_id,order_id,product_id,start_date,student_product_id,product_name,effective_date,cancellation_date,end_date,order_item_created_at,order_item_updated_at,order_item_deleted_at,discount_id,discount_name,discount_type,discount_amount_type,discount_amount_value,recurring_valid_duration,available_from,available_until,remarks,is_archived,student_tag_id_validation,parent_tag_id_validation,discount_created_at,discount_updated_at,discount_deleted_at',
+      'key.converter'='org.apache.kafka.connect.storage.StringConverter',
+      'value.converter'='io.confluent.connect.avro.AvroConverter',
+      'value.converter.schema.registry.url'='{{ .Values.cpRegistryHost }}',
+      'delete.enabled'='false',
+      'transforms.unwrap.drop.tombstones'='true',
+      'auto.create'='true',
+      'connection.url'='${file:/decrypted/kafka-connect.secrets.properties:kec_url}',
+      'insert.mode'='upsert',
+      'table.name.format'='public.discount',
+      'pk.mode'='record_key',
+      'transforms'='RenameField',
+      'transforms.RenameField.type'= 'org.apache.kafka.connect.transforms.ReplaceField$Value',
+      'transforms.RenameField.renames'='ORDER_ITEM_ID:order_item_id,ORDER_ID:order_id,PRODUCT_ID:product_id,START_DATE:start_date,STUDENT_PRODUCT_ID:student_product_id,PRODUCT_NAME:product_name,EFFECTIVE_DATE:effective_date,CANCELLATION_DATE:cancellation_date,END_DATE:end_date,ORDER_ITEM_CREATED_AT:order_item_created_at,ORDER_ITEM_UPDATED_AT:order_item_updated_at,ORDER_ITEM_DELETED_AT:order_item_deleted_at,DISCOUNT_ID:discount_id,DISCOUNT_NAME:discount_name,DISCOUNT_TYPE:discount_type,DISCOUNT_AMOUNT_TYPE:discount_amount_type,DISCOUNT_AMOUNT_VALUE:discount_amount_value,RECURRING_VALID_DURATION:recurring_valid_duration,AVAILABLE_FROM:available_from,AVAILABLE_UNTIL:available_until,REMARKS:remarks,IS_ARCHIVED:is_archived,STUDENT_TAG_ID_VALIDATION:student_tag_id_validation,PARENT_TAG_ID_VALIDATION:parent_tag_id_validation,DISCOUNT_CREATED_AT:discount_created_at,DISCOUNT_UPDATED_AT:discount_updated_at,DISCOUNT_DELETED_AT:discount_deleted_at',
+      'pk.fields'='order_item_id'
+);
+
+CREATE SINK CONNECTOR IF NOT EXISTS SINK_ORDER_ITEM_PUBLIC_INFO_V2 WITH (
+      'connector.class'='io.confluent.connect.jdbc.JdbcSinkConnector',
+      'transforms.unwrap.delete.handling.mode'='drop',
+      'tasks.max'='1',
+      'topics'='{{ .Values.topicPrefix }}ORDER_ITEM_TABLE_FORMATTED_V2',
+      'fields.whitelist'='order_item_id,order_id,product_id,discount_id,start_date,student_product_id,product_name,effective_date,cancellation_date,end_date,created_at,updated_at,deleted_at',
+      'key.converter'='org.apache.kafka.connect.storage.StringConverter',
+      'value.converter'='io.confluent.connect.avro.AvroConverter',
+      'value.converter.schema.registry.url'='{{ .Values.cpRegistryHost }}',
+      'delete.enabled'='false',
+      'transforms.unwrap.drop.tombstones'='true',
+      'auto.create'='true',
+      'connection.url'='${file:/decrypted/kafka-connect.secrets.properties:kec_url}',
+      'insert.mode'='upsert',
+      'table.name.format'='public.order_item',
+      'pk.mode'='record_value',
+      'transforms'='RenameField',
+      'transforms.RenameField.type'= 'org.apache.kafka.connect.transforms.ReplaceField$Value',
+      'transforms.RenameField.renames'='ORDER_ITEM_ID:order_item_id,ORDER_ID:order_id,PRODUCT_ID:product_id,DISCOUNT_ID:discount_id,START_DATE:start_date,STUDENT_PRODUCT_ID:student_product_id,PRODUCT_NAME:product_name,EFFECTIVE_DATE:effective_date,CANCELLATION_DATE:cancellation_date,END_DATE:end_date,CREATED_AT:created_at,UPDATED_AT:updated_at,DELETED_AT:deleted_at',
+      'pk.fields'='order_item_id'
+);

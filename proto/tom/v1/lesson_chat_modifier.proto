@@ -1,0 +1,22 @@
+
+syntax = "proto3";
+
+package tom.v1;
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/tom/v1;tpb";
+import "common/v1/profiles.proto";
+import "tom/v1/conversations.proto";
+
+message CreateLiveLessonPrivateConversationRequest {
+    string lesson_id =1;
+    repeated string user_ids = 2;
+  }
+
+  message CreateLiveLessonPrivateConversationResponse {
+    Conversation conversation=1;
+  }
+
+
+service LessonChatModifierService {
+    rpc CreateLiveLessonPrivateConversation (CreateLiveLessonPrivateConversationRequest) 
+    returns (CreateLiveLessonPrivateConversationResponse);
+}

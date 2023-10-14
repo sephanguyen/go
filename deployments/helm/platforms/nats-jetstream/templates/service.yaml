@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "nats-jetstream.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "nats-jetstream.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "nats-jetstream.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.jetstream.service.type }}
+  ports:
+    - port: {{ .Values.jetstream.service.clientPort }}
+      targetPort: tcp-client-port
+      protocol: TCP
+      name: tcp-client-port
+    - port: {{ .Values.jetstream.service.adminPort }}
+      targetPort: tcp-admin-port
+      protocol: TCP
+      name: tcp-admin-port
+  selector:
+    app.kubernetes.io/name: {{ include "nats-jetstream.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: nats-jetstream
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "nats-jetstream.fullname" . }}-headless
+  labels:
+    app.kubernetes.io/name: {{ include "nats-jetstream.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "nats-jetstream.labels" . | nindent 4 }} 
+spec:
+  clusterIP: None
+  ports:
+    - port: {{ .Values.jetstream.service.clientPort }}
+      targetPort: tcp-client-port
+      protocol: TCP
+      name: tcp-client-port
+    - port: {{ .Values.jetstream.service.clusterPort }}
+      targetPort: cluster-port
+      protocol: TCP
+      name: cluster-port
+  selector:
+    app.kubernetes.io/name: {{ include "nats-jetstream.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: nats-jetstream

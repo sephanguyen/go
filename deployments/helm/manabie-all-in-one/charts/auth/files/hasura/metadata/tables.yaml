@@ -1,0 +1,24 @@
+- table:
+    schema: public
+    name: organizations
+  select_permissions:
+  - role: anonymous
+    permission:
+      columns:
+      - tenant_id
+      - name
+      - domain_name
+      - logo_url
+      - organization_id
+      filter: {}
+      allow_aggregations: true
+  - role: MANABIE
+    permission:
+      columns:
+      - domain_name
+      - logo_url
+      - name
+      - organization_id
+      - tenant_id
+      filter: {}
+      allow_aggregations: true

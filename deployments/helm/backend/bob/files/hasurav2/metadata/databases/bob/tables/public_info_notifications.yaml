@@ -1,0 +1,86 @@
+table:
+  schema: public
+  name: info_notifications
+object_relationships:
+  - name: info_notification_msg
+    using:
+      foreign_key_constraint_on: notification_msg_id
+  - name: questionnaire
+    using:
+      foreign_key_constraint_on: questionnaire_id
+  - name: school
+    using:
+      foreign_key_constraint_on: owner
+  - name: school_admin
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: school_admins
+        insertion_order: null
+        column_mapping:
+          editor_id: school_admin_id
+array_relationships:
+  - name: users_info_notifications
+    using:
+      foreign_key_constraint_on:
+        column: notification_id
+        table:
+          schema: public
+          name: users_info_notifications
+select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+        - created_at
+        - data
+        - deleted_at
+        - editor_id
+        - event
+        - is_important
+        - notification_id
+        - notification_msg_id
+        - questionnaire_id
+        - receiver_ids
+        - scheduled_at
+        - sent_at
+        - status
+        - target_groups
+        - type
+        - updated_at
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+          - type:
+              _eq: NOTIFICATION_TYPE_COMPOSED
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+        - created_at
+        - data
+        - deleted_at
+        - editor_id
+        - event
+        - is_important
+        - notification_id
+        - notification_msg_id
+        - owner
+        - questionnaire_id
+        - receiver_ids
+        - scheduled_at
+        - sent_at
+        - status
+        - target_groups
+        - type
+        - updated_at
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+          - owner:
+              _in: X-Hasura-School-Ids
+          - type:
+              _eq: NOTIFICATION_TYPE_COMPOSED
+      allow_aggregations: true

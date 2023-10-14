@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package common.v1;
+
+import "google/protobuf/timestamp.proto";
+import "common/v1/contents.proto";
+
+option java_package = "com.manabie.libs.proto.common.v1";
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/common/v1;cpb";
+
+message QuestionGroup {
+  string question_group_id = 1;
+  string learning_material_id = 2;
+  string name = 3;
+  string description = 4 [deprecated = true];
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
+  int32 total_children = 7;
+  int32 total_points = 8;
+  RichText rich_description = 9;
+}

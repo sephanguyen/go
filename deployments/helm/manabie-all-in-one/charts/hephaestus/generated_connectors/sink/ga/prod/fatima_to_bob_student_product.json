@@ -1,0 +1,23 @@
+{
+  "name": "prod_ga_fatima_to_bob_student_product_sink_connector",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+    "tasks.max": "1",
+    "topics": "prod.ga.fatima.public.student_product",
+    "connection.url": "${file:/config/kafka-connect-config.properties:bob_url}",
+    "auto.create": "false",
+    "insert.mode": "upsert",
+    "table.name.format": "student_product",
+    "fields.whitelist": "approval_status,created_at,deleted_at,end_date,is_unique,location_id,product_id,product_status,resource_path,root_student_product_id,start_date,student_id,student_product_id,student_product_label,upcoming_billing_date,updated_at,updated_from_student_product_id,updated_to_student_product_id",
+    "transforms": "unwrap,route",
+    "transforms.route.type": "org.apache.kafka.connect.transforms.RegexRouter",
+    "transforms.route.regex": "([^.]+).([^.]+).([^.]+).([^.]+).([^.]+)",
+    "transforms.route.replacement": "$5",
+    "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+    "delete.enabled": "false",
+    "pk.mode": "record_value",
+    "pk.fields": "student_product_id",
+    "transforms.unwrap.drop.tombstones": "true",
+    "transforms.unwrap.delete.handling.mode": "drop"
+  }
+}

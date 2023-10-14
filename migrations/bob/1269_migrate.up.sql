@@ -1,0 +1,1 @@
+ALTER TABLE IF EXISTS users DROP CONSTRAINT IF EXISTS users__phone_number__key;

@@ -1,0 +1,6 @@
+- template: 1
+  tableName: ac_hasura_test_template_1
+  locationCol: location_id
+  permissionPrefix: accesscontrol.b
+  permissions:
+    hasura: []

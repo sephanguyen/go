@@ -1,0 +1,40 @@
+
+replicaCount: 1
+
+podAnnotations:
+  sidecar.istio.io/proxyCPU: "20m"
+  sidecar.istio.io/proxyMemory: "50Mi"
+
+metrics:
+  enabled: true
+  podAnnotations:
+
+imagePullSecrets: []
+nameOverride: "gandalf"
+fullnameOverride: "gandalf"
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+service:
+  type: ClusterIP
+  port: 5889
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+nodeSelector: {}
+
+tolerations:
+
+affinity: {}
+affinityOverride: {}
+
+gandalfCI:
+  podAffinityIdentifier: "gandalf-ci"
+gandalfStub:
+  podAffinityIdentifier: "gandalf-stub"

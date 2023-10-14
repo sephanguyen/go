@@ -1,0 +1,246 @@
+global:
+  dbPrefix: "tokyo_"
+  dbUserPrefix: "prod-"
+  serviceAccountEmailSuffix: "synersia"
+  replicaCount: 1
+  cloudSQLUsePublicIP: true
+  cloudSQLCommonInstance: "student-coach-e1e95:asia-northeast1:clone-prod-tokyo"
+  cloudSQLLMSInstance: "student-coach-e1e95:asia-northeast1:clone-prod-tokyo-lms-b2dc4508"
+  hasura:
+    replicaCount: 1
+    affinityOverride:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: cloud.google.com/gke-spot
+              operator: In
+              values: ["true"]
+            - key: environment
+              operator: In
+              values: ["preproduction"]
+    tolerations:
+      - effect: NoSchedule
+        key: cloud.google.com/gke-spot
+        operator: Exists
+      - effect: NoSchedule
+        key: environment
+        operator: Equal
+        value: preproduction
+
+  affinityOverride:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: cloud.google.com/gke-spot
+            operator: In
+            values: ["true"]
+          - key: environment
+            operator: In
+            values: ["preproduction"]
+  tolerations:
+    - effect: NoSchedule
+      key: cloud.google.com/gke-spot
+      operator: Exists
+    - effect: NoSchedule
+      key: environment
+      operator: Equal
+      value: preproduction
+
+eureka:
+  eurekaAllConsumers:
+    affinityOverride:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: cloud.google.com/gke-spot
+              operator: In
+              values: ["true"]
+            - key: environment
+              operator: In
+              values: ["preproduction"]
+    tolerations:
+      - effect: NoSchedule
+        key: cloud.google.com/gke-spot
+        operator: Exists
+      - effect: NoSchedule
+        key: environment
+        operator: Equal
+        value: preproduction
+  eurekaJPREPSyncCourseStudent:
+    affinityOverride:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: cloud.google.com/gke-spot
+              operator: In
+              values: ["true"]
+            - key: environment
+              operator: In
+              values: ["preproduction"]
+    tolerations:
+      - effect: NoSchedule
+        key: cloud.google.com/gke-spot
+        operator: Exists
+      - effect: NoSchedule
+        key: environment
+        operator: Equal
+        value: preproduction
+  eurekaMonitors:
+    affinityOverride:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: cloud.google.com/gke-spot
+              operator: In
+              values: ["true"]
+            - key: environment
+              operator: In
+              values: ["preproduction"]
+    tolerations:
+      - effect: NoSchedule
+        key: cloud.google.com/gke-spot
+        operator: Exists
+      - effect: NoSchedule
+        key: environment
+        operator: Equal
+        value: preproduction
+tom:
+  replicaCount: 2
+  affinityOverride:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: cloud.google.com/gke-spot
+            operator: In
+            values: ["true"]
+          - key: environment
+            operator: In
+            values: ["preproduction"]
+  tolerations:
+    - effect: NoSchedule
+      key: cloud.google.com/gke-spot
+      operator: Exists
+    - effect: NoSchedule
+      key: environment
+      operator: Equal
+      value: preproduction
+unleash:
+  unleash:
+    replicaCount: 0
+    affinityOverride:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: cloud.google.com/gke-spot
+                  operator: In
+                  values: ["true"]
+                - key: environment
+                  operator: In
+                  values: ["preproduction"]
+    tolerations:
+      - effect: NoSchedule
+        key: "cloud.google.com/gke-spot"
+        operator: Exists
+      - key: environment
+        operator: Equal
+        value: preproduction
+        effect: NoSchedule
+  unleashProxy:
+    replicaCount: 0
+    affinityOverride:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: cloud.google.com/gke-spot
+              operator: In
+              values: ["true"]
+            - key: environment
+              operator: In
+              values: ["preproduction"]
+    tolerations:
+      - effect: NoSchedule
+        key: cloud.google.com/gke-spot
+        operator: Exists
+      - effect: NoSchedule
+        key: environment
+        operator: Equal
+        value: preproduction
+
+  adminHttp:
+    - match:
+        - uri:
+            prefix: /unleash/proxy
+        # We can't use prefix `/unleash` here because it would match `/unleashv2`
+        # thus we use exact `/unleash` and prefix `/unleash/` instead
+        - uri:
+            exact: /unleash
+        - uri:
+            prefix: /unleash/
+      rewrite:
+        authority: admin.prep.tokyo.manabie.io
+      route:
+        - destination:
+            host: admin.prep.tokyo.manabie.io # This points to a customized DestinationRule in gateway chart
+            port:
+              number: 443
+      corsPolicy:
+        allowOrigins:
+          - exact: "*"
+        allowMethods:
+          - POST
+          - GET
+          - OPTIONS
+          - PUT
+          - DELETE
+        allowHeaders:
+          - authorization
+          - grpc-timeout
+          - content-type
+          - keep-alive
+          - user-agent
+          - cache-control
+          - content-transfer-encoding
+          - token
+          - x-accept-content-transfer-encoding
+          - x-accept-response-streaming
+          - x-request-id
+          - x-user-agent
+          - x-graphql-mesh-authorization
+          - x-grpc-web
+          - if-none-match
+          - pkg
+          - version
+        maxAge: 100s
+        exposeHeaders:
+          - grpc-status
+          - grpc-message
+          - etag
+
+zeus:
+  resources:
+    requests:
+      memory: 64Mi
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "10m"
+    sidecar.istio.io/proxyMemory: "50Mi"
+usermgmt:
+  cronjobs:
+    check-enrollment-status-date:
+      cmd: usermgmt_cronjob_check_enrollment_status_date
+      schedule: "0 0 * * *"
+    cronjob-itee-download-data-file:
+      cmd: usermgmt_itee_download_data_file
+      schedule: "13 19 * * *"
+      disabled: true
+    cronjob-withus-download-data-file:
+      cmd: usermgmt_withus_download_data_file
+      schedule: "13 19 * * *"
+      disabled: true

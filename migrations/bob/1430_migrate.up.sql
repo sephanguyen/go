@@ -1,0 +1,1 @@
+ALTER PUBLICATION debezium_publication ADD TABLE public.lesson_student_subscriptions;

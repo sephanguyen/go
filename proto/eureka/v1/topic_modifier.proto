@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package eureka.v1;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/eureka/v1;epb";
+
+import "eureka/v1/topic_reader.proto";
+
+message UpsertTopicsRequest {
+  repeated Topic topics = 1;
+}
+
+message UpsertTopicsResponse {
+  repeated string topic_ids = 1;
+}
+
+message PublishTopicsRequest {
+  repeated string topic_ids = 1;
+}
+
+message PublishTopicsResponse {
+  bool is_success = 1;
+}
+
+message DeleteTopicsRequest {
+  repeated string topic_ids = 1;
+}
+
+message DeleteTopicsResponse {
+  bool successful = 1;
+}
+
+message AssignTopicItemsRequest {
+  message Item {
+    oneof item_id {
+      string assignment_id = 3;
+      string lo_id = 4;
+    }
+    int32 display_order = 5;
+  }
+  string topic_id = 1;
+  repeated Item items = 2;
+}
+
+message AssignTopicItemsResponse {}
+
+service TopicModifierService {
+  rpc Upsert(UpsertTopicsRequest) returns (UpsertTopicsResponse);
+  rpc Publish(PublishTopicsRequest) returns (PublishTopicsResponse); //TODO: remove soon
+  rpc DeleteTopics(DeleteTopicsRequest) returns (DeleteTopicsResponse);
+  rpc AssignTopicItems(AssignTopicItemsRequest) returns (AssignTopicItemsResponse);
+}

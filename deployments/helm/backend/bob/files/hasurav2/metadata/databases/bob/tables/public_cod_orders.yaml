@@ -1,0 +1,20 @@
+table:
+  schema: public
+  name: cod_orders
+select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+        - cod_order_id
+        - student_order_id
+        - cod_secret_code
+        - customer_name
+        - customer_phone_number
+        - customer_address
+        - address_tree
+        - status
+        - expected_delivery_time
+        - updated_at
+        - created_at
+      filter: {}
+      allow_aggregations: true

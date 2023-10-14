@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package yasuo.v1;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/yasuo/v1;ypb";
+
+message BuildConversationDocumentRequest {
+    repeated string conversation_ids = 1;
+    repeated string user_ids = 2;
+}
+
+message BuildConversationDocumentResponse {
+    int32 total = 1;
+    int32 total_success = 2;
+}
+
+service OpenSearchService{
+    rpc BuildConversationDocument (BuildConversationDocumentRequest) returns (BuildConversationDocumentResponse){
+        option deprecated = true;
+    };
+}

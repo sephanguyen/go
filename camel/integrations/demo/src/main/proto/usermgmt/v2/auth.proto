@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package usermgmt.v2;
+
+option java_package = "io.manabie.demo.proto.usermgmt.v2";
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/usermgmt/v2;upb";
+
+message ExchangeCustomTokenRequest {
+  string token = 1;
+}
+
+message ExchangeCustomTokenResponse {
+  string custom_token = 1;
+}
+message ValidateUserIPRequest {}
+message ValidateUserIPResponse {
+  bool allow = 1;
+}
+
+service AuthService {
+  rpc ExchangeCustomToken(ExchangeCustomTokenRequest) returns (ExchangeCustomTokenResponse);
+  rpc ValidateUserIP(ValidateUserIPRequest) returns (ValidateUserIPResponse);
+}

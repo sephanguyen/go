@@ -1,0 +1,23 @@
+common:
+  google_cloud_project: staging-manabie-online
+  identity_platform_project: staging-manabie-online
+postgres_v2:
+  bob:
+    max_conns: 16
+    shard_id: 1
+issuers:
+  - issuer: manabie
+    audience: manabie-stag
+    jwks_endpoint: http://shamir:5680/.well-known/jwks.json
+  - issuer: https://securetoken.google.com/staging-manabie-online
+    audience: staging-manabie-online
+    jwks_endpoint: https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com
+brightcove:
+  account_id: 6064018595001
+  client_id: 3c6e5dd5-a7fc-4cc3-94a7-95bd0c553e31
+  profile: Asia-PREMIUM (96-1500)
+fake_brightcove_server: ""
+jwt_applicant: manabie-stag
+storage:
+  bucket: stag-manabie-backend
+question_bucket: stag-manabie-questions-content

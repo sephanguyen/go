@@ -1,0 +1,738 @@
+defaultHeartBeatQuery: SELECT 1
+customHeartbeatQuery: INSERT INTO public.debezium_heartbeat (id, updated_at) VALUES (1, NOW()) ON CONFLICT(id) DO UPDATE SET updated_at=EXCLUDED.updated_at
+dbUseCustomHeartBeat: [calendar]
+envs: [local, stag, uat, prod]
+orgs: [e2e, manabie, jprep, aic, ga, renseikai, synersia, tokyo]
+database: bob
+schema: public
+preProductionEnabled: true
+datapipelines:
+- name: locations
+  table: locations
+  source:
+    deployEnv: [local, stag, uat, prod]
+    deployOrg: [e2e, manabie, jprep, aic, ga, renseikai, synersia, tokyo]
+  sinks:
+  - database: calendar
+    # not deployed in jprep
+    deployOrg: [e2e, manabie, aic, ga, renseikai, synersia, tokyo]
+  - database: entryexitmgmt
+    deployOrg: [e2e, manabie, aic, ga, renseikai, synersia, tokyo]
+  - database: eureka
+  - database: fatima
+    deployEnv: [local, uat, stag, prod]
+  - database: invoicemgmt
+  - database: lessonmgmt
+  - database: timesheet
+    deployEnv: [local, stag, uat, prod]
+    deployOrg: [e2e, manabie, aic, ga, renseikai, synersia, tokyo]
+  - database: tom
+  - database: notificationmgmt
+    deployEnv: [local, stag]
+  - database: auth
+    deployEnv: [local, stag, uat, prod]
+    deployOrg: [e2e, manabie, jprep, tokyo, renseikai, aic, ga]
+  - database: mastermgmt
+    deployEnv: [local, stag, uat, prod]
+    deployOrg: [e2e, manabie, jprep, tokyo, renseikai, aic, ga]
+
+#location_types :
+#    calendar : not jprep
+#    lessonmgmt  : local and stag
+#    timesheet : local, uat, stag
+#    tom  :  all
+- name: bob_location_types
+  table: location_types
+  source:
+    deployEnv: [local, stag, uat, prod]
+    deployOrg: [e2e, manabie, jprep, aic, ga, renseikai, synersia, tokyo]
+  sinks:
+  - database: fatima
+  ## not deploy jprep
+  - database: calendar
+    deployEnv: [local, uat, stag, prod]
+    deployOrg: [e2e, manabie, aic, ga, renseikai, synersia, tokyo]
+  - database: lessonmgmt
+  - database: timesheet
+    deployEnv: [local, stag, uat, prod]
+    deployOrg: [e2e, manabie, aic, ga, renseikai, synersia, tokyo]
+  - database: tom
+  - database: notificationmgmt
+    deployEnv: [local, stag]
+  - database: mastermgmt
+    deployEnv: [local, stag, uat, prod]
+    deployOrg: [e2e, manabie, jprep, tokyo, renseikai, aic, ga]
+  - name: bob_to_fatima_location_types_sink_connector_v2
+    database: fatima
+    deployEnv: [local, stag, uat, prod]
+    deployOrg: [e2e, manabie, jprep, tokyo, renseikai, aic, ga]
+  # organizations :
+  #   fatima : all
+  #   invoicemgmt : all
+  #   tom   : all
+- name: bob_organizations
+  table: organizations
+  sinks:
+  - database: fatima
+  - database: invoicemgmt
+  - database: tom
+  - database: auth
+    deployEnv: [local, stag, uat, prod]
+    deployOrg: [e2e, manabie, jprep, tokyo, renseikai, aic, ga]
+  - name: bob_to_auth_organizations_sink_connector_v2
+    database: auth
+    deployEnv: [local, stag, uat, prod]
+    deployOrg: [e2e, manabie, jprep, tokyo, renseikai, aic, ga]
+###
+# public.grade :
+#     eureka  : all
+- name: bob_grade
+  table: grade
+  sinks:
+  - database: eureka
+# public.users
+#     entryexitmgmt  not jprep
+#     eureka  all
+#     fatima  all except prod
+#     invoicemgmt  all
+#     timesheet  local and staging and uat
+#     tom      all
+- name: bob_users
+  table: users
+  source:
+    deployEnv: [local, stag, uat, prod]
+    deployOrg: [e2e, manabie, jprep, aic, ga, renseikai, synersia, tokyo]
+  sinks:
+  - database: entryexitmgmt
+    # not deployed in jprep
+    deployOrg: [e2e, manabie, aic, ga, renseikai, synersia, tokyo]
+    captureDeleteEnvs: [stag]
+  - database: eureka
+    captureDeleteEnvs: [stag]
+  - database: fatima
+    captureDeleteEnvs: [stag]
+  - database: invoicemgmt
+    captureDeleteEnvs: [stag]
+  - database: timesheet
+    deployEnv: [local, stag, uat, prod]
+    deployOrg: [e2e, manabie, aic, ga, renseikai, synersia, tokyo]
+    captureDeleteEnvs: [stag]
+  - database: tom
+    captureDeleteEnvs: [stag]
+  - database: notificationmgmt
+    deployEnv: [local, stag]
+  - name: bob_to_invoicemgmt_users_sink_connector_v2
+    database: invoicemgmt
+  - database: auth
+    deployEnv: [local, stag, uat, prod]
+    deployOrg: [e2e, manabie, jprep, tokyo, renseikai, aic, ga]
+  - name: bob_to_auth_users_sink_connector_v2
+    database: auth
+    deployEnv: [local, stag, uat, prod]
+    deployOrg: [e2e, manabie, jprep, tokyo, renseikai, aic, ga]
+  - name: bob_to_auth_users_sink_connector_v3
+    database: auth
+    deployEnv: [local, stag, uat, prod]
+    deployOrg: [e2e, manabie, jprep, tokyo, renseikai, aic, ga]
+
+- name: granted_role_access_path
+  table: granted_role_access_path
+  sinks:
+  - database: entryexitmgmt
+    # not deployed in jprep
+    name: bob_to_entryexitmgmt_granted_role_access_path_connector
+    deployOrg: [e2e, manabie, aic, ga, renseikai, synersia, tokyo]
+  - database: fatima
+  - database: invoicemgmt
+    name: bob_to_invoicemgmt_granted_role_access_path_connector
+  - database: timesheet
+    deployEnv: [local, stag, uat, prod]
+    deployOrg: [e2e, manabie, aic, ga, renseikai, synersia, tokyo]
+  - database: tom
+    deployEnv: [local, stag, uat, prod]
+  - database: eureka
+  - database: lessonmgmt
+  - database: notificationmgmt
+    deployEnv: [local, stag]
+  - database: auth
+    deployEnv: [local, stag, uat, prod]
+    deployOrg: [e2e, manabie, jprep, tokyo, renseikai, aic, ga]
+
+- name: granted_role
+  table: granted_role
+  sinks:
+  - database: entryexitmgmt
+    name: bob_to_entryexitmgmt_granted_role_connector
+    # not deployed in jprep
+    deployOrg: [e2e, manabie, aic, ga, renseikai, synersia, tokyo]
+  - database: eureka
+  - database: fatima
+    name: bob_to_fatima_granted_role_connector
+  - database: invoicemgmt
+    name: bob_to_invoicemgmt_granted_role_connector
+  - database: timesheet
+    deployEnv: [local, stag, uat, prod]
+    deployOrg: [e2e, manabie, aic, ga, renseikai, synersia, tokyo]
+  - database: tom
+  - database: lessonmgmt
+  - database: notificationmgmt
+    deployEnv: [local, stag]
+  - database: auth
+    deployEnv: [local, stag, uat, prod]
+    deployOrg: [e2e, manabie, jprep, tokyo, renseikai, aic, ga]
+
+- name: permission_role
+  table: permission_role
+  sinks:
+  - database: entryexitmgmt
+    # not deployed in jprep
+    name: bob_to_entryexitmgmt_permission_role_connector
+    deployOrg: [e2e, manabie, aic, ga, renseikai, synersia, tokyo]
+  - database: fatima
+    name: bob_to_fatima_permission_role_connector
+  - database: invoicemgmt
+    name: bob_to_invoicemgmt_permission_role_connector
+  - database: timesheet
+    name: bob_to_timesheet_permission_role_connector
+    deployEnv: [local, stag, uat, prod]
+    deployOrg: [e2e, manabie, aic, ga, renseikai, synersia, tokyo]
+  - database: tom
+    deployEnv: [local, stag, uat, prod]
+  - database: eureka
+  - database: lessonmgmt
+  - database: notificationmgmt
+    deployEnv: [local, stag]
+  - database: auth
+    deployEnv: [local, stag, uat, prod]
+    deployOrg: [e2e, manabie, jprep, tokyo, renseikai, aic, ga]
+
+- name: permission
+  table: permission
+  sinks:
+  - database: entryexitmgmt
+    name: bob_to_entryexitmgmt_permission_connector
+    # not deployed in jprep
+    deployOrg: [e2e, manabie, aic, ga, renseikai, synersia, tokyo]
+  - database: fatima
+    name: bob_to_fatima_permission_connector
+  - database: invoicemgmt
+    name: bob_to_invoicemgmt_permission_connector
+  - database: timesheet
+    deployEnv: [local, stag, uat, prod]
+    deployOrg: [e2e, manabie, aic, ga, renseikai, synersia, tokyo]
+  - database: tom
+    deployEnv: [local, stag, uat, prod]
+  - database: eureka
+  - database: lessonmgmt
+  - database: notificationmgmt
+    deployEnv: [local, stag]
+  - database: auth
+    deployEnv: [local, stag, uat, prod]
+    deployOrg: [e2e, manabie, jprep, tokyo, renseikai, aic, ga]
+
+- name: role
+  table: role
+  sinks:
+  - database: entryexitmgmt
+    name: bob_to_entryexitmgmt_role_connector
+    # not deployed in jprep
+    deployOrg: [e2e, manabie, aic, ga, renseikai, synersia, tokyo]
+  - database: eureka
+  - database: fatima
+    name: bob_to_fatima_role_connector
+  - database: invoicemgmt
+    name: bob_to_invoicemgmt_role_connector
+  - database: timesheet
+    deployEnv: [local, stag, uat, prod]
+    deployOrg: [e2e, manabie, aic, ga, renseikai, synersia, tokyo]
+  - database: tom
+  - database: lessonmgmt
+  - database: notificationmgmt
+    deployEnv: [local, stag]
+  - database: auth
+    deployEnv: [local, stag, uat, prod]
+    deployOrg: [e2e, manabie, jprep, tokyo, renseikai, aic, ga]
+
+- name: students
+  table: students
+  sinks:
+  - database: entryexitmgmt
+    # not deployed in jprep
+    deployOrg: [e2e, manabie, aic, ga, renseikai, synersia, tokyo]
+  - name: bob_to_entryexitmgmt_students_sink_connector_v2
+    database: entryexitmgmt
+    # not deployed in jprep
+    deployOrg: [e2e, manabie, aic, ga, renseikai, synersia, tokyo]
+  - database: eureka
+  - database: fatima
+  - database: invoicemgmt
+  - database: lessonmgmt
+  - name: bob_to_entryexitmgmt_students_sink_connector_v3
+    database: entryexitmgmt
+    deployEnv: [local, stag, uat, prod]
+    # not deployed in jprep
+    deployOrg: [e2e, manabie, aic, ga, renseikai, synersia, tokyo]
+
+- name: user_access_paths
+  table: user_access_paths
+  sinks:
+  - database: entryexitmgmt
+    # not deployed in jprep
+    deployOrg: [e2e, manabie, aic, ga, renseikai, synersia, tokyo]
+    captureDeleteEnvs: [stag]
+  - database: fatima
+    captureDeleteEnvs: [stag]
+  - database: invoicemgmt
+    captureDeleteEnvs: [stag]
+  - database: timesheet
+    deployEnv: [local, stag, uat, prod]
+    deployOrg: [e2e, manabie, aic, ga, renseikai, synersia, tokyo]
+    captureDeleteEnvs: [stag]
+  - database: eureka
+    captureDeleteEnvs: [stag]
+  - database: tom
+    captureDeleteEnvs: [stag]
+    deployEnv: [local, stag, uat, prod]
+  - database: lessonmgmt
+  - database: notificationmgmt
+    deployEnv: [local, stag]
+  - database: auth
+    deployEnv: [local, stag, uat, prod]
+    deployOrg: [e2e, manabie, jprep, tokyo, renseikai, aic, ga]
+
+- name: course_access_paths
+  table: course_access_paths
+  sinks:
+  - database: eureka
+    captureDeleteEnvs: [stag]
+  - database: fatima
+  - database: timesheet
+    deployOrg: [e2e, manabie, aic, ga, renseikai, synersia, tokyo]
+  - database: lessonmgmt
+    deployEnv: [local, stag, uat, prod]
+    deployOrg: [e2e, manabie, aic, ga, renseikai, synersia, tokyo]
+
+
+- name: user_group_member
+  table: user_group_member
+  sinks:
+  - database: entryexitmgmt
+    # not deployed in jprep
+    deployOrg: [e2e, manabie, aic, ga, renseikai, synersia, tokyo]
+    captureDeleteEnvs: [stag]
+  - database: eureka
+    captureDeleteEnvs: [stag]
+  - database: fatima
+    captureDeleteEnvs: [stag]
+  - database: invoicemgmt
+    captureDeleteEnvs: [stag]
+  - database: timesheet
+    deployEnv: [local, stag, uat, prod]
+    deployOrg: [e2e, manabie, aic, ga, renseikai, synersia, tokyo]
+    captureDeleteEnvs: [stag]
+  - database: tom
+    captureDeleteEnvs: [stag]
+  - database: lessonmgmt
+  - database: notificationmgmt
+    deployEnv: [local, stag]
+  - database: auth
+    deployEnv: [local, stag, uat, prod]
+    deployOrg: [e2e, manabie, jprep, tokyo, renseikai, aic, ga]
+
+- name: user_group
+  table: user_group
+  sinks:
+  - database: entryexitmgmt
+    # not deployed in jprep
+    deployOrg: [e2e, manabie, aic, ga, renseikai, synersia, tokyo]
+  - database: eureka
+  - database: fatima
+  - database: invoicemgmt
+  - database: timesheet
+    deployEnv: [local, stag, uat, prod]
+    deployOrg: [e2e, manabie, aic, ga, renseikai, synersia, tokyo]
+  - database: tom
+  - database: lessonmgmt
+  - database: notificationmgmt
+    deployEnv: [local, stag]
+  - database: auth
+    deployEnv: [local, stag, uat, prod]
+    deployOrg: [e2e, manabie, jprep, tokyo, renseikai, aic, ga]
+
+- name: groups
+  table: groups
+  sinks:
+  - database: eureka
+  - database: fatima
+
+- name: users_groups
+  table: users_groups
+  sinks:
+  - database: eureka
+  - database: fatima
+
+- name: lessons
+  table: lessons
+  sinks:
+  - database: lessonmgmt
+    deployOrg: [ jprep ]
+    deployEnv: [ stag, uat, prod ]
+  - database: timesheet
+    deployOrg: [e2e, manabie, aic, ga, renseikai, synersia, tokyo]
+    deployEnv: [ prod ]
+  - name: bob_to_timesheet_lessons_sink_connector_v2
+    database: timesheet
+    deployOrg: [e2e, manabie, aic, ga, renseikai, synersia, tokyo]
+    deployEnv: [ prod ]
+
+- name: lesson_members
+  table: lesson_members
+  sinks:
+  - database: lessonmgmt
+    deployOrg: [ jprep ]
+    deployEnv: [ stag, uat, prod ]
+
+- name: lesson_members_states
+  table: lesson_members_states
+  sinks:
+  - database: lessonmgmt
+    deployOrg: [ jprep ]
+    deployEnv: [ stag, uat, prod ]
+
+- name: lesson_room_states
+  table: lesson_room_states
+  sinks:
+  - database: lessonmgmt
+    deployOrg: [ jprep ]
+    deployEnv: [ stag, uat, prod ]
+
+- name: lessons_teachers
+  table: lessons_teachers
+  sinks:
+  - database: lessonmgmt
+    deployOrg: [ jprep ]
+    deployEnv: [ stag, uat, prod ]
+  - database: timesheet
+    deployOrg: [ e2e, manabie, aic, ga, renseikai, synersia, tokyo ]
+    deployEnv: [ prod ]
+
+- name: virtual_classroom_log
+  table: virtual_classroom_log
+  sinks:
+  - database: lessonmgmt
+    deployOrg: [ jprep ]
+    deployEnv: [ stag, uat, prod ]
+
+- name: activity_logs
+  table: activity_logs
+
+- name: lesson_polls
+  table: lesson_polls
+  sinks:
+  - database: lessonmgmt
+    deployOrg: [ jprep ]
+    deployEnv: [ stag, uat, prod ]
+
+- name: lesson_recorded_videos
+  table: lesson_recorded_videos
+  sinks:
+  - database: lessonmgmt
+    deployOrg: [ jprep ]
+    deployEnv: [ stag, uat, prod ]
+
+- name: academic_years
+  table: academic_years
+  sinks:
+  - database: lessonmgmt
+    deployOrg: [ e2e, manabie, aic, ga, renseikai, synersia, tokyo, jprep ]
+    deployEnv: [ local, stag, uat, prod ]
+
+- name: courses_academic_years
+  table: courses_academic_years
+  sinks:
+  - database: lessonmgmt
+    deployOrg: [ e2e, manabie, aic, ga, renseikai, synersia, tokyo ]
+    deployEnv: [ local, stag, uat, prod ]
+
+- name: classes
+  table: classes
+  sinks:
+  - database: lessonmgmt
+    deployOrg: [ e2e, manabie, aic, ga, renseikai, synersia, tokyo ]
+    deployEnv: [ local, stag, uat, prod ]
+
+- name: courses_classes
+  table: courses_classes
+  sinks:
+  - database: lessonmgmt
+    deployOrg: [ e2e, manabie, aic, ga, renseikai, synersia, tokyo ]
+    deployEnv: [ local, stag, uat, prod ]
+
+- name: live_lesson_sent_notifications
+  table: live_lesson_sent_notifications
+  sinks:
+  - database: lessonmgmt
+    deployOrg: [ jprep ]
+    deployEnv: [ stag, uat, prod ]
+
+- name: lesson_student_subscriptions
+  table: lesson_student_subscriptions
+  sinks:
+  - database: lessonmgmt
+    deployOrg: [ jprep ]
+    deployEnv: [ stag, uat, prod ]
+
+- name: partner_dynamic_form_field_values
+  table: partner_dynamic_form_field_values
+  sinks:
+  - database: lessonmgmt
+    deployOrg: [ jprep ]
+    deployEnv: [ stag, uat, prod ]
+
+- name: partner_form_configs
+  table: partner_form_configs
+  sinks:
+  - database: lessonmgmt
+    deployOrg: [ jprep ]
+    deployEnv: [ stag, uat, prod ]
+
+- name: lesson_reports
+  table: lesson_reports
+  sinks:
+  - database: lessonmgmt
+    deployOrg: [ jprep ]
+    deployEnv: [ stag, uat, prod ]
+
+- name: lesson_report_details
+  table: lesson_report_details
+  sinks:
+  - database: lessonmgmt
+    deployOrg: [ jprep ]
+    deployEnv: [ stag, uat, prod ]
+
+- name: media
+  table: media
+  sinks:
+  - database: lessonmgmt
+
+- name: student_enrollment_status_history
+  table: student_enrollment_status_history
+  sinks:
+  - database: fatima
+    deployOrg: [e2e, manabie, tokyo]
+    deployEnv: [local, stag, uat, prod]
+  - database: lessonmgmt
+
+- name: lesson_student_subscription_access_path
+  table: lesson_student_subscription_access_path
+  sinks:
+  - database: lessonmgmt
+    deployOrg: [ jprep ]
+    deployEnv: [ stag, uat, prod ]
+
+- name: class
+  table: class
+  sinks:
+    - database: fatima
+    - database: lessonmgmt
+
+- name: reserve_class
+  table: reserve_class
+  sinks:
+    - database: lessonmgmt
+      deployOrg: [ e2e, manabie, aic, ga, renseikai, synersia, tokyo ]
+      deployEnv: [ local, stag, uat, prod ]
+
+- name: class_member
+  table: class_member
+  sinks:
+    - database: lessonmgmt
+
+- name: courses
+  table: courses
+  sinks:
+  - database: fatima
+  - database: lessonmgmt
+  - database: timesheet
+    deployOrg: [e2e, manabie, aic, ga, renseikai, synersia, tokyo]
+  - database: eureka
+    deployOrg: [e2e, manabie, tokyo]
+
+- name: school_admins
+  table: school_admins
+  sinks:
+  - database: fatima
+
+- name: tagged_user
+  table: tagged_user
+  sinks:
+  - database: fatima
+    deployEnv: [local, stag, uat]
+  - database: eureka
+    deployOrg: [e2e, manabie, jprep, aic, ga, renseikai, synersia, tokyo]
+
+- name: user_tag
+  table: user_tag
+  sinks:
+  - database: fatima
+    deployEnv: [local, stag, uat]
+  - database: eureka
+    deployOrg: [e2e, manabie, jprep, aic, ga, renseikai, synersia, tokyo]
+
+- name: lessons_courses
+  table: lessons_courses
+  sinks:
+  - database: lessonmgmt
+    deployOrg: [ jprep ]
+    deployEnv: [ stag, uat, prod ]
+  - database: timesheet
+    deployOrg: [e2e, manabie, aic, ga, renseikai, synersia, tokyo]
+    deployEnv: [ prod ]
+
+- name: staff
+  table: staff
+  sinks:
+  - database: timesheet
+    deployOrg: [e2e, manabie, aic, ga, renseikai, synersia, tokyo]
+  - database: lessonmgmt
+
+- name: prefecture
+  table: prefecture
+  sinks:
+  - database: invoicemgmt
+
+- name: student_parents
+  table: student_parents
+  sinks:
+  - database: entryexitmgmt
+    deployOrg: [e2e, manabie, aic, ga, renseikai, synersia, tokyo]
+  - database: fatima
+    deployOrg: [manabie]
+    deployEnv: [local, stag]
+  - database: lessonmgmt
+    deployOrg: [ e2e, manabie, aic, ga, renseikai, synersia, tokyo, jprep ]
+    deployEnv: [ local, stag, uat, prod ]
+
+- name: reallocation
+  table: reallocation
+  sinks:
+  - database: lessonmgmt
+    deployOrg: [ jprep ]
+    deployEnv: [ stag, uat, prod ]
+
+- name: user_basic_info
+  table: user_basic_info
+  source:
+    deployEnv: [local, stag, uat, prod]
+    deployOrg: [e2e, manabie, jprep, aic, ga, renseikai, synersia, tokyo]
+  sinks:
+  - database: entryexitmgmt
+    deployEnv: [local, stag, uat, prod]
+    deployOrg: [e2e, manabie, aic, ga, renseikai, synersia, tokyo]
+    captureDeleteEnvs: [stag]
+  - database: invoicemgmt
+    # only deployed on KEC
+    deployOrg: [e2e, manabie, tokyo]
+    captureDeleteEnvs: [stag]
+  - database: lessonmgmt
+  - database: timesheet
+    deployEnv: [local, stag, uat, prod]
+    deployOrg: [e2e, manabie, aic, ga, renseikai, synersia, tokyo]
+  - name: bob_to_entryexitmgmt_user_basic_info_sink_connector_v2
+    database: entryexitmgmt
+    deployEnv: [local, stag, uat, prod]
+    deployOrg: [e2e, manabie, aic, ga, renseikai, synersia, tokyo]
+  - name: bob_to_invoicemgmt_user_basic_info_sink_connector_v2
+    database: invoicemgmt
+    deployEnv: [local, stag, uat, prod]
+    deployOrg: [e2e, manabie, tokyo]
+  - name: bob_to_lessonmgmt_user_basic_info_sink_connector_v2
+    database: lessonmgmt
+    deployEnv: [local, stag, uat, prod]
+    deployOrg: [e2e, manabie, jprep, aic, ga, renseikai, synersia, tokyo]
+  - name: bob_to_timesheet_user_basic_info_sink_connector_v2
+    database: timesheet
+    deployEnv: [local, stag, uat, prod]
+    deployOrg: [e2e, manabie, aic, ga, renseikai, synersia, tokyo]
+
+- name: lesson_groups
+  table: lesson_groups
+  sinks:
+  - database: lessonmgmt
+    deployOrg: [ jprep ]
+    deployEnv: [ stag, uat, prod ]
+
+- name: lesson_classrooms
+  table: lesson_classrooms
+  sinks:
+  - database: lessonmgmt
+    deployOrg: [ jprep ]
+    deployEnv: [ stag, uat, prod ]
+
+- name: classroom
+  table: classroom
+  sinks:
+  - database: lessonmgmt
+    deployOrg: [ jprep ]
+    deployEnv: [ stag, uat, prod ]
+
+- name: configs
+  table: configs
+  sinks:
+  - database: lessonmgmt
+
+- name: zoom_account
+  table: zoom_account
+  sinks:
+  - database: lessonmgmt
+    deployOrg: [ jprep ]
+    deployEnv: [ stag, uat, prod ]
+
+- name: organization_auths
+  table: organization_auths
+  sinks:
+  - database: auth
+    deployEnv: [local, stag, uat, prod]
+    deployOrg: [e2e, manabie, jprep, tokyo, renseikai, aic, ga]
+
+- name: api_keypair
+  table: api_keypair
+  sinks:
+  - database: auth
+    deployEnv: [local, stag, uat, prod]
+    deployOrg: [e2e, manabie, jprep, tokyo, renseikai, aic, ga]
+
+- name: course_teaching_time
+  table: course_teaching_time
+  sinks:
+  - database: lessonmgmt
+    deployOrg: [ jprep ]
+    deployEnv: [ stag, uat, prod ]
+
+- name: course_location_schedule
+  table: course_location_schedule
+  sinks:
+  - database: lessonmgmt
+    deployOrg: [ jprep ]
+    deployEnv: [ stag, uat, prod ]
+
+- name: class_members
+  table: class_members
+  sinks:
+  - database: lessonmgmt
+    deployOrg: [ e2e, manabie, aic, ga, renseikai, synersia, tokyo ]
+    deployEnv: [ local, stag, uat, prod ]
+
+- name: course_type
+  table: course_type
+  sinks:
+  - database: lessonmgmt
+    deployOrg: [ e2e, manabie, tokyo ]
+    deployEnv: [ local, stag, uat, prod ]
+
+- name: school_history
+  table: school_history
+  sinks:
+  - database: eureka
+    deployOrg: [ e2e, manabie, aic, ga, renseikai, synersia, tokyo ]
+    deployEnv: [ local, stag, uat, prod ]

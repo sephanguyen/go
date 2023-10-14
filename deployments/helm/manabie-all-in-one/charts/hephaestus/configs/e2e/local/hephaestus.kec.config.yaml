@@ -1,0 +1,23 @@
+common:
+  stats_enabled: false
+  remote_trace:
+    enabled: true
+  grpc:
+    client_name: "hephaestus"
+  google_cloud_project: "dev-manabie-online"
+
+datalake:
+  alloydb:
+    user: 'postgres'
+    host: 'alloydb-infras.emulator.svc.cluster.local'
+    port: '5433'
+    dbname: 'alloydb'
+    password: 'example'
+
+datawarehouses:
+  kec:
+    user: 'postgres'
+    host: 'alloydb-infras.emulator.svc.cluster.local'
+    port: '5433'
+    dbname: 'kec'
+    password: 'example'

@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS user_basic_info__name_idx ON public.user_basic_info (name);

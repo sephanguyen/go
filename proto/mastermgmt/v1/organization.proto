@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package mastermgmt.v1;
+
+import "common/v1/enums.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/mastermgmt/v1;mpb";
+
+message Organization {
+  string organization_id = 1;
+  string tenant_id = 2;
+  string organization_name = 3;
+  string domain_name = 4;
+  string logo_url = 5;
+  common.v1.Country country_code = 6;
+}
+
+message CreateOrganizationRequest {
+  Organization organization = 1;
+}
+  
+message CreateOrganizationResponse {
+  Organization organization = 1;
+}
+
+// services
+service OrganizationService {
+    rpc CreateOrganization(CreateOrganizationRequest) returns (CreateOrganizationResponse);
+}

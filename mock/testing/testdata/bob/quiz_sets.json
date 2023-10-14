@@ -1,0 +1,111 @@
+{
+	"schema": [
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "lo_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "quiz_external_ids",
+			"data_type": "ARRAY",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "quiz_set_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "status",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "quiz_sets",
+			"policyname": "rls_quiz_sets",
+			"qual": "permission_check(resource_path, 'quiz_sets'::text)",
+			"with_check": "permission_check(resource_path, 'quiz_sets'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "quiz_sets",
+			"policyname": "rls_quiz_sets_restrictive",
+			"qual": "permission_check(resource_path, 'quiz_sets'::text)",
+			"with_check": "permission_check(resource_path, 'quiz_sets'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "quiz_sets_fk",
+			"column_name": "lo_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "quiz_sets_pk",
+			"column_name": "quiz_set_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "quiz_sets",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

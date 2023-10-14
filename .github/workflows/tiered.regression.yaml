@@ -1,0 +1,137 @@
+name: tiered.regression
+on:
+  workflow_dispatch:
+  # schedule:
+  #   - cron: '45 3 * * *' # run at 10:45 Vietnam Time Daily
+
+# Keep only one instance running at a time.
+concurrency: ${{ github.workflow }}
+
+jobs:
+  runners:
+    runs-on: ['self-hosted', '100m-400mi', 'spot', 'persistent']
+    outputs:
+      runners: ${{ steps.runners.outputs.runners }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: develop #should be develop
+
+      - id: runners
+        uses: ./.github/actions/runners
+        with:
+          token: ${{ secrets.ORG_GITHUB_TOKEN }}
+
+  run-integration-test:
+    runs-on: ${{ fromJson(needs.runners.outputs.runners)['run-integration-test'] }}
+    needs: [runners]
+    permissions:
+      actions: 'read'
+      contents: 'read'
+      id-token: 'write'
+    env:
+      NO_COLLECT: 'true'
+      USE_SHARED_REGISTRY: true
+    steps:
+      - name: Collect Workflow Telemetry
+        continue-on-error: true
+        timeout-minutes: 5
+        uses: manabie-com/workflow-telemetry-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.BUILD_GITHUB_TOKEN }}
+
+      - name: Authenticate to Google Cloud using Workload Identity Federation
+        id: auth
+        uses: google-github-actions/auth@v1
+        with:
+          token_format: access_token
+          workload_identity_provider: 'projects/418860883682/locations/global/workloadIdentityPools/gh-action-pool/providers/integration-test-bot-provider'
+          service_account: 'integration-test-bot@student-coach-e1e95.iam.gserviceaccount.com'
+
+      - name: Login to GCR
+        uses: docker/login-action@v2
+        with:
+          registry: asia.gcr.io
+          username: oauth2accesstoken
+          password: ${{ steps.auth.outputs.access_token }}
+
+      - name: Login to AR
+        uses: docker/login-action@v2
+        with:
+          registry: asia-southeast1-docker.pkg.dev
+          username: oauth2accesstoken
+          password: ${{ steps.auth.outputs.access_token }}
+
+      - name: Checkout source
+        uses: actions/checkout@v3
+        timeout-minutes: 5
+
+      - id: version
+        uses: ./.github/actions/tool-version
+
+      - uses: actions/setup-go@v3
+        with:
+          go-version: "${{ steps.version.outputs.go }}"
+
+      - name: Install backend
+        timeout-minutes: 20
+        env:
+          DOCKER_SERVER: 'https://asia-southeast1-docker.pkg.dev'
+          DOCKER_USERNAME: 'oauth2accesstoken'
+          DOCKER_PASSWORD: '${{ steps.auth.outputs.access_token }}'
+          DOCKER_EMAIL: 'integration-test-bot@student-coach-e1e95.iam.gserviceaccount.com'
+        run: ./deployments/sk.bash
+
+      - name: Check hasura metadata
+        run: ./.github/scripts/hasura-metadata-apply.bash
+
+      - name: Run integration tests
+        id: run-post-merge-integration-tests
+        timeout-minutes: 45
+        env:
+          TRACE_ENABLED: 'false'
+          OTEL_ENDPOINT: opentelemetry-collector.manabie.io:443
+          PUSHGATEWAY_ENDPOINT: https://prometheus-pushgateway.staging.manabie.io
+          COLLECT_BDD_TESTS_METRICS: 'false'
+        run: |
+          ./deployments/k8s_bdd_test.bash
+
+      # - name: Block merge
+      #   if: failure() && steps.run-post-merge-integration-tests.outcome != 'success' && steps.run-post-merge-integration-tests.outcome != 'skipped'
+      #   run: |
+      #     payload='{
+      #         "repo": "backend",
+      #         "owner": "manabie-com",
+      #         "block_merge": true
+      #     }'
+      #     curl -fL --request POST 'https://web-api.staging.manabie.io/draft-http/v1/status' \
+      #       --header 'Content-Type: application/json' \
+      #       --header "X-Hub-Signature-256: ${{ secrets.DRAFT_SERVICE_MERGE_STATUS_SECRET_KEY }}" \
+      #       -d "$payload"
+
+      # - name: Notify when post-merge failed
+      #   if: failure() && steps.run-post-merge-integration-tests.outcome != 'success' && steps.run-post-merge-integration-tests.outcome != 'skipped'
+      #   uses: ./.github/actions/slack-post-merge
+      #   with:
+      #     status: 'failure'
+      #     message: 'The integration test of the post-merge workflow was failed. Please help us check it.'
+      #     username: ${{ github.actor }}
+      #     BUILD_GITHUB_TOKEN: ${{ secrets.BUILD_GITHUB_TOKEN }}
+      #     SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
+
+      # - name: Unblock merge
+      #   if: steps.run-post-merge-integration-tests.outcome == 'success'
+      #   run: |
+      #     payload='{
+      #       "repo": "backend",
+      #       "owner": "manabie-com",
+      #       "block_merge": false
+      #     }'
+      #     curl -fL --request POST 'https://web-api.staging.manabie.io/draft-http/v1/status' \
+      #       --header 'Content-Type: application/json' \
+      #       --header "X-Hub-Signature-256: ${{ secrets.DRAFT_SERVICE_MERGE_STATUS_SECRET_KEY }}" \
+      #       -d "$payload"
+
+      - name: Clean up for Kind
+        if: always()
+        run: ./deployments/sk.bash -d

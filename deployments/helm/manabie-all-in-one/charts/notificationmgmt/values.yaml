@@ -1,0 +1,174 @@
+grpcPort: 6950
+httpPort: 6980
+
+service:
+  type: ClusterIP
+  port: 6950
+
+cronjobs:
+  send-scheduled-notification:
+    cmd: notificationmgmt_send_scheduled_notification
+    schedule: "*/1 * * * *"
+
+metrics:
+  enabled: true
+  podAnnotations:
+    prometheus.io/scheme: "http"
+    prometheus.io/port: "8888"
+    prometheus.io/scrape: "true"
+
+resources:
+  requests:
+    memory: "120Mi"
+affinity: {}
+affinityOverride: {}
+
+apiHttp:
+  - match:
+    - uri:
+        prefix: /notificationmgmt.v1.InternalService
+    route:
+      - destination:
+          host: notificationmgmt
+          port:
+            number: 6950
+    fault:
+      abort:
+        percentage:
+          value: 100
+        httpStatus: 403
+  - match:
+    - uri:
+        exact: /notificationmgmt.v1.NotificationModifierService/SendScheduledNotification
+    route:
+      - destination:
+          host: notificationmgmt
+          port:
+            number: 6950
+    fault:
+      abort:
+        percentage:
+          value: 100
+        httpStatus: 403
+  - match:
+    - uri:
+        prefix: /notificationmgmt.v1
+    route:
+      - destination:
+          host: notificationmgmt
+          port:
+            number: 6950
+  - match:
+    - uri:
+        prefix: /notificationmgmt.v2
+    route:
+      - destination:
+          host: notificationmgmt
+          port:
+            number: 6950
+  - match:
+    - uri:
+        prefix: /notificationmgmt/api
+    route:
+      - destination:
+          host: notificationmgmt
+          port:
+            number: 6980
+
+webHttp:
+  - match:
+    - uri:
+        prefix: /notificationmgmt.v1.InternalService
+    route:
+      - destination:
+          host: notificationmgmt
+          port:
+            number: 6950
+    fault:
+      abort:
+        percentage:
+          value: 100
+        httpStatus: 403
+  - match:
+    - uri:
+        exact: /notificationmgmt.v1.NotificationModifierService/SendScheduledNotification
+    route:
+      - destination:
+          host: notificationmgmt
+          port:
+            number: 6950
+    fault:
+      abort:
+        percentage:
+          value: 100
+        httpStatus: 403
+  - match:
+    - uri:
+        prefix: /notificationmgmt.v1
+    route:
+      - destination:
+          host: notificationmgmt
+          port:
+            number: 6950
+    corsPolicy: &CORSPolicy
+      allowOrigins:
+        - regex: ".*"
+      allowMethods:
+        - POST
+        - GET
+        - OPTIONS
+        - PUT
+        - DELETE
+      allowHeaders:
+        - grpc-timeout
+        - content-type
+        - keep-alive
+        - user-agent
+        - cache-control
+        - content-type
+        - content-transfer-encoding
+        - token
+        - x-accept-content-transfer-encoding
+        - x-accept-response-streaming
+        - x-user-agent
+        - x-grpc-web
+        - pkg
+        - version
+      maxAge: 100s
+      exposeHeaders:
+        - grpc-status
+        - grpc-message
+  - match:
+    - uri:
+        prefix: /notificationmgmt.v2
+    route:
+      - destination:
+          host: notificationmgmt
+          port:
+            number: 6950
+    corsPolicy: *CORSPolicy
+  - match:
+    - uri:
+        prefix: /notificationmgmt/api
+    route:
+      - destination:
+          host: notificationmgmt
+          port:
+            number: 6980
+    corsPolicy: *CORSPolicy
+
+jobs:
+  migrate-notification-course-filter:
+    cmd: notificationmgmt_migrate_notification_course_filter
+
+  migrate-notification-class-filter:
+    cmd: notificationmgmt_migrate_notification_class_filter
+
+  migrate-notification-location-filter:
+    cmd: notificationmgmt_migrate_notification_location_filter
+
+  migrate-notification-assignment-notification:
+    cmd: notificationmgmt_migrate_notification_assignment_return
+
+  trigger-upsert-system-notification:
+    cmd: notificationmgmt_trigger_upsert_system_notification

@@ -1,0 +1,65 @@
+name: deployment.k8s-runner.yml
+
+on:
+  workflow_dispatch:
+    inputs:
+      actions:
+        type: choice
+        description: "Choose actions for deployment, it is not recommended to perform the update during peak hours"
+        required: true
+        options:
+          - update_all
+          - update
+          - create
+          - delete
+      runner_name:
+        description: "Fill runner name to deploy"
+      dry-run:
+        type: boolean
+        default: true
+        description: Only dry-run (Checked is only show diff, Unchecked is show diff and deploy)
+        required: true
+      branch:
+        description: "Choose a branch to deploy from"
+        required: true
+        default: "develop"
+
+env:
+  ACTIONS: ${{ inputs.actions }}
+  RUNNER_DEPLOY_NAME: ${{ inputs.runner_name }}
+
+jobs:
+  deploy-k8s-runner:
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    runs-on: ["self-hosted", "100m-400mi", "spot", "persistent"]
+    env:
+      SERVICE_ACCOUNT_EMAIL_SUFFIX: "staging-manabie-online"
+      ENV: "stag"
+      ORG: "manabie"
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v3
+        timeout-minutes: 5
+        with:
+          ref: ${{ github.event.inputs.branch }}
+
+      - name: Setup Kubernetes for ${{ env.ENV }}.${{ env.ORG }}
+        uses: ./.github/actions/setup-k8s
+        with:
+          organization: ${{ env.ORG }}
+          environment: ${{ env.ENV }}
+
+      - name: Manabie Staging - Kubectl dry-run deploy actions runners
+        continue-on-error: true
+        run: |
+          set -e
+          kubectl diff -f ./deployments/runner
+
+      - name: Manabie Staging - Kubectl deploy actions runners
+        run: |
+          set -e
+          if [[ "${{ github.event.inputs.dry-run }}" == "false" ]]; then
+            ./deployments/setup_k8s_runner.bash
+          fi

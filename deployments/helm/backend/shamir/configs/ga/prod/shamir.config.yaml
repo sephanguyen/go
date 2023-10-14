@@ -1,0 +1,22 @@
+common:
+  google_cloud_project: student-coach-e1e95
+postgres_v2:
+  auth:
+    cloudsql_instance: '{{ .Values.global.cloudSQLAuthInstance }}'
+    cloudsql_use_public_ip: {{ .Values.global.cloudSQLUsePublicIP }}
+    cloudsql_auto_iam_authn: true
+    user: '{{ include "util.databaseUser" . }}'
+    host: '{{ include "util.databaseHost" . }}'
+    port: '5432'
+    dbname: '{{ .Values.global.dbPrefix }}auth'
+    max_conns: 8
+    retry_attempts: 10
+    retry_wait_interval: '5s'
+vendor: manabie
+issuers:
+  - issuer: https://securetoken.google.com/production-ga
+    audience: production-ga
+    jwks_endpoint: https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com
+  - issuer: https://securetoken.google.com/student-coach-e1e95
+    audience: student-coach-e1e95
+    jwks_endpoint: https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com

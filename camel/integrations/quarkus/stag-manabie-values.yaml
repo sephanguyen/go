@@ -1,0 +1,16 @@
+global:
+  image:
+    # Temporarily always pull new images on staging
+    # since we reuse image tag "local" at the moment.
+    pullPolicy: Always
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: cloud.google.com/gke-spot
+                operator: In
+                values: ['true']
+  tolerations:
+    - key: cloud.google.com/gke-spot
+      operator: Exists

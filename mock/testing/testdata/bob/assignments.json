@@ -1,0 +1,141 @@
+{
+	"schema": [
+		{
+			"column_name": "assigned_by",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "assignment_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "assignment_type",
+			"data_type": "text",
+			"column_default": "'ASSIGNMENT_TYPE_NONE'::text",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "class_id",
+			"data_type": "integer",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "end_date",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "preset_study_plan_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "preset_study_plan_weekly_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "start_date",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "topic_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "assignments",
+			"policyname": "rls_assignments",
+			"qual": "permission_check(resource_path, 'assignments'::text)",
+			"with_check": "permission_check(resource_path, 'assignments'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "assignments",
+			"policyname": "rls_assignments_restrictive",
+			"qual": "permission_check(resource_path, 'assignments'::text)",
+			"with_check": "permission_check(resource_path, 'assignments'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "assignments_fk",
+			"column_name": "topic_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "assignments_pk",
+			"column_name": "assignment_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "assignments",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package payment.v1;
+
+import "payment/v1/enums.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/payment/v1;pmpb";
+
+message ExportStudentBillingRequest {
+  repeated string location_ids = 1;
+}
+
+message ExportStudentBillingResponse {
+  bytes data = 1;
+}
+
+message ExportMasterDataRequest {
+  ExportMasterDataType export_data_type = 1;
+
+}
+
+message ExportMasterDataResponse {
+  bytes data = 1;
+}
+
+service ExportService {
+    rpc ExportStudentBilling(ExportStudentBillingRequest)
+    returns (ExportStudentBillingResponse);
+    rpc ExportMasterData(ExportMasterDataRequest)
+    returns (ExportMasterDataResponse);
+}

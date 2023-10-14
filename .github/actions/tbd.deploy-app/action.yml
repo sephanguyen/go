@@ -1,0 +1,76 @@
+name: 'Deploy App'
+description: 'A composite action for run deploy mobile app (Android, IOS)'
+inputs:
+  github-token:
+    description: "Github token"
+    required: true
+  repo:
+    description: "Repository name"
+    required: true
+  release-tag:
+    description: "Release Tag"
+    required: true
+  environment:
+    description: "Environment"
+    required: true
+  organization:
+    description: "Organization"
+  firebase-token:
+    description: "Firebase token"
+    required: true
+  platform:
+    description: "Platform"
+    required: true
+  app:
+    description: "App"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout ${{ inputs.repo }}
+      uses: actions/checkout@v3
+      with:
+        repository: ${{github.repository_owner}}/${{ inputs.repo }}
+        token: ${{ inputs.github-token }}
+        ref: ${{ inputs.release-tag }}
+        path: 'repo-${{ inputs.repo }}'
+
+    - name: Setup Firebase
+      working-directory: "repo-${{ inputs.repo }}"
+      run: |
+        sudo npm install -g firebase-tools
+        echo "${{ inputs.firebase-token }}" | base64 -d > $(pwd)/gcp_key.json
+        echo "GOOGLE_APPLICATION_CREDENTIALS=$(pwd)/gcp_key.json" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Prepare infos
+      uses: actions/github-script@v6
+      id: prepare
+      with:
+        script: |
+          var prefix = '${{ inputs.release-tag }}-${{ inputs.organization }}-${{ inputs.app }}-${{ inputs.environment }}';
+          if ("${{ inputs.platform }}" == 'ios') {
+            core.exportVariable('FILE_PATH', prefix + '-ad-hoc.ipa');
+          } else if ("${{ inputs.platform }}" == 'android') {
+            core.exportVariable('FILE_PATH', prefix + '.apk');
+          }
+
+    - name: Download ${{inputs.platform}}
+      uses: i3h/download-release-asset@v1
+      with:
+        owner: ${{ github.repository_owner }}
+        repo: ${{ inputs.repo }}
+        tag: ${{ inputs.release-tag }}
+        file: ${{ env.FILE_PATH}}
+        path: './repo-${{ inputs.repo }}'
+        token: ${{ inputs.github-token }}
+
+    - name: Deploy Learner ${{inputs.platform}}
+      working-directory: "repo-${{ inputs.repo }}"
+      env:
+        FLAVOR: ${{ inputs.organization }}_${{ inputs.app }}_${{ inputs.environment }}
+        PLATFORM: ${{ inputs.platform }}
+      run: |
+        PLATFORM=$PLATFORM FLAVOR=$FLAVOR FILE_PATH=$FILE_PATH bash ./scripts/deploy-app.sh
+      shell: bash

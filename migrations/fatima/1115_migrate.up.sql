@@ -1,0 +1,1 @@
+ALTER TABLE public.order_item ADD COLUMN end_date timestamptz DEFAULT NULL;

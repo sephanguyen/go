@@ -1,0 +1,12 @@
+kafka:
+  fileStorage:
+    storageClassName: premium-rwo
+
+  heapOptions: "-Xms768M -Xmx768M"
+
+  resources:
+    requests:
+      cpu: 35m
+      memory: 1Gi
+    limits:
+      memory: 1536Mi

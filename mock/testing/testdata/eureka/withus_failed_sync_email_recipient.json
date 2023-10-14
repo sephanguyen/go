@@ -1,0 +1,94 @@
+{
+	"schema": [
+		{
+			"column_name": "email_address",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "is_archived",
+			"data_type": "boolean",
+			"column_default": "false",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "last_updated_by",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "last_updated_date",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "recipient_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "YES"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "withus_failed_sync_email_recipient",
+			"policyname": "rls_withus_failed_sync_email_recipient",
+			"qual": "permission_check(resource_path, 'withus_failed_sync_email_recipient'::text)",
+			"with_check": "permission_check(resource_path, 'withus_failed_sync_email_recipient'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "withus_failed_sync_email_recipient",
+			"policyname": "rls_withus_failed_sync_email_recipient_restrictive",
+			"qual": "permission_check(resource_path, 'withus_failed_sync_email_recipient'::text)",
+			"with_check": "permission_check(resource_path, 'withus_failed_sync_email_recipient'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "withus_failed_sync_email_recipient_pk",
+			"column_name": "recipient_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "withus_failed_sync_email_recipient",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

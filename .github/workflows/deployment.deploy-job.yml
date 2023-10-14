@@ -1,0 +1,77 @@
+name: deployment.deploy-job
+on:
+  workflow_dispatch:
+    inputs:
+      run_job_args:
+        description: "Run job args: e.g eureka test-service -- --flag=\"myFlag\" --flag2=\"flag 2\""
+        required: true
+      environment:
+        type: choice
+        description: "Choose an environment to deploy"
+        options:
+          - staging
+          - uat
+          - preproduction
+          - production
+        required: true
+      organization:
+        type: choice
+        description: "Choose an organization to deploy"
+        required: true
+        options:
+          - manabie
+          - jprep
+          - synersia
+          - renseikai
+          - ga
+          - aic
+          - tokyo
+      delete_existing_job:
+        type: boolean
+        description: "Delete existing job before deploy"
+        required: false
+        default: false
+      dryrun:
+        type: boolean
+        description: "Dry run, don't deploy"
+        required: false
+        default: false
+
+jobs:
+  deploy-job:
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    runs-on: ["self-hosted", "100m-400mi", "spot", "persistent"]
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v3
+        timeout-minutes: 5
+
+      - name: Setup Kubernetes for ${{ github.event.inputs.environment }}.${{ github.event.inputs.organization }}
+        uses: ./.github/actions/setup-k8s
+        with:
+          organization: ${{ github.event.inputs.organization }}
+          environment: ${{ github.event.inputs.environment }}
+
+      - name: Sanity check for preproduction
+        if: github.event.inputs.environment == 'preproduction'
+        run: |
+          if [[ "$ENV" != "dorp" ]]; then
+            echo "Expected dorp for ENV, got $environment"
+            exit 1
+          fi
+
+      - name: Deploy k8s job
+        env:
+          SERVICE_ACCOUNT_EMAIL_SUFFIX: ${{ env.SERVICE_ACCOUNT_EMAIL_SUFFIX }}
+          ENV: ${{ env.ENV }}
+          ORG: ${{ env.ORG }}
+          NAMESPACE: ${{ env.NAMESPACE }}
+          RUN_JOB_ARGS: ${{ github.event.inputs.run_job_args }}
+          DELETE_EXISTING_JOB: ${{ github.event.inputs.delete_existing_job }}
+          DRY_RUN: ${{ github.event.inputs.dryrun }}
+        run: |
+          set -eu
+          echo "Running command: ./deployments/job.bash ${RUN_JOB_ARGS}"
+          eval "./deployments/job.bash ${RUN_JOB_ARGS}"

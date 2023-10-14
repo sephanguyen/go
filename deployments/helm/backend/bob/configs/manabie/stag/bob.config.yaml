@@ -1,0 +1,48 @@
+common:
+  google_cloud_project: staging-manabie-online
+  firebase_project: staging-manabie-online
+  identity_platform_project: staging-manabie-online
+jwt_applicant: manabie-stag
+issuers:
+  - issuer: manabie
+    audience: manabie-stag
+    jwks_endpoint: http://shamir:5680/.well-known/jwks.json
+  - issuer: https://securetoken.google.com/staging-manabie-online
+    audience: staging-manabie-online
+    jwks_endpoint: https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com
+storage:
+  bucket: stag-manabie-backend
+brightcove:
+  account_id: 6064018595001
+  client_id: 3c6e5dd5-a7fc-4cc3-94a7-95bd0c553e31
+  profile: Asia-PREMIUM (96-1500)
+whiteboard:
+  app_id: V7mZoJt9Eeqxp_kxzbwYqQ/rtGV6Bj_XDpLcw
+agora:
+  app_id: 793d72fc36614e03aa90866c2bc2271c
+check_client_versions:
+  - com.manabie.student_manabie_app:1.5.0
+  - com.manabie.studentManabieApp:1.5.0
+  - com.manabie.liz:1.0.0
+  - com.manabie.lms_manabie_app:1.0.0
+  - com.manabie.lmsManabieApp:1.0.0
+  - jp.jprep.jprep_learner:1.0.0
+  - jp.jprep.jprepLearner:1.0.0
+  - jp.jprep.jprep_teacher:1.0.0
+  - jp.jprep.jprepTeacher:1.0.0
+  - com.manabie.enigma:1.0.0
+  - com.renseikai.learner:1.0.0
+  - com.renseikai.teacher:1.0.0
+  - com.synersia.learner:1.0.0
+  - com.synersia.teacher:1.0.0
+  - com.manabie.learner:2.0.20230509020728
+  - com.manabie.teacher:2.0.20230509020728
+  - jp.jprep.learner:2.0.20230509020728
+  - jp.jprep.teacher:2.0.20230509020728
+partner:
+  domain_bo: "https://green-school-portal.web.app/"
+  domain_teacher: "https://manabie-teacher-staging.web.app/"
+  domain_learner: "https://manabie-learner-staging.web.app/"
+postgres_v2:
+  bob:
+    max_conns: 32

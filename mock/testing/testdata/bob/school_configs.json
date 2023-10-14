@@ -1,0 +1,123 @@
+{
+	"schema": [
+		{
+			"column_name": "country",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "plan_duration",
+			"data_type": "smallint",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "plan_expired_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "plan_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "privileges",
+			"data_type": "ARRAY",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "school_id",
+			"data_type": "integer",
+			"column_default": "nextval('school_configs_school_id_seq'::regclass)",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "school_configs",
+			"policyname": "rls_school_configs",
+			"qual": "permission_check(resource_path, 'school_configs'::text)",
+			"with_check": "permission_check(resource_path, 'school_configs'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "school_configs",
+			"policyname": "rls_school_configs_restrictive",
+			"qual": "permission_check(resource_path, 'school_configs'::text)",
+			"with_check": "permission_check(resource_path, 'school_configs'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "school_configs__school_id_fk",
+			"column_name": "school_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "school_configs_pk",
+			"column_name": "school_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "school_configs",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

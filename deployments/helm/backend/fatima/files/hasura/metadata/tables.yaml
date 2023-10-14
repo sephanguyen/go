@@ -1,0 +1,2109 @@
+- table:
+    schema: public
+    name: bill_item
+  object_relationships: []
+  select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - bill_item_sequence_number
+      - bill_type
+      - billing_date
+      - billing_from
+      - billing_schedule_period_id
+      - billing_status
+      - billing_to
+      - created_at
+      - discount_amount
+      - discount_amount_type
+      - discount_amount_value
+      - final_price
+      - order_id
+      - product_description
+      - product_id
+      - product_pricing
+      - tax_amount
+      - tax_category
+      - tax_id
+      - tax_percentage
+      - updated_at
+      - student_product_id
+      - billing_approval_status
+      - billing_item_description
+      - previous_bill_item_status
+      - previous_bill_item_sequence_number
+      - is_latest_bill_item
+      - adjustment_price
+      - price
+      - old_price
+      - billing_ratio_numerator
+      - billing_ratio_denominator
+      - raw_discount_amount
+      filter:
+        _and: []
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - bill_item_sequence_number
+      - bill_type
+      - billing_date
+      - billing_from
+      - billing_schedule_period_id
+      - billing_status
+      - billing_to
+      - created_at
+      - discount_amount
+      - discount_amount_type
+      - discount_amount_value
+      - final_price
+      - order_id
+      - product_description
+      - product_id
+      - product_pricing
+      - tax_amount
+      - tax_category
+      - tax_id
+      - tax_percentage
+      - updated_at
+      - student_product_id
+      - billing_approval_status
+      - billing_item_description
+      - previous_bill_item_status
+      - previous_bill_item_sequence_number
+      - is_latest_bill_item
+      - adjustment_price
+      - price
+      - old_price
+      - billing_ratio_numerator
+      - billing_ratio_denominator
+      - raw_discount_amount
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: MANABIE
+    permission:
+      columns:
+      - adjustment_price
+      - bill_item_sequence_number
+      - bill_type
+      - billing_approval_status
+      - billing_date
+      - billing_from
+      - billing_item_description
+      - billing_ratio_denominator
+      - billing_ratio_numerator
+      - billing_schedule_period_id
+      - billing_status
+      - billing_to
+      - created_at
+      - discount_amount
+      - discount_amount_type
+      - discount_amount_value
+      - final_price
+      - is_latest_bill_item
+      - old_price
+      - order_id
+      - previous_bill_item_sequence_number
+      - previous_bill_item_status
+      - price
+      - product_description
+      - product_id
+      - product_pricing
+      - student_product_id
+      - tax_amount
+      - tax_category
+      - tax_id
+      - tax_percentage
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+- table:
+    schema: public
+    name: billing_schedule
+  select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - created_at
+      - billing_schedule_id
+      - is_archived
+      - name
+      - remarks
+      - updated_at
+      filter:
+        is_archived:
+          _eq: false
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - created_at
+      - billing_schedule_id
+      - is_archived
+      - name
+      - remarks
+      - updated_at
+      filter:
+        _and:
+        - is_archived:
+            _eq: false
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: MANABIE
+    permission:
+      columns:
+      - billing_schedule_id
+      - created_at
+      - is_archived
+      - name
+      - remarks
+      - updated_at
+      filter:
+        _and:
+        - is_archived:
+            _eq: false
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+- table:
+    schema: public
+    name: billing_schedule_period
+  array_relationships:
+  - name: billing_ratios
+    using:
+      foreign_key_constraint_on:
+        column: billing_schedule_period_id
+        table:
+          schema: public
+          name: billing_ratio
+  - name: product_prices
+    using:
+      foreign_key_constraint_on:
+        column: billing_schedule_period_id
+        table:
+          schema: public
+          name: product_price
+  select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - billing_date
+      - billing_schedule_id
+      - created_at
+      - end_date
+      - billing_schedule_period_id
+      - is_archived
+      - name
+      - remarks
+      - start_date
+      - updated_at
+      filter:
+        is_archived:
+          _eq: false
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - billing_date
+      - billing_schedule_id
+      - created_at
+      - end_date
+      - billing_schedule_period_id
+      - is_archived
+      - name
+      - remarks
+      - start_date
+      - updated_at
+      filter:
+        _and:
+        - is_archived:
+            _eq: false
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: MANABIE
+    permission:
+      columns:
+      - billing_date
+      - billing_schedule_id
+      - billing_schedule_period_id
+      - created_at
+      - end_date
+      - is_archived
+      - name
+      - remarks
+      - start_date
+      - updated_at
+      filter:
+        _and:
+        - is_archived:
+            _eq: false
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+- table:
+    schema: public
+    name: courses
+  select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - course_id
+      - created_at
+      - deleted_at
+      - grade
+      - name
+      - teaching_method
+      - updated_at
+      filter:
+        deleted_at:
+          _is_null: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - course_id
+      - created_at
+      - deleted_at
+      - grade
+      - name
+      - teaching_method
+      - updated_at
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+  - role: MANABIE
+    permission:
+      columns:
+      - course_id
+      - created_at
+      - deleted_at
+      - grade
+      - name
+      - teaching_method
+      - updated_at
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+- table:
+    schema: public
+    name: discount
+  array_relationships:
+  - name: order_items
+    using:
+      foreign_key_constraint_on:
+        column: discount_id
+        table:
+          schema: public
+          name: order_item
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - available_from
+      - available_until
+      - created_at
+      - discount_amount_type
+      - discount_amount_value
+      - discount_id
+      - discount_tag_id
+      - discount_type
+      - is_archived
+      - name
+      - parent_tag_id_validation
+      - recurring_valid_duration
+      - remarks
+      - student_tag_id_validation
+      - updated_at
+      filter:
+        _and:
+        - is_archived:
+            _eq: false
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - available_from
+      - available_until
+      - created_at
+      - discount_amount_type
+      - discount_amount_value
+      - discount_id
+      - discount_tag_id
+      - discount_type
+      - is_archived
+      - name
+      - parent_tag_id_validation
+      - recurring_valid_duration
+      - remarks
+      - student_tag_id_validation
+      - updated_at
+      filter:
+        is_archived:
+          _eq: false
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - available_from
+      - available_until
+      - created_at
+      - discount_amount_type
+      - discount_amount_value
+      - discount_id
+      - discount_tag_id
+      - discount_type
+      - is_archived
+      - name
+      - parent_tag_id_validation
+      - recurring_valid_duration
+      - remarks
+      - student_tag_id_validation
+      - updated_at
+      filter:
+        _and:
+        - is_archived:
+            _eq: false
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+- table:
+    schema: public
+    name: fee
+  object_relationships:
+  - name: product
+    using:
+      foreign_key_constraint_on: fee_id
+  select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - fee_type
+      - fee_id
+      filter: {}
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - fee_type
+      - fee_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: MANABIE
+    permission:
+      columns:
+      - fee_id
+      - fee_type
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+- table:
+    schema: public
+    name: grade
+  select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - created_at
+      - grade_id
+      - is_archived
+      - name
+      - partner_internal_id
+      - updated_at
+      - deleted_at
+      - sequence
+      filter:
+        is_archived:
+          _eq: false
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - created_at
+      - grade_id
+      - is_archived
+      - partner_internal_id
+      - name
+      - updated_at
+      - deleted_at
+      - sequence
+      filter:
+        _and:
+        - is_archived:
+            _eq: false
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: MANABIE
+    permission:
+      columns:
+      - created_at
+      - deleted_at
+      - grade_id
+      - is_archived
+      - name
+      - partner_internal_id
+      - updated_at
+      filter:
+        _and:
+        - is_archived:
+            _eq: false
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+- table:
+    schema: public
+    name: locations
+  select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - access_path
+      - created_at
+      - deleted_at
+      - is_archived
+      - location_id
+      - location_type
+      - name
+      - parent_location_id
+      - partner_internal_id
+      - partner_internal_parent_id
+      - updated_at
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - is_archived:
+            _eq: false
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - access_path
+      - created_at
+      - deleted_at
+      - is_archived
+      - location_id
+      - location_type
+      - name
+      - parent_location_id
+      - partner_internal_id
+      - partner_internal_parent_id
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+        - is_archived:
+            _eq: false
+      allow_aggregations: true
+  - role: MANABIE
+    permission:
+      columns:
+      - access_path
+      - created_at
+      - deleted_at
+      - is_archived
+      - location_id
+      - location_type
+      - name
+      - parent_location_id
+      - partner_internal_id
+      - partner_internal_parent_id
+      - updated_at
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - is_archived:
+            _eq: false
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+- table:
+    schema: public
+    name: material
+  object_relationships:
+  - name: product
+    using:
+      foreign_key_constraint_on: material_id
+  select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - custom_billing_date
+      - material_id
+      - material_type
+      filter: {}
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - custom_billing_date
+      - material_id
+      - material_type
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: MANABIE
+    permission:
+      columns:
+      - custom_billing_date
+      - material_id
+      - material_type
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+- table:
+    schema: public
+    name: order
+  object_relationships: []
+  select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - background
+      - created_at
+      - future_measures
+      - is_reviewed
+      - loa_end_date
+      - loa_start_date
+      - location_id
+      - order_comment
+      - order_id
+      - order_sequence_number
+      - order_status
+      - order_type
+      - student_full_name
+      - student_id
+      - updated_at
+      - version_number
+      - withdrawal_effective_date
+      filter:
+        _and: []
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - background
+      - created_at
+      - future_measures
+      - is_reviewed
+      - loa_end_date
+      - loa_start_date
+      - location_id
+      - order_comment
+      - order_id
+      - order_sequence_number
+      - order_status
+      - order_type
+      - student_full_name
+      - student_id
+      - updated_at
+      - version_number
+      - withdrawal_effective_date
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: MANABIE
+    permission:
+      columns:
+      - background
+      - created_at
+      - future_measures
+      - is_reviewed
+      - loa_end_date
+      - loa_start_date
+      - location_id
+      - order_comment
+      - order_id
+      - order_sequence_number
+      - order_status
+      - order_type
+      - student_full_name
+      - student_id
+      - updated_at
+      - version_number
+      - withdrawal_effective_date
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+- table:
+    schema: public
+    name: order_action_log
+  object_relationships:
+  - name: user
+    using:
+      foreign_key_constraint_on: user_id
+  select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - action
+      - comment
+      - created_at
+      - order_action_log_id
+      - order_id
+      - updated_at
+      - user_id
+      filter: {}
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - action
+      - comment
+      - created_at
+      - order_action_log_id
+      - order_id
+      - updated_at
+      - user_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: MANABIE
+    permission:
+      columns:
+      - action
+      - comment
+      - created_at
+      - order_action_log_id
+      - order_id
+      - updated_at
+      - user_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+- table:
+    schema: public
+    name: order_item
+  object_relationships:
+  - name: discount
+    using:
+      foreign_key_constraint_on: discount_id
+  - name: product
+    using:
+      foreign_key_constraint_on: product_id
+  select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - created_at
+      - discount_id
+      - order_id
+      - product_id
+      - start_date
+      - student_product_id
+      filter: {}
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - created_at
+      - discount_id
+      - order_id
+      - product_id
+      - start_date
+      - student_product_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: MANABIE
+    permission:
+      columns:
+      - created_at
+      - discount_id
+      - order_id
+      - product_id
+      - start_date
+      - student_product_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+- table:
+    schema: public
+    name: package
+  object_relationships:
+  - name: product
+    using:
+      foreign_key_constraint_on: package_id
+  select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - package_id
+      - max_slot
+      - package_end_date
+      - package_start_date
+      - package_type
+      filter: {}
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - package_id
+      - max_slot
+      - package_end_date
+      - package_start_date
+      - package_type
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: MANABIE
+    permission:
+      columns:
+      - max_slot
+      - package_end_date
+      - package_id
+      - package_start_date
+      - package_type
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - max_slot
+      - package_end_date
+      - package_id
+      - package_start_date
+      - package_type
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+- table:
+    schema: public
+    name: package_course
+  select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - course_id
+      - course_weight
+      - created_at
+      - mandatory_flag
+      - max_slots_per_course
+      - package_id
+      filter: {}
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - course_id
+      - course_weight
+      - created_at
+      - mandatory_flag
+      - max_slots_per_course
+      - package_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+  - role: MANABIE
+    permission:
+      columns:
+      - course_id
+      - course_weight
+      - created_at
+      - mandatory_flag
+      - max_slots_per_course
+      - package_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+- table:
+    schema: public
+    name: product
+  array_relationships:
+  - name: order_items
+    using:
+      foreign_key_constraint_on:
+        column: product_id
+        table:
+          schema: public
+          name: order_item
+  - name: product_fees
+    using:
+      foreign_key_constraint_on:
+        column: fee_id
+        table:
+          schema: public
+          name: fee
+  - name: product_grades
+    using:
+      foreign_key_constraint_on:
+        column: product_id
+        table:
+          schema: public
+          name: product_grade
+  - name: product_locations
+    using:
+      foreign_key_constraint_on:
+        column: product_id
+        table:
+          schema: public
+          name: product_location
+  - name: product_materials
+    using:
+      foreign_key_constraint_on:
+        column: material_id
+        table:
+          schema: public
+          name: material
+  - name: product_packages
+    using:
+      foreign_key_constraint_on:
+        column: package_id
+        table:
+          schema: public
+          name: package
+  - name: product_prices
+    using:
+      foreign_key_constraint_on:
+        column: product_id
+        table:
+          schema: public
+          name: product_price
+  - name: product_settings
+    using:
+      foreign_key_constraint_on:
+        column: product_id
+        table:
+          schema: public
+          name: product_setting
+  select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - available_from
+      - available_until
+      - billing_schedule_id
+      - created_at
+      - custom_billing_period
+      - disable_pro_rating_flag
+      - is_archived
+      - is_unique
+      - name
+      - product_id
+      - product_type
+      - remarks
+      - tax_id
+      - updated_at
+      - product_partner_id
+      filter:
+        is_archived:
+          _eq: false
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - available_from
+      - available_until
+      - billing_schedule_id
+      - created_at
+      - custom_billing_period
+      - disable_pro_rating_flag
+      - is_archived
+      - is_unique
+      - name
+      - product_id
+      - product_type
+      - remarks
+      - tax_id
+      - updated_at
+      - product_partner_id
+      filter:
+        _and:
+        - is_archived:
+            _eq: false
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: MANABIE
+    permission:
+      columns:
+      - available_from
+      - available_until
+      - billing_schedule_id
+      - created_at
+      - custom_billing_period
+      - disable_pro_rating_flag
+      - is_archived
+      - is_unique
+      - name
+      - product_id
+      - product_type
+      - remarks
+      - tax_id
+      - updated_at
+      - product_partner_id
+      filter:
+        _and:
+        - is_archived:
+            _eq: false
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - name
+      - product_id
+      - product_partner_id
+      filter:
+        _and:
+        - is_archived:
+            _eq: false
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+- table:
+    schema: public
+    name: product_discount
+  object_relationships:
+  - name: discount
+    using:
+      foreign_key_constraint_on: discount_id
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - created_at
+      - discount_id
+      - product_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - created_at
+      - discount_id
+      - product_id
+      filter: {}
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - created_at
+      - discount_id
+      - product_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+- table:
+    schema: public
+    name: product_grade
+  object_relationships:
+  - name: product
+    using:
+      foreign_key_constraint_on: product_id
+  select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - created_at
+      - grade_id
+      - product_id
+      filter: {}
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - created_at
+      - grade_id
+      - product_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: MANABIE
+    permission:
+      columns:
+      - created_at
+      - grade_id
+      - product_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+- table:
+    schema: public
+    name: product_location
+  object_relationships:
+  - name: product
+    using:
+      foreign_key_constraint_on: product_id
+  select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - created_at
+      - location_id
+      - product_id
+      filter: {}
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - created_at
+      - location_id
+      - product_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: MANABIE
+    permission:
+      columns:
+      - created_at
+      - location_id
+      - product_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+- table:
+    schema: public
+    name: product_price
+  object_relationships:
+  - name: product
+    using:
+      foreign_key_constraint_on: product_id
+  select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - billing_schedule_period_id
+      - created_at
+      - product_price_id
+      - price
+      - product_id
+      - quantity
+      - price_type
+      filter: {}
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - billing_schedule_period_id
+      - created_at
+      - product_price_id
+      - price
+      - product_id
+      - quantity
+      - price_type
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: MANABIE
+    permission:
+      columns:
+      - billing_schedule_period_id
+      - created_at
+      - price
+      - product_id
+      - product_price_id
+      - quantity
+      - price_type
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+- table:
+    schema: public
+    name: student_packages
+  select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - created_at
+      - end_at
+      - is_active
+      - package_id
+      - properties
+      - start_at
+      - student_id
+      - student_package_id
+      - updated_at
+      - location_ids
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - created_at
+      - end_at
+      - is_active
+      - package_id
+      - properties
+      - start_at
+      - student_id
+      - student_package_id
+      - updated_at
+      - location_ids
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: MANABIE
+    permission:
+      columns:
+      - created_at
+      - end_at
+      - is_active
+      - location_ids
+      - package_id
+      - properties
+      - start_at
+      - student_id
+      - student_package_id
+      - updated_at
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - created_at
+      - end_at
+      - is_active
+      - package_id
+      - properties
+      - start_at
+      - student_id
+      - student_package_id
+      - updated_at
+      - location_ids
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+- table:
+    schema: public
+    name: tax
+  array_relationships:
+  - name: products
+    using:
+      foreign_key_constraint_on:
+        column: tax_id
+        table:
+          schema: public
+          name: product
+  select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - created_at
+      - default_flag
+      - tax_id
+      - name
+      - tax_category
+      - tax_percentage
+      - updated_at
+      filter:
+        is_archived:
+          _eq: false
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - created_at
+      - default_flag
+      - tax_id
+      - name
+      - tax_category
+      - tax_percentage
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - is_archived:
+            _eq: false
+      allow_aggregations: true
+  - role: MANABIE
+    permission:
+      columns:
+      - created_at
+      - default_flag
+      - name
+      - tax_category
+      - tax_id
+      - tax_percentage
+      - updated_at
+      filter:
+        _and:
+        - is_archived:
+            _eq: false
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+- table:
+    schema: public
+    name: users
+  select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - name
+      - user_group
+      - user_id
+      filter: {}
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - name
+      - user_group
+      - user_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: MANABIE
+    permission:
+      columns:
+      - name
+      - user_group
+      - user_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+- table:
+    schema: public
+    name: package_course_fee
+  select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - package_id
+      - course_id
+      - fee_id
+      - available_from
+      - available_until
+      - created_at
+      - is_added_by_default
+      filter: {}
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - package_id
+      - course_id
+      - fee_id
+      - available_from
+      - available_until
+      - created_at
+      - is_added_by_default
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+  - role: MANABIE
+    permission:
+      columns:
+      - available_from
+      - available_until
+      - course_id
+      - created_at
+      - fee_id
+      - package_id
+      - is_added_by_default
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+- table:
+    schema: public
+    name: package_course_material
+  select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - package_id
+      - course_id
+      - material_id
+      - available_from
+      - available_until
+      - created_at
+      - is_added_by_default
+      filter: {}
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - package_id
+      - course_id
+      - material_id
+      - available_from
+      - available_until
+      - created_at
+      - is_added_by_default
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+  - role: MANABIE
+    permission:
+      columns:
+      - available_from
+      - available_until
+      - course_id
+      - created_at
+      - material_id
+      - package_id
+      - is_added_by_default
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+- table:
+    schema: public
+    name: student_package_class
+  select_permissions:
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - class_id
+      - course_id
+      - created_at
+      - deleted_at
+      - location_id
+      - student_id
+      - student_package_id
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  - role: MANABIE
+    permission:
+      columns:
+      - class_id
+      - course_id
+      - created_at
+      - deleted_at
+      - location_id
+      - student_id
+      - student_package_id
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - class_id
+      - course_id
+      - created_at
+      - deleted_at
+      - location_id
+      - student_id
+      - student_package_id
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+- table:
+    schema: public
+    name: student_product
+  object_relationships:
+  - name: product
+    using:
+      foreign_key_constraint_on: product_id
+  select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - student_product_id
+      - student_id
+      - product_id
+      - upcoming_billing_date
+      - start_date
+      - end_date
+      - product_status
+      - approval_status
+      - updated_from_student_product_id
+      - updated_to_student_product_id
+      - student_product_label
+      - updated_at
+      - created_at
+      - deleted_at
+      - location_id
+      - version_number
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - student_product_id
+      - student_id
+      - product_id
+      - upcoming_billing_date
+      - start_date
+      - end_date
+      - product_status
+      - approval_status
+      - updated_from_student_product_id
+      - updated_to_student_product_id
+      - student_product_label
+      - updated_at
+      - created_at
+      - deleted_at
+      - location_id
+      - version_number
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+  - role: MANABIE
+    permission:
+      columns:
+      - approval_status
+      - created_at
+      - deleted_at
+      - end_date
+      - location_id
+      - product_id
+      - product_status
+      - start_date
+      - student_id
+      - student_product_id
+      - student_product_label
+      - upcoming_billing_date
+      - updated_at
+      - updated_from_student_product_id
+      - updated_to_student_product_id
+      - version_number
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+- table:
+    schema: public
+    name: product_setting
+  object_relationships:
+  - name: product
+    using:
+      foreign_key_constraint_on: product_id
+  select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - created_at
+      - is_enrollment_required
+      - is_added_to_enrollment_by_default
+      - product_id
+      - resource_path
+      - is_pausable
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - created_at
+      - is_enrollment_required
+      - is_added_to_enrollment_by_default
+      - product_id
+      - updated_at
+      - is_pausable
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: MANABIE
+    permission:
+      columns:
+      - created_at
+      - is_enrollment_required
+      - is_added_to_enrollment_by_default
+      - product_id
+      - resource_path
+      - updated_at
+      - is_pausable
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+- table:
+    schema: public
+    name: billing_ratio
+  object_relationships:
+  - name: billing_schedule_period
+    using:
+      foreign_key_constraint_on: billing_schedule_period_id
+  select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - billing_ratio_denominator
+      - billing_ratio_id
+      - billing_ratio_numerator
+      - billing_schedule_period_id
+      - created_at
+      - end_date
+      - is_archived
+      - start_date
+      - updated_at
+      filter:
+        _and:
+        - is_archived:
+            _eq: false
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - billing_ratio_denominator
+      - billing_ratio_id
+      - billing_ratio_numerator
+      - billing_schedule_period_id
+      - created_at
+      - end_date
+      - is_archived
+      - start_date
+      - updated_at
+      filter:
+        _and:
+        - is_archived:
+            _eq: false
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: MANABIE
+    permission:
+      columns:
+      - billing_ratio_denominator
+      - billing_ratio_id
+      - billing_ratio_numerator
+      - billing_schedule_period_id
+      - created_at
+      - end_date
+      - is_archived
+      - start_date
+      - updated_at
+      filter:
+        _and:
+        - is_archived:
+            _eq: false
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+- table:
+    schema: public
+    name: bill_item_course
+  select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - bill_item_sequence_number
+      - course_id
+      - course_name
+      - course_slot
+      - course_slot_per_week
+      - course_weight
+      - created_at
+      filter: {}
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - bill_item_sequence_number
+      - course_id
+      - course_name
+      - course_slot
+      - course_slot_per_week
+      - course_weight
+      - created_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: MANABIE
+    permission:
+      columns:
+      - bill_item_sequence_number
+      - course_id
+      - course_name
+      - course_slot
+      - course_slot_per_week
+      - course_weight
+      - created_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+- table:
+    schema: public
+    name: student_associated_product
+  select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - associated_product_id
+      - created_at
+      - deleted_at
+      - student_product_id
+      - updated_at
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - associated_product_id
+      - created_at
+      - deleted_at
+      - student_product_id
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: MANABIE
+    permission:
+      columns:
+      - associated_product_id
+      - created_at
+      - deleted_at
+      - student_product_id
+      - updated_at
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+- table:
+    schema: public
+    name: granted_permissions
+  object_relationships: []
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - user_id
+      - permission_name
+      - location_id
+      - resource_path
+      filter:
+        _and:
+        - user_id:
+            _eq: X-Hasura-User-Id
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+- table:
+    schema: public
+    name: accounting_category
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - accounting_category_id
+      - created_at
+      - name
+      - remarks
+      - updated_at
+      filter:
+        _and:
+        - is_archived:
+            _eq: false
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - accounting_category_id
+      - created_at
+      - name
+      - remarks
+      - updated_at
+      filter:
+        is_archived:
+          _eq: false
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - accounting_category_id
+      - created_at
+      - name
+      - remarks
+      - updated_at
+      filter:
+        _and:
+        - is_archived:
+            _eq: false
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+- table:
+    schema: public
+    name: leaving_reason
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - created_at
+      - is_archived
+      - leaving_reason_id
+      - leaving_reason_type
+      - name
+      - remark
+      - updated_at
+      filter:
+        _and:
+        - is_archived:
+            _eq: false
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - created_at
+      - is_archived
+      - leaving_reason_id
+      - leaving_reason_type
+      - name
+      - remark
+      - updated_at
+      filter:
+        _and:
+        - is_archived:
+            _eq: false
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - created_at
+      - is_archived
+      - leaving_reason_id
+      - leaving_reason_type
+      - name
+      - remark
+      - updated_at
+      filter:
+        _and:
+        - is_archived:
+            _eq: false
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+- table:
+    schema: public
+    name: user_discount_tag
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - created_at
+      - deleted_at
+      - discount_tag_id
+      - discount_type
+      - end_date
+      - location_id
+      - product_group_id
+      - product_id
+      - start_date
+      - updated_at
+      - user_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - created_at
+      - deleted_at
+      - discount_tag_id
+      - discount_type
+      - end_date
+      - location_id
+      - product_group_id
+      - product_id
+      - start_date
+      - updated_at
+      - user_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - created_at
+      - deleted_at
+      - discount_tag_id
+      - discount_type
+      - end_date
+      - location_id
+      - product_group_id
+      - product_id
+      - start_date
+      - updated_at
+      - user_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+- table:
+    schema: public
+    name: order_leaving_reason
+  object_relationships:
+  - name: leaving_reason
+    using:
+      foreign_key_constraint_on: leaving_reason_id
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - created_at
+      - leaving_reason_id
+      - order_id
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - created_at
+      - leaving_reason_id
+      - order_id
+      - updated_at
+      filter: {}
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - created_at
+      - leaving_reason_id
+      - order_id
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+- table:
+    schema: public
+    name: student_package_order
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - course_id
+      - created_at
+      - end_at
+      - is_current_student_package
+      - order_id
+      - start_at
+      - student_package_id
+      - student_package_object
+      - student_package_order_id
+      - upcoming_student_package_id
+      - updated_at
+      - user_id
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - course_id
+      - created_at
+      - end_at
+      - is_current_student_package
+      - order_id
+      - start_at
+      - student_package_id
+      - student_package_object
+      - student_package_order_id
+      - upcoming_student_package_id
+      - updated_at
+      - user_id
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - course_id
+      - created_at
+      - end_at
+      - is_current_student_package
+      - order_id
+      - start_at
+      - student_package_id
+      - student_package_object
+      - student_package_order_id
+      - upcoming_student_package_id
+      - updated_at
+      - user_id
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+- table:
+    schema: public
+    name: discount_tag
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - created_at
+      - discount_tag_id
+      - discount_tag_name
+      - is_archived
+      - selectable
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - created_at
+      - discount_tag_id
+      - discount_tag_name
+      - is_archived
+      - selectable
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - created_at
+      - discount_tag_id
+      - discount_tag_name
+      - is_archived
+      - selectable
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true

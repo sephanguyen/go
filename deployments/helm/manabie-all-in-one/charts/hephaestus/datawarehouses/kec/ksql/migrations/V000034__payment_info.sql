@@ -1,0 +1,71 @@
+SET 'auto.offset.reset' = 'earliest';
+
+CREATE STREAM IF NOT EXISTS PAYMENT_STREAM_ORIGIN_V1 WITH (kafka_topic='{{ .Values.global.environment }}.kec.datalake.invoicemgmt.payment', value_format='AVRO');
+
+CREATE STREAM IF NOT EXISTS PAYMENT_STREAM_FORMATTED_V1
+    AS SELECT
+        PAYMENT_STREAM_ORIGIN_V1.AFTER->PAYMENT_ID AS KEY,
+        AS_VALUE(PAYMENT_STREAM_ORIGIN_V1.AFTER->PAYMENT_ID) AS PAYMENT_ID,
+        PAYMENT_STREAM_ORIGIN_V1.AFTER->INVOICE_ID AS INVOICE_ID,
+        PAYMENT_STREAM_ORIGIN_V1.AFTER->STUDENT_ID AS PAYMENT_STUDENT_ID,
+        PAYMENT_STREAM_ORIGIN_V1.AFTER->PAYMENT_SEQUENCE_NUMBER AS PAYMENT_SEQUENCE_NUMBER,
+        PAYMENT_STREAM_ORIGIN_V1.AFTER->PAYMENT_STATUS AS PAYMENT_STATUS,
+        PAYMENT_STREAM_ORIGIN_V1.AFTER->PAYMENT_METHOD AS PAYMENT_METHOD,
+        PAYMENT_STREAM_ORIGIN_V1.AFTER->PAYMENT_DUE_DATE AS PAYMENT_DUE_DATE,
+        PAYMENT_STREAM_ORIGIN_V1.AFTER->PAYMENT_EXPIRY_DATE AS PAYMENT_EXPIRY_DATE,
+        PAYMENT_STREAM_ORIGIN_V1.AFTER->PAYMENT_DATE AS PAYMENT_DATE,
+        PAYMENT_STREAM_ORIGIN_V1.AFTER->AMOUNT AS AMOUNT,
+        PAYMENT_STREAM_ORIGIN_V1.AFTER->RESULT_CODE AS RESULT_CODE,
+        PAYMENT_STREAM_ORIGIN_V1.AFTER->CREATED_AT AS PAYMENT_CREATED_AT,
+        PAYMENT_STREAM_ORIGIN_V1.AFTER->UPDATED_AT AS PAYMENT_UPDATED_AT,
+        PAYMENT_STREAM_ORIGIN_V1.AFTER->DELETED_AT AS PAYMENT_DELETED_AT
+    FROM PAYMENT_STREAM_ORIGIN_V1
+    WHERE PAYMENT_STREAM_ORIGIN_V1.AFTER->RESOURCE_PATH = '{{ .Values.kecResourcePath }}'
+    PARTITION BY AFTER->PAYMENT_ID
+    EMIT CHANGES;
+
+CREATE TABLE IF NOT EXISTS PAYMENT_TABLE_FORMATTED_V1 (KEY VARCHAR PRIMARY KEY) with (kafka_topic='{{ .Values.topicPrefix }}PAYMENT_STREAM_FORMATTED_V1', value_format='AVRO');
+
+CREATE TABLE IF NOT EXISTS INVOICE_PAYMENT_LIST_PUBLIC_INFO_V1
+AS SELECT
+    PAYMENT_TABLE_FORMATTED_V1.KEY AS PAYMENT_ID,
+    AS_VALUE(INVOICE_TABLE_FORMATTED_V1.KEY) AS INVOICE_ID,
+    INVOICE_TABLE_FORMATTED_V1.INVOICE_SEQUENCE_NUMBER AS INVOICE_SEQUENCE_NUMBER,
+    INVOICE_TABLE_FORMATTED_V1.STUDENT_ID AS STUDENT_ID,
+    PAYMENT_TABLE_FORMATTED_V1.PAYMENT_SEQUENCE_NUMBER AS PAYMENT_SEQUENCE_NUMBER,
+    PAYMENT_TABLE_FORMATTED_V1.PAYMENT_STATUS AS PAYMENT_STATUS,
+    PAYMENT_TABLE_FORMATTED_V1.PAYMENT_METHOD AS PAYMENT_METHOD,
+    PAYMENT_TABLE_FORMATTED_V1.PAYMENT_DUE_DATE AS PAYMENT_DUE_DATE,
+    PAYMENT_TABLE_FORMATTED_V1.PAYMENT_EXPIRY_DATE AS PAYMENT_EXPIRY_DATE,
+    PAYMENT_TABLE_FORMATTED_V1.PAYMENT_DATE AS PAYMENT_DATE,
+    PAYMENT_TABLE_FORMATTED_V1.AMOUNT AS AMOUNT,
+    PAYMENT_TABLE_FORMATTED_V1.RESULT_CODE AS RESULT_CODE,
+    PAYMENT_TABLE_FORMATTED_V1.PAYMENT_CREATED_AT AS PAYMENT_CREATED_AT,
+    PAYMENT_TABLE_FORMATTED_V1.PAYMENT_UPDATED_AT AS PAYMENT_UPDATED_AT,
+    INVOICE_TABLE_FORMATTED_V1.CREATED_AT AS INVOICE_CREATED_AT,
+    INVOICE_TABLE_FORMATTED_V1.UPDATED_AT AS INVOICE_UPDATED_AT
+FROM PAYMENT_TABLE_FORMATTED_V1
+JOIN INVOICE_TABLE_FORMATTED_V1
+ON PAYMENT_TABLE_FORMATTED_V1.INVOICE_ID = INVOICE_TABLE_FORMATTED_V1.KEY;
+
+CREATE SINK CONNECTOR IF NOT EXISTS SINK_INVOICE_PAYMENT_LIST_PUBLIC_INFO WITH (
+      'connector.class'='io.confluent.connect.jdbc.JdbcSinkConnector',
+      'transforms.unwrap.delete.handling.mode'='drop',
+      'tasks.max'='1',
+      'topics'='{{ .Values.topicPrefix }}INVOICE_PAYMENT_LIST_PUBLIC_INFO_V1',
+      'fields.whitelist'='payment_id,invoice_id,invoice_sequence_number,student_id,payment_sequence_number,payment_status,payment_method,payment_due_date,payment_expiry_date,payment_date,amount,result_code,payment_created_at,payment_updated_at,invoice_created_at,invoice_updated_at',
+      'key.converter'='org.apache.kafka.connect.storage.StringConverter',
+      'value.converter'='io.confluent.connect.avro.AvroConverter',
+      'value.converter.schema.registry.url'='{{ .Values.cpRegistryHost }}',
+      'delete.enabled'='false',
+      'transforms.unwrap.drop.tombstones'='true',
+      'auto.create'='true',
+      'connection.url'='${file:/decrypted/kafka-connect.secrets.properties:kec_url}',
+      'insert.mode'='upsert',
+      'table.name.format'='invoicemgmt.invoice_payment_list_public_info',
+      'pk.mode'='record_key',
+      'transforms'='RenameField',
+      'transforms.RenameField.type'= 'org.apache.kafka.connect.transforms.ReplaceField$Value',
+      'transforms.RenameField.renames'='PAYMENT_ID:payment_id,INVOICE_ID:invoice_id,INVOICE_SEQUENCE_NUMBER:invoice_sequence_number,STUDENT_ID:student_id,PAYMENT_SEQUENCE_NUMBER:payment_sequence_number,PAYMENT_STATUS:payment_status,PAYMENT_METHOD:payment_method,PAYMENT_DUE_DATE:payment_due_date,PAYMENT_EXPIRY_DATE:payment_expiry_date,PAYMENT_DATE:payment_date,AMOUNT:amount,RESULT_CODE:result_code,PAYMENT_CREATED_AT:payment_created_at,PAYMENT_UPDATED_AT:payment_updated_at,INVOICE_CREATED_AT:invoice_created_at,INVOICE_UPDATED_AT:invoice_updated_at',
+      'pk.fields'='payment_id'
+);

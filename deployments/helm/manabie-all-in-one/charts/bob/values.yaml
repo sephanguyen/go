@@ -1,0 +1,234 @@
+migrationEnabled: true
+hasuraEnabled: true
+grpcPort: 5050
+httpPort: 5080
+readinessProbe:
+  enabled: true
+resources:
+  requests:
+    memory: 192Mi
+
+service:
+  type: ClusterIP
+  port: 5050
+
+affinity: {}
+affinityOverride: {}
+
+web:
+  type: ClusterIP
+  port: 5060
+
+podAnnotations:
+  sidecar.istio.io/proxyCPU: "10m"
+  sidecar.istio.io/proxyMemory: "64Mi"
+
+metrics:
+  enabled: true
+  podAnnotations:
+    prometheus.io/scheme: "http"
+    prometheus.io/port: "8888"
+    prometheus.io/scrape: "true"
+
+clientVersion: "v0.30.0"
+
+hasura:
+  enableConsole: true
+  enabledApis: "metadata,graphql"
+  service:
+    type: ClusterIP
+    port: 8080
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 10m
+  pgConnections: 8
+  pgTimeout: 10
+  anonymous:
+    enabled: true
+
+hasurav2: #hasura v2
+  enableConsole: true
+  enableRemoteSchemaPermission: false #we dont use it now
+  experimentFeatures: "naming_convention"
+  allowList: true
+  namingConvention: "hasura-default"
+  enabledApis: "metadata,graphql"
+  unauthorized:
+    enable: true #only bob enable this from now
+    role: anonymous
+  service:
+    type: ClusterIP
+    port: 8080
+  resources:
+    requests:
+      memory: 256Mi
+
+
+adminHttpV2: #hasura v2
+  - match:
+    - uri:
+        prefix: /bobv2/ # accessing hasura by /bobv2/console path
+    rewrite:
+      uri: /
+    route:
+    - destination:
+        host: bob-hasurav2
+        port:
+          number: 8080
+
+apiHttp:
+  - match:
+    - uri:
+        prefix: /manabie.bob.Internal
+    - uri:
+        prefix: /bob.v1.InternalReaderService
+    - uri:
+        prefix: /bob.v1.InternalModifierService
+    - uri:
+        prefix: /bob.v1.InternalService
+    route:
+      - destination:
+          host: bob
+          port:
+            number: 5050
+    fault:
+      abort:
+        percentage:
+          value: 100
+        httpStatus: 403
+  - match:
+    - uri:
+        prefix: /bob.v1.NotificationModifierService
+    - uri:
+        prefix: /bob.v1.NotificationReaderService
+    - uri:
+        exact: /manabie.bob.UserService/UpdateUserDeviceToken
+    route:
+      - destination:
+          host: notificationmgmt
+          port:
+            number: 6950
+  - match:
+    - uri:
+        prefix: /bob
+    - uri:
+        prefix: /manabie.bob
+    route:
+      - destination:
+          host: bob
+          port:
+            number: 5050
+
+webHttp:
+  - match:
+    - uri:
+        prefix: /manabie.bob.Internal
+    - uri:
+        prefix: /bob.v1.InternalReaderService
+    - uri:
+        prefix: /bob.v1.InternalModifierService
+    - uri:
+        prefix: /bob.v1.InternalService
+    route:
+    - destination:
+        host: bob
+        port:
+          number: 5050
+    fault:
+      abort:
+        percentage:
+          value: 100
+        httpStatus: 403
+  - match:
+    - uri:
+        prefix: /bob.v1.NotificationModifierService
+    - uri:
+        prefix: /bob.v1.NotificationReaderService
+    - uri:
+        exact: /manabie.bob.UserService/UpdateUserDeviceToken
+    route:
+      - destination:
+          host: notificationmgmt
+          port:
+            number: 6950
+  - match:
+    - uri:
+        prefix: /bob
+    - uri:
+        prefix: /manabie.bob
+    route:
+    - destination:
+        host: bob
+        port:
+          number: 5050
+    corsPolicy: &CORSPolicy
+      allowOrigins:
+        - regex: ".*"
+      allowMethods:
+        - POST
+        - GET
+        - OPTIONS
+        - PUT
+        - DELETE
+      allowHeaders:
+        - authorization
+        - grpc-timeout
+        - content-type
+        - keep-alive
+        - user-agent
+        - cache-control
+        - content-transfer-encoding
+        - token
+        - x-accept-content-transfer-encoding
+        - x-accept-response-streaming
+        - x-request-id
+        - x-user-agent
+        - x-graphql-mesh-authorization
+        - x-grpc-web
+        - if-none-match
+        - pkg
+        - version
+        - connect-timeout-ms
+        - connect-protocol-version
+        - connect-content-encoding
+        - connect-accept-encoding
+      maxAge: 100s
+      exposeHeaders:
+        - grpc-status
+        - grpc-message
+        - etag
+
+adminHttp:
+  - match:
+    - uri:
+        exact: /healthz
+    - uri:
+        prefix: /v1
+    - uri:
+        prefix: /console
+    - uri:
+        prefix: //v1 # bug: https://github.com/hasura/graphql-engine/issues/7196
+    - uri:
+        prefix: /v2
+    route:
+    - destination:
+        host: bob-hasura
+        port:
+          number: 8080
+    corsPolicy: *CORSPolicy
+
+pdb:
+  enabled: false
+
+jobs:
+  migrate-partner-form-configs:
+    cmd: bob_migrate_partner_form_configs
+
+  sync-lesson-conversation:
+    cmd: bob_sync_lesson_conversations
+caching:
+  enabled: false
+  resources:
+    requests:
+      memory: 32Mi

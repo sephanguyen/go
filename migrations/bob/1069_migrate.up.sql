@@ -1,0 +1,1 @@
+ALTER TABLE info_notifications ADD COLUMN IF NOT EXISTS sent_at TIMESTAMPTZ;

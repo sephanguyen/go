@@ -1,0 +1,225 @@
+{
+	"schema": [
+		{
+			"column_name": "assignment_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "check_list",
+			"data_type": "jsonb",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "complete_date",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "correct_score",
+			"data_type": "real",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "deleted_by",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "duration",
+			"data_type": "integer",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "editor_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "learning_material_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "note",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "status",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "student_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "student_submission_grade_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "student_submission_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "study_plan_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "study_plan_item_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "submission_content",
+			"data_type": "jsonb",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "total_score",
+			"data_type": "real",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "understanding_level",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "student_latest_submissions",
+			"policyname": "rls_student_latest_submissions",
+			"qual": "permission_check(resource_path, 'student_latest_submissions'::text)",
+			"with_check": "permission_check(resource_path, 'student_latest_submissions'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "student_latest_submissions",
+			"policyname": "rls_student_latest_submissions_restrictive",
+			"qual": "permission_check(resource_path, 'student_latest_submissions'::text)",
+			"with_check": "permission_check(resource_path, 'student_latest_submissions'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "student_latest_submission_assigment_fk",
+			"column_name": "assignment_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "student_latest_submission_study_plan_item_fk",
+			"column_name": "study_plan_item_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "student_latest_submissions_pk",
+			"column_name": "learning_material_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "student_latest_submissions_pk",
+			"column_name": "student_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "student_latest_submissions_pk",
+			"column_name": "study_plan_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "student_latest_submissions_old_uk",
+			"column_name": "assignment_id",
+			"constraint_type": "UNIQUE"
+		},
+		{
+			"constraint_name": "student_latest_submissions_old_uk",
+			"column_name": "student_id",
+			"constraint_type": "UNIQUE"
+		},
+		{
+			"constraint_name": "student_latest_submissions_old_uk",
+			"column_name": "study_plan_item_id",
+			"constraint_type": "UNIQUE"
+		}
+	],
+	"table_name": "student_latest_submissions",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

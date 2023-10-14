@@ -1,0 +1,6 @@
+logging:
+  operator:
+    format: json
+prometheus:
+  metricServer:
+    enabled: true

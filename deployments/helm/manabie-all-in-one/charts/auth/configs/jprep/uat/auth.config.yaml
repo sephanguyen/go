@@ -1,0 +1,10 @@
+common:
+  google_cloud_project: staging-manabie-online
+vendor: jprep
+issuers:
+  - issuer: https://d2020-ji-sso.jprep.jp/auth/realms/manabie-test
+    audience: manabie-app
+    jwks_endpoint: https://d2020-ji-sso.jprep.jp/auth/realms/manabie-test/protocol/openid-connect/certs
+  - issuer: https://securetoken.google.com/staging-manabie-online
+    audience: staging-manabie-online
+    jwks_endpoint: https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com

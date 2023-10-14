@@ -1,0 +1,220 @@
+syntax = "proto3";
+
+package fatima.v1;
+
+import "bob/v1/enums.proto";
+import "common/v1/enums.proto";
+import "google/protobuf/timestamp.proto";
+import "common/v1/requests.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/fatima/v1;fpb";
+
+message PackageProperties {
+  repeated string can_watch_video = 1;
+  repeated string can_view_study_guide = 2;
+  repeated string can_do_quiz = 3;
+  int32 limit_online_lession = 4;
+  message AskTutorCfg {
+    int32 total_question_limit = 1;
+    bob.v1.AskDuration limit_duration = 2;
+  }
+  AskTutorCfg ask_tutor = 5;
+}
+
+message CreatePackageRequest {
+  string name = 1;
+  common.v1.Country country = 2;
+  repeated string descriptions = 3;
+  uint32 price = 4;
+  uint32 discounted_price = 5;
+  google.protobuf.Timestamp start_at = 6;
+  google.protobuf.Timestamp end_at = 7;
+  int32 duration = 8;  // unit by day
+  int32 prioritize_level = 9;
+  PackageProperties properties = 10;
+  bool is_recommended = 11;
+}
+
+message CreatePackageResponse {
+  string package_id = 1;
+}
+
+message ToggleActivePackageRequest {
+  string package_id = 1;
+}
+
+message ToggleActivePackageResponse {
+  bool is_active = 1;
+}
+
+message AddStudentPackageRequest {
+  string student_id = 1;
+  string package_id = 2;
+}
+
+message AddStudentPackageResponse {
+  string student_package_id = 1;
+}
+
+message ToggleActiveStudentPackageRequest {
+  string student_package_id = 1;
+}
+
+message ToggleActiveStudentPackageResponse {
+  bool is_active = 1;
+}
+
+message AddStudentPackageCourseRequest {
+  string student_id = 1;
+  repeated string course_ids = 2 [deprecated = true];
+  google.protobuf.Timestamp start_at = 3;
+  google.protobuf.Timestamp end_at = 4;
+  repeated string location_ids = 5 [deprecated = true];
+  repeated AddStudentPackageExtra student_package_extra = 6;
+
+  message AddStudentPackageExtra {
+    string course_id = 1;
+    string location_id = 2;
+    string class_id = 3;
+  }
+}
+
+message AddStudentPackageCourseResponse {
+  string student_package_id = 1;
+}
+
+message EditTimeStudentPackageRequest {
+  string student_package_id = 1;
+  google.protobuf.Timestamp start_at = 2;
+  google.protobuf.Timestamp end_at = 3;
+  repeated string location_ids = 4 [deprecated = true];
+  repeated EditTimeStudentPackageExtra student_package_extra = 6;
+
+  message EditTimeStudentPackageExtra {
+    string course_id = 1;
+    string location_id = 2;
+    string class_id = 3;
+  }
+}
+
+message EditTimeStudentPackageResponse {
+  string student_package_id = 1;
+}
+
+message StudentPackage {
+  string id = 1;
+  string student_id = 2;
+  string package_id = 3;
+  google.protobuf.Timestamp start_at = 4;
+  google.protobuf.Timestamp end_at = 5;
+  PackageProperties properties = 6;
+  bool is_active = 7;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp updated_at = 9;
+  repeated string location_ids = 10;
+}
+
+message ListStudentPackageRequest {
+  repeated string student_ids = 1;
+}
+
+message ListStudentPackageResponse {
+  repeated StudentPackage student_packages = 1;
+}
+
+message ListStudentPackageV2Request {
+  repeated string student_ids = 1;
+}
+
+message ListStudentPackageV2Response {
+  StudentPackage student_package = 1;
+}
+
+message RegisterStudentClassRequest {
+  repeated ClassInformation classes_information = 1;
+  message ClassInformation {
+    string student_id = 1;
+    string student_package_id = 2;
+    string class_id = 3;
+    google.protobuf.Timestamp start_time = 4;
+    google.protobuf.Timestamp end_time = 5;
+    string course_id = 6;
+  }
+}
+
+message RegisterStudentClassResponse {
+  bool successful = 1;
+}
+
+message WrapperRegisterStudentClassRequest {
+  repeated ReserveClassInformation reserve_classes_information = 1;
+  message ReserveClassInformation {
+    string student_id = 1;
+    string student_package_id = 2;
+    string class_id = 3;
+    string course_id = 4;
+  }
+}
+
+message WrapperRegisterStudentClassResponse {
+  bool successful = 1;
+}
+
+message RetrieveStudentPackagesUnderCourseRequest {
+  message Filter {
+    repeated string location_ids = 1;
+    repeated string class_ids = 2;
+  }
+  string course_id = 1;
+  common.v1.Paging paging = 2;
+  Filter filter = 3;
+  string keyword = 4;
+}
+
+message RetrieveStudentPackagesUnderCourseResponse {
+  message StudentPackageUnderCourse {
+    string student_package_id = 1;
+    string student_id = 2;
+    string class_id = 3;
+    string location_id = 4;
+    string course_id = 5;
+    google.protobuf.Timestamp start_at = 6;
+    google.protobuf.Timestamp end_at = 7;
+    google.protobuf.Timestamp created_at = 8;
+    google.protobuf.Timestamp updated_at = 9;
+  }
+
+  repeated StudentPackageUnderCourse items = 1;
+  common.v1.Paging next_page = 2;
+  common.v1.Paging previous_page = 3;
+  uint32 total_items = 4;
+}
+
+service SubscriptionModifierService {
+  rpc CreatePackage(CreatePackageRequest) returns (CreatePackageResponse);
+  rpc ToggleActivePackage(ToggleActivePackageRequest)
+      returns (ToggleActivePackageResponse);
+
+  rpc AddStudentPackage(AddStudentPackageRequest)
+      returns (AddStudentPackageResponse);
+  rpc ToggleActiveStudentPackage(ToggleActiveStudentPackageRequest)
+      returns (ToggleActiveStudentPackageResponse);
+
+  rpc AddStudentPackageCourse(AddStudentPackageCourseRequest)
+      returns (AddStudentPackageCourseResponse);
+
+  rpc EditTimeStudentPackage(EditTimeStudentPackageRequest)
+      returns (EditTimeStudentPackageResponse);
+
+  rpc RegisterStudentClass(RegisterStudentClassRequest)
+      returns (RegisterStudentClassResponse);
+
+  rpc ListStudentPackage(ListStudentPackageRequest) returns (ListStudentPackageResponse);
+  rpc ListStudentPackageV2(ListStudentPackageV2Request) returns (stream ListStudentPackageV2Response);
+
+  rpc WrapperRegisterStudentClass(WrapperRegisterStudentClassRequest)
+      returns (WrapperRegisterStudentClassResponse);
+
+  rpc RetrieveStudentPackagesUnderCourse(RetrieveStudentPackagesUnderCourseRequest)
+      returns (RetrieveStudentPackagesUnderCourseResponse);
+}

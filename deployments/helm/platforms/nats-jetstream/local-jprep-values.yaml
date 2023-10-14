@@ -1,0 +1,34 @@
+# This file should be identical to local-manabie-values.yaml.
+# When edit one, remember to edit for the other, too.
+jetstream:
+  image:
+    repository: asia-southeast1-docker.pkg.dev/student-coach-e1e95/ci/nats
+
+  # In local, decrease the termination period so that we can clean up faster
+  terminationGracePeriodSeconds: 30
+  cluster:
+    enabled: false
+  imagePullSecrets:
+    - name: regcred
+natsbox:
+  image:
+    repository: kind-reg.actions-runner-system.svc/natsio/nats-box
+  affinityOverride:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - preference:
+            matchExpressions:
+              - key: cloud.google.com/gke-spot
+                operator: In
+                values: ["true"]
+          weight: 10
+  imagePullSecrets:
+    - name: regcred
+exporter:
+  image:
+    repository: kind-reg.actions-runner-system.svc/natsio/prometheus-nats-exporter
+reloader:
+  image:
+    repository: kind-reg.actions-runner-system.svc/natsio/nats-server-config-reloader
+sopsImage:
+  repository: asia-southeast1-docker.pkg.dev/student-coach-e1e95/ci/mozilla/sops

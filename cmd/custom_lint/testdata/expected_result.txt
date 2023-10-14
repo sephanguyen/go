@@ -1,0 +1,3 @@
+# github.com/manabie-com/backend/cmd/custom_lint/testdata
+cmd/custom_lint/testdata/missing_close.go:13:23: pgx.Rows was not closed after query. Please add "defer rows.Close()" to your code
+cmd/custom_lint/testdata/non_defer_close.go:15:12: pgx.Rows.Close() is being called without "defer". Please update it to "defer rows.Close()" in your code.

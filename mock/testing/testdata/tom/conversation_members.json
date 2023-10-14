@@ -1,0 +1,133 @@
+{
+	"schema": [
+		{
+			"column_name": "conversation_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "conversation_statuses_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "last_notify_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "role",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "seen_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "status",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "user_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "conversation_members",
+			"policyname": "rls_conversation_members",
+			"qual": "permission_check(resource_path, 'conversation_members'::text)",
+			"with_check": "permission_check(resource_path, 'conversation_members'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "conversation_members",
+			"policyname": "rls_conversation_members_restrictive",
+			"qual": "permission_check(resource_path, 'conversation_members'::text)",
+			"with_check": "permission_check(resource_path, 'conversation_members'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "conversation_statuses__conversation_id__fk",
+			"column_name": "conversation_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "conversation_statuses_pk",
+			"column_name": "conversation_statuses_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "conversation_statuses__user_id__conversation_id_un",
+			"column_name": "conversation_id",
+			"constraint_type": "UNIQUE"
+		},
+		{
+			"constraint_name": "conversation_statuses__user_id__conversation_id_un",
+			"column_name": "user_id",
+			"constraint_type": "UNIQUE"
+		}
+	],
+	"table_name": "conversation_members",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

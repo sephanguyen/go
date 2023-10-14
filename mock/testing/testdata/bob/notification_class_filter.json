@@ -1,0 +1,104 @@
+{
+	"schema": [
+		{
+			"column_name": "class_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "notification_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "notification_class_filter",
+			"policyname": "rls_notification_class_filter",
+			"qual": "permission_check(resource_path, 'notification_class_filter'::text)",
+			"with_check": "permission_check(resource_path, 'notification_class_filter'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "notification_class_filter",
+			"policyname": "rls_notification_class_filter_restrictive",
+			"qual": "permission_check(resource_path, 'notification_class_filter'::text)",
+			"with_check": "permission_check(resource_path, 'notification_class_filter'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "fk_notification_class_filter__notification_id",
+			"column_name": "notification_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "pk_notification_class_filter",
+			"column_name": "class_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "pk_notification_class_filter",
+			"column_name": "notification_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "notification_class_filter",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

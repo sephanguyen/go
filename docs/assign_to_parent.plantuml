@@ -1,0 +1,62 @@
+@startuml AssignToParent
+actor Client as client order 10
+participant Yasuo as Yasuo order 20
+participant NATS as NATS order 30 
+participant Tom as Tom order 40
+
+client -> Yasuo: Call "yasuo.v1.UserModifierService/AssignToParent
+activate Yasuo
+note over Yasuo
+ 1. select students in bob.students
+    by array studentIDs
+ 2. ExecInTx
+   * upsert bob.student_parents
+   * publish EvtUser_CreateParent_ 
+     on "subject_user_event"
+end note
+Yasuo -> NATS: publish EvtUser_CreateParent_ \non "subject_user_event"
+note right Yasuo
+ &ppb_v1.EvtUser{ 
+    Message: &ppb_v1.EvtUser_CreateParent_{
+     CreateParent: &ppb_v1.EvtUser_CreateParent{
+     StudentId:   assignParent.StudentId,
+     ParentId:    assignParent.ParentId,
+     StudentName: studentProfiles.GetName(),
+     SchoolId:    strconv.Itoa(int(studentProfiles.SchoolID.Int)),
+     },
+  },
+}
+end note
+Yasuo -> client: Return AssignToParentResponse
+deactivate Yasuo
+NATS -> Tom: publish EvtUser_CreateParent_ \non "subject_user_event"
+activate Tom
+note right Tom
+ 1. HandlerNatsMessageCreateConversation 
+  -> HandleEventCreateParentConversation
+ * get conversationIDs by conversation type is CONVERSATION_PARENT and student id 
+ * if conversation has type CONVERSATION_PARENT existed:
+   Insert conversation_students
+ * Else: 
+  - get conversationIDs on tom.conversation_students 
+   by array studentId and conversation type is CONVERSATION_PARENT
+  - get conversationMembers on 
+   tom.conversation_members by conversationIds
+  - for range conversationMembers: 
+   + if conversationMember.Role == UserGroup_USER_GROUP_TEACHER:
+     insert tom.conversation_members 
+     with UserGroup_USER_GROUP_TEACHER
+  - insert tom.conversation_members 
+   with UserGroup_USER_GROUP_PARENT
+  - ExecInTX
+   + bulk upsert tom.conversations
+   + bulk upsert tom.conversation_members
+   + bulk upsert tom.conversation_students
+  - Publish msg EventConversation on subject "subject_conversation_event" 
+  - Insert tom.messages
+ 
+end note
+Tom -> NATS: publish msg EventConversation on subject "subject_conversation_event"
+deactivate Tom
+NATS -> Yasuo: publish msg EventConversation on subject "subject_converastion_event"
+@enduml

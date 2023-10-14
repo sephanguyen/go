@@ -1,0 +1,162 @@
+- template: 1.1
+  tableName: info_notifications
+  useCustomPolicy: true
+  postgresPolicy:
+    - name: rls_info_notifications_insert_location
+      for: insert
+      withCheck: |
+        1 = 1
+    - name: rls_info_notifications_insert_permission_v4
+      for: insert
+      withCheck: |
+        1 = 1
+
+    - name: rls_info_notifications_select_location
+      for: select
+      using: |
+        true <= (
+            select
+                true
+            from
+                granted_permissions p
+                join info_notifications_access_paths inap on inap.location_id = p.location_id
+            where
+                p.user_id = current_setting('app.user_id')
+                and p.permission_id = (
+                  select p2.permission_id
+                  from permission p2
+                  where p2.permission_name = 'communication.notification.read' and p2.resource_path = current_setting('permission.resource_path')
+                )
+                and inap."notification_id" = info_notifications.notification_id
+                and inap."deleted_at" is null
+            limit
+                1
+        )
+    - name: rls_info_notifications_select_permission_v4
+      for: select
+      using: |
+        info_notifications.created_user_id = current_setting('app.user_id')
+
+    - name: rls_info_notifications_update_location
+      for: update
+      using: |
+        true <= (
+            select
+                true
+            from
+                granted_permissions p
+                join info_notifications_access_paths inap on inap.location_id = p.location_id
+            where
+                p.user_id = current_setting('app.user_id')
+                and p.permission_id = (
+                  select p2.permission_id
+                  from permission p2
+                  where p2.permission_name = 'communication.notification.read' and p2.resource_path = current_setting('permission.resource_path')
+                )
+                and inap."notification_id" = info_notifications.notification_id
+                and inap."deleted_at" is null
+            limit
+                1
+        )
+      withCheck: |
+        true <= (
+            select
+                true
+            from
+                granted_permissions p
+                join info_notifications_access_paths inap on inap.location_id = p.location_id
+            where
+                p.user_id = current_setting('app.user_id')
+                and p.permission_id = (
+                  select p2.permission_id
+                  from permission p2
+                  where p2.permission_name = 'communication.notification.write' and p2.resource_path = current_setting('permission.resource_path')
+                )
+                and inap."notification_id" = info_notifications.notification_id
+                and inap."deleted_at" is null
+            limit
+                1
+        )
+    - name: rls_info_notifications_update_permission_v4
+      for: update
+      using: |
+        info_notifications.created_user_id = current_setting('app.user_id')
+      withCheck: |
+        info_notifications.created_user_id = current_setting('app.user_id')
+
+    - name: rls_info_notifications_delete_location
+      for: delete
+      using: |
+          true <= (
+            select
+                true
+            from
+                granted_permissions p
+                join info_notifications_access_paths inap on inap.location_id = p.location_id
+            where
+                p.user_id = current_setting('app.user_id')
+                and p.permission_id = (
+                  select p2.permission_id
+                  from permission p2
+                  where p2.permission_name = 'communication.notification.write' and p2.resource_path = current_setting('permission.resource_path')
+                )
+                and inap."notification_id" = info_notifications.notification_id
+                and inap."deleted_at" is null
+            limit
+                1
+          )
+    - name: rls_info_notifications_delete_permission_v4
+      for: delete
+      using: |
+        info_notifications.created_user_id = current_setting('app.user_id')
+  useCustomHasuraPolicy: true
+  hasuraPolicy:
+    selectPermission:
+    - name: MANABIE
+      filter:
+      - _or:
+          - info_notifications_access_paths:
+              info_notifications_location_permission:
+                _and:
+                - permission_name:
+                    _eq: communication.notification.read
+                - user_id:
+                    _eq: X-Hasura-User-Id
+          - created_user_id:
+              _eq: X-Hasura-User-Id
+    - name: USER_GROUP_ADMIN
+      filter:
+      - _or:
+          - info_notifications_access_paths:
+              info_notifications_location_permission:
+                _and:
+                - permission_name:
+                    _eq: communication.notification.read
+                - user_id:
+                    _eq: X-Hasura-User-Id
+          - created_user_id:
+              _eq: X-Hasura-User-Id
+    - name: USER_GROUP_SCHOOL_ADMIN
+      filter:
+      - _or:
+          - info_notifications_access_paths:
+              info_notifications_location_permission:
+                _and:
+                - permission_name:
+                    _eq: communication.notification.read
+                - user_id:
+                    _eq: X-Hasura-User-Id
+          - created_user_id:
+              _eq: X-Hasura-User-Id
+    - name: USER_GROUP_TEACHER
+      filter:
+      - _or:
+          - info_notifications_access_paths:
+              info_notifications_location_permission:
+                _and:
+                - permission_name:
+                    _eq: communication.notification.read
+                - user_id:
+                    _eq: X-Hasura-User-Id
+          - created_user_id:
+              _eq: X-Hasura-User-Id

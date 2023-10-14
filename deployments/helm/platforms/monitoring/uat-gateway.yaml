@@ -1,0 +1,363 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: prometheus
+  namespace: istio-system
+spec:
+  commonName: prometheus.uat.manabie.io
+  dnsNames:
+    - prometheus.uat.manabie.io
+  issuerRef:
+    kind: ClusterIssuer
+    name: uat-manabie-gateway
+  secretName: cert-prometheus
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: thanos-sidecar
+  namespace: istio-system
+spec:
+  commonName: thanos-sidecar.uat.manabie.io
+  dnsNames:
+    - thanos-sidecar.uat.manabie.io
+  issuerRef:
+    kind: ClusterIssuer
+    name: uat-manabie-gateway
+  secretName: cert-thanos-sidecar
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: alertmanager
+  namespace: istio-system
+spec:
+  commonName: alertmanager.uat.manabie.io
+  dnsNames:
+    - alertmanager.uat.manabie.io
+  issuerRef:
+    kind: ClusterIssuer
+    name: uat-manabie-gateway
+  secretName: cert-alertmanager
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: jaeger
+  namespace: istio-system
+spec:
+  commonName: jaeger.uat.manabie.io
+  dnsNames:
+    - jaeger.uat.manabie.io
+  issuerRef:
+    kind: ClusterIssuer
+    name: uat-manabie-gateway
+  secretName: cert-jaeger
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: kiali
+  namespace: istio-system
+spec:
+  commonName: kiali.uat.manabie.io
+  dnsNames:
+    - kiali.uat.manabie.io
+  issuerRef:
+    kind: ClusterIssuer
+    name: uat-manabie-gateway
+  secretName: cert-kiali
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: opentelemetry-collector
+  namespace: istio-system
+spec:
+  commonName: opentelemetry-collector.manabie.io
+  dnsNames:
+    - opentelemetry-collector.manabie.io
+  issuerRef:
+    kind: ClusterIssuer
+    name: uat-manabie-gateway
+  secretName: cert-opentelemetry-collector
+---
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: monitoring
+  namespace: istio-system
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - hosts:
+    - prometheus.uat.manabie.io
+    port:
+      name: https-prometheus
+      number: 443
+      protocol: HTTPS
+    tls:
+      credentialName: cert-prometheus
+      mode: SIMPLE
+      privateKey: sds
+      serverCertificate: sds
+  - hosts:
+    - thanos-sidecar.uat.manabie.io
+    port:
+      name: https-thanos-sidecar
+      number: 443
+      protocol: HTTPS
+    tls:
+      credentialName: cert-thanos-sidecar
+      mode: SIMPLE
+      privateKey: sds
+      serverCertificate: sds
+  - hosts:
+    - alertmanager.uat.manabie.io
+    port:
+      name: https-alertmanager
+      number: 443
+      protocol: HTTPS
+    tls:
+      credentialName: cert-alertmanager
+      mode: SIMPLE
+      privateKey: sds
+      serverCertificate: sds
+  - hosts:
+    - jaeger.uat.manabie.io
+    port:
+      name: https-jaeger
+      number: 443
+      protocol: HTTPS
+    tls:
+      credentialName: cert-jaeger
+      mode: SIMPLE
+      privateKey: sds
+      serverCertificate: sds
+  - hosts:
+    - kiali.uat.manabie.io
+    port:
+      name: https-kiali
+      number: 443
+      protocol: HTTPS
+    tls:
+      credentialName: cert-kiali
+      mode: SIMPLE
+      privateKey: sds
+      serverCertificate: sds
+  - hosts:
+    - opentelemetry-collector.manabie.io
+    port:
+      name: https-opentelemetry-collector
+      number: 443
+      protocol: HTTPS
+    tls:
+      credentialName: cert-opentelemetry-collector
+      mode: SIMPLE
+      privateKey: sds
+      serverCertificate: sds
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: prometheus
+  namespace: monitoring
+spec:
+  exportTo:
+  - istio-system
+  gateways:
+  - istio-system/monitoring
+  hosts:
+  - prometheus.uat.manabie.io
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: prometheus-server
+        port:
+          number: 80
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: thanos-sidecar
+  namespace: monitoring
+spec:
+  exportTo:
+  - istio-system
+  gateways:
+  - istio-system/monitoring
+  hosts:
+  - thanos-sidecar.uat.manabie.io
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: prometheus-server-thanos
+        port:
+          number: 10901
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: alertmanager
+  namespace: monitoring
+spec:
+  exportTo:
+  - istio-system
+  gateways:
+  - istio-system/monitoring
+  hosts:
+  - alertmanager.uat.manabie.io
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: prometheus-alertmanager
+        port:
+          number: 80
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: jaeger
+  namespace: monitoring
+spec:
+  exportTo:
+  - istio-system
+  gateways:
+  - istio-system/monitoring
+  hosts:
+  - jaeger.uat.manabie.io
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: jaeger-all-in-one
+        port:
+          number: 16686
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: kiali
+  namespace: istio-system
+spec:
+  exportTo:
+  - istio-system
+  gateways:
+  - istio-system/monitoring
+  hosts:
+  - kiali.uat.manabie.io
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: kiali
+        port:
+          number: 20001
+---
+apiVersion: security.istio.io/v1beta1
+kind: RequestAuthentication
+metadata:
+  name: jwt-x-manabie-auth
+  namespace: istio-system
+spec:
+  selector:
+    matchLabels:
+      istio: ingressgateway
+  jwtRules:
+  - issuer: "https://securetoken.google.com/uat-manabie-online"
+    jwksUri: "https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com"
+    fromHeaders:
+    - name: x-manabie-auth
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: jaeger-host
+  namespace: istio-system
+spec:
+  selector:
+    matchLabels:
+      istio: ingressgateway
+  action: DENY
+  rules:
+  - from:
+    - source:
+        notRequestPrincipals: ["*"]
+    to:
+    - operation:
+        hosts: ["jaeger.uat.manabie.io"]
+        notPaths: ["/.well-known/acme-challenge/*"]
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: opentelemetry-collector
+  namespace: monitoring
+spec:
+  exportTo:
+  - istio-system
+  gateways:
+  - istio-system/monitoring
+  hosts:
+  - opentelemetry-collector.manabie.io
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: opentelemetry-collector
+        port:
+          number: 4317
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: opentelemetry-collector-filter
+  namespace: istio-system
+spec:
+  workloadSelector:
+    labels:
+      istio: ingressgateway
+  configPatches:
+  - applyTo: HTTP_FILTER
+    match:
+      context: ANY
+      listener:
+        filterChain:
+          filter:
+            name: "envoy.filters.network.http_connection_manager"
+            subFilter:
+              name: "envoy.filters.http.router"
+    patch:
+      operation: INSERT_BEFORE
+      value:
+        name: envoy.lua
+        typed_config:
+          "@type": "type.googleapis.com/envoy.extensions.filters.http.lua.v3.Lua"
+          inlineCode: |
+            function envoy_on_request(request_handle)
+              if request_handle:headers():get(":authority") == "opentelemetry-collector.manabie.io:443" or request_handle:headers():get("host") == "opentelemetry-collector.manabie.io" then
+                local uri = request_handle:headers():get(":path")
+                if uri:find(".well-known", 1, true) then
+                  request_handle:headers():add("auth_token", "45fb58ce040a477d4cb9")
+                end
+                if request_handle:headers():get("auth_token") ~= "45fb58ce040a477d4cb9" then
+                  request_handle:respond({[":status"] = "401"}, "nope")
+                end
+              end
+            end

@@ -1,0 +1,23 @@
+ContextMap EntryAndExit {
+  contains UserManagementContext
+  contains NotificationContext
+  contains EntryAndExitContext
+
+  EntryAndExitContext [C]<-[S] UserManagementContext
+
+  EntryAndExitContext [ACL]<-[U,OHS,PL] NotificationContext
+}
+
+
+BoundedContext UserManagementContext {
+}
+
+BoundedContext NotificationContext {
+}
+
+BoundedContext EntryAndExitContext {
+}
+
+
+
+

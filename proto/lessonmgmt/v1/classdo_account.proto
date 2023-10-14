@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package lessonmgmt.v1;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/lessonmgmt/v1;lpb";
+
+message ImportClassDoAccountRequest {
+  bytes payload = 1;
+}
+
+message ImportClassDoAccountResponse {
+  message ImportClassDoAccountError {
+    int32 row_number = 1;
+    string error = 2;
+  }
+  repeated ImportClassDoAccountError errors = 1;
+}
+
+message ExportClassDoAccountRequest {}
+
+message ExportClassDoAccountResponse {
+  bytes data = 1;
+}
+
+service ClassDoAccountService {
+  rpc ImportClassDoAccount(ImportClassDoAccountRequest) returns (ImportClassDoAccountResponse);
+  rpc ExportClassDoAccount(ExportClassDoAccountRequest) returns (ExportClassDoAccountResponse);
+}

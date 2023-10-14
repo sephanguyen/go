@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package payment.v1;
+
+import "payment/v1/order.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/payment/v1;pmpb";
+
+message UpdateStudentCourseRequest{
+    google.protobuf.Timestamp to = 1;
+    string organization_id = 2;
+}
+
+message UpdateStudentCourseResponse{
+    bool successful = 1;
+}
+
+message UpdateStudentPackageForCronjobRequest{}
+
+
+message UpdateStudentPackageForCronjobResponse {
+    message UpdateStudentPackageForCronjobError {
+        string upcoming_student_package_id = 1;
+        string error = 2;
+        string student_package_id = 3;
+        string student_package_order_id = 4;
+    }
+    bool Successful = 1;
+    int32  Successed = 2;
+    int32 Failed = 3;
+    repeated UpdateStudentPackageForCronjobError errors = 4;
+}
+
+service InternalService {
+    rpc UpdateBillItemStatus(UpdateBillItemStatusRequest)
+        returns (UpdateBillItemStatusResponse);
+    rpc UpdateStudentProductStatus(UpdateStudentProductStatusRequest)
+        returns (UpdateStudentProductStatusResponse);
+    rpc GenerateBillingItems(GenerateBillingItemsRequest)
+        returns (GenerateBillingItemsResponse);
+    rpc UpdateStudentCourse(UpdateStudentCourseRequest)
+        returns (UpdateStudentCourseResponse);
+    rpc UpdateStudentPackage(UpdateStudentPackageForCronjobRequest)
+        returns (UpdateStudentPackageForCronjobResponse);
+}

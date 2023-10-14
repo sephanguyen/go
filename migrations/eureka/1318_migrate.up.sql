@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS shuffled_quiz_session_id_idx ON public.shuffled_quiz_sets (session_id);

@@ -1,0 +1,929 @@
+- name: allowed-queries
+  definition:
+    queries:
+    - name: AssignmentOne
+      query: |-
+        query AssignmentOne($assignment_id: String) {
+          assignments(where: {assignment_id: {_eq: $assignment_id}}) {
+            ...AssignmentAttrs
+          }
+        }
+
+        fragment AssignmentAttrs on assignments {
+          assignment_id
+          instruction
+          content
+          check_list
+          attachment
+          type
+          name
+          max_grade
+          settings
+          is_required_grade
+          created_at
+          display_order
+        }
+    - name: CourseStudentsListByCourseIds
+      query: |-
+        query CourseStudentsListByCourseIds($course_ids: [String!]) {
+          course_students(order_by: {created_at: desc}, where: {course_id: {_in: $course_ids}}) {
+            ...CourseStudentAttrs
+          }
+          course_students_aggregate(where: {course_id: {_in: $course_ids}}) {
+            aggregate {
+              count
+            }
+          }
+        }
+
+        fragment CourseStudentAttrs on course_students {
+          student_id
+          course_id
+        }
+    - name: CourseStudentsListV2
+      query: >-
+        query CourseStudentsListV2($course_id: String, $limit: Int = 10,
+        $offset: Int = 0) {
+          course_students(
+            order_by: { created_at: desc }
+            where: { course_id: { _eq: $course_id } }
+            limit: $limit
+            offset: $offset
+          ) {
+            ...CourseStudentAttrs
+          }
+          course_students_aggregate(where: { course_id: { _eq: $course_id } }) {
+            aggregate {
+              count
+            }
+          }
+        }
+
+
+        fragment CourseStudentAttrs on course_students {
+          student_id
+          course_id
+        }
+    - name: StudyPlanOneV2
+      query: |-
+        query StudyPlanOneV2($study_plan_id: String!) {
+          study_plans(where: {study_plan_id: {_eq: $study_plan_id}}) {
+            ...StudyPlanAttrsV2
+            study_plan_type
+            course_id
+            track_school_progress
+            study_plan_items {
+              ...StudyPlanItemAttrs
+            }
+          }
+        }
+
+        fragment StudyPlanAttrsV2 on study_plans {
+          name
+          study_plan_id
+          created_at
+          master_study_plan_id
+          book_id
+          grades
+          status
+        }
+
+        fragment StudyPlanItemAttrs on study_plan_items {
+          study_plan_item_id
+          available_from
+          available_to
+          content_structure
+          start_date
+          end_date
+          status
+          assignment_study_plan_item {
+            assignment_id
+          }
+          lo_study_plan_item {
+            lo_id
+          }
+        }
+    - name: GetListCourseStudentStudyPlansByFilter
+      query: |-
+        query GetListCourseStudentStudyPlansByFilter(
+                $courseId: String!
+                $grades: _int4 = "{}"
+                $limit: Int = 10
+                $search: String = ""
+                $bookIds: _text = "{}"
+                $status: String = "STUDY_PLAN_STATUS_ACTIVE"
+                $offset: Int = 0
+            ) {
+                get_list_course_student_study_plans_by_filter(
+                    args: {
+                        _course_id: $courseId
+                        _grades: $grades
+                        search: $search
+                        _status: $status
+                        _book_ids: $bookIds
+                    }
+                    limit: $limit
+                    offset: $offset
+                    order_by: { created_at: desc }
+                ) {
+                    course_id
+                    student_id
+                }
+                get_list_course_student_study_plans_by_filter_aggregate(
+                    args: {
+                        _course_id: $courseId
+                        _grades: $grades
+                        search: $search
+                        _status: $status
+                        _book_ids: $bookIds
+                    }
+                ) {
+                    aggregate {
+                        count
+                    }
+                }
+            }
+    - name: GetManyStudentStudyPlansByFilter
+      query: >
+        query GetManyStudentStudyPlansByFilter($courseId: String!, $grades:
+        _int4 = "{}", $search: String = "", $bookIds: _text = "{}", $status:
+        String = "STUDY_PLAN_STATUS_ACTIVE", $studentIds: _text = "{}") {
+          get_student_study_plans_by_filter(args: {_course_id: $courseId, _book_ids:
+        $bookIds, _grades: $grades, _status: $status, search: $search, _student_ids:
+        $studentIds}, order_by: {created_at: desc}) {
+            ...StudyPlanAttrsV3
+            student_study_plans {
+              student_id
+            }
+          }
+        }
+
+
+        fragment StudyPlanAttrsV3 on study_plans {
+          name
+          study_plan_id
+          created_at
+          master_study_plan_id
+          book_id
+          grades
+          status
+        }
+    - name: CourseStudyPlansListByFilter
+      query: >
+        query CourseStudyPlansListByFilter($courseId: String!, $grades: _int4
+        = "{}", $limit: Int = 10, $search: String = "", $bookIds: _text =
+        "{}", $status: _text = "{}", $offset: Int = 0) {
+          get_list_course_study_plan_by_filter(args: {_course_id: $courseId, _grades:
+        $grades, search: $search, _status: $status, _book_ids: $bookIds}, limit: $limit,
+        offset: $offset, order_by: {created_at: desc}) {
+            ...CourseStudyPlanAttrsV3
+          }
+          get_list_course_study_plan_by_filter_aggregate(args: {_course_id: $courseId,
+        _grades: $grades, search: $search, _status: $status, _book_ids: $bookIds})
+        {
+            aggregate {
+              count
+            }
+          }
+        }
+
+
+        fragment CourseStudyPlanAttrsV3 on course_study_plans {
+          course_id
+          study_plan_id
+          study_plan {
+            ...StudyPlanAttrsV3
+          }
+        }
+
+
+        fragment StudyPlanAttrsV3 on study_plans {
+          name
+          study_plan_id
+          created_at
+          master_study_plan_id
+          book_id
+          grades
+          status
+        }
+    - name: BooksTitle
+      query: |-
+        query BooksTitle($book_id: String!) {
+          books(where: {book_id: {_eq: $book_id}}) {
+            name
+          }
+        }
+    - name: ChaptersTitle
+      query: |-
+        query ChaptersTitle($chapter_id: String!) {
+          chapters(where: {chapter_id: {_eq: $chapter_id}}) {
+            name
+          }
+        }
+    - name: TopicTitle
+      query: |-
+        query TopicTitle($topic_id: String = "") {
+          topics(where: {topic_id: {_eq: $topic_id}}) {
+            name
+          }
+        }
+    - name: QuizzesManyByLearningObjectId
+      query: |-
+        query QuizzesManyByLearningObjectId($lo_id: String) {
+          find_quiz_by_lo_id(args: {id: $lo_id}) {
+            ...QuizzesAttrs
+          }
+        }
+
+        fragment QuizzesAttrs on quizzes {
+          approved_by
+          country
+          difficulty_level
+          explanation
+          external_id
+          kind
+          options
+          question
+          quiz_id
+          school_id
+          tagged_los
+        }
+    - name: TopicOne
+      query: |-
+        query TopicOne($topic_id: String = "") {
+          topics(where: {topic_id: {_eq: $topic_id}}) {
+            ...TopicAttrs
+          }
+        }
+
+        fragment TopicAttrs on topics {
+          topic_id
+          name
+          country
+          school_id
+          subject
+          grade
+          display_order
+          topic_type
+          status
+          chapter_id
+          school_id
+          instruction
+          icon_url
+          essay_required
+          created_at
+          updated_at
+        }
+    - name: QuizzesByExternalId
+      query: |-
+        query QuizzesByExternalId($external_id: String = "") {
+          quizzes(where: {external_id: {_eq: $external_id}}) {
+            external_id
+            quiz_id
+          }
+        }
+    - name: Syllabus_QuizzesManyByLearningObjectiveId
+      query: |
+        query Syllabus_QuizzesManyByLearningObjectiveId($id: String!) {
+          find_quiz_by_lo_id(args: {id: $id}) {
+            approved_by
+            country
+            difficulty_level
+            explanation
+            external_id
+            kind
+            options
+            question
+            quiz_id
+            school_id
+            tagged_los
+            point
+          }
+        }
+    - name: Syllabus_QuestionManyByLearningObjectiveId
+      query: |
+        query Syllabus_QuestionManyByLearningObjectiveId($learningObjectiveId: String!) {
+          find_question_by_lo_id(args: {id: $learningObjectiveId}) {
+            difficulty_level
+            explanation
+            external_id
+            kind
+            options
+            question
+            quiz_id
+            school_id
+            tagged_los
+            point
+            question_group_id
+            question_tag_ids
+          }
+        }
+    - name: Syllabus_LearningObjectivesOne
+      query: |
+        query Syllabus_LearningObjectivesOne($lo_id: String!) {
+          learning_objectives(where: {lo_id: {_eq: $lo_id}}) {
+            lo_id
+            topic_id
+            name
+            video
+            study_guide
+            display_order
+            prerequisites
+            school_id
+            type
+          }
+        }
+    - name: Syllabus_BooksListByLMSVersion
+      query: |
+        query Syllabus_BooksListByLMSVersion($name: String, $limit: Int = 10, $offset: Int = 0, $type: String = "BOOK_TYPE_GENERAL", $isV2: Boolean = false) {
+          books(limit: $limit, offset: $offset, order_by: [{created_at: desc}, {name: asc}, {book_id: asc}], where: {name: {_ilike: $name}, book_type: {_eq: $type}, is_v2: {_eq: $isV2}}) {
+            book_id
+            name
+          }
+          books_aggregate(where: {name: {_ilike: $name}, book_type: {_eq: $type}, is_v2: {_eq: $isV2}}) {
+            aggregate {
+              count
+            }
+          }
+        }
+    - name: Syllabus_BooksManyReferenceV2
+      query: |-
+        query Syllabus_BooksManyReferenceV2(
+          $name: String
+          $limit: Int = 10
+          $offset: Int = 0
+          $type: String = "BOOK_TYPE_GENERAL"
+        ) {
+          books(
+            limit: $limit
+            offset: $offset
+            order_by: [{created_at: desc}, {name: asc}, {book_id: asc}]
+            where: { name: { _ilike: $name }, book_type: { _eq: $type } }
+          ) {
+            name
+            book_id
+          }
+        }
+    - name: Syllabus_LearningObjectiveGetOne
+      query: |
+        query Syllabus_LearningObjectiveGetOne($id: String!) {
+          learning_objective(where: {learning_material_id: {_eq: $id}}) {
+            learning_material_id
+            topic_id
+            name
+            study_guide
+            video
+            display_order
+          }
+        }
+    - name: Syllabus_ExamLOGetOne
+      query: |
+        query Syllabus_ExamLOGetOne($id: String!) {
+          exam_lo(where: {learning_material_id: {_eq: $id}}) {
+            learning_material_id
+            topic_id
+            name
+            display_order
+            instruction
+          }
+        }
+    - name: Syllabus_FlashcardGetOne
+      query: |
+        query Syllabus_FlashcardGetOne($id: String!) {
+          flash_card(where: {learning_material_id: {_eq: $id}}) {
+            learning_material_id
+            topic_id
+            name
+            display_order
+          }
+        }
+    - name: Syllabus_FlashcardGetOneV2
+      query: |
+        query Syllabus_FlashcardGetOneV2($id: String!) {
+          flash_card(where: {learning_material_id: {_eq: $id}}) {
+            learning_material_id
+            topic_id
+            name
+            display_order
+            is_published
+          }
+        }
+    - name: Syllabus_LearningMaterialGetTypeById
+      query: |
+        query Syllabus_LearningMaterialGetTypeById($id: String!) {
+          learning_material(where: {learning_material_id: {_eq: $id}}) {
+            type
+          }
+        }
+    - name: Syllabus_AssignmentGetOne
+      query: |
+        query Syllabus_AssignmentGetOne($id: String!) {
+          assignment(where: {learning_material_id: {_eq: $id}}) {
+            name
+            topic_id
+            instruction
+            learning_material_id
+            max_grade
+            is_required_grade
+            require_attachment
+            require_assignment_note
+            require_video_submission
+            allow_resubmission
+            allow_late_submission
+            display_order
+            attachments
+          }
+        }
+    - name: Syllabus_TaskAssignmentGetOne
+      query: |
+        query Syllabus_TaskAssignmentGetOne($id: String!) {
+          task_assignment(where: {learning_material_id: {_eq: $id}}) {
+            name
+            topic_id
+            instruction
+            learning_material_id
+            attachments
+            instruction
+            learning_material_id
+            name
+            require_assignment_note
+            require_attachment
+            require_complete_date
+            require_correctness
+            require_duration
+            require_understanding_level
+            display_order
+          }
+        }
+    - name: Syllabus_LearningMaterialGetManyByTopicId
+      query: |
+        query Syllabus_LearningMaterialGetManyByTopicId($topicId: String!) {
+          learning_material(where: {topic_id: {_eq: $topicId}}, order_by: {display_order: asc}) {
+            learning_material_id
+            type
+            name
+            display_order
+          }
+        }
+    - name: Syllabus_LearningMaterialGetManyByTopicIdByLMSV2
+      query: |
+        query Syllabus_LearningMaterialGetManyByTopicIdByLMSV2($topicId: String!) {
+          learning_material(where: {topic_id: {_eq: $topicId}}, order_by: {display_order: asc}) {
+            learning_material_id
+            type
+            name
+            display_order
+            is_published
+          }
+        }
+    - name: Syllabus_LearningMaterialMany
+      query: |
+        query Syllabus_LearningMaterialMany($ids: [String!]!) {
+          learning_material(where: {learning_material_id: {_in: $ids}}, order_by: {display_order: asc}) {
+            learning_material_id
+            name
+            type
+            topic_id
+            display_order
+          }
+        }
+    - name: Syllabus_LearningMaterialGetListInTypes
+      query: |
+        query Syllabus_LearningMaterialGetListInTypes(
+          $name: String
+          $types: [String!]!
+          $limit: Int = 10
+          $offset: Int = 0
+          $order_by: learning_material_order_by! = { created_at: desc, name: asc }
+        ) {
+            learning_material(
+                limit: $limit
+                offset: $offset
+                where: { name: { _ilike: $name }, type: { _in: $types } }
+                order_by: [$order_by]
+            ) {
+                learning_material_id
+                name
+            }
+        }
+    - name: Syllabus_BookGetType
+      query: |
+        query Syllabus_BookGetType($bookId: String!) {
+          books(where: {book_id: {_eq: $bookId}}) {
+            book_type
+          }
+        }
+    - name: Syllabus_ChapterGetManyByBookId
+      query: |
+        query Syllabus_ChapterGetManyByBookId($bookId: String!, $displayOrderBy: order_by = asc) {
+          chapters(where: {book_id: {_eq: $bookId}}, order_by: {display_order: $displayOrderBy}) {
+            chapter_id
+            name
+            display_order
+          }
+        }
+    - name: Syllabus_BookGetOne
+      query: |
+        query Syllabus_BookGetOne($id: String!) {
+          books(where: {book_id: {_eq: $id}}) {
+            book_id
+            name
+            book_type
+          }
+        }
+    - name: Syllabus_ExamLOGetOneV2
+      query: |
+        query Syllabus_ExamLOGetOneV2($id: String!) {
+          exam_lo(where: {learning_material_id: {_eq: $id}}) {
+            learning_material_id
+            topic_id
+            name
+            display_order
+            instruction
+            grade_to_pass
+            manual_grading
+            time_limit
+            maximum_attempt
+            approve_grading
+            review_option
+            grade_capping
+          }
+        }
+    - name: Syllabus_QuizzesOneInQuizSet
+      query: |
+        query Syllabus_QuizzesOneInQuizSet($id: String!, $loId: String!) {
+          find_a_quiz_in_quiz_set(args: { quizid: $id, loid: $loId }) {
+            difficulty_level
+            explanation
+            external_id
+            kind
+            options
+            question
+            quiz_id
+            school_id
+            tagged_los
+            point
+          }
+        }
+    - name: Syllabus_StudyPlanOne
+      query: |-
+        query Syllabus_StudyPlanOne($study_plan_id: String!) {
+          study_plans(where: { study_plan_id: { _eq: $study_plan_id } }) {
+            study_plan_id
+            name
+            master_study_plan_id
+            created_at
+            grades
+            status
+            study_plan_type
+            course_id
+            track_school_progress
+            book_id
+          }
+        }
+    - name: Syllabus_Import_StudyPlan_TaskOne
+      query: |-
+        query Syllabus_Import_StudyPlan_TaskOne($task_id: String!) {
+          import_study_plan_task(where: { task_id: { _eq: $task_id } }) {
+            study_plan_id
+            status
+            error_detail
+          }
+        }
+    - name: Syllabus_StudyPlanItems_Master
+      query: |-
+        query Syllabus_StudyPlanItems_Master($study_plan_id: String!) {
+          master_study_plan_view(
+              where: { study_plan_id: { _eq: $study_plan_id } }
+              order_by: { lm_display_order: asc }
+          ) {
+            study_plan_id
+            book_id
+            chapter_id
+            chapter_display_order
+            topic_id
+            topic_display_order
+            learning_material_id
+            lm_display_order
+            start_date
+            end_date
+            available_from
+            available_to
+            status
+            learning_material {
+                name
+                type
+            }
+          }
+        }
+    - name: Syllabus_QuestionGroupManyByLearningMaterialIdV2
+      query: |
+        query Syllabus_QuestionGroupManyByLearningMaterialIdV2($learningMaterialId: String!) {
+          question_group(where: {learning_material_id: {_eq: $learningMaterialId}}) {
+            question_group_id
+            name
+            rich_description
+          }
+        }
+    - name: Syllabus_QuestionGroupOneByQuestionGroupIdV2
+      query: |
+        query Syllabus_QuestionGroupOneByQuestionGroupIdV2($questionGroupId: String!) {
+          question_group(where: {question_group_id: {_eq: $questionGroupId}}) {
+            question_group_id
+            name
+            rich_description
+          }
+        }
+    - name: Syllabus_GetQuestionTagList
+      query: |
+        query Syllabus_GetQuestionTagList($name: String, $limit: Int = 10) {
+          question_tag(where: {name: {_ilike: $name}}, limit: $limit, order_by: {name: asc}) {
+            name
+            question_tag_id
+          }
+        }
+    - name: Syllabus_GetManyQuestionTagByIds
+      query: |
+        query Syllabus_GetManyQuestionTagByIds($ids: [String!]!) {
+          question_tag(where: {question_tag_id: {_in: $ids}}, order_by: {name: asc}) {
+            name
+            question_tag_id
+          }
+        }
+    - name: Syllabus_GetManyQuizByLearningObjectiveId
+      query: |
+        query Syllabus_GetManyQuizByLearningObjectiveId($id: String!) {
+          find_quiz_by_lo_id(args: {id: $id}) {
+            difficulty_level
+            explanation
+            external_id
+            kind
+            options
+            question
+            quiz_id
+            school_id
+            point
+            question_tag_ids
+          }
+        }
+    - name: Syllabus_GetManyTopicByChapterId
+      query: |
+        query Syllabus_GetManyTopicByChapterId($chapterId: String!) {
+          topics(order_by: [{display_order: asc}, {created_at: desc}], where: {chapter_id: {_eq: $chapterId}}) {
+            chapter_id
+            topic_id
+            name
+            display_order
+            icon_url
+          }
+        }
+    - name: Syllabus_GetManyBook
+      query: |
+        query Syllabus_GetManyBook($bookIds: [String!]!) {
+          books(where: {book_id: {_in: $bookIds}}) {
+            book_id
+            name
+          }
+        }
+    - name: Syllabus_GetOneQuizInQuizSetV3
+      query: |
+        query Syllabus_GetOneQuizInQuizSetV3($id: String!, $loId: String!) {
+          find_a_quiz_in_quiz_set(args: {quizid: $id, loid: $loId}) {
+            difficulty_level
+            explanation
+            external_id
+            kind
+            options
+            question
+            quiz_id
+            point
+            question_tag_ids
+          }
+        }
+    - name: GetListCourseStudentByFilter
+      query: >
+        query GetListCourseStudentByFilter($courseId: String!, $grades: _int4
+        = "{}", $limit: Int = 10, $search: String = "", $bookIds: _text =
+        "{}", $status: String = "STUDY_PLAN_STATUS_ACTIVE", $offset: Int = 0)
+        {
+          get_list_course_student_study_plans_by_filter_v2(
+            args: {_course_id: $courseId, _grades: $grades, search: $search, _status:
+        $status, _book_ids: $bookIds}
+            limit: $limit
+            offset: $offset
+            order_by: {created_at: desc}
+          ) {
+            course_id
+            student_id
+          }
+          get_list_course_student_study_plans_by_filter_v2_aggregate(
+            args: {_course_id: $courseId, _grades: $grades, search: $search, _status:
+        $status, _book_ids: $bookIds}
+          ) {
+            aggregate {
+              count
+            }
+          }
+        }
+    - name: Syllabus_LearningObjectiveGetOneV3
+      query: |
+        query Syllabus_LearningObjectiveGetOneV3($id: String!) {
+          learning_objective(where: {learning_material_id: {_eq: $id}}) {
+            learning_material_id
+            topic_id
+            name
+            study_guide
+            video
+            display_order
+            is_published
+          }
+        }
+    - name: Syllabus_Mobile_GetManyLearningMaterials
+      query: |
+        query Syllabus_Mobile_GetManyLearningMaterials($ids: [String!]!) {
+          learning_material(where: {learning_material_id: {_in: $ids}}) {
+            learning_material_id
+            type
+            name
+            display_order
+          }
+        }
+    - name: Syllabus_GetOneQuizInQuizSetV4
+      query: |
+        query Syllabus_GetOneQuizInQuizSetV4($id: String!, $loId: String!) {
+          find_a_quiz_in_quiz_set(args: { quizid: $id, loid: $loId }) {
+            difficulty_level
+            explanation
+            external_id
+            kind
+            options
+            question
+            quiz_id
+            point
+            question_tag_ids
+            label_type
+          }
+        }
+    - name: Syllabus_GetBooksByCourseId
+      query: |
+        query Syllabus_GetBooksByCourseId($course_id: String) {
+          courses_books(
+            order_by: {book_id: asc}
+            where: {course_id: {_eq: $course_id}, books: {}}
+          ) {
+            books {
+              book_id
+              name
+            }
+          }
+        }
+    - name: Syllabus_GetUserName
+      query: |
+        query Syllabus_GetUserName($userId: String!) {
+          users(where: {user_id: {_eq: $userId}}) {
+            name
+            last_name
+            first_name
+          }
+        }
+    - name: Syllabus_BooksManyReferenceV3
+      query: >
+        query Syllabus_BooksManyReferenceV3($name: String, $limit: Int = 10,
+        $offset: Int = 0, $type: String = "BOOK_TYPE_GENERAL") {
+          books(
+            limit: $limit
+            offset: $offset
+            order_by: [{created_at: desc}, {name: asc}, {book_id: asc}]
+            where: {name: {_ilike: $name}, book_type: {_eq: $type}, _not: {course_books: {}}, is_v2: {_eq: true}}
+          ) {
+            name
+            book_id
+          }
+        }
+    - name: Syllabus_GetLMNameAndTopicIdById
+      query: |
+        query Syllabus_GetLMNameAndTopicIdById($id: String!) {
+          learning_material(where: {learning_material_id: {_eq: $id}}) {
+            name
+            topic_id
+          }
+        }
+    - name: Syllabus_Import_StudyPlan_InProgressTaskByStudyPlanId
+      query: |-
+        query Syllabus_Import_StudyPlan_InProgressTaskByStudyPlanId(
+            $study_plan_id: String!
+            $user_id: String!
+        ) {
+            import_study_plan_task(
+                where: {
+                    study_plan_id: { _eq: $study_plan_id }
+                    status: { _eq: "STUDY_PLAN_TASK_STATUS_IN_PROGRESS" }
+                    imported_by: { _eq: $user_id }
+                }
+                order_by: { created_at: desc }
+                limit: 1
+            ) {
+                study_plan_id
+                task_id
+            }
+        }
+    - name: Syllabus_GetManyImageBankImages
+      query: |-
+        query Syllabus_GetManyImageBankImages {
+          content_bank_medias(order_by: {updated_at: desc}) {
+            id
+            name
+            resource
+            type
+            file_size_bytes
+          }
+        }
+    - name: Syllabus_LearningObjectiveGetOneV4
+      query: |
+        query Syllabus_LearningObjectiveGetOneV4($id: String!) {
+          learning_objective(where: { learning_material_id: { _eq: $id } }) {
+            learning_material_id
+            topic_id
+            name
+            study_guide
+            video
+            display_order
+            is_published
+            manual_grading
+          }
+        }
+    - name: Syllabus_GetManyImageBankImagesV2
+      query: |-
+        query Syllabus_GetManyImageBankImagesV2($name: String, $type: String =
+        "MEDIA_TYPE_IMAGE", $limit: Int = 10, $offset: Int = 0) {
+          content_bank_medias(
+            limit: $limit
+            offset: $offset
+            where: {name: {_ilike: $name}, type: {_eq: $type}}
+            order_by: {updated_at: desc}
+          ) {
+            id
+            name
+            resource
+            type
+            file_size_bytes
+          }
+          content_bank_medias_aggregate(
+            where: {name: {_ilike: $name}, type: {_eq: $type}}
+            order_by: {updated_at: desc}
+          ) {
+            aggregate {
+              count
+            }
+          }
+        }
+    - name: Syllabus_GetBooksByCourseIds
+      query: |-
+        query Syllabus_GetBooksByCourseIds($course_ids: [String!]) {
+          courses_books(where: {course_id: {_in: $course_ids}, books: {is_v2: {_eq: true}}}) {
+            course_id
+            books {
+              book_id
+              name
+            }
+          }
+        }
+    - name: Syllabus_BooksManyReferenceV4
+      query: >
+        query Syllabus_BooksManyReferenceV4($name: String, $limit: Int = 10,
+        $offset: Int = 0, $type: String = "BOOK_TYPE_GENERAL") {
+          books(
+            limit: $limit
+            offset: $offset
+            order_by: [{created_at: desc}, {name: asc}, {book_id: asc}]
+            where: {name: {_ilike: $name}, book_type: {_eq: $type}, is_v2: {_eq: true}}
+          ) {
+            name
+            book_id
+          }
+        }
+    - name: Syllabus_GetStudyPlanListWithFilters
+      query: |-
+        query Syllabus_GetStudyPlanListWithFilters($where: lms_study_plans_bool_exp! = {}, $limit: Int = 10, $offset: Int = 0) {
+          lms_study_plans(limit: $limit, offset: $offset, order_by: {name: asc}, where: $where) {
+            study_plan_id
+            course_id
+            name
+            academic_year
+            status
+            academic_year_data {
+              academic_year_id
+              name
+            }
+          }
+        }
+    - name: Syllabus_GetManyUserByIds
+      query: |
+        query Syllabus_GetManyUserByIds($ids: [String!]!) {
+          users(where: {user_id: {_in: $ids}}) {
+            user_id
+            name
+            first_name
+            last_name
+          }
+        }

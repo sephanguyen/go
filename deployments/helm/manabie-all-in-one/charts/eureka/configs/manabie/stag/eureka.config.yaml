@@ -1,0 +1,17 @@
+common:
+  google_cloud_project: staging-manabie-online
+issuers:
+  - issuer: manabie
+    audience: manabie-stag
+    jwks_endpoint: http://shamir:5680/.well-known/jwks.json
+  - issuer: https://securetoken.google.com/staging-manabie-online
+    audience: staging-manabie-online
+    jwks_endpoint: https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com
+  - issuer: https://d2020-ji-sso.jprep.jp/auth/realms/manabie-test
+    audience: manabie-app
+    jwks_endpoint: https://d2020-ji-sso.jprep.jp/auth/realms/manabie-test/protocol/openid-connect/certs
+school_information:
+  school_id: -2147483648
+  school_name: Manabie School
+storage:
+  bucket: stag-manabie-backend

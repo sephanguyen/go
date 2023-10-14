@@ -1,0 +1,23 @@
+common:
+  grpc:
+    client_name: usermgmt
+  google_cloud_project: dev-manabie-online
+  firebase_project: dev-manabie-online
+  identity_platform_project: dev-manabie-online
+issuers:
+  - issuer: http://firebase.emulator.svc.cluster.local:40401/fake_aud
+    audience: fake_aud
+    jwks_endpoint: http://firebase.emulator.svc.cluster.local:40401/jwkset
+  - issuer: manabie
+    audience: manabie-local
+    jwks_endpoint: http://shamir:5680/.well-known/jwks.json
+jwt_applicant: manabie-local
+postgres_v2:
+  bob:
+    shard_id: 1
+    max_conns: 16
+with_us:
+  bucket_name: local-etl
+  slack_channel: C051MD7RZ5M
+  withus_channel: C051MD7RZ5M
+  withus_webhook_url: https://hooks.slack.com/services/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

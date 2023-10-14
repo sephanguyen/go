@@ -1,0 +1,106 @@
+{
+	"schema": [
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "defined_by",
+			"data_type": "USER-DEFINED",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "product_type",
+			"data_type": "USER-DEFINED",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "product_type_schedule_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "schedule_type",
+			"data_type": "USER-DEFINED",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "product_type_schedule",
+			"policyname": "rls_product_type_schedule",
+			"qual": "permission_check(resource_path, 'product_type_schedule'::text)",
+			"with_check": "permission_check(resource_path, 'product_type_schedule'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "product_type_schedule",
+			"policyname": "rls_product_type_schedule_restrictive",
+			"qual": "permission_check(resource_path, 'product_type_schedule'::text)",
+			"with_check": "permission_check(resource_path, 'product_type_schedule'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "product_type_schedule_pk",
+			"column_name": "product_type_schedule_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "product_type_schedule",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

@@ -1,0 +1,3 @@
+ALTER TABLE public.students ADD COLUMN IF NOT EXISTS status text NOT NULL DEFAULT 'STUDENT_STATUS_ENROLLED'::text;
+ALTER TABLE public.students DROP CONSTRAINT IF EXISTS students_status_check;
+ALTER TABLE public.students ADD CONSTRAINT students_status_check CHECK ((status = ANY (ARRAY['STUDENT_STATUS_POTENTIAL'::text, 'STUDENT_STATUS_ENROLLED'::text, 'STUDENT_STATUS_QUIT'::text])));

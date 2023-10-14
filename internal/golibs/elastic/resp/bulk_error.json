@@ -1,0 +1,22 @@
+{
+  "took" : 5,
+  "errors" : true,
+  "items" : [
+    {
+      "index" : {
+        "_index" : "chat",
+        "_type" : "_doc",
+        "_id" : "",
+        "status" : 400,
+        "error" : {
+          "type" : "mapper_parsing_exception",
+          "reason" : "failed to parse",
+          "caused_by" : {
+            "type" : "json_parse_exception",
+            "reason" : ""
+          }
+        }
+      }
+    }
+  ]
+}

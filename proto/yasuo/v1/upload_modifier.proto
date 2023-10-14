@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package yasuo.v1;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/yasuo/v1;ypb";
+
+service UploadModifierService {
+    rpc UploadHtmlContent(UploadHtmlContentRequest) returns (UploadHtmlContentResponse);
+    rpc BulkUploadHtmlContent(BulkUploadHtmlContentRequest) returns (BulkUploadHtmlContentResponse);
+    rpc BulkUploadFile(BulkUploadFileRequest) returns (BulkUploadFileResponse);
+}
+
+message UploadHtmlContentRequest {
+    string content = 1;
+}
+
+message UploadHtmlContentResponse {
+    string url = 1;
+}
+
+message BulkUploadHtmlContentRequest {
+    repeated string contents = 1;
+}
+
+message BulkUploadHtmlContentResponse {
+    repeated string urls = 1;
+}
+
+message BulkUploadFileRequest {
+    message File {
+        string file_name = 1;
+        bytes payload = 2;
+        string content_type = 3;
+    }
+
+    repeated File files = 1;
+}
+
+message BulkUploadFileResponse {
+    message File {
+        string file_name = 1;
+        string url = 2;
+    }
+
+    repeated File files = 1;
+}
+  

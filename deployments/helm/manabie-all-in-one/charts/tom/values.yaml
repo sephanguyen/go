@@ -1,0 +1,120 @@
+grpcPort: 5150
+
+resources:
+  requests:
+    memory: 128Mi
+
+
+metrics:
+  enabled: true
+  podAnnotations:
+    prometheus.io/scheme: "http"
+    prometheus.io/port: "8888"
+    prometheus.io/scrape: "true"
+affinity:
+  podAntiAffinity: {}
+affinityOverride:
+  nodeAffinity: {}
+tolerations: []
+
+service:
+  type: ClusterIP
+  port: 5150
+  grpcWebPort: 5151
+  grpcHost: tom
+  grpcWebHost: tom-grpc-web
+
+podAnnotations:
+  sidecar.istio.io/proxyCPU: "10m"
+  sidecar.istio.io/proxyMemory: "50Mi"
+
+
+jwtApplicant: "803wq85dyl3x5jzt"
+
+clientVersion: "v0.30.0"
+
+trafficPolicy:
+  loadBalancer:
+    consistentHash:
+      httpHeaderName: x-chat-userhash
+
+apiHttp:
+  - match:
+    - uri:
+        prefix: /tom.v1.InternalService
+    - uri:
+        exact: /tom.v1.ConversationReaderService/ListConversationByLessons
+    route:
+      - destination:
+          host: tom
+          port:
+            number: 5150
+    fault:
+      abort:
+        percentage:
+          value: 100
+        httpStatus: 403
+  - match:
+    - uri:
+        prefix: /tom
+    - uri:
+        prefix: /manabie.tom
+    route:
+    - destination:
+        host: tom
+        port:
+          number: 5150
+
+webHttp:
+  - match:
+    - uri:
+        prefix: /tom
+    - uri:
+        prefix: /manabie.tom
+    route:
+    - destination:
+        host: tom
+        port:
+          number: 5150
+    corsPolicy:
+      allowOrigins:
+        - regex: ".*"
+      allowMethods:
+        - POST
+        - GET
+        - OPTIONS
+        - PUT
+        - DELETE
+      allowHeaders:
+        - grpc-timeout
+        - content-type
+        - keep-alive
+        - user-agent
+        - cache-control
+        - content-type
+        - content-transfer-encoding
+        - token
+        - x-accept-content-transfer-encoding
+        - x-accept-response-streaming
+        - x-user-agent
+        - x-grpc-web
+        - pkg
+        - version
+        - x-chat-userhash
+      maxAge: 100s
+      exposeHeaders:
+        - grpc-status
+        - grpc-message
+
+pdb:
+  enabled: false
+
+jobs:
+  # Disabled, convert to gjob before enabling again
+  # stresstest:
+  #   cmd: tom_stress_test
+  sync-documents:
+    cmd: tom_sync_conversations_document
+
+  migrate-conversation-locations:
+    cmd: tom_migrate_conversation_locations

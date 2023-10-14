@@ -1,0 +1,7 @@
+elasticsearch:
+  addresses:
+    - https://elasticsearch-elastic.dorp-manabie-elastic.svc.cluster.local:9200
+partner:
+  domain_bo: "https://backoffice.prep.manabie-vn.manabie.io/"
+  domain_teacher: "https://teacher.prep.manabie-vn.manabie.io/"
+  domain_learner: "https://learner.prep.manabie-vn.manabie.io/"

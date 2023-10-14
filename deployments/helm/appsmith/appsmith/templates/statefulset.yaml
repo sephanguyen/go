@@ -1,0 +1,207 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "appsmith.fullname" . }}
+  namespace: {{ include "appsmith.namespace" . }}
+  labels:
+    {{- include "appsmith.labels" . | nindent 4 }}
+spec:
+  replicas: 2
+  serviceName: {{ include "appsmith.fullname" . }}
+  updateStrategy:
+    type: {{ .Values.strategyType }}
+  selector:
+    matchLabels:
+      {{- include "appsmith.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/appsmith.secrets.encrypted.yaml: {{ printf "secrets/%s/%s/appsmith.secrets.encrypted.yaml" .Values.vendor .Values.environment | .Files.Get | sha256sum }}
+      labels:
+        {{- include "appsmith.selectorLabels" . | nindent 8 }}
+        {{- if .Values.podLabels }}
+        {{- toYaml .Values.podLabels | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- if .Values.schedulerName }}
+      schedulerName: {{ .Values.schedulerName | quote }}
+      {{- end }}
+      serviceAccountName: {{ template "appsmith.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      initContainers:
+      {{- if .Values.redis.enabled }}
+      - name: redis-init-container
+        image: alpine
+        command: ['sh', '-c', "apk add redis; until redis-cli -h appsmith-redis-master.{{.Release.Namespace}}.svc.cluster.local ping; do echo waiting for redis; sleep 2; done"]
+      {{- end }}
+      # {{- if .Values.mongodb.enabled }}
+      # - name: mongo-init-container
+      #   image: docker.io/bitnami/mongodb:4.4.11-debian-10-r12
+      #   command: ['sh', '-c', "until mongo --host appsmith-mongodb.{{.Release.Namespace}}.svc.cluster.local --eval 'db.runCommand({ping:1})' ; do echo waiting for mongo; sleep 2; done"]
+      # {{- end }}
+      # custom
+      # {{- if .Values.mongodb.external }}
+      # - name: mongo-init-container
+      #   image: docker.io/bitnami/mongodb:6.0.2-debian-11-r1 #4.4.11-debian-10-r12
+      #   command: ['sh', '-c', "until mongo --host mongodb.{{.Release.Namespace}}.svc.cluster.local --eval 'db.runCommand({ping:1})' ; do echo waiting for mongo; sleep 2; done"]
+      # {{- end }}
+      containers:
+        - name: {{ .Values.containerName }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+
+              sops --decrypt /configs/appsmith.secrets.encrypted.yaml > appsmith.secrets.yaml
+              user=$(grep MONGODB_ROOT_USER appsmith.secrets.yaml | awk '{print$2}')
+              password=$(grep MONGODB_ROOT_PASSWORD appsmith.secrets.yaml | awk '{print$2}')
+              connectionStr="mongodb+srv://$user:$password@{{ .Values.mongodb.service.nameOverride }}.{{ include "appsmith.namespace" . }}.svc.cluster.local/appsmith?retryWrites=true&authSource=admin&ssl=false"
+              external={{ .Values.mongodb.external }}
+
+              if [ "$external" = "true" ]; then
+                connectionStr="mongodb://$user:$password@mongodb-0.mongodb-headless.{{ include "appsmith.namespace" . }}.svc.cluster.local:27017,mongodb-1.mongodb-headless.{{ include "appsmith.namespace" . }}.svc.cluster.local:27017/appsmith?retryWrites=true&authSource=admin&ssl=false"
+              fi
+
+              export APPSMITH_MONGODB_URI=$connectionStr
+
+              # env={{ .Values.environment }}
+              # if [ "$env" = "local" ]; then
+              #     response=$(curl http://shamir.{{ .Values.environment }}-{{ .Values.vendor }}-backend.svc.cluster.local:5680/.well-known/jwks.json)
+              # else
+              #     response=$(curl http://shamir.{{ .Values.environment }}-{{ .Values.vendor }}-services.svc.cluster.local:5680/.well-known/jwks.json)
+              # fi
+              # export APPSMITH_SHAMIR_KEYS=$response
+
+              mailpass=$(grep APPSMITH_MAIL_PASSWORD appsmith.secrets.yaml | awk '{print$2}')
+              export APPSMITH_MAIL_PASSWORD=$mailpass
+
+              google_oauth_secrect=$(grep APPSMITH_OAUTH2_GOOGLE_CLIENT_SECRET appsmith.secrets.yaml | awk '{print$2}')
+              export APPSMITH_OAUTH2_GOOGLE_CLIENT_SECRET=$google_oauth_secrect
+
+
+              /opt/appsmith/entrypoint.sh
+              /usr/bin/supervisord -n
+
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+            - name: https
+              containerPort: 443
+              protocol: TCP
+            - name: supervisord
+              containerPort: 9001
+              protocol: TCP
+          startupProbe:
+            # The `livenessProbe` and `readinessProbe` will be disabled until the `startupProbe` is successful.
+            httpGet:
+              path: /
+              port: http
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+            successThreshold: 1
+          readinessProbe:
+            httpGet:
+              path: /api/v1/users/me
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+            successThreshold: 1
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: data
+              mountPath: /appsmith-stacks
+            - name: appsmith-secret
+              mountPath: /configs/appsmith.secrets.encrypted.yaml
+              subPath: appsmith.secrets.encrypted.yaml
+              readOnly: true
+{{- if eq "local" .Values.environment }}
+            - name: service-credential
+              mountPath: /configs/service_credential.json
+              subPath: service_credential.json
+              readOnly: true
+          env:
+          - name: GOOGLE_APPLICATION_CREDENTIALS
+            value: "/configs/service_credential.json"
+{{- end }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "appsmith.fullname" . }}
+            {{- if .Values.secretName }}
+            - secretRef:
+                name: {{ .Values.secretName }}
+            {{- end }}
+        {{- if .Values.sqlProxy.enabled }}
+        - name: cloud-sql-proxy
+          image: "{{ .Values.sqlProxy.image.repository }}:{{ .Values.sqlProxy.image.tag }}"
+          imagePullPolicy: IfNotPresent
+          command:
+            - "/cloud_sql_proxy"
+            - {{ printf "-instances=%s" .Values.sqlProxy.dbConnName }}
+            - "-structured_logs"
+            - "-log_debug_stdout=true"
+          securityContext:
+            runAsNonRoot: true
+          resources:
+            {{- toYaml .Values.sqlProxy.resources | nindent 12 }}
+        {{- end }}
+      volumes:
+  {{- if not .Values.persistence.enabled }}
+      - name: data
+        emptyDir: {}
+  {{- else }}
+      - name: appsmith-secret
+        secret:
+          secretName: {{ include "appsmith.fullname" . }}
+          items:
+          - key: appsmith.secrets.encrypted.yaml
+            path: appsmith.secrets.encrypted.yaml
+      {{- if eq "local" .Values.environment }}
+      - name: service-credential
+        secret:
+          secretName: {{ include "appsmith.fullname" . }}
+          items:
+          - key: service_credential.json
+            path: service_credential.json
+      {{- end }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+        {{- if .Values.persistence.annotations }}
+        annotations: {{- include "tplvalues.render" (dict "value" .Values.persistence.annotations "context" $) | nindent 10 }}
+        {{- end }}
+      spec:
+        accessModes:
+        {{- range .Values.persistence.accessModes }}
+          - {{ . | quote }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.persistence.size | quote }}
+        {{ include "storage.class" (dict "persistence" .Values.persistence "global" .Values.global) }}
+  {{- end }}

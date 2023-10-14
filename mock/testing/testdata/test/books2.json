@@ -1,0 +1,60 @@
+{
+  "schema": [
+    {
+      "column_name": "book_id",
+      "data_type": "text",
+      "column_default": null
+    },
+    {
+      "column_name": "name",
+      "data_type": "text",
+      "column_default": null
+    },
+    {
+      "column_name": "country",
+      "data_type": "text",
+      "column_default": null
+    },
+    {
+      "column_name": "subject",
+      "data_type": "text",
+      "column_default": null
+    },
+    {
+      "column_name": "grade",
+      "data_type": "smallint",
+      "column_default": null
+    },
+    {
+      "column_name": "updated_at",
+      "data_type": "timestamp with time zone",
+      "column_default": null
+    },
+    {
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "column_default": null
+    },
+    {
+      "column_name": "deleted_at",
+      "data_type": "timestamp with time zone",
+      "column_default": null
+    },
+    {
+      "column_name": "school_id",
+      "data_type": "integer",
+      "column_default": null
+    },
+    {
+			"column_name": "resource_path",
+			"data_type": "text",
+      "column_default": null
+		},
+    {
+      "column_name": "copied_from",
+      "data_type": "text",
+      "column_default": null
+    }
+  ],
+  "table_name": "wrongtablename"
+}

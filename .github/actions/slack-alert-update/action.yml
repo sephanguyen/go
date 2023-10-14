@@ -1,0 +1,173 @@
+name: "slack-alert-update"
+description: "Update a message on Slack to report the status of the build/deploy job."
+
+inputs:
+  be_tag:
+    required: false
+    description: Release tag of BE
+  fe_tag:
+    required: false
+    description: Release tag of FE
+  me_tag:
+    required: false
+    description: Release tag of ME
+  be_status:
+    required: true
+    description: Status of all be jobs
+  fe_status:
+    required: true
+    description: Status of all fe jobs
+  me_status:
+    required: true
+    description: Status of all me jobs
+  message:
+    required: true
+    description: Title of alert message
+  channel:
+    required: true
+    description: channel to reply/update message to
+  message-timestamp:
+    required: true
+    description: Message timestamp
+  orgs:
+    required: true
+    description: Organizations affect by the workflow
+  SLACK_TOKEN:
+    required: true
+    description: Slack token
+  squad_alert:
+    required: true
+    description: The team mentioned in the sent message
+  user_alert:
+    required: true
+    description: The user mentioned in the sent message
+
+runs:
+  using: composite
+  steps:
+    - id: statusMap
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const statusMap = {
+            'running': ':github_running:',
+            'success': ':github_success:',
+            'failure': ':github_failure:',
+            'skipped': ':github_skipped:',
+            'cancelled': ':github_cancelled:'
+          }
+          core.setOutput('statusMap', statusMap);
+
+    - id: status
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const statusMap = ${{ steps.statusMap.outputs.statusMap }}
+
+          function checkStatus(statuses) {
+            if (statuses.includes('cancelled')) return 'cancelled'
+            if (statuses.includes('failure')) return 'failure'
+            if (statuses.every(item => item === 'skipped')) return 'skipped'
+            return 'success'
+          }
+
+          const final_statuses = [
+            '${{ inputs.be_status }}' || 'skipped',
+            '${{ inputs.fe_status }}' || 'skipped',
+            '${{ inputs.me_status }}' || 'skipped'
+          ]
+
+          core.setOutput('final_status', checkStatus(final_statuses));
+          core.setOutput('final_status_icon', statusMap[checkStatus(final_statuses)]);
+
+    - id: generate-alert-content
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const statusMap = ${{ steps.statusMap.outputs.statusMap }}
+          function genReleaseLink(repo, releaseTag) {
+            if (!releaseTag) return
+            const space = repo === 'student-app' ? "    " : " "
+            return `${space}<https://github.com/manabie-com/${repo}/releases/tag/${releaseTag}|${releaseTag}>`
+          }
+
+          function genAlert(tag, status) {
+            if (!tag) return ""
+            const icon = statusMap[status]
+            let repo = ""
+            let name = ""
+
+            if (tag === "${{ inputs.be_tag }}") {
+              name = "Backend"
+              repo = "backend"
+            }
+            if (tag === "${{ inputs.fe_tag }}") {
+              name = "Frontend"
+              repo = "school-portal-admin"
+            }
+            if (tag === "${{ inputs.me_tag }}") {
+              name = "Mobile"
+              repo = "student-app"
+            }
+
+            const link = genReleaseLink(repo, tag)
+            return `${icon} ${name} ${link}\n`
+          }
+
+          const be_content = genAlert("${{ inputs.be_tag }}", "${{ inputs.be_status }}")
+          const fe_content = genAlert("${{ inputs.fe_tag }}", "${{ inputs.fe_status }}")
+          const me_content = genAlert("${{ inputs.me_tag }}", "${{ inputs.me_status }}")
+
+          const alert_content = [
+            {
+              "text": `${be_content}${fe_content}${me_content}`,
+              "type": "mrkdwn"
+            }
+          ]
+          core.setOutput('alert_content', alert_content)
+
+    - id: metadata
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const content = "${{ inputs.user_alert }}\n" +
+                          "Orgs: ${{ inputs.orgs }}\n" + 
+                          "Workflow Run: <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|#${{ github.run_id }}>\n" + 
+                          "${{ inputs.squad_alert }}"
+          core.setOutput('content', content)
+
+    - name: Update message
+      id: update
+      uses: archive/github-actions-slack@master
+      with:
+        slack-function: update-message
+        slack-update-message-ts: ${{ inputs.message-timestamp }}
+        slack-bot-user-oauth-access-token: ${{ inputs.SLACK_TOKEN }}
+        slack-channel: ${{ inputs.channel }}
+        slack-update-message-blocks: >-
+          [
+            {
+              "type": "section",
+              "text": {
+                "type": "mrkdwn",
+                "text": "${{ steps.status.outputs.final_status_icon }} *${{ inputs.message }}* `${{ steps.status.outputs.final_status }}`"
+              }
+            },
+            {
+              "type": "context",
+              "elements": [
+                {
+                  "text": "${{ steps.metadata.outputs.content }}",
+                  "type": "mrkdwn"
+                }
+              ]
+            },
+            {
+              "type": "context",
+              "elements": ${{ steps.generate-alert-content.outputs.alert_content }}
+            }
+          ]
+
+    - name: Update Message Log
+      run: echo '${{ steps.update.outputs.slack-result }}'
+      shell: bash

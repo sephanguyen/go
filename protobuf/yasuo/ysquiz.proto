@@ -1,0 +1,77 @@
+syntax = "proto3";
+
+package manabie.yasuo;
+
+import "bob/enum.proto";
+import "google/protobuf/timestamp.proto";
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option (gogoproto.goproto_registration) = true;
+option go_package = "github.com/manabie-com/backend/pkg/genproto/yasuo;pb";
+
+enum QuizType {
+  QUIZ_TYPE_MCQ = 0;
+  QUIZ_TYPE_FIB = 1;
+  QUIZ_TYPE_POW = 2;
+  QUIZ_TYPE_TAD = 3;
+  QUIZ_TYPE_MIQ = 4;
+  QUIZ_TYPE_MAQ = 5;
+}
+
+enum QuizStatus {
+  QUIZ_STATUS_NEW = 0;
+  QUIZ_STATUS_APPROVED = 1;
+  QUIZ_STATUS_DELETED = 2;
+}
+
+enum QuizSetStatus {
+  QUIZSET_STATUS_NEW = 0;
+  QUIZSET_STATUS_APPROVED = 1;
+  QUIZSET_STATUS_DELETED = 2;
+}
+
+message RichText {
+  string raw = 1;
+  string rendered = 2;
+}
+
+enum QuizOptionConfig {
+  QUIZ_OPTION_CONFIG_CASE_SENSITIVE = 0;
+  QUIZ_OPTION_CONFIG_PARTIAL_CREDIT = 1;
+  QUIZ_OPTION_CONFIG_PLAN_LIST = 2;
+}
+
+enum QuizConfig {
+	QUIZ_CONFIG_OPTIONS_PLAIN_LIST= 0;
+}
+
+message QuizOption {
+  RichText content = 1;
+  bool correctness = 2;
+  repeated QuizOptionConfig configs = 3;
+  string label = 4;
+  string key = 5;
+}
+
+message QuizCore { // use for upsert request
+  string external_id = 1;
+  QuizType kind = 2;
+  int32 school_id = 3;
+  manabie.bob.Country country = 4;
+  RichText question = 5;
+  RichText explanation = 6;
+  repeated string tagged_los = 7;
+  int32 difficulty_level = 8;
+  repeated QuizOption options = 9;
+  repeated QuizConfig config = 10;
+}
+
+message Quiz { // for listing
+  QuizCore core = 1;
+  string question_url = 2;
+  repeated string answers_url = 3;
+  string explanation_url = 4;
+  QuizStatus status = 5;
+  google.protobuf.Timestamp updated_at = 6;
+  google.protobuf.Timestamp created_at = 7;
+}

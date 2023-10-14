@@ -1,0 +1,251 @@
+@startuml
+hide circle
+
+namespace Syllabus-BookStudyPlan {
+
+    class Student <<value object>> {}
+
+    class Course <<value object>> {
+        assignStudyPlanForStudent(students []Student)
+    }
+
+
+    class StudentStudyPlan <<value object>> {
+        study_plan_id string
+        student_id string
+        ' updated_at: timestamp
+        ' created_at: timestamp
+        ' deleted_at: timestamp
+    }
+
+    class CourseStudyPlan <<value object>> {
+        study_plan_id string
+        course_id string
+        ' updated_at: timestamp
+        ' created_at: timestamp
+        ' deleted_at: timestamp
+    }
+    
+    class Book <<entity>> {
+        book_id string
+        name string
+        copied_from string
+        school_id string
+        current_chapter_display_order int
+        ' updated_at: timestamp
+        ' created_at: timestamp
+        ' deleted_at: timestamp
+    }
+   note right of Book::copied_from
+    store origin book id when duplicate book
+    end note
+   note right of Book::current_chapter_display_order
+    numbers of chapter in this book
+    end note
+
+    class BooksChapters <<value object>> {
+        book_id string
+        chapter_id string
+        ' updated_at: timestamp
+        ' created_at: timestamp
+        ' deleted_at: timestamp
+    }
+
+
+    class Chapter <<entity>> {
+        chapter_id string
+        name string
+        copied_from string
+        school_id string
+        display_order int
+        current_topic_display_order int
+        ' updated_at: timestamp
+        ' created_at: timestamp
+        ' deleted_at: timestamp
+    }
+   note right of Chapter::copied_from
+    store origin chapter id when duplicate book
+    end note
+   note right of Chapter::display_order
+    order of this chapter in book
+    end note
+   note right of Chapter::current_topic_display_order
+    numbers of topic in this chapter
+    end note
+
+    class Topic <<entity>> {
+        topic_id string
+        chapter_id string
+        school_id string
+        name string
+        copied_from string
+        display_order int
+        lo_display_order_counter int
+        ' updated_at: timestamp
+        ' created_at: timestamp
+        ' deleted_at: timestamp
+    }
+
+   note right of Topic::display_order
+    order of this topic in chapter
+    end note
+   note right of Topic::lo_display_order_counter
+    numbers of learning objective/assignment was created in this topic
+    end note
+    class TopicsLearningObjectives <<value object>> {
+        topic_id string
+        lo_id string
+        display_order int
+        ' updated_at: timestamp
+        ' created_at: timestamp
+        ' deleted_at: timestamp
+    }
+
+    note right of TopicsLearningObjectives::display_order
+    order of this LO in topic
+    end note
+
+    class LearningObjective <<entity>>  {
+        name string
+        grade int
+        subject string
+        topic_id string
+        video string
+        study_guide string
+        copied_from string
+        type string
+        school_id string
+        display_order int
+        ' updated_at: timestamp
+        ' created_at: timestamp
+        ' deleted_at: timestamp
+    }
+    note left of LearningObjective::type
+    one of
+    * LEARNING_OBJECTIVE_TYPE_NONE
+    * LEARNING_OBJECTIVE_TYPE_LEARNING
+    * LEARNING_OBJECTIVE_TYPE_FLASH_CARD
+    * LEARNING_OBJECTIVE_TYPE_OFFLINE_LEARNING
+    end note
+    note left of LearningObjective::display_order
+    used in old flow
+    should use display order in TopicsLearningObjectives table instead
+    end note
+    
+    class TopicsAssignments <<value object>> {
+        topic_id string
+        assignment_id string
+        display_order int
+        ' updated_at: timestamp
+        ' created_at: timestamp
+        ' deleted_at: timestamp
+    }
+    note right of TopicsAssignments::display_order
+    order of this Assignment in topic
+    end note
+
+    class Assignment <<entity>>  {
+        name string
+        content jsonb
+        attachment []string
+        settings jsonb
+        max_grade int
+        check_list jsonb
+        instruction string
+        original_topic string
+        is_required_grade bool
+        display_order int
+        ' updated_at: timestamp
+        ' created_at: timestamp
+        ' deleted_at: timestamp
+    }
+    note right of Assignment::display_order
+    used in old flow
+    should use display order in TopicsAssignments table instead
+    end note
+
+    class StudyPlan <<entity>> {
+        study_plan_id string
+        name string
+        master_study_plan_id string
+        name string
+        study_plan_type string
+        course_id string
+        ' updated_at: timestamp
+        ' created_at: timestamp
+        ' deleted_at: timestamp
+
+    }
+    note left of StudyPlan::master_study_plan_id
+    when add new course study plan id A
+    -> new study plan create for each student with master_study_plan_id = A
+    end note
+    note left of StudyPlan::study_plan_type
+    one of 
+    * STUDY_PLAN_TYPE_NONE
+    * STUDY_PLAN_TYPE_COURSE
+    * STUDY_PLAN_TYPE_INDIVIDUAL
+    end note
+
+    class StudyPlanItem <<entity>> {
+        study_plan_item_id string
+        study_plan_id string
+        available_from datetime
+        available_to dateimte
+        start_date datetime
+        end_date dateimte
+        copy_study_plan_item_id string
+        display_order int
+        content_structure jsonb
+        content_structure_flatten string
+        ' updated_at: timestamp
+        ' created_at: timestamp
+        ' deleted_at: timestamp
+    }
+    note left of StudyPlanItem::copy_study_plan_item_id
+    when add new course study plan has study plan item id A
+    -> new study plan create for each student contains study plan item
+    id B with copy_study_plan_item_id = A
+    end note
+    note left of StudyPlanItem::display_order
+    order of study plan items in a study plan
+    end note
+    note left of StudyPlanItem::content_structure
+    contains course_id, book_id, chapter_id, topic_id 
+    end note
+
+    class AssignmentsStudyPlanItems <<value object>> {
+        assignment_id string
+        study_plan_item_id string
+        ' updated_at: timestamp
+        ' created_at: timestamp
+        ' deleted_at: timestamp
+    }
+
+    class LOsStudyPlanItems <<value object>> {
+        lo_id string
+        study_plan_item_id string
+        ' updated_at: timestamp
+        ' created_at: timestamp
+        ' deleted_at: timestamp
+    }
+
+    Book "1" .. "n" StudyPlan
+    Book "1" .. "n" BooksChapters
+    BooksChapters "n" .. "1" Chapter
+    Chapter "1" .. "1" Topic
+    Topic "1" .. "n" TopicsLearningObjectives
+    TopicsLearningObjectives "n" .. "1" LearningObjective
+    Topic "1" .. "n" TopicsAssignments
+    TopicsAssignments "n" .. "1" Assignment
+    StudyPlan "1" *-- "n" StudyPlanItem
+    StudyPlanItem "1" .. "n" AssignmentsStudyPlanItems
+    AssignmentsStudyPlanItems "n" .."1" Assignment
+    StudyPlanItem "1" .. "n" LOsStudyPlanItems
+    LOsStudyPlanItems "n" .. "1" LearningObjective
+    Student "1" .. "n" StudentStudyPlan
+    StudentStudyPlan "1" .. "1" StudyPlan
+    Course "1" .. "n" CourseStudyPlan
+    CourseStudyPlan "1" .. "1" StudyPlan
+}
+@enduml

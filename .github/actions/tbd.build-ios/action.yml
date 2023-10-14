@@ -1,0 +1,147 @@
+name: 'Build IOS App'
+description: 'A composite action for run build mobile app (IOS)'
+
+runs:
+  using: "composite"
+  steps:
+
+    - name: Get Release information
+      uses: actions/github-script@v6
+      with:
+        github-token: ${{ env.GITHUB_TOKEN }}
+        script: |
+          var response = await github.rest.repos.getReleaseByTag({
+            owner: context.repo.owner,
+            repo: '${{ env.REPO }}',
+            tag: process.env.RELEASE_TAG,
+          });
+
+          const prefix = '${{ env.RELEASE_TAG }}-${{ env.ORGANIZATION }}-${{ env.APP }}-${{ env.ENVIRONMENT }}';
+          const adhoc = prefix + '-ad-hoc.ipa';
+          const appstore = prefix + '-app-store.ipa';
+
+          const adhocBuild = response.data.assets.find((item) => item.name.includes(adhoc));
+          const appstoreBuild = response.data.assets.find((item) => item.name.includes(appstore));
+
+          core.exportVariable('AD_HOC_FILE_NAME', adhoc);
+          core.exportVariable('APP_STORE_FILE_NAME', appstore);
+          core.exportVariable('RELEASE_ID', response.data.id);
+
+          if (adhocBuild) {
+            core.exportVariable('AD_HOC_SKIP', true);
+          } else {
+            core.exportVariable('AD_HOC_SKIP', false);
+          }
+
+          if (appstoreBuild) {
+            core.exportVariable('APP_STORE_SKIP', true);
+          } else {
+            core.exportVariable('APP_STORE_SKIP', false);
+          }
+
+    - uses: actions/checkout@v3
+      with:
+        repository: ${{github.repository_owner}}/${{ env.REPO }}
+        token: ${{ env.GITHUB_TOKEN }}
+        ref: ${{ env.RELEASE_TAG }}
+        path: 'repo-${{ env.REPO }}'
+
+    - name: Setup tools
+      shell: bash
+      working-directory: 'repo-${{ env.REPO }}'
+      run: |
+        rm ~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision || true
+        ./scripts/config_github.sh ${{ env.GITHUB_TOKEN }}
+        ./tool/install-flutter.sh
+        source $HOME/.zshrc
+        ./tool/setup.sh
+
+    - name: Install Certificate and Profile for Ad hoc and App Store
+      shell: bash
+      working-directory: 'repo-${{ env.REPO }}'
+      run: |
+        METHOD=ad-hoc \
+        MANABIE_BUILD_PROVISION_PROFILE_BASE64=${{ env.MANABIE_MOBILEPROVISION_BASE64 }} \
+        JPREP_BUILD_PROVISION_PROFILE_BASE64=${{ env.JPREP_MOBILEPROVISION_BASE64 }} \
+        SYNERSIA_BUILD_PROVISION_PROFILE_BASE64=${{ env.SYNERSIA_MOBILEPROVISION_BASE64 }} \
+        RENSEIKAI_BUILD_PROVISION_PROFILE_BASE64=${{ env.RENSEIKAI_MOBILEPROVISION_BASE64 }} \
+        GA_BUILD_PROVISION_PROFILE_BASE64=${{ env.GA_MOBILEPROVISION_BASE64 }} \
+        AIC_BUILD_PROVISION_PROFILE_BASE64=${{ env.AIC_MOBILEPROVISION_BASE64 }} \
+        ./tool/ios/install-certificate-and-profile.sh
+
+        METHOD=app-store \
+        MANABIE_BUILD_PROVISION_PROFILE_BASE64=${{ env.MANABIE_APP_STORE_MOBILEPROVISION_BASE64 }} \
+        JPREP_BUILD_PROVISION_PROFILE_BASE64=${{ env.JPREP_APP_STORE_MOBILEPROVISION_BASE64 }} \
+        SYNERSIA_BUILD_PROVISION_PROFILE_BASE64=${{ env.SYNERSIA_APP_STORE_MOBILEPROVISION_BASE64 }} \
+        RENSEIKAI_BUILD_PROVISION_PROFILE_BASE64=${{ env.RENSEIKAI_APP_STORE_MOBILEPROVISION_BASE64 }} \
+        GA_BUILD_PROVISION_PROFILE_BASE64=${{ env.GA_APP_STORE_MOBILEPROVISION_BASE64 }} \
+        AIC_BUILD_PROVISION_PROFILE_BASE64=${{ env.AIC_APP_STORE_MOBILEPROVISION_BASE64 }} \
+        ./tool/ios/install-certificate-and-profile.sh
+
+    - name: Build Ad hoc
+      if: ${{ env.AD_HOC_SKIP == 'false' && (env.ORGANIZATION == 'manabie' || env.ORGANIZATION == 'jprep') }}
+      shell: bash
+      working-directory: 'repo-${{ env.REPO }}'
+      run: |
+        source $HOME/.zshrc
+        METHOD=ad-hoc ./tool/ios/update_option_plist.sh
+        FLAVOR=${{ env.FLAVOR }} PLATFORM=ios ./tool/build.sh
+        mv manabie_learner/build/ios/ipa/*.ipa ./ad-hoc.ipa
+
+    - name: Uploading Ad hoc build
+      if: ${{ env.AD_HOC_SKIP == 'false' && (env.ORGANIZATION == 'manabie' || env.ORGANIZATION == 'jprep') }}
+      uses: actions/github-script@v6
+      with:
+        github-token: ${{ env.GITHUB_TOKEN }}
+        script: |
+          const path = require('path');
+          const fs = require('fs');
+          const filePath = "./repo-${{ env.REPO }}/ad-hoc.ipa";
+          await github.rest.repos.uploadReleaseAsset({
+            owner: context.repo.owner,
+            repo: '${{ env.REPO }}',
+            release_id: '${{ env.RELEASE_ID }}',
+            name: '${{ env.AD_HOC_FILE_NAME }}',
+            data: await fs.readFileSync(filePath)
+          });
+
+    - name: Build App Store
+      if: ${{ env.APP_STORE_SKIP == 'false' }}
+      shell: bash
+      working-directory: 'repo-${{ env.REPO }}'
+      run: |
+        source $HOME/.zshrc
+        METHOD=app-store ./tool/ios/update_option_plist.sh
+        VERSION=v2 FLAVOR=${{ env.FLAVOR }} PLATFORM=ios ./tool/build.sh
+        mv manabie_learner/build/ios/ipa/*.ipa ./app-store.ipa
+
+    - name: Uploading App Store build to TestFlight
+      shell: bash
+      working-directory: 'repo-${{ env.REPO }}'
+      if: ${{ env.APP_STORE_SKIP == 'false' }}
+      run: xcrun altool --upload-app --type ios --file ./app-store.ipa --username vu.pham@manabie.com --password ${{ env.TEST_FLIGHT_PASSWORD }}
+
+    - name: Uploading App Store build
+      if: ${{ env.APP_STORE_SKIP == 'false' }}
+      uses: actions/github-script@v6
+      with:
+        github-token: ${{ env.GITHUB_TOKEN }}
+        script: |
+          const path = require('path');
+          const fs = require('fs');
+          const filePath = "./repo-${{ env.REPO }}/app-store.ipa";
+          await github.rest.repos.uploadReleaseAsset({
+            owner: context.repo.owner,
+            repo: '${{ env.REPO }}',
+            release_id: '${{ env.RELEASE_ID }}',
+            name: '${{ env.APP_STORE_FILE_NAME }}',
+            data: await fs.readFileSync(filePath)
+          });
+
+    - name: Clean up keychain and provisioning profile
+      if: ${{ always() }}
+      working-directory: 'repo-${{ env.REPO }}'
+      shell: bash
+      run: |
+        METHOD=ad-hoc ./tool/ios/remove_certificate.sh || true
+        METHOD=app-store ./tool/ios/remove_certificate.sh || true

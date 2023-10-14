@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package discount.v1;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/discount/v1;pmpb";
+
+enum DiscountStatus {
+    STUDENT_DISCOUNT_STATUS_NONE = 0;
+    STUDENT_DISCOUNT_STATUS_POTENTIAL = 1;
+    STUDENT_DISCOUNT_STATUS_ACTIVE = 2;
+    STUDENT_DISCOUNT_STATUS_EXPIRED = 3;
+}
+
+enum ExportMasterDataType {
+    EXPORT_DISCOUNT_TAG = 0;
+}

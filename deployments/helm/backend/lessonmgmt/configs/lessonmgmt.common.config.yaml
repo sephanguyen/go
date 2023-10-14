@@ -1,0 +1,77 @@
+common:
+  name: lessonmgmt
+  organization: {{ .Values.global.vendor }}
+  environment: '{{ include "util.runtimeEnvironment" . }}'
+  actual_environment: '{{ include "util.environment" . }}'
+  log:
+    app_level: debug
+    log_payload: true
+  stats_enabled: true
+  grpc:
+    trace_enabled: true
+    handler_timeout: -1s
+    client_name: com.manabie.lessonmgmt
+    client_version: {{ .Values.clientVersion }}
+  image_tag: {{ include "util.imageTag" . }}
+  remote_trace:
+    enabled: true
+    otel_collector_receiver: http://opentelemetry-collector.monitoring.svc.cluster.local:14268/api/traces
+postgres_migrate:
+  source: file:///migrations/lessonmgmt
+  database:
+    cloudsql_instance: '{{ .Values.global.cloudSQLCommonInstance }}'
+    cloudsql_use_public_ip: {{ .Values.global.cloudSQLUsePublicIP }}
+    cloudsql_auto_iam_authn: true
+    cloudsql_impersonate_service_account_email: '{{ include "util.databaseMigrationServiceAccountEmail" .}}'
+    user: '{{ include "util.databaseMigrationUser" . }}'
+    host: '{{ include "util.databaseHost" . }}'
+    port: '5432'
+    dbname: '{{ .Values.global.dbPrefix }}lessonmgmt'
+    max_conns: 2
+    retry_attempts: 10
+    retry_wait_internal: 5s
+postgres_v2:
+  bob:
+    cloudsql_instance: '{{ .Values.global.cloudSQLCommonInstance }}'
+    cloudsql_use_public_ip: {{ .Values.global.cloudSQLUsePublicIP }}
+    cloudsql_auto_iam_authn: true
+    user: '{{ include "util.databaseUser" . }}'
+    host: '{{ include "util.databaseHost" . }}'
+    port: '5432'
+    dbname: '{{ .Values.global.dbPrefix }}bob'
+    max_conns: 30
+    retry_attempts: 10
+    retry_wait_interval: '5s'
+  lessonmgmt:
+    cloudsql_instance: '{{ .Values.global.cloudSQLCommonInstance }}'
+    cloudsql_use_public_ip: {{ .Values.global.cloudSQLUsePublicIP }}
+    cloudsql_auto_iam_authn: true
+    user: '{{ include "util.databaseUser" . }}'
+    host: '{{ include "util.databaseHost" . }}'
+    port: '5432'
+    dbname: '{{ .Values.global.dbPrefix }}lessonmgmt'
+    max_conns: 8
+    retry_attempts: 10
+    retry_wait_interval: '5s'
+natsjs:
+  address: "nats://nats-jetstream.{{ .Values.global.environment }}-{{ .Values.global.vendor }}-nats-jetstream.svc.cluster.local:4223"
+  user: "LessonMgmt"
+  max_redelivery: 10
+  jprep_ack_wait: 3s #should be 30s, for local we set small value
+  default_ack_wait: 10s
+  reconnect_wait: 10s
+  max_reconnect: -1
+  is_local: {{ include "util.natsIsLocal" . }}
+elasticsearch:
+  addresses:
+    - https://elasticsearch-elastic.{{ .Values.global.environment }}-{{ .Values.global.vendor }}-elastic.svc.cluster.local:9200
+unleash_client:
+  url: '{{ include "util.unleashURL" . }}'
+  app_name: "manabie-backend-lessonmgmt-unleash-client"
+  api_token: ce4ed2eba3a72d6b5be23c7aa9b71178753f5908cf2dcbbca29442b5b81d397f
+zoom:
+  endpoint_oauth: "https://zoom.us/oauth/token"
+  endpoint: "https://api.zoom.us/v2"
+class_do:
+  endpoint: "https://api.classdo.com/graphql"
+

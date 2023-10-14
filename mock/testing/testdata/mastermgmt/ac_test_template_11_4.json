@@ -1,0 +1,184 @@
+{
+	"schema": [
+		{
+			"column_name": "ac_test_template_11_4_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "name",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "owners",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "ac_test_template_11_4",
+			"policyname": "rls_ac_test_template_11_4_delete_location",
+			"qual": "(true \u003c= ( SELECT true AS bool\n   FROM (granted_permissions p\n     JOIN ac_test_template_11_4_access_paths usp ON ((usp.location_id = p.location_id)))\n  WHERE ((p.user_id = current_setting('app.user_id'::text)) AND (p.permission_name = 'accesscontrol.ac_test_template_11_4.write'::text) AND (usp.ac_test_template_11_4_id = ac_test_template_11_4.ac_test_template_11_4_id))\n LIMIT 1))",
+			"with_check": null,
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "ac_test_template_11_4",
+			"policyname": "rls_ac_test_template_11_4_insert_location",
+			"qual": null,
+			"with_check": "(1 = 1)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "ac_test_template_11_4",
+			"policyname": "rls_ac_test_template_11_4_permission_v4",
+			"qual": "(current_setting('app.user_id'::text) = owners)",
+			"with_check": "(current_setting('app.user_id'::text) = owners)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "ac_test_template_11_4",
+			"policyname": "rls_ac_test_template_11_4_restrictive",
+			"qual": "permission_check(resource_path, 'ac_test_template_11_4'::text)",
+			"with_check": "permission_check(resource_path, 'ac_test_template_11_4'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "ac_test_template_11_4",
+			"policyname": "rls_ac_test_template_11_4_select_location",
+			"qual": "(true \u003c= ( SELECT true AS bool\n   FROM (granted_permissions p\n     JOIN ac_test_template_11_4_access_paths usp ON ((usp.location_id = p.location_id)))\n  WHERE ((p.user_id = current_setting('app.user_id'::text)) AND (p.permission_name = 'accesscontrol.ac_test_template_11_4.read'::text) AND (usp.ac_test_template_11_4_id = ac_test_template_11_4.ac_test_template_11_4_id))\n LIMIT 1))",
+			"with_check": null,
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "ac_test_template_11_4",
+			"policyname": "rls_ac_test_template_11_4_update_location",
+			"qual": "(true \u003c= ( SELECT true AS bool\n   FROM (granted_permissions p\n     JOIN ac_test_template_11_4_access_paths usp ON ((usp.location_id = p.location_id)))\n  WHERE ((p.user_id = current_setting('app.user_id'::text)) AND (p.permission_name = 'accesscontrol.ac_test_template_11_4.write'::text) AND (usp.ac_test_template_11_4_id = ac_test_template_11_4.ac_test_template_11_4_id))\n LIMIT 1))",
+			"with_check": "(true \u003c= ( SELECT true AS bool\n   FROM (granted_permissions p\n     JOIN ac_test_template_11_4_access_paths usp ON ((usp.location_id = p.location_id)))\n  WHERE ((p.user_id = current_setting('app.user_id'::text)) AND (p.permission_name = 'accesscontrol.ac_test_template_11_4.write'::text) AND (usp.ac_test_template_11_4_id = ac_test_template_11_4.ac_test_template_11_4_id))\n LIMIT 1))",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "pk__ac_test_template_11_4",
+			"column_name": "ac_test_template_11_4_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "ac_test_template_11_4",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

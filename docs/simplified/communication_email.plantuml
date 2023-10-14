@@ -1,0 +1,70 @@
+@startuml
+
+    class email <<entity>> #green{
+        email_id: string
+        sg_message_id: string
+        subject: string
+        content: string
+        email_from: string
+        status: string
+        email_recipients: []string
+        created_at: timestamp
+        updated_at: timestamp
+        deleted_at: timestamp
+    }
+
+     class email_recipient<<entity>> #green{
+        id: string
+        email_id: string
+        recipient_address: string
+        created_at: timestamp
+        updated_at: timestamp
+        deleted_at: timestamp
+    }
+  
+
+    class email_recipient_event<<entity>> #green{
+        id: string
+        email_recipient_id: string
+        sg_event_id: string
+        type: string
+        event: string
+        description: jsonb
+        created_at: timestamp
+        updated_at: timestamp
+        deleted_at: timestamp
+    }
+
+    note right of email_recipient_event::type
+        EMAIL_EVENT_TYPE_NONE
+        EMAIL_EVENT_TYPE_DELIVERY
+        EMAIL_EVENT_TYPE_ENGAGEMENT
+    end note
+
+    note left of email_recipient_event::event
+        EMAIL_EVENT_NONE
+        EMAIL_EVENT_PROCESSED
+        EMAIL_EVENT_DROPPED
+        EMAIL_EVENT_DELIVERED
+        EMAIL_EVENT_DEFERRED
+        EMAIL_EVENT_BOUNCE
+        EMAIL_EVENT_BLOCKED
+        EMAIL_EVENT_OPEN
+        EMAIL_EVENT_CLICK
+        EMAIL_EVENT_SPAM_REPORT
+        EMAIL_EVENT_UNSUBSCRIBE
+        EMAIL_EVENT_GROUP_UNSUBSCRIBE
+        EMAIL_EVENT_GROUP_RESUBSCRIBE
+    end note
+
+    note left of email::status
+        EMAIL_STATUS_NONE
+        EMAIL_STATUS_QUEUED
+        EMAIL_STATUS_INTERNAL_FAILED
+        EMAIL_STATUS_PROCESSED
+    end note
+
+    email "1" --> "many" email_recipient
+    email_recipient "1" --> "many" email_recipient_event
+
+@enduml

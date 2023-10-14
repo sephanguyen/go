@@ -1,0 +1,7 @@
+common:
+  stats_enabled: false
+  remote_trace:
+    enabled: true
+  grpc:
+    client_name: "fink"
+  google_cloud_project: "dev-manabie-online"

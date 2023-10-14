@@ -1,0 +1,87 @@
+name: "tbd.get-latest-tag-on-trunk"
+description: "Get latest tag on develop BE FE ME"
+
+inputs:
+  github-token:
+    description: "Github token"
+    required: true
+
+outputs:
+  fe_tag:
+    description: "FE Tag"
+    value: ${{ steps.get-fe-tag.outputs.fe_tag }}
+  me_tag:
+    description: "ME Tag"
+    value: ${{ steps.get-me-tag.outputs.me_tag }}
+  be_tag:
+    description: "FE Tag"
+    value: ${{ steps.get-be-tag.outputs.be_tag }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout develop FE
+      uses: actions/checkout@main
+      with:
+        repository: "manabie-com/school-portal-admin"
+        token: ${{ inputs.github-token }}
+        ref: "develop"
+        fetch-depth: 2
+        fetch-tags: true
+
+    - name: Get latest tag FE on develop
+      shell: bash
+      id: get-fe-tag
+      run: |
+        i=1
+        until git describe --tags --abbrev=0 --match "202*.*" >/dev/null; do
+            i=$((i + 1))
+            git fetch --depth=$i
+        done
+
+        latest_tag=$(git describe --tags --abbrev=0 --match "202*.*")
+        echo "fe_tag=$latest_tag" >> $GITHUB_OUTPUT
+
+    - name: Checkout develop ME
+      uses: actions/checkout@main
+      with:
+        repository: "manabie-com/student-app"
+        token: ${{ inputs.github-token }}
+        ref: "develop"
+        fetch-depth: 2
+        fetch-tags: true
+
+    - name: Get latest tag ME on develop
+      shell: bash
+      id: get-me-tag
+      run: |
+        i=1
+        until git describe --tags --abbrev=0 --match "202*.*" >/dev/null; do
+            i=$((i + 1))
+            git fetch --depth=$i
+        done
+
+        latest_tag=$(git describe --tags --abbrev=0 --match "202*.*")
+        echo "me_tag=$latest_tag" >> $GITHUB_OUTPUT
+
+    - name: Checkout develop BE
+      uses: actions/checkout@main
+      with:
+        repository: "manabie-com/backend"
+        token: ${{ inputs.github-token }}
+        ref: "develop"
+        fetch-depth: 2
+        fetch-tags: true
+
+    - name: Get latest tag BE on develop
+      shell: bash
+      id: get-be-tag
+      run: |
+        i=1
+        until git describe --tags --abbrev=0 --match "202*.*" >/dev/null; do
+            i=$((i + 1))
+            git fetch --depth=$i
+        done
+
+        latest_tag=$(git describe --tags --abbrev=0 --match "202*.*")
+        echo "be_tag=$latest_tag" >> $GITHUB_OUTPUT

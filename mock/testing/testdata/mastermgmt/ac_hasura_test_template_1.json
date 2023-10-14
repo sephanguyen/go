@@ -1,0 +1,100 @@
+{
+	"schema": [
+		{
+			"column_name": "ac_hasura_test_template_1_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "now()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "location_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "name",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "now()",
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "ac_hasura_test_template_1",
+			"policyname": "rls_ac_hasura_test_template_1",
+			"qual": "permission_check(resource_path, 'ac_hasura_test_template_1'::text)",
+			"with_check": "permission_check(resource_path, 'ac_hasura_test_template_1'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "ac_hasura_test_template_1",
+			"policyname": "rls_ac_hasura_test_template_1_restrictive",
+			"qual": "permission_check(resource_path, 'ac_hasura_test_template_1'::text)",
+			"with_check": "permission_check(resource_path, 'ac_hasura_test_template_1'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "pk__ac_hasura_test_template_1",
+			"column_name": "ac_hasura_test_template_1_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "ac_hasura_test_template_1",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

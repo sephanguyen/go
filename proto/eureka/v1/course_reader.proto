@@ -1,0 +1,197 @@
+syntax = "proto3";
+
+package eureka.v1;
+
+import "common/v1/profiles.proto";
+import "common/v1/requests.proto";
+import "common/v1/contents.proto";
+import "common/v1/enums.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/eureka/v1;epb";
+
+message RetrieveLOsRequest {
+  string student_id = 1;
+  repeated string topic_ids = 2;
+  bool with_completeness = 3;
+  // either topic_ids or lo_ids can be existed
+  repeated string lo_ids = 4;
+  bool with_achievement_crown = 5;
+}
+
+message RetrieveLOsResponse {
+  repeated common.v1.LearningObjective learning_objectives = 1;
+  repeated common.v1.Completenes completenesses = 2; // correspond to list of LO, value in range of [0,100]
+  map<string, int32> total_questions = 3; // lo id => total questions
+  repeated common.v1.AchievementCrown crowns = 4; // correspond to list of LO, value in range of [0,100]
+}
+
+message ListClassByCourseRequest {
+  string course_id = 1; // required
+  repeated string location_ids = 2; // options
+}
+
+message ListClassByCourseResponse {
+  repeated string class_ids = 1;
+}
+
+message ListStudentByCourseRequest {
+  string course_id = 1;
+  string search_text = 2;
+  common.v1.Paging paging = 3;
+}
+
+message ListStudentByCourseResponse {
+  repeated common.v1.BasicProfile profiles = 1;
+  common.v1.Paging next_page = 2;
+}
+
+message ListStudentIDsByCourseRequest {
+  repeated string course_ids = 1;
+  common.v1.Paging paging = 2;
+}
+
+message ListStudentIDsByCourseResponse {
+  message StudentCourses {
+    string student_id = 1;
+    repeated string course_ids = 2;
+  }
+  repeated StudentCourses student_courses = 1;
+  common.v1.Paging next_page = 2;
+}
+
+message ListCourseIDsByStudentsRequest{
+  repeated string student_ids = 1;
+  string organization_id = 2;
+}
+message ListCourseIDsByStudentsResponse {
+  message StudentCourses {
+    string student_id = 1;
+    repeated string course_ids = 2;
+  }
+  repeated StudentCourses student_courses = 1;
+}
+
+message ListStudentIDsByCourseV2Request {
+  repeated string course_ids = 1;
+  int32 school_id = 2;
+}
+
+message ListStudentIDsByCourseV2Response {
+  message StudentCourses {
+    string student_id = 1;
+    repeated string course_ids = 2;
+  }
+  StudentCourses student_courses = 1;
+}
+
+message ListTopicsByStudyPlanRequest {
+  common.v1.Paging paging = 1;
+  string study_plan_id = 2;
+}
+
+message ListTopicsByStudyPlanResponse {
+  common.v1.Paging next_page = 1;
+  repeated common.v1.Topic items = 2;
+}
+
+message RetrieveCourseStatisticRequest {
+  string course_id = 1;
+  string study_plan_id = 2;
+  string class_id = 3;
+}
+
+message RetrieveCourseStatisticResponse {
+  repeated CourseStatisticItem course_statistic_items = 1;
+
+  message CourseStatisticItem {
+    string topic_id = 1;
+    int32 completed_student = 2;
+    int32 total_assigned_student = 3;
+    int32 average_score = 4;
+    repeated StudyPlanItemStatisticItem study_plan_item_statistic_items = 5;
+
+    message StudyPlanItemStatisticItem {
+      string study_plan_item_id = 1;
+      int32 completed_student = 2;
+      int32 total_assigned_student = 3;
+      int32 average_score = 4;
+    }
+  }
+}
+
+message RetrieveCourseStatisticRequestV2 {
+  string course_id = 1;
+  string study_plan_id = 2;
+  repeated string class_id = 3;
+  repeated string student_tag_ids = 4;
+  repeated string school_ids = 5;
+}
+
+message RetrieveCourseStatisticResponseV2 {
+  repeated TopicStatistic topic_statistic = 1;
+
+  message TopicStatistic {
+    string topic_id = 1;
+    int32 completed_student = 2;
+    int32 total_assigned_student = 3;
+    int32 average_score = 4;
+    repeated LearningMaterialStatistic learning_material_statistic = 5;
+
+    message LearningMaterialStatistic {
+      string study_plan_item_id = 1;
+      int32 completed_student = 2;
+      int32 total_assigned_student = 3;
+      int32 average_score = 4;
+      string learning_material_id = 5;
+    }
+  }
+}
+
+message GetLOsByCourseRequest {
+  repeated string course_id = 1;
+  common.v1.Paging paging = 2;
+}
+
+message GetLOsByCourseResponse {  
+  message LearningObject {
+    string activity_id = 1;
+    string topic_name = 2;
+    string lo_name = 3;
+    string learning_material_id = 4;
+  }
+
+  repeated LearningObject LOs = 1;
+  common.v1.Paging next_page = 2;
+  int32 total_items = 3;
+}
+
+
+message GetStudentsAccessPathRequest {
+  repeated string location_ids = 1;
+  repeated string student_ids = 2;
+  repeated string course_ids = 3;
+}
+
+
+message GetStudentsAccessPathResponse {
+  message CourseStudentAccessPathObject {
+    string course_student_id = 1;
+    string student_id = 2;
+    string course_id = 3;
+  }
+  repeated CourseStudentAccessPathObject course_student_accesss_paths = 1;
+}
+
+service CourseReaderService {
+  rpc RetrieveLOs(RetrieveLOsRequest) returns (RetrieveLOsResponse); // TODO: LM team x
+  rpc ListTopicsByStudyPlan(ListTopicsByStudyPlanRequest) returns (ListTopicsByStudyPlanResponse); //x
+  rpc ListClassByCourse(ListClassByCourseRequest) returns (ListClassByCourseResponse) {};
+  rpc ListStudentByCourse(ListStudentByCourseRequest) returns (ListStudentByCourseResponse) {};
+  rpc ListStudentIDsByCourse (ListStudentIDsByCourseRequest) returns (ListStudentIDsByCourseResponse);
+  rpc ListCourseIDsByStudents (ListCourseIDsByStudentsRequest) returns (ListCourseIDsByStudentsResponse);
+  rpc ListStudentIDsByCourseV2 (ListStudentIDsByCourseV2Request) returns (stream ListStudentIDsByCourseV2Response);
+  rpc RetrieveCourseStatistic(RetrieveCourseStatisticRequest) returns (RetrieveCourseStatisticResponse);
+  rpc RetrieveCourseStatisticV2(RetrieveCourseStatisticRequestV2) returns (RetrieveCourseStatisticResponseV2);
+  rpc GetLOsByCourse(GetLOsByCourseRequest) returns (GetLOsByCourseResponse);
+  rpc GetStudentsAccessPath(GetStudentsAccessPathRequest) returns (GetStudentsAccessPathResponse);
+}  

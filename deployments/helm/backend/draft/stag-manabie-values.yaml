@@ -1,0 +1,94 @@
+alloydbProxy:
+    alloydbConnName: projects/staging-manabie-online/locations/asia-southeast1/clusters/stag-alloydb/instances/stag-alloydb-w01?port=6432
+    enabled: false
+    image:
+        repository: gcr.io/alloydb-connectors/alloydb-auth-proxy
+        tag: 0.5.0
+    resources:
+        requests:
+            cpu: 5m
+            memory: 16Mi
+cronjobs:
+    clean-data-bob:
+        args:
+            batchEnabled: true
+            before: 7 days ago
+            dryRun: false
+            perBatch: "1000"
+            schoolID: "-2147483644"
+            service: bob
+            tables: info_notification_msgs,users,staff,students,locations,courses
+        cmd: clean_test_data
+        schedule: 0 22 * * 5
+    clean-data-eureka:
+        args:
+            batchEnabled: true
+            before: 7 days ago
+            dryRun: false
+            perBatch: "300000"
+            schoolID: "-2147483644"
+            service: eureka
+            tables: study_plan_items,books,quizzes
+        cmd: clean_test_data
+        schedule: 0 22 * * 5
+    clean-data-invoicemgmt:
+        args:
+            batchEnabled: true
+            before: 7 days ago
+            dryRun: false
+            perBatch: "300000"
+            schoolID: "-2147483644"
+            service: invoicemgmt
+            tables: users,students,bank,student_payment_detail
+        cmd: clean_test_data
+        schedule: 0 22 * * 5
+    clean-data-lessonmgmt:
+        args:
+            batchEnabled: true
+            before: 7 days ago
+            dryRun: false
+            perBatch: "1000"
+            schoolID: "-2147483644"
+            service: lessonmgmt
+            tables: locations,courses,lessons,lesson_members,lessons_teachers
+        cmd: clean_test_data
+        schedule: 0 22 * * 5
+    clean-data-timesheet:
+        args:
+            batchEnabled: true
+            before: 7 days ago
+            dryRun: false
+            perBatch: "300000"
+            schoolID: "-2147483644"
+            service: timesheet
+            tables: users,staff,timesheet,transportation_expense,lessons,locations
+        cmd: clean_test_data
+        schedule: 0 22 * * 5
+    clean-data-tom:
+        args:
+            batchEnabled: true
+            before: 7 days ago
+            dryRun: false
+            perBatch: "1000"
+            schoolID: "-2147483644"
+            service: tom
+            tables: conversations
+        cmd: clean_test_data
+        schedule: 0 22 * * 5
+enabled: true
+hasura:
+    useGlobalCronScheduledScaling: true
+hpa:
+    averageCPUUtilization: 300
+    averageMemoryValue: 512Mi
+    maxReplicas: 3
+    minReplicas: 2
+podAnnotations:
+    sidecar.istio.io/proxyCPU: 5m
+    sidecar.istio.io/proxyMemory: 50Mi
+replicaCount: 1
+resources:
+    requests:
+        cpu: 5m
+        memory: 96Mi
+useGlobalCronScheduledScaling: true

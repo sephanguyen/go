@@ -1,0 +1,108 @@
+affinity: {}
+affinityOverride: {}
+apiHttp:
+    - fault:
+        abort:
+            httpStatus: 403
+            percentage:
+                value: 100
+      match:
+        - uri:
+            prefix: /payment.v1.InternalService
+      route:
+        - destination:
+            host: payment
+            port:
+                number: 6250
+    - match:
+        - uri:
+            prefix: /payment.v1
+      route:
+        - destination:
+            host: payment
+            port:
+                number: 6250
+cronjobs:
+    generate-billing-items:
+        cmd: payment_generate_billing_items
+        schedule: 0 17 * * *
+    update-billing-status:
+        cmd: payment_update_billing_status
+        schedule: 0 17 * * *
+    update-student-courses:
+        cmd: payment_update_student_courses
+        schedule: 0 17 * * *
+    update-student-package:
+        cmd: payment_update_student_package
+        schedule: 0 17 * * *
+    update-student-product-status-to-cancelled:
+        cmd: payment_update_student_product_status
+        schedule: 0 17 * * *
+enabled: true
+grpcPort: 6250
+hasuraEnabled: false
+jobs:
+    generate-billing-items:
+        cmd: payment_generate_billing_items
+    sync-elasticsearch:
+        cmd: payment_sync_elasticsearch
+    update-billing-status:
+        cmd: payment_update_billing_status
+    update-student-courses:
+        cmd: payment_update_student_courses
+    update-student-package:
+        cmd: payment_update_student_package
+    update-student-product-status-to-cancelled:
+        cmd: payment_update_student_product_status
+metrics:
+    enabled: true
+    podAnnotations:
+        prometheus.io/port: "8888"
+        prometheus.io/scheme: http
+        prometheus.io/scrape: "true"
+migrationEnabled: false
+readinessProbe:
+    enabled: true
+resources:
+    requests:
+        cpu: 5m
+        memory: 64Mi
+tolerations: null
+webHttp:
+    - corsPolicy:
+        allowHeaders:
+            - grpc-timeout
+            - content-type
+            - keep-alive
+            - user-agent
+            - cache-control
+            - content-type
+            - content-transfer-encoding
+            - token
+            - x-accept-content-transfer-encoding
+            - x-accept-response-streaming
+            - x-user-agent
+            - x-grpc-web
+            - pkg
+            - version
+        allowMethods:
+            - POST
+            - GET
+            - OPTIONS
+            - PUT
+            - DELETE
+        allowOrigins:
+            - regex: .*
+        exposeHeaders:
+            - grpc-status
+            - grpc-message
+            - grpc-status-details-bin
+        maxAge: 100s
+      match:
+        - uri:
+            prefix: /payment.v1
+      route:
+        - destination:
+            host: payment
+            port:
+                number: 6250

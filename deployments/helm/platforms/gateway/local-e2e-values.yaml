@@ -1,0 +1,73 @@
+# Remember to update for local-jprep-values.yaml whenever you
+# update this file.
+skipTLSVerify: &skipTLSVerify true
+
+acme: &acme
+  email: tech.support@manabie.com
+  server: https://letsencrypt.emulator:14000/dir
+
+dnsNames: &dnsNames
+  webApi:
+    - web-api.local-green.manabie.io
+    - web-api.local-blue.manabie.io
+  api:
+    - api.local-green.manabie.io
+    - api.local-blue.manabie.io
+  grafana:
+    - grafana.local.manabie.io
+  kiali:
+    - kiali.local.manabie.io
+  admin:
+    - admin.local-green.manabie.io
+    - admin.local-blue.manabie.io
+  backoffice:
+    - backoffice.local.manabie.io
+  backofficeMfe:
+    - backoffice-mfe.local.manabie.io
+  teacher:
+    - teacher.local.manabie.io
+  learner:
+    - learner.local.manabie.io
+  redash:
+    - redash.local.manabie.io
+  appsmith:
+    - appsmith.local-green.manabie.io
+  minio:
+    - minio.local.manabie.io
+  learnosityWebView:
+    - learnosity-web-view.local.manabie.io
+  internal:
+    - internal.local.manabie.io
+    - internal.local-green.manabie.io
+
+backend: &backend
+  skipTLSVerify: *skipTLSVerify
+
+  acme: *acme
+
+  dnsNames: *dnsNames
+global: *backend
+
+bob: *backend
+enigma: *backend
+entryexitmgmt: *backend
+eureka: *backend
+fatima: *backend
+tom: *backend
+yasuo: *backend
+usermgmt: *backend
+payment: *backend
+backoffice: *backend
+learner-web: *backend
+teacher-web: *backend
+unleash: *backend
+minio: *backend
+mastermgmt: *backend
+lessonmgmt: *backend
+import-map-deployer: *backend
+invoicemgmt: *backend
+virtualclassroom: *backend
+timesheet: *backend
+notificationmgmt: *backend
+spike: *backend
+calendar: *backend

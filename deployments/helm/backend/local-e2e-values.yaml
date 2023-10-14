@@ -1,0 +1,56 @@
+global:
+  dbPrefix: ""
+  dbUserPrefix: ""  # IAM is not available in local, we use username/password
+  serviceAccountEmailSuffix: ""
+  replicaCount: 1
+  sqlProxy:
+    enabled: false
+  cloudSQLCommonInstance: ""
+  cloudSQLLMSInstance: ""
+  hasura:
+    image:
+      repository: asia-southeast1-docker.pkg.dev/student-coach-e1e95/ci/asia.gcr.io/student-coach-e1e95/customized-graphql-engine
+    migrationImage:
+      repository: asia-southeast1-docker.pkg.dev/student-coach-e1e95/ci/asia.gcr.io/student-coach-e1e95/customized-graphql-engine
+    replicaCount: 1
+    affinityOverride:
+      nodeAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+          - preference:
+              matchExpressions:
+              - key: cloud.google.com/gke-spot
+                operator: In
+                values: ["true"]
+            weight: 10
+    imagePullSecrets:
+      - name: regcred
+  hasurav2:
+    image:
+      repository: asia-southeast1-docker.pkg.dev/student-coach-e1e95/ci/asia.gcr.io/student-coach-e1e95/customized-graphql-engine
+  liveReloadEnabled: true
+
+  sopsImage:
+    repository: asia-southeast1-docker.pkg.dev/student-coach-e1e95/ci/mozilla/sops
+  waitForImage:
+    repository: asia-southeast1-docker.pkg.dev/student-coach-e1e95/ci/asia.gcr.io/student-coach-e1e95/wait-for
+
+  vpa:
+    enabled: false
+
+  affinityOverride:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - preference:
+            matchExpressions:
+            - key: cloud.google.com/gke-spot
+              operator: In
+              values: ["true"]
+          weight: 10
+
+  imagePullSecrets:
+    - name: regcred
+
+  caching:
+    redis:
+      image:
+        repository: kind-reg.actions-runner-system.svc/redis

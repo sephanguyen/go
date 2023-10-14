@@ -1,0 +1,420 @@
+global:
+  dbPrefix: "uat_"
+  dbUserPrefix: "uat-"
+  serviceAccountEmailSuffix: "uat-manabie"
+  replicaCount: 2
+  cloudSQLCommonInstance: "staging-manabie-online:asia-southeast1:manabie-common-88e1ee71"
+  cloudSQLLMSInstance: "staging-manabie-online:asia-southeast1:manabie-lms-de12e08e"
+  cloudSQLAuthInstance: "staging-manabie-online:asia-southeast1:manabie-auth-f2dc7988"
+  hasura:
+    replicaCount: 2
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: cloud.google.com/gke-spot
+                  operator: In
+                  values: ["true"]
+                - key: n2d-highmem-2-uat-spot
+                  operator: In
+                  values: ["true"]
+    tolerations:
+      - effect: NoSchedule
+        key: cloud.google.com/gke-spot
+        operator: Exists
+      - effect: NoSchedule
+        key: n2d-highmem-2-uat-spot
+        operator: Exists
+    cronScheduledScaling:
+      - timezone: UTC
+        start: "0 13 * * *" # 20h ICT
+        end: "0 20 * * *"   # 3h  ICT
+        desiredReplicas: "1"
+      - timezone: UTC
+        start: "1 20 * * *" # 3h01  ICT
+        end: "59 12 * * *"  # 19h59 ICT
+        desiredReplicas: "2"
+  calendar:
+    enabled: false
+  auth:
+    enabled: false
+  yasuo:
+    enabled: false
+  notificationmgmt:
+    enabled: false
+  bob:
+    enabled: false
+  enigma:
+    enabled: false
+  entryexitmgmt:
+    enabled: false
+  eureka:
+    enabled: false
+  fatima:
+    enabled: false
+  fink:
+    enabled: false
+  hephaestus:
+    enabled: false
+  invoicemgmt:
+    enabled: false
+  lessonmgmt:
+    enabled: false
+  mastermgmt:
+    enabled: false
+  payment:
+    enabled: false
+  timesheet:
+    enabled: false
+  tom:
+    enabled: false
+  usermgmt:
+    enabled: false
+  virtualclassroom:
+    enabled: false
+  shamir:
+    enabled: false
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: cloud.google.com/gke-spot
+                operator: In
+                values: ["true"]
+              - key: n2d-highmem-2-uat-spot
+                operator: In
+                values: ["true"]
+  tolerations:
+    - effect: NoSchedule
+      key: cloud.google.com/gke-spot
+      operator: Exists
+    - effect: NoSchedule
+      key: n2d-highmem-2-uat-spot
+      operator: Exists
+
+  cronScheduledScaling:
+    - timezone: UTC
+      start: "0 13 * * *" # 20h ICT
+      end: "0 20 * * *"   # 3h  ICT
+      desiredReplicas: "1"
+    - timezone: UTC
+      start: "1 20 * * *" # 3h01  ICT
+      end: "59 12 * * *"  # 19h59 ICT
+      desiredReplicas: "2"
+  kedaScaledObjectMinReplicas: 1
+  kedaScaledObjectMaxReplicas: 2
+auth:
+  resources:
+    requests:
+      memory: 46Mi
+      cpu: 5m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "2m"
+    sidecar.istio.io/proxyMemory: "64Mi"
+  hpa:
+    minReplicas: 2
+    maxReplicas: 3
+    averageCPUUtilization: 300
+    averageMemoryValue: 512Mi
+  useGlobalCronScheduledScaling: true
+  hasura:
+    useGlobalCronScheduledScaling: true
+  migrationEnabled: true
+  hasuraEnabled: true
+bob:
+  resources:
+    requests:
+      memory: 55Mi
+      cpu: 5m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "5m"
+    sidecar.istio.io/proxyMemory: "72Mi"
+  hpa:
+    minReplicas: 2
+    maxReplicas: 3
+    averageCPUUtilization: 300
+    averageMemoryValue: 512Mi
+  useGlobalCronScheduledScaling: true
+  hasura:
+    resources:
+      requests:
+        memory: 320Mi
+        cpu: 15m
+    hpa:
+      minReplicas: 2
+      maxReplicas: 3
+      averageCPUUtilization: 300
+      averageMemoryValue: 512Mi
+    useGlobalCronScheduledScaling: true
+enigma:
+  resources:
+    requests:
+      memory: 32Mi
+      cpu: 1m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "2m"
+    sidecar.istio.io/proxyMemory: "64Mi"
+  hpa:
+    minReplicas: 2
+    maxReplicas: 3
+    averageCPUUtilization: 300
+    averageMemoryValue: 512Mi
+  useGlobalCronScheduledScaling: true
+entryexitmgmt:
+  resources:
+    requests:
+      memory: 50Mi
+      cpu: 5m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "5m"
+    sidecar.istio.io/proxyMemory: "64Mi"
+  hpa:
+    minReplicas: 2
+    maxReplicas: 3
+    averageCPUUtilization: 300
+    averageMemoryValue: 512Mi
+  useGlobalCronScheduledScaling: true
+  hasura:
+    useGlobalCronScheduledScaling: true
+eureka:
+  resources:
+    requests:
+      memory: 64Mi
+      cpu: 4m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "3m"
+    sidecar.istio.io/proxyMemory: "64Mi"
+  hpa:
+    minReplicas: 2
+    maxReplicas: 3
+    averageCPUUtilization: 300
+    averageMemoryValue: 512Mi
+  useGlobalCronScheduledScaling: true
+  hasura:
+    useGlobalCronScheduledScaling: true
+fatima:
+  resources:
+    requests:
+      memory: 45Mi
+      cpu: 4m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "3m"
+    sidecar.istio.io/proxyMemory: "64Mi"
+  hpa:
+    minReplicas: 2
+    maxReplicas: 3
+    averageCPUUtilization: 300
+    averageMemoryValue: 512Mi
+  useGlobalCronScheduledScaling: true
+  hasura:
+    resources:
+      requests:
+        memory: 192Mi
+        cpu: 10m
+    hpa:
+      minReplicas: 2
+      maxReplicas: 3
+      averageCPUUtilization: 300
+      averageMemoryValue: 1024Mi
+    useGlobalCronScheduledScaling: true
+invoicemgmt:
+  resources:
+    requests:
+      memory: 40Mi
+      cpu: 5m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "4m"
+    sidecar.istio.io/proxyMemory: "50Mi"
+  hpa:
+    minReplicas: 2
+    maxReplicas: 3
+    averageCPUUtilization: 300
+    averageMemoryValue: 512Mi
+  useGlobalCronScheduledScaling: true
+  hasura:
+    resources:
+      requests:
+        memory: "128Mi"
+        cpu: "5m"
+    hpa:
+      minReplicas: 2
+      maxReplicas: 3
+      averageCPUUtilization: 300
+      averageMemoryValue: 1024Mi
+    useGlobalCronScheduledScaling: true
+learner-web:
+  resources:
+    requests:
+      memory: 3Mi
+      cpu: 1m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "2m"
+    sidecar.istio.io/proxyMemory: "64Mi"
+  hpa:
+    minReplicas: 2
+    maxReplicas: 3
+    averageCPUUtilization: 300
+    averageMemoryValue: 512Mi
+  useGlobalCronScheduledScaling: true
+lessonmgmt:
+  resources:
+    requests:
+      memory: 40Mi
+      cpu: 4m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "3m"
+    sidecar.istio.io/proxyMemory: "64Mi"
+  hpa:
+    minReplicas: 2
+    maxReplicas: 3
+    averageCPUUtilization: 300
+    averageMemoryValue: 512Mi
+  useGlobalCronScheduledScaling: true
+  hasura:
+    useGlobalCronScheduledScaling: true
+virtualclassroom:
+  resources:
+    requests:
+      memory: "36Mi"
+      cpu: 3m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "2m"
+    sidecar.istio.io/proxyMemory: "50Mi"
+  hpa:
+    minReplicas: 2
+    maxReplicas: 3
+    averageCPUUtilization: 300
+    averageMemoryValue: 512Mi
+  useGlobalCronScheduledScaling: true
+mastermgmt:
+  resources:
+    requests:
+      memory: 60Mi
+      cpu: 4m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "4m"
+    sidecar.istio.io/proxyMemory: "64Mi"
+  hpa:
+    minReplicas: 2
+    maxReplicas: 3
+    averageCPUUtilization: 300
+    averageMemoryValue: 512Mi
+  useGlobalCronScheduledScaling: true
+  hasura:
+    useGlobalCronScheduledScaling: true
+notificationmgmt:
+  replicaCount: 2
+  resources:
+    requests:
+      memory: 60Mi
+      cpu: 4m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "4m"
+    sidecar.istio.io/proxyMemory: "64Mi"
+  useGlobalCronScheduledScaling: true
+payment:
+  resources:
+    requests:
+      memory: 32Mi
+      cpu: 4m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "4m"
+    sidecar.istio.io/proxyMemory: "64Mi"
+  hpa:
+    minReplicas: 2
+    maxReplicas: 3
+    averageCPUUtilization: 300
+    averageMemoryValue: 512Mi
+  useGlobalCronScheduledScaling: true
+shamir:
+  resources:
+    requests:
+      memory: 64Mi
+      cpu: 1m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "2m"
+    sidecar.istio.io/proxyMemory: "72Mi"
+  hpa:
+    minReplicas: 2
+    maxReplicas: 3
+    averageCPUUtilization: 300
+    averageMemoryValue: 512Mi
+  useGlobalCronScheduledScaling: true
+teacher-web:
+  resources:
+    requests:
+      memory: 3Mi
+      cpu: 1m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "2m"
+    sidecar.istio.io/proxyMemory: "64Mi"
+  hpa:
+    minReplicas: 2
+    maxReplicas: 3
+    averageCPUUtilization: 300
+    averageMemoryValue: 512Mi
+  useGlobalCronScheduledScaling: true
+timesheet:
+  resources:
+    requests:
+      memory: 46Mi
+      cpu: 4m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "3m"
+    sidecar.istio.io/proxyMemory: "60Mi"
+  hpa:
+    minReplicas: 2
+    maxReplicas: 3
+    averageCPUUtilization: 300
+    averageMemoryValue: 512Mi
+  useGlobalCronScheduledScaling: true
+  hasura:
+    useGlobalCronScheduledScaling: true
+tom:
+  resources:
+    requests:
+      memory: 50Mi
+      cpu: 5m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "5m"
+    sidecar.istio.io/proxyMemory: "64Mi"
+usermgmt:
+  resources:
+    requests:
+      memory: 46Mi
+      cpu: 5m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "2m"
+    sidecar.istio.io/proxyMemory: "64Mi"
+  hpa:
+    minReplicas: 2
+    maxReplicas: 3
+    averageCPUUtilization: 300
+    averageMemoryValue: 512Mi
+  useGlobalCronScheduledScaling: true
+yasuo:
+  resources:
+    requests:
+      memory: 64Mi
+      cpu: 5m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "3m"
+    sidecar.istio.io/proxyMemory: "64Mi"
+  hpa:
+    minReplicas: 2
+    maxReplicas: 3
+    averageCPUUtilization: 300
+    averageMemoryValue: 512Mi
+  useGlobalCronScheduledScaling: true
+zeus:
+  resources:
+    requests:
+      memory: 32Mi
+      cpu: 5m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "3m"
+    sidecar.istio.io/proxyMemory: "60Mi"
+  useGlobalCronScheduledScaling: true
+

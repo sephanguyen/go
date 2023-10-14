@@ -1,0 +1,49 @@
+table:
+  schema: public
+  name: topics_learning_objectives
+object_relationships:
+  - name: learning_objective
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: learning_objectives
+        insertion_order: null
+        column_mapping:
+          lo_id: lo_id
+select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+        - display_order
+        - lo_id
+        - resource_path
+        - topic_id
+        - created_at
+        - deleted_at
+        - updated_at
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+          - learning_objective:
+              deleted_at:
+                _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+        - topic_id
+        - lo_id
+        - display_order
+        - updated_at
+        - created_at
+        - deleted_at
+        - resource_path
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+          - learning_objective:
+              deleted_at:
+                _is_null: true

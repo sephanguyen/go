@@ -1,0 +1,27 @@
+syntax = "proto3";
+package mastermgmt.v1;
+import "google/api/annotations.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/mastermgmt/v1;mpb";
+
+message ImportWorkingHoursRequest {
+    bytes payload = 1;
+    string location_id = 2;
+}
+
+message ImportWorkingHoursResponse {
+    message ImportWorkingHoursError {
+        int32 row_number = 1;
+        string error = 2;
+    }
+    repeated ImportWorkingHoursError errors = 1;
+}
+
+service WorkingHoursService {
+    rpc ImportWorkingHours(ImportWorkingHoursRequest) returns (ImportWorkingHoursResponse){
+        option (google.api.http) = {
+            post: "/mastermgmt/api/v1/proxy/working_hours/import",
+            body: "*"
+        };
+    };
+}

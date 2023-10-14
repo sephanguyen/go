@@ -1,0 +1,16 @@
+apiVersion: skaffold/v2beta29
+kind: Config
+metadata:
+  name: emulator
+profiles:
+  - name: local
+    activation:
+      - env: ENV=local
+    deploy:
+      kubeContext: kind-kind
+      helm:
+        hooks:
+          before:
+            - host:
+                command: ["skaffoldv2", "deploy", "-f", "skaffold2.emulator.yaml"]
+        releases: []

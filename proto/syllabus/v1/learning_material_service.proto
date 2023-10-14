@@ -1,0 +1,167 @@
+syntax = "proto3";
+
+package syllabus.v1;
+
+import "syllabus/v1/assignment_service.proto";
+import "syllabus/v1/exam_lo_service.proto";
+import "syllabus/v1/flashcard_service.proto";
+import "syllabus/v1/learning_objective_service.proto";
+import "syllabus/v1/task_assignment_service.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/syllabus/v1;sspb";
+
+//InsertLearningMaterialRequest is central inserted request for all learning material types
+message InsertLearningMaterialRequest{
+    //choose one of learning material types
+    oneof message{
+        InsertAssignmentRequest assignment = 1;
+        InsertExamLORequest exam_lo = 2;
+        InsertFlashcardRequest flashcard = 3;
+        InsertLearningObjectiveRequest learning_objective = 4;
+        InsertTaskAssignmentRequest task_assignment = 6;
+    }
+}
+
+//InsertLearningMaterialResponse is central insert response for all learning material types
+message InsertLearningMaterialResponse {
+    //choose one of learning material types
+    oneof message{
+        InsertAssignmentResponse assignment = 1;
+        InsertExamLOResponse exam_lo = 2;
+        InsertFlashcardResponse flashcard = 3;
+        InsertLearningObjectiveResponse learning_objective = 4;
+        InsertTaskAssignmentResponse task_assignment = 6;
+    }
+}
+
+//UpdateLearningMaterialRequest is central update request for all learning material types
+message UpdateLearningMaterialRequest{
+    oneof message{
+        //choose one of learning material types
+        UpdateAssignmentRequest assignment = 1;
+        UpdateExamLORequest exam_lo = 2;
+        UpdateFlashcardRequest flashcard = 3;
+        UpdateLearningObjectiveRequest learning_objective = 4;
+        UpdateTaskAssignmentRequest task_assignment = 6;
+    }
+}
+
+//UpdateLearningMaterialResponse is central update response for all learning material types
+message UpdateLearningMaterialResponse {
+    oneof message{
+        UpdateAssignmentResponse assignment = 1;
+        UpdateExamLOResponse exam_lo = 2;
+        UpdateFlashcardResponse flashcard = 3;
+        UpdateLearningObjectiveResponse learning_objective = 4;
+        UpdateTaskAssignmentRequest task_assignment = 6;
+
+    }
+}
+
+//DeleteLearningMaterialRequest is delete a learning material request
+message DeleteLearningMaterialRequest{
+    string learning_material_id = 1;
+}
+
+// DeleteLearningMaterialResponse is empty message
+message DeleteLearningMaterialResponse {
+}
+
+// SwapDisplayOrderRequest is two learning material types to swap these display order
+message SwapDisplayOrderRequest {
+    string first_learning_material_id = 1;
+    string second_learning_material_id = 2;
+}
+
+// SwapDisplayOrderResponse is empty response
+message SwapDisplayOrderResponse {
+}
+
+//TODO: define then PHASE 3 -- questions.
+// message InsertQuizSetTestRequest {
+//     StudyPlanItemIdentity study_plan_item_identity = 1;
+//     // let empty for the first call
+//     google.protobuf.StringValue shuffle_quiz_set_id = 2; // = set_id - make consistent name
+//     string session_id = 3;
+//     bool keep_order = 4;
+//     common.v1.Paging paging = 5;
+// }
+// message Quiz { // TODO: Refactor PHASE 3
+//     QuizCore core = 1;
+//     string learning_material_id = 2;
+//     string question_url = 3;
+//     repeated string answers_url = 4;
+//     string explanation_url = 5;
+//     QuizStatus status = 6;
+// }
+  
+// message InsertQuizSetTestResponse {
+//     common.v1.Paging next_page = 1;
+//     repeated Quiz quizzes = 2;
+//     string shuffle_quiz_set_id = 3;
+// }
+message DuplicateBookRequest {
+    string book_id = 1;
+    string book_name = 2;
+  };
+  
+message DuplicateBookResponse {
+    string newBookID = 1;
+    repeated string new_topic_id = 2;
+    repeated string old_topic_id = 3;
+};
+
+//ListLearningMaterial is central insert response for all learning material types
+message ListLearningMaterialRequest {
+    oneof message{
+        ListAssignmentRequest assignment = 1;
+        ListExamLORequest exam_lo = 2;
+        ListFlashcardRequest flashcard = 3;
+        ListLearningObjectiveRequest learning_objective = 4;
+        ListTaskAssignmentRequest task_assignment = 6;
+    }
+}
+
+message ListLearningMaterialResponse {
+    oneof message{
+        ListAssignmentResponse assignment = 1;
+        ListExamLOResponse exam_lo = 2;
+        ListFlashcardResponse flashcard = 3;
+        ListLearningObjectiveResponse learning_objective = 4;
+        ListTaskAssignmentResponse task_assignment = 6;
+    }
+}
+
+message UpdateLearningMaterialNameRequest {
+    string learning_material_id = 1;
+    string new_learning_material_name = 2;
+}
+
+message UpdateLearningMaterialNameResponse {
+}
+
+// LearningMaterial is a proxy gRPC service which is used to centralize all 
+// learning material gRPC services
+service LearningMaterial {
+    //InsertLearningMaterial insert a learning material type
+    rpc InsertLearningMaterial(InsertLearningMaterialRequest)
+        returns (InsertLearningMaterialResponse);
+    //UpdateLearningMaterial update a learning material type
+    rpc UpdateLearningMaterial(UpdateLearningMaterialRequest)
+        returns (UpdateLearningMaterialResponse);
+    //DeleteLearningMaterial delete a learning material type
+    rpc DeleteLearningMaterial(DeleteLearningMaterialRequest)
+        returns (DeleteLearningMaterialResponse);
+    //SwapDisplayOrder swaps display order of two learning materials
+    rpc SwapDisplayOrder (SwapDisplayOrderRequest)
+        returns (SwapDisplayOrderResponse);
+    // rpc InsertQuizSetTest(InsertQuizSetTestRequest)  //CreateQuizTest
+        // returns (InsertQuizSetTestResponse); //TODO: Refactor PHASE 3 - convert to GenerateQuestionSet
+    
+    rpc DuplicateBook(DuplicateBookRequest) //DuplicateBook
+        returns (DuplicateBookResponse);
+    rpc ListLearningMaterial (ListLearningMaterialRequest)
+        returns (ListLearningMaterialResponse);
+    rpc UpdateLearningMaterialName (UpdateLearningMaterialNameRequest)
+        returns (UpdateLearningMaterialNameResponse);
+}

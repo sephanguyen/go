@@ -1,0 +1,2 @@
+DROP TABLE IF EXISTS date_info;
+DROP TABLE IF EXISTS date_type;

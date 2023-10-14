@@ -1,0 +1,1 @@
+CREATE INDEX CONCURRENTLY IF NOT EXISTS student_event_logs_learning_material_id_idx ON public.student_event_logs(learning_material_id);

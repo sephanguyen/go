@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "util.fullname" . }}
+  labels:
+{{ include "util.labels" . | indent 4 }}
+spec:
+  replicas: {{ default .Values.global.replicaCount .Values.replicaCount }}
+  serviceName: {{ include "util.fullname" . }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "util.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+    {{- include "util.workloadMetadata" . | indent 6 }}
+    spec:
+    {{- with (default .Values.global.imagePullSecrets .Values.imagePullSecrets) }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      serviceAccountName: {{ include "util.serviceAccountName" . }}
+      volumes:
+      {{- include "util.workloadVolumes" . | indent 8 }}
+      initContainers:
+      {{- include "util.workloadInitContainers" . | nindent 8 }}
+      containers:
+      {{- include "util.workloadContainers" . | indent 8 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values }}
+      {{- $context := (mustMerge (deepCopy .) $) }}
+      affinity: {{- include "util.affinityNew" $context | nindent 8 }}
+      tolerations: {{- include "util.tolerations" $context | nindent 8 }}
+      {{- end }}

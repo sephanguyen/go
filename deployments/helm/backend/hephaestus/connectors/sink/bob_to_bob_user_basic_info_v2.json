@@ -1,0 +1,23 @@
+{
+  "name": "{{ .Values.global.environment }}_{{ .Values.global.vendor }}_bob_to_bob_user_basic_info_sink_connector_v2",
+  "config": {
+      "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+      "transforms.unwrap.delete.handling.mode": "drop",
+      "tasks.max": "1",
+      "topics": "{{ .Values.global.environment }}.{{ .Values.global.vendor }}.bob.public.users",
+      "transforms": "unwrap,route",
+      "fields.whitelist": "user_id,name,first_name,last_name,full_name_phonetic,first_name_phonetic,last_name_phonetic,resource_path,created_at,updated_at,deleted_at,email,gender,user_role,user_external_id",
+      "transforms.route.type": "org.apache.kafka.connect.transforms.RegexRouter",
+      "transforms.route.regex": "([^.]+).([^.]+).([^.]+).([^.]+).([^.]+)",
+      "delete.enabled": "false",
+      "transforms.unwrap.drop.tombstones": "true",
+      "auto.create": "false",
+      "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+      "connection.url": "${file:/config/kafka-connect-config.properties:bob_url}",
+      "insert.mode": "upsert",
+      "table.name.format": "public.user_basic_info",
+      "transforms.route.replacement": "$5",
+      "pk.mode": "record_value",
+      "pk.fields": "user_id"
+  }
+}

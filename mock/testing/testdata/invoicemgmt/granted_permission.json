@@ -1,0 +1,121 @@
+{
+	"schema": [
+		{
+			"column_name": "location_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "permission_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "permission_name",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "role_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "role_name",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "user_group_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "user_group_name",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "granted_permission",
+			"policyname": "rls_granted_permission",
+			"qual": "permission_check(resource_path, 'granted_permission'::text)",
+			"with_check": "permission_check(resource_path, 'granted_permission'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "granted_permission",
+			"policyname": "rls_granted_permission_restrictive",
+			"qual": "permission_check(resource_path, 'granted_permission'::text)",
+			"with_check": "permission_check(resource_path, 'granted_permission'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "granted_permission__pk",
+			"column_name": "location_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "granted_permission__pk",
+			"column_name": "permission_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "granted_permission__pk",
+			"column_name": "role_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "granted_permission__pk",
+			"column_name": "user_group_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "granted_permission",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

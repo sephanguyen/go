@@ -1,0 +1,38 @@
+{{- range .Values.networkPolicy.rules }}
+{{/* Rule's schema validation */}}
+{{- if not (hasKey . "namespace") }}
+  {{- printf "rule must contain \"namespace\" field (rule: %v)" . | fail }}
+{{- end }}
+{{- if empty .namespace }}
+  {{- printf "\"namespace\" cannot be an empty string (rule: %v)" . | fail }}
+{{- end }}
+{{- if not (hasKey . "allowedIngressFromNamespaces") }}
+  {{- printf "rule must contain \"allowedIngressFromNamespaces\" field (rule: %v)" . | fail }}
+{{- end }}
+{{- if not (hasKey . "environments") }}
+  {{- printf "rule must contain \"environments\" field (rule: %v)" . | fail }}
+{{- end }}
+
+{{/* Actual data */}}
+{{- if has (include "util.environment" $) .environments }}
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: "ingress-{{ .namespace | replace "<env>" (include "util.environment" $) | replace "<org>" (include "util.vendor" $) }}"
+  namespace: "{{ .namespace | replace "<env>" (include "util.environment" $) | replace "<org>" (include "util.vendor" $) }}"
+spec:
+  podSelector: {} # targets all pods in current namespace
+  ingress:
+    - from:
+        # Always allow access from pods in the same namespace
+        - podSelector: {}
+
+        # User-defined rules
+    {{- range .allowedIngressFromNamespaces }}
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: "{{ . | replace "<env>" (include "util.environment" $) | replace "<org>" (include "util.vendor" $) }}"
+    {{- end }} {{/*{{- range .allowedIngressFromNamespaces }}*/}}
+---
+{{- end }} {{/*{{- if has (include "util.environment" $) .envs }}*/}}
+{{- end }} {{/*{{- range .Values.networkPolicy.rules }}*/}}

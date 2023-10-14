@@ -1,0 +1,93 @@
+@startuml organization_simplified
+hide circle
+
+namespace Organization <<shared kernel>> {
+    class Organization  <<entity>> #90EE90 {
+        organization_id string
+        configs jsonb
+        name string
+    }
+    class Location <<entity>> #90EE90{
+        location_id string
+        organization_id string
+        name string
+        lat float64
+        long float64
+        address string
+    }
+    class Course <<entity>> {
+        course_id string
+        name    string
+        <color:red>country string
+        subject string
+        grade string
+        display_order int64
+        <color:red>school_id string
+        course_type string
+        start_date datetime
+        end_date datetime
+        <color:red>teacher_ids []string
+        <color:red>preset_study_plan_id string
+        icon    string
+        <color:red>status  string
+        <color:green>owner string
+    }
+
+
+    class Class <<entity>> {
+        class_id string
+        <color:red>school_id int64 
+        avatar string
+        name string
+        subjects string
+        grades string
+        <color:red>status string
+        <color:red>plan_id string
+        <color:red>country string
+        <color:red>plan_expired_at string
+        <color:red>plan_duration string
+        <color:red>class_code string
+        <color:green>owner string
+    }
+    class Student <<value object>> {
+        student_id string
+    }
+    
+    class CourseStudent <<value object>> #red {
+        student_id string
+        course_id string
+        <color:green>owner string
+    }
+
+    class ClassStudent <<value object>> #red {
+        class_id string
+        course_id string
+        <color:green>owner string
+    }
+    
+    class StudentEnrollment <<value object>> #90EE90{
+        student_id string
+        class_id string
+        owner string
+    }
+
+    class Lesson <<value object>>{
+    }
+
+    class LessonStudent <<value object>>{
+        student_id string
+        lesson_id string
+    }
+
+    Organization "1" *-- "m" Location
+    Location "1" *-- "m" Location
+    Location "1" *-- "m" Course
+    Location "1" *-- "m" Lesson
+    Course "1" *-- "m" Class
+
+    Lesson "1" --* "many" LessonStudent
+    Student "1" --* "many" LessonStudent
+    Class "1" --* "many" StudentEnrollment
+
+}
+@enduml

@@ -1,0 +1,599 @@
+syntax = "proto3";
+
+package usermgmt.v2;
+
+import "usermgmt/v2/enums.proto";
+import "common/v1/enums.proto";
+import "common/v1/profiles.proto";
+import "common/v1/requests.proto";
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/timestamp.proto";
+
+option java_package = "io.manabie.quarkus.proto.usermgmt.v2";
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/usermgmt/v2;upb";
+
+message UserProfile {
+  string user_id = 1;
+  string email = 2;
+  string name = 3;
+  string avatar = 4;
+  UserGroup group = 5;
+  string phone_number = 6;
+  string facebook_id = 7;
+  string apple_user_id = 8;
+  string given_name = 9;
+  common.v1.Country country_code = 10;
+  google.protobuf.Timestamp birthday = 11;
+  Gender gender = 12;
+  repeated string location_ids = 13;
+  string first_name = 14;
+  string last_name = 15;
+  string first_name_phonetic = 16;
+  string last_name_phonetic = 17;
+  string full_name_phonetic = 18;
+  string external_user_id = 19;
+  string username = 20;
+}
+
+message UserNameFields {
+  string first_name = 1;
+  string last_name = 2;
+  string first_name_phonetic = 3;
+  string last_name_phonetic = 4;
+}
+
+message Student {
+  UserProfile user_profile = 1;
+  int32 grade = 2 [deprecated = true];
+  int32 school_id = 3;
+  StudentEnrollmentStatus enrollment_status = 4;
+  string student_external_id = 5;
+  string student_note = 6;
+  string email = 7;
+  google.protobuf.Timestamp birthday = 8 [deprecated = true];
+  Gender gender = 9 [deprecated = true];
+  string grade_id = 10;
+}
+
+message Parent {
+  UserProfile user_profile = 1;
+  int32 school_id = 2;
+}
+
+message SchoolHistory {
+  string school_id = 1;
+  string school_course_id = 2;
+  google.protobuf.Timestamp start_date = 3;
+  google.protobuf.Timestamp end_date = 4;
+}
+
+message EnrollmentStatusHistory {
+  string student_id = 1;
+  string location_id = 2;
+  usermgmt.v2.StudentEnrollmentStatus enrollment_status = 3;
+  string comment = 4;
+  google.protobuf.Timestamp start_date = 5;
+  google.protobuf.Timestamp end_date = 6;
+}
+
+message UserAddress {
+  string address_id = 1;
+  AddressType address_type = 2;
+  string postal_code = 3;
+  string prefecture = 4;
+  string city = 5;
+  string first_street = 6;
+  string second_street = 7;
+}
+
+enum StudentContactPreference {
+  STUDENT_PHONE_NUMBER = 0;
+  STUDENT_HOME_PHONE_NUMBER = 1;
+  PARENT_PRIMARY_PHONE_NUMBER = 2;
+  PARENT_SECONDARY_PHONE_NUMBER = 3;
+}
+
+enum StudentPhoneNumberType {
+  PHONE_NUMBER = 0;
+  HOME_PHONE_NUMBER = 1;
+}
+
+message StudentPhoneNumber {
+  string phone_number = 1;
+  string home_phone_number = 2;
+  StudentContactPreference contact_preference = 3;
+}
+
+message StudentPhoneNumberWithID {
+  string student_phone_number_id = 1;
+  StudentPhoneNumberType phone_number_type = 2;
+  string phone_number = 3;
+}
+
+message UpdateStudentPhoneNumber {
+  repeated StudentPhoneNumberWithID student_phone_number = 1;
+  StudentContactPreference contact_preference = 3;
+}
+
+message ParentPhoneNumber {
+  string phone_number = 1;
+  ParentPhoneNumberType phone_number_type = 2;
+  string phone_number_id = 3;
+
+  enum ParentPhoneNumberType {
+    PARENT_PRIMARY_PHONE_NUMBER = 0;
+    PARENT_SECONDARY_PHONE_NUMBER = 1;
+  }
+}
+
+// requests
+message CreateStudentRequest {
+  int32 school_id = 1;
+  StudentProfile student_profile = 2;
+  repeated SchoolHistory school_histories = 3;
+  repeated UserAddress user_addresses = 4;
+  repeated EnrollmentStatusHistory enrollment_status_histories = 5;
+
+  message StudentProfile {
+    string email = 1;
+    string password = 2;
+    string name = 3 [deprecated = true];
+    string phone_number = 4 [deprecated = true];
+    common.v1.Country country_code = 5;
+    int32 grade = 6 [deprecated = true];
+    usermgmt.v2.StudentEnrollmentStatus enrollment_status = 7;
+    string student_external_id = 8;
+    string student_note = 9;
+    google.protobuf.Timestamp birthday = 10;
+    Gender gender = 11;
+    repeated string location_ids = 12;
+    string enrollment_status_str = 13;
+    string first_name = 14;
+    string last_name = 15;
+    string first_name_phonetic = 16;
+    string last_name_phonetic = 17;
+    StudentPhoneNumber student_phone_number = 18;
+    string grade_id = 19;
+    repeated string tag_ids = 20;
+  }
+}
+
+message CreateParentsAndAssignToStudentRequest {
+  int32 school_id = 1;
+  string student_id = 2;
+  repeated ParentProfile parent_profiles = 3;
+
+  message ParentProfile {
+    string email = 1;
+    string password = 2;
+    string name = 3;
+    string phone_number = 4 [deprecated = true];
+    common.v1.Country country_code = 5;
+    FamilyRelationship relationship = 6;
+    repeated string tag_ids = 7;
+    repeated ParentPhoneNumber parent_phone_numbers = 8;
+    string remarks = 9;
+    UserNameFields user_name_fields = 10;
+    string external_user_id = 11;
+    string username = 12;
+  }
+}
+
+enum StaffPhoneNumberType {
+  STAFF_PRIMARY_PHONE_NUMBER = 0;
+  STAFF_SECONDARY_PHONE_NUMBER = 1;
+}
+
+message StaffPhoneNumber {
+  string phone_number = 1;
+  StaffPhoneNumberType phone_number_type = 2;
+  string phone_number_id = 3;
+}
+
+
+enum StaffWorkingStatus {
+  AVAILABLE = 0;
+  RESIGNED = 1;
+  ON_LEAVE = 2;
+}
+
+message CreateStaffRequest {
+  message StaffProfile {
+    string name = 1;
+    string organization_id = 2;
+    UserGroup user_group = 3;
+    common.v1.Country country = 4;
+    string phone_number = 5 [deprecated = true];
+    string email = 6;
+    string avatar = 7;
+    repeated string user_group_ids = 8;
+    repeated string location_ids = 9;
+    google.protobuf.Timestamp birthday = 10;
+    Gender gender = 11;
+    repeated StaffPhoneNumber staff_phone_number = 12;
+    StaffWorkingStatus working_status = 13;
+    google.protobuf.Timestamp start_date = 14;
+    google.protobuf.Timestamp end_date = 15;
+    string remarks = 16;
+    UserNameFields user_name_fields = 17;
+    repeated string tag_ids = 18;
+    string external_user_id = 19;
+    string username = 20;
+  }
+
+  StaffProfile staff = 1;
+}
+
+message CreateStaffResponse {
+  message StaffProfile {
+    string staff_id = 1;
+    string name = 2;
+    string organization_id = 3;
+    UserGroup user_group = 4;
+    common.v1.Country country = 5;
+    string phone_number = 6 [deprecated = true];
+    string email = 7;
+    string avatar = 8;
+    repeated string user_group_ids = 9;
+    repeated string location_ids = 10;
+    google.protobuf.Timestamp birthday = 11;
+    Gender gender = 12;
+    repeated StaffPhoneNumber staff_phone_number = 13;
+    StaffWorkingStatus working_status = 14;
+    google.protobuf.Timestamp start_date = 15;
+    google.protobuf.Timestamp end_date = 16;
+    string remarks = 17;
+    UserNameFields user_name_fields = 18;
+    repeated string tag_ids = 19;
+    string external_user_id = 20;
+    string username = 21;
+  }
+
+  StaffProfile staff = 1;
+}
+
+message UpdateStaffRequest {
+  message StaffProfile {
+    string staff_id = 1;
+    string name = 2;
+    string email = 3;
+    repeated string user_group_ids = 4;
+    repeated string location_ids = 5;
+    google.protobuf.Timestamp birthday = 6;
+    Gender gender = 7;
+    repeated StaffPhoneNumber staff_phone_number = 8;
+    StaffWorkingStatus working_status = 9;
+    google.protobuf.Timestamp start_date = 10;
+    google.protobuf.Timestamp end_date = 11;
+    string remarks = 12;
+    UserNameFields user_name_fields = 13;
+    repeated string tag_ids = 14;
+    string external_user_id = 15;
+    string username = 16;
+  }
+
+  StaffProfile staff = 1;
+}
+
+message UpdateStaffResponse {
+  bool successful = 1;
+}
+
+message UpdateStudentRequest {
+  int32 school_id = 1;
+  StudentProfile student_profile = 2;
+  repeated SchoolHistory school_histories = 3;
+  repeated UserAddress user_addresses = 4;
+  repeated EnrollmentStatusHistory enrollment_status_histories = 5;
+
+  message StudentProfile {
+    string id = 1;
+    string name = 2 [deprecated = true];
+    int32 grade = 3 [deprecated = true];
+    usermgmt.v2.StudentEnrollmentStatus enrollment_status = 4;
+    string student_external_id = 5;
+    string student_note = 6;
+    string email = 7;
+    google.protobuf.Timestamp birthday = 8;
+    Gender gender = 9;
+    repeated string location_ids = 10;
+    string enrollment_status_str = 11;
+    string first_name = 12;
+    string last_name = 13;
+    string first_name_phonetic = 14;
+    string last_name_phonetic = 15;
+    StudentPhoneNumber student_phone_number = 16[deprecated = true];
+    string grade_id = 17;
+    repeated string tag_ids = 18;
+    UpdateStudentPhoneNumber student_phone_numbers = 19;
+  }
+}
+
+message UpdateStaffSettingRequest {
+  string staff_id = 1;
+  bool auto_create_timesheet = 2;
+}
+
+message UpdateStaffSettingResponse {
+  bool successful = 1;
+}
+
+message UpdateParentsAndFamilyRelationshipRequest {
+  int32 school_id = 1;
+  string student_id = 2;
+  repeated ParentProfile parent_profiles = 3;
+  message ParentProfile {
+    string id = 1;
+    string email = 2;
+    FamilyRelationship relationship = 3;
+    repeated string tag_ids = 4;
+    repeated ParentPhoneNumber parent_phone_numbers = 5;
+    string remarks = 6;
+    UserNameFields user_name_fields = 7;
+    string external_user_id = 8;
+    string username = 9;
+  }
+}
+
+message ReissueUserPasswordRequest {
+  string user_id = 1;
+  string new_password = 2;
+}
+
+
+message UpsertStudentCoursePackageRequest {
+  string student_id = 1;
+  repeated StudentPackageProfile student_package_profiles = 2;
+  repeated string location_ids = 3 [deprecated = true];
+
+  message StudentPackageProfile {
+    oneof id {
+      string course_id = 1;
+      string student_package_id = 2;
+    }
+    google.protobuf.Timestamp start_time = 3;
+    google.protobuf.Timestamp end_time = 4;
+    repeated string location_ids = 5  [deprecated = true];
+    repeated StudentPackageExtra student_package_extra = 6;
+  }
+}
+
+message StudentPackageExtra {
+  string location_id = 6;
+  string class_id = 7;
+}
+
+// responses
+
+message CreateStudentResponse {
+  StudentProfile student_profile = 1;
+
+  message StudentProfile {
+    Student student = 1;
+    string student_password = 2;
+    StudentPhoneNumber student_phone_number = 3;
+    repeated string tag_ids = 4;
+  }
+}
+
+message CreateParentsAndAssignToStudentResponse {
+  string student_id = 1;
+  repeated ParentProfile parent_profiles = 2;
+
+  message ParentProfile {
+    Parent parent = 1;
+    string parent_password = 2;
+    FamilyRelationship relationship = 3;
+    repeated string tag_ids = 4;
+    repeated ParentPhoneNumber parent_phone_numbers = 5;
+    string remarks = 6;
+    UserNameFields user_name_fields = 7;
+  }
+}
+
+message ReissueUserPasswordResponse {
+  bool successful = 1;
+}
+
+message UpdateStudentResponse {
+  StudentProfile student_profile = 1;
+
+  message StudentProfile {
+    string id = 1;
+    string name = 2;
+    int32 grade = 3 [deprecated = true];
+    usermgmt.v2.StudentEnrollmentStatus enrollment_status = 4;
+    string student_external_id = 5;
+    string student_note = 6;
+    string email = 7;
+    google.protobuf.Timestamp birthday = 8;
+    Gender gender = 9;
+    repeated string location_ids = 10;
+    string enrollment_status_str = 11;
+    string first_name = 12;
+    string last_name = 13;
+    string first_name_phonetic = 14;
+    string last_name_phonetic = 15;
+    string full_name_phonetic = 16;
+    StudentPhoneNumber student_phone_number = 17;
+    string grade_id = 18;
+    repeated string tag_ids = 19;
+  }
+}
+
+message UpdateParentsAndFamilyRelationshipResponse {
+  string student_id = 1;
+  repeated ParentProfile parent_profiles = 2;
+  
+  message ParentProfile {
+    Parent parent = 1;
+    FamilyRelationship relationship = 2;
+  }
+}
+
+message UpsertStudentCoursePackageResponse {
+  string student_id = 1;
+  repeated StudentPackageProfile student_package_profiles = 2;
+
+  message StudentPackageProfile {
+    string student_course_package_id = 1;
+    string course_id = 2;
+    google.protobuf.Timestamp start_time = 3;
+    google.protobuf.Timestamp end_time = 4;
+    repeated string location_ids = 5  [deprecated = true];
+    repeated StudentPackageExtra student_package_extra = 6;
+  }
+}
+
+message RemoveParentFromStudentRequest {
+  string parent_id = 1;
+  string student_id = 2;
+}
+
+message RemoveParentFromStudentResponse {
+  string parent_id = 1;
+  string student_id = 2;
+}
+
+message UpdateUserProfileRequest {
+  UserProfile profile = 1;
+  message UserProfile {
+    string id = 1;
+    string name = 2;
+    common.v1.Country country = 3;
+    string phone_number = 4;
+    string email = 5;
+    string avatar = 6;
+    string device_token = 7;
+    string group = 8;
+  }
+}
+message UpdateUserProfileResponse {
+  bool successful = 1;
+}
+message UpdateUserLastLoginDateRequest {
+  google.protobuf.Timestamp last_login_date = 1;
+}
+
+message UpdateUserLastLoginDateResponse {
+  bool successful = 1;
+}
+
+message RetrieveStudentAssociatedToParentAccountRequest {
+}
+
+message RetrieveStudentAssociatedToParentAccountResponse {
+  repeated common.v1.BasicProfile profiles = 1;
+}
+
+message UpdateUserDeviceTokenRequest {
+  string user_id = 1;
+  string device_token = 2;
+  bool allow_notification = 3;
+}
+
+message UpdateUserDeviceTokenResponse {
+  bool successful = 1;
+}
+
+message ImportParentsAndAssignToStudentRequest {
+  bytes payload = 1;
+}
+
+message ImportParentsAndAssignToStudentResponse {
+  message ImportParentsAndAssignToStudentError {
+    int32 row_number = 1;
+    string error = 2;
+    string field_name = 3;
+  }
+  repeated ImportParentsAndAssignToStudentError errors = 1;
+}
+
+message GenerateImportParentsAndAssignToStudentTemplateRequest {
+}
+
+message GenerateImportParentsAndAssignToStudentTemplateResponse {
+  bytes data = 1;
+}
+
+// services
+service UserModifierService {
+  rpc CreateStudent(CreateStudentRequest) returns (CreateStudentResponse) { option deprecated = true; };
+  rpc CreateParentsAndAssignToStudent(CreateParentsAndAssignToStudentRequest) returns (CreateParentsAndAssignToStudentResponse);
+  rpc ImportParentsAndAssignToStudent(ImportParentsAndAssignToStudentRequest) returns (ImportParentsAndAssignToStudentResponse);
+  rpc UpdateStudent(UpdateStudentRequest) returns (UpdateStudentResponse) { option deprecated = true; };
+  rpc UpdateParentsAndFamilyRelationship(UpdateParentsAndFamilyRelationshipRequest) returns (UpdateParentsAndFamilyRelationshipResponse);
+  rpc ReissueUserPassword(ReissueUserPasswordRequest) returns (ReissueUserPasswordResponse);
+  rpc UpsertStudentCoursePackage(UpsertStudentCoursePackageRequest) returns (UpsertStudentCoursePackageResponse);
+  rpc RemoveParentFromStudent(RemoveParentFromStudentRequest) returns (RemoveParentFromStudentResponse);
+  rpc UpdateUserProfile(UpdateUserProfileRequest) returns (UpdateUserProfileResponse);
+  rpc UpdateUserDeviceToken(UpdateUserDeviceTokenRequest) returns (UpdateUserDeviceTokenResponse);
+  rpc UpdateUserLastLoginDate(UpdateUserLastLoginDateRequest) returns (UpdateUserLastLoginDateResponse);
+  rpc GenerateImportParentsAndAssignToStudentTemplate(GenerateImportParentsAndAssignToStudentTemplateRequest) returns (GenerateImportParentsAndAssignToStudentTemplateResponse);
+
+}
+
+message SearchBasicProfileRequest{
+  repeated string user_ids = 1;
+  google.protobuf.StringValue search_text = 2;
+  common.v1.Paging paging = 3;
+  repeated string location_ids = 4;
+}
+
+message SearchBasicProfileResponse{
+  repeated common.v1.BasicProfile profiles = 1;
+  common.v1.Paging next_page = 2;
+}
+
+message BasicProfile {
+  message School {
+    int64 school_id = 1;
+    string school_name = 2;
+  }
+  message Role {
+    string role = 1;
+    google.protobuf.Timestamp created_at = 2;
+    string role_id = 3;
+  }
+  message UserGroup {
+    string user_group = 1;
+    repeated Role roles = 2;
+    string user_group_id = 3;
+  }
+
+  string user_id = 1;
+  string name = 2;
+  string avatar = 3;
+  string user_group = 4;
+  common.v1.Country country = 5;
+  string email = 6;
+  School school = 7;
+  repeated UserGroup user_group_v2 = 8;
+  google.protobuf.Timestamp created_at = 9;
+  google.protobuf.Timestamp last_login_date = 10;
+  string first_name = 11;
+  string last_name = 12;
+}
+
+message GetBasicProfileRequest {
+  repeated string user_ids = 1;
+}
+
+message GetBasicProfileResponse {
+  repeated BasicProfile profiles = 1;
+}
+
+service UserReaderService {
+  rpc SearchBasicProfile(SearchBasicProfileRequest)
+      returns (SearchBasicProfileResponse);
+  rpc RetrieveStudentAssociatedToParentAccount(RetrieveStudentAssociatedToParentAccountRequest)
+      returns (RetrieveStudentAssociatedToParentAccountResponse);
+  rpc GetBasicProfile(GetBasicProfileRequest)
+      returns (GetBasicProfileResponse);
+}
+
+service StaffService {
+  rpc CreateStaff(CreateStaffRequest) returns (CreateStaffResponse);
+  rpc UpdateStaff(UpdateStaffRequest) returns (UpdateStaffResponse);
+  rpc UpdateStaffSetting(UpdateStaffSettingRequest) returns (UpdateStaffSettingResponse);
+}

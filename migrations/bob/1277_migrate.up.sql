@@ -1,0 +1,1 @@
+ALTER TABLE public.notification_student_courses DROP COLUMN IF EXISTS subscription_id;

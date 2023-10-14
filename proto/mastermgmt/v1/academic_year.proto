@@ -1,0 +1,80 @@
+syntax = "proto3";
+package mastermgmt.v1;
+import "google/api/annotations.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/mastermgmt/v1;mpb";
+
+message ImportAcademicCalendarRequest {
+    bytes payload = 1;
+    string location_id = 2;
+    string academic_year_id = 3;
+    repeated string academic_closed_days = 4;
+}
+
+message ImportAcademicCalendarResponse {
+  message ImportAcademicCalendarError {
+    int32 row_number = 1;
+    string error = 2;
+  }
+  repeated ImportAcademicCalendarError errors = 1;
+}
+
+message ExportAcademicCalendarRequest {
+    string academic_year_id = 1;
+    string location_id = 2;
+}
+
+message ExportAcademicCalendarResponse {
+  bytes data = 1;
+}
+
+message RetrieveLocationsForAcademicRequest {
+    string academic_year_id = 1;
+}
+
+message RetrieveLocationsForAcademicResponse {
+  message Location {
+    string location_id = 1;
+    string name = 2;
+    bool is_imported = 3;
+  }
+  repeated Location locations = 1;
+}
+
+message RetrieveLocationsByLocationTypeLevelConfigRequest {
+}
+
+message RetrieveLocationsByLocationTypeLevelConfigResponse {
+message Location {
+  string location_id = 1;
+  string name = 2;
+}
+repeated Location locations = 1;
+}
+
+service AcademicYearService {
+    rpc ImportAcademicCalendar(ImportAcademicCalendarRequest) returns (ImportAcademicCalendarResponse){
+        option (google.api.http) = {
+            post: "/mastermgmt/api/v1/proxy/academic/calendars",
+            body: "*"
+        };
+    };
+
+    rpc ExportAcademicCalendar(ExportAcademicCalendarRequest) returns (ExportAcademicCalendarResponse){
+        option (google.api.http) = {
+            get: "/mastermgmt/api/v1/proxy/academic/calendars/export/{academic_year_id}/{location_id}",
+        };
+    };
+
+    rpc RetrieveLocationsForAcademic(RetrieveLocationsForAcademicRequest) returns (RetrieveLocationsForAcademicResponse){
+        option (google.api.http) = {
+            get: "/mastermgmt/api/v1/proxy/academic/locations/{academic_year_id}"
+        };
+    };
+
+    rpc RetrieveLocationsByLocationTypeLevelConfig(RetrieveLocationsByLocationTypeLevelConfigRequest) returns (RetrieveLocationsByLocationTypeLevelConfigResponse){
+      option (google.api.http) = {
+          get: "/mastermgmt/api/v1/proxy/academic/locations_by_level_config"
+      };
+    };
+}

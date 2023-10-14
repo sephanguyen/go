@@ -1,0 +1,399 @@
+@startuml payment_simplified
+hide circle
+
+note "will still be updated" as N1
+OrderManagement .up. N1
+namespace OrderManagement {
+
+    class Location <<value object>> #SkyBlue {
+        id: string
+        ...
+        resource_path: string
+    }
+
+    class Grade <<value object>> #SkyBlue {
+        id: int
+        ...
+        resource_path: string
+    }
+
+    class AccountingCategory <<entity>> #90EE90 {
+        id: int
+        name: string
+        remarks: string
+        is_archived: boolean
+        created_date: datetime
+        updated_date: datetime
+        resource_path: string
+    }
+
+    class Course <<value object>> #SkyBlue {
+        id: string
+        ...
+        resource_path: string
+    }
+
+    ' class CourseGrade <<entity>> #339898 {
+    '     course_id: string
+    '     grade_id: int
+    '     created_at: datetime
+    '     resource_path: string
+    ' }
+
+    ' class CourseLocation <<entity>> #90EE90 {
+    '     course_id: string
+    '     location_id: string
+    '     created_at: datetime
+    '     resource_path: string
+    ' }
+
+    ' class CourseSubject <<entity>> #90EE90 {
+    '     course_id: string
+    '     grade_id: int
+    '     location_id: string
+    '     brand_id: string
+    '     subject_id: string
+    '     resource_path: string
+    ' }
+
+    class Product <<entity>> #AAAAAA {
+        id: int
+        name: string
+        product_type: enum <color:Purple>- package, fee, material
+        tax_id: int
+        billing_ratio_type_id: int
+        available_from: datetime
+        available_until: datetime
+        remarks: string
+        custom_billing_period: datetime
+        billing_schedule_id: int
+        disable_pro_rating_flag: boolean
+        is_archived: boolean
+        created_date: datetime
+        updated_date: datetime
+        resource_path: string
+    }
+
+    class ProductPackage <<entity>> #90EE90 {
+        id: int <color:Purple>- product id for product type package
+        package_type: enum <color:Purple>- onetime, slot-based, frequency, schedule
+        max_slot: int
+        package_start_date: datetime
+        package_end_date: datetime
+        resource_path: string
+    }
+
+    class ProductMaterial <<entity>> #90EE90 {
+        id: int <color:Purple>- product id for product type material
+        material_type: enum <color:Purple>- onetime, recurring
+        custom_billing_date: datetime
+    }
+
+    class ProductFee <<entity>> #90EE90 {
+        id: int <color:Purple>- product id for product type fee
+        fee_type: enum <color:Purple>- onetime, recurring
+        resource_path: string
+    }
+
+    class ProductGrade <<entity>> #339898 {
+        product_id: int
+        grade_id: int
+        created_at: datetime
+        resource_path: string
+    }
+
+    class ProductLocation <<entity>> #339898 {
+        product_id: int
+        location_id: string
+        created_at: datetime
+        resource_path: string
+    }
+
+    class ProductAccountingCategory <<entity>> #339898 {
+        product_id: int
+        accounting_category_id: int
+        created_at: datetime
+        resource_path: string
+    }
+
+    class PackageCourse <<entity>> #339898 {
+        package_id: int <color:Purple>- product id for product type package
+        course_id: string
+        mandatory_flag: bool
+        created_at: datetime
+        resource_path: string
+    }
+
+    ' class CourseMaterial <<entity>> #90EE90 {
+    '     course_id: string
+    '     material_id: int
+    '     created_at: datetime
+    '     resource_path: string
+    ' }
+
+    ' class CourseFee <<entity>> #90EE90 {
+    '     course_id: string
+    '     fee_id: int
+    '     created_at: datetime
+    '     resource_path: string
+    ' }
+
+    class BillingSchedule <<entity>> #90EE90 {
+        id: int
+        name: string
+        remarks: string
+        is_archived: boolean
+        created_date: datetime
+        updated_date: datetime
+        resource_path: string
+    }
+
+    class BillingSchedulePeriod <<entity>> #90EE90 {
+        id: int
+        billing_schedule_id: int
+        name: string
+        start_date: datetime
+        end_date: datetime
+        billing_date: datetime
+        remarks: string
+        is_archived: boolean
+        created_date: datetime
+        updated_date: datetime
+        resource_path: string
+    }
+
+    class BillingRatioType <<entity>> #90EE90 {
+        id: int
+        name: string
+        remarks: string
+        is_archived: boolean
+        created_date: datetime
+        updated_date: datetime
+        resource_path: string
+    }
+
+    class BillingRatio <<entity>> #90EE90 {
+        id: int
+        billing_ratio_type_id: int
+        billing_schedule_period_id: int
+        billing_ratio_numerator: int
+        billing_ratio_denominator: int
+        start_date: datetime
+        end_date: datetime
+        is_archived: boolean
+        resource_path: string
+    }
+
+    class ProductPrice <<entity>> #90EE90 {
+        id: int
+        product_id: int
+        billing_schedule_period_id: int
+        quantity_type: enum <color:Purple>- course weight, slot, slot per week
+        quantity: int
+        price: decimal
+        created_date: datetime
+        resource_path: string
+    }
+
+    class Order <<entity>> #AAAAAA {
+        id: string
+        student_id: string
+        location_id: string
+        order_sequence_number: int
+        ' order_type: string
+        ' invoice_method: enum
+        comment: string
+        order_status: enum <color:Purple>- pending, submitted, rejected, voided, invoiced
+        created_date: datetime
+        updated_date: datetime
+        resource_path: string
+    }
+
+    class OrderProduct <<entity>> #339898 {
+        order_id: string
+        product_id: int
+        discount_id: int
+        start_date: datetime
+        created_date: datetime
+        resource_path: string
+    }
+
+    class OrderCourse <<entity>> #339898 {
+        order_id: string
+        package_id: int
+        course_id: string
+        number_of_slot: int
+        created_date: datetime
+        resource_path: string
+    }
+
+    class OrderActionLog <<entity>> #90EE90 {
+        id: string
+        order_id: string
+        user_name: string
+        action: enum <color:Purple>- Approved/Submitted/...
+        comment: string
+        created_date: datetime
+        updated_date: datetime
+        resource_path: string
+    }
+
+    class Bill <<entity>> #90EE90 {
+        id: string
+        bill_sequence_number: int
+        order_id: string
+        type: enum <color:Purple>- billed at order, upcoming billing
+        discount_amount: int
+        tax_amount: int
+        total_amount: int
+        billing_status: enum <color:Purple>- pending, billed
+        billing_date: datetime
+        billing_from: datetime
+        billing_to: datetime
+        content: string
+        billing_status: string
+        created_date: datetime
+        updated_date: datetime
+        resource_path: string
+    }
+
+    class Discount <<entity>> #90EE90 {
+        id: int
+        name: string
+        discount_type: enum <color:Purple>- onetime, recurring
+        discount_amount_type: enum <color:Purple>- value, percentage
+        discount_amount_value: int
+        recurring_valid_duration: int
+        available_from: datetime
+        available_until: datetime
+        remarks: string
+        is_archived: boolean
+        created_date: datetime
+        updated_date: datetime
+        resource_path: string
+    }
+
+    class Tax <<entity>> #90EE90 {
+        id: int
+        name: string
+        tax_category: enum <color:Purple>- inclusive, exclusive
+        tax_percentage: int
+        default_flag: boolean
+        is_archived: boolean
+        created_date: datetime
+        updated_date: datetime
+        resource_path: string
+    }
+
+    ' class ProductDiscount <<entity>> #90EE90 {
+    '     discount_id: string
+    '     product_id: string
+    '     deleted_at: datetime
+    '     resource_path: string
+    ' }
+
+    class Student <<value object>> #SkyBlue {
+        student_id: string
+        ...
+        resource_path: string
+    }
+
+    ' class StudentProduct <<entity>> #90EE90 {
+    '     student_id: string
+    '     product_id: string
+    '     created_date: datetime
+    '     updated_date: datetime
+    '     deleted_date: datetime
+    '     resource_path: string
+    ' }
+
+    ' class StudentCourse <<entity>> #987654 {
+    '     student_id: string
+    '     package_id: string
+    '     course_id: string
+    '     start_date: datetime
+    '     end_date: datetime
+    '     created_date: datetime
+    '     updated_date: datetime
+    '     deleted_date: datetime
+    '     resource_path: string
+    ' }
+
+    Student "1" *- "m" Order
+
+    ' Student "1" *- "m" StudentProduct
+    ' Product "1" *- "m" StudentProduct
+
+    ' Student "1" -down- "m" StudentCourse
+    ' Course "1" -- "m" StudentCourse
+
+    Order "1" *- "m" Bill
+
+    Order "1" -left- "m" OrderProduct
+    Product "1" -left- "m" OrderProduct
+    Discount "1" -left- "m" OrderProduct
+
+    Order "1" -down- "m" OrderActionLog
+
+    Order "1" -- "m" OrderCourse
+    Course "1" -up- "m" OrderCourse
+
+    BillingSchedule "1" *- "m" BillingSchedulePeriod
+
+    Product "1" *- "m" ProductPrice
+    BillingSchedulePeriod "1" -down- "m" ProductPrice
+    BillingSchedulePeriod "1" -down- "m" BillingRatio
+
+    BillingSchedule "1" -down- "m" Product
+    Tax "1" -down- "m" Product
+    BillingRatioType "1" -down- "m" Product
+
+    Location "1" -up- "m" ProductLocation
+    Product "1" -down- "m" ProductLocation
+
+    Grade "1" -up- "m" ProductGrade
+    Product "1" -down- "m" ProductGrade
+
+    ' Location "1" *- "m" CourseLocation
+    ' Course "1" -up- "m" CourseLocation
+
+    ' Grade "1" -up- "m" CourseGrade
+    ' Course "1" *- "m" CourseGrade
+
+    ' Subject "1" -up- "m" CourseSubject
+    ' Course "1" *- "m" CourseSubject
+
+    ' Material "1" -up- "m" CourseMaterial
+    ' Course "1" -left- "m" CourseMaterial
+
+    ' Fee "1" -up- "m" CourseFee
+    ' Course "1" -left- "m" CourseFee
+
+    ' Package "1" -up- "m" PackageFee
+    ' Fee "1" *- "m" PackageFee
+
+    ProductPackage "1" -up- "m" PackageCourse
+    Course "1" -up- "m" PackageCourse
+
+    ' Package "1" *- "m" PackageMaterial
+    ' Material "1" *- "m" PackageMaterial
+
+
+    AccountingCategory "1" -up- "m" ProductAccountingCategory
+    Product "1" -down- "m" ProductAccountingCategory
+
+    Product "1" -- "1" ProductPackage
+    Product "1" -- "1" ProductMaterial
+    Product "1" -- "1" ProductFee
+
+
+    ' Discount "1" -left- "m" ProductDiscount
+    ' Product "1" *- "m" ProductDiscount
+}
+
+note "Waiting for specs to complete" as N2
+InvoiceManagement .. N2
+namespace InvoiceManagement {
+}
+
+@enduml

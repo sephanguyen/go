@@ -1,0 +1,80 @@
+pushgateway:
+  enabled: true
+
+extraManifests:
+  - |
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: {{ template "prometheus.server.fullname" . }}-thanos
+      labels:
+    {{- include "prometheus.server.labels" . | nindent 4 }}
+    data:
+      bucket.yaml: |
+        type: S3
+        config:
+          bucket: thanos
+          endpoint: thanos-minio:9000
+          access_key: minio
+          secret_key: minio123
+          insecure: true
+  - |
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: {{ template "prometheus.server.fullname" . }}-thanos
+      labels:
+    {{- include "prometheus.server.labels" . | nindent 4 }}
+    spec:
+      type: ClusterIP
+      ports:
+        - name: grpc
+          port: 10901
+          targetPort: grpc
+          protocol: TCP
+      selector:
+      {{- include "prometheus.server.matchLabels" . | nindent 4 }}
+
+server:
+  image:
+    tag: v2.43.1-stringlabels
+  persistentVolume:
+    size: 8Gi
+  extraTemplates:
+    - |
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: {{ template "prometheus.server.fullname" . }}-thanos
+        labels:
+      {{- include "prometheus.server.labels" . | nindent 4 }}
+      data:
+        bucket.yaml: |
+          type: S3
+          config:
+            bucket: thanos
+            endpoint: thanos-minio:9000
+            access_key: minio
+            secret_key: minio123
+            insecure: true
+    - |
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: {{ template "prometheus.server.fullname" . }}-thanos
+        labels:
+      {{- include "prometheus.server.labels" . | nindent 4 }}
+      spec:
+        type: ClusterIP
+        ports:
+          - name: grpc
+            port: 10901
+            targetPort: grpc
+            protocol: TCP
+        selector:
+        {{- include "prometheus.server.matchLabels" . | nindent 4 }}
+  global:
+    external_labels:
+      gke_cluster: minikube
+
+env: local

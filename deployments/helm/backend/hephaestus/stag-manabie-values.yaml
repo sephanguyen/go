@@ -1,0 +1,7 @@
+enabled: true
+migrationEnabled: false
+postHookMigrateDataLake: true
+postHookMigrateDatawarehouses: true
+postHookSyncDataLake: true
+postHookSyncDataWarehouse: true
+postHookUpsertKsqlMigration: true

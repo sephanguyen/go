@@ -1,0 +1,12 @@
+common:
+  google_cloud_project: staging-manabie-online
+issuers:
+  - issuer: manabie
+    audience: jprep-stag
+    jwks_endpoint: http://shamir:5680/.well-known/jwks.json
+jwt_applicant: jprep-stag
+agora:
+  app_id: 5add5309d871464eb1b498ccbc80de86
+  app_name: 1139874
+  org_name: 61976395
+  rest_api: https://a61.chat.agora.io

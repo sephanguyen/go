@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "jaeger-all-in-one.fullname" . }}
+  labels:
+    {{- include "jaeger-all-in-one.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: 16686
+      targetPort: 16686
+      protocol: TCP
+      name: http-ui
+    - port: 14268
+      targetPort: 14268
+      protocol: TCP
+      name: jaeger-thrift-http
+    - port: 14250
+      targetPort: 14250
+      protocol: TCP
+      name: jaeger-grpc
+    - name: grpc-query
+      port: 16685
+      protocol: TCP
+      targetPort: 16685
+  selector:
+    {{- include "jaeger-all-in-one.selectorLabels" . | nindent 4 }}

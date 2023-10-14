@@ -1,0 +1,101 @@
+{
+	"schema": [
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "event_id",
+			"data_type": "character varying",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "event_type",
+			"data_type": "character varying",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "learning_material_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "payload",
+			"data_type": "jsonb",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "student_event_log_id",
+			"data_type": "integer",
+			"column_default": "nextval('student_event_logs_student_event_log_id_seq'::regclass)",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "student_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "study_plan_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "study_plan_item_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "student_event_logs",
+			"policyname": null,
+			"qual": null,
+			"with_check": null,
+			"relrowsecurity": null,
+			"relforcerowsecurity": null,
+			"permissive": null,
+			"roles": {
+				"Elements": null,
+				"Dimensions": null,
+				"Status": 1
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "event_log_pk",
+			"column_name": "student_event_log_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "event_id_un",
+			"column_name": "event_id",
+			"constraint_type": "UNIQUE"
+		}
+	],
+	"table_name": "student_event_logs",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

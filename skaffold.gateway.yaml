@@ -1,0 +1,75 @@
+apiVersion: skaffold/v2beta29
+kind: Config
+metadata:
+  name: gateway
+deploy: &DefaultDeploy
+  helm:
+    releases:
+      - name: cert-manager
+        remoteChart: cert-manager
+        repo: https://charts.jetstack.io
+        version: v1.7.1
+        namespace: cert-manager
+        createNamespace: true
+        wait: true
+        setValueTemplates:
+          cainjector.extraArgs[0]: '--leader-elect=false'
+          installCRDs: true
+          # TODO: Upgrade to cert-manager to latest version so that we can edit `acmesolver.image.repository` field
+          image.repository: '{{if eq "local" .ENV}}kind-reg.actions-runner-system.svc/{{end}}quay.io/jetstack/cert-manager-controller'
+          webhook.image.repository: '{{if eq "local" .ENV}}kind-reg.actions-runner-system.svc/{{end}}quay.io/jetstack/cert-manager-webhook'
+          cainjector.image.repository: '{{if eq "local" .ENV}}kind-reg.actions-runner-system.svc/{{end}}quay.io/jetstack/cert-manager-cainjector'
+          startupapicheck.image.repository: '{{if eq "local" .ENV}}kind-reg.actions-runner-system.svc/{{end}}quay.io/jetstack/cert-manager-ctl'
+      - name: '{{.ENV}}-{{.ORG}}-gateway'
+        chartPath: deployments/helm/platforms/gateway
+        namespace: istio-system
+        valuesFiles:
+          - deployments/helm/platforms/gateway/{{.ENV}}-{{.ORG}}-values.yaml
+        setValueTemplates:
+          org: '{{.ORG}}'
+          environment: '{{.ENV}}'
+profiles:
+  - name: local
+    activation:
+      - env: ENV=local
+    deploy: *DefaultDeploy
+    patches:
+      - op: add
+        path: /deploy/kubeContext
+        value: kind-kind
+      - op: add
+        path: /deploy/helm/hooks
+        value:
+          after:
+            - host:
+                command:
+                  - bash
+                  - -c
+                  - |
+                    set -euo pipefail
+                    . ./deployments/setup_istio.bash
+
+                    setup_localhost
+                    update_coredns
+                    wait_for_cert
+
+                    ip=127.0.0.1
+                    echo "Done."
+                    echo "To access hasura, you need to add '$ip admin.local-green.manabie.io' to your /etc/hosts, and visit:"
+                    echo "    https://admin.local-green.manabie.io:31600/console for bob hasura, or"
+                    echo "    https://admin.local-green.manabie.io:31600/<svc>/console for service <svc>'s hasura, or"
+                    echo "    https://admin.local-green.manabie.io:31600/unleash for Unleash"
+
+  - name: disable-gateway
+    deploy: *DefaultDeploy
+    activation:
+      - env: DISABLE_GATEWAY=true
+    patches:
+      - op: remove
+        path: /deploy
+
+  - name: gateway-only
+    deploy: *DefaultDeploy
+    patches:
+      - op: remove
+        path: /deploy/helm/releases/0

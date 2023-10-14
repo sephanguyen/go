@@ -1,0 +1,39 @@
+
+@startuml communication_advanced_filter
+
+
+
+    class InfoNotification<<entity>>{
+        notification_id: string
+        ...
+    }
+
+    class NotificationClassFilter<<entity>> #green{
+        notification_id: string
+        class_id: string
+        created_at: timestamp
+        updated_at: timestamp
+        deleted_at: timestamp
+    }
+
+    class NotificationLocationFilter<<entity>> #green{
+        notification_id: string
+        location_id: string
+        created_at: timestamp
+        updated_at: timestamp
+        deleted_at: timestamp
+    }
+
+    class NotificationCourseFilter<<entity>> #green{
+        notification_id: string
+        course_id: string
+        created_at: timestamp
+        updated_at: timestamp
+        deleted_at: timestamp
+    }
+
+
+    InfoNotification "1" <-- "many" NotificationClassFilter
+    InfoNotification "1" <-- "many" NotificationLocationFilter
+    InfoNotification "1" <-- "many" NotificationCourseFilter
+@enduml

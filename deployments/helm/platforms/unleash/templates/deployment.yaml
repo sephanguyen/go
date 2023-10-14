@@ -1,0 +1,189 @@
+{{- if .Values.unleash.replicaCount }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "unleash.fullname" . }}
+  labels:
+    {{- include "unleash.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.unleash.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "unleash.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        prometheus.io/port: "4242"
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/unleash/internal-backstage/prometheus"
+        checksum/features.yaml: {{ tpl ("configs/features.yaml" | .Files.Get) . | sha256sum }}
+        checksum/index.js: {{ tpl ("configs/index.js" | .Files.Get) . | sha256sum }}
+{{- if eq "local" .Values.global.environment }}
+        checksum/service_credential.json: {{ include "util.serviceCredential" . | sha256sum }}
+{{- end }}
+        checksum/unleash.secrets.encrypted.yaml: {{ printf "secrets/%s/%s/unleash.secrets.encrypted.yaml" .Values.global.vendor .Values.global.environment | .Files.Get | sha256sum }}
+{{- if .Values.podAnnotations }}
+{{ toYaml .Values.podAnnotations | indent 8 }}
+{{- end }}
+      labels:
+        {{- include "unleash.selectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "util.serviceAccountName" . }}
+      {{- with .Values.unleash.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+{{- if eq "local" .Values.global.environment }}
+        - name: service-credential
+          secret:
+            secretName: {{ include "unleash.fullname" . }}
+            items:
+            - key: service_credential.json
+              path: service_credential.json
+{{- end }}
+        - name: index-config
+          configMap:
+            name: {{ include "unleash.fullname" . }}
+            items:
+            - key: index.js
+              path: index.js
+        - name: secrets-file
+          secret:
+            secretName: {{ include "unleash.fullname" . }}
+            items:
+              - key: unleash.secrets.encrypted.yaml
+                path: unleash.secrets.encrypted.yaml
+        - name: decrypted-volume
+          emptyDir: {}
+        - name: import-file
+          configMap:
+            name: {{ include "unleash.fullname" . }}
+            items:
+            - key: import.yaml
+              path: import.yaml
+        - name: fix-state-util
+          configMap:
+            name: {{ include "unleash.fullname" . }}
+            items:
+            - key: stateUtils.js
+              path: state-util.js
+      initContainers:
+      - name: decrypt-secret
+        image: "{{ include "util.sopsImage" . }}"
+        imagePullPolicy: IfNotPresent
+        command:
+          - /bin/sh
+          - -c
+          - |
+            sops --decrypt  /unleash/secrets/unleash.secrets.encrypted.yaml > /unleash/secrets/unleash.secrets.yaml
+        volumeMounts:
+          - name: decrypted-volume
+            mountPath: /unleash/secrets/
+          - name: secrets-file
+            mountPath: /unleash/secrets/unleash.secrets.encrypted.yaml
+            subPath: unleash.secrets.encrypted.yaml
+        {{- if eq "local" .Values.global.environment }}
+          - name: service-credential
+            mountPath: /unleash/service_credential.json
+            subPath: service_credential.json
+            readOnly: true
+        env:
+          - name: GOOGLE_APPLICATION_CREDENTIALS
+            value: "/unleash/service_credential.json"
+        {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          env:
+            - name: BASE_URI_PATH
+              value: "{{ .Values.baseUriPath }}"
+            - name: DATABASE_POOL_MAX
+              value: "{{ .Values.databasePoolMax | default 4 }}"
+            - name: DATABASE_SSL
+              value: "{{ .Values.dbConfig.ssl | default "false" }}"
+            - name: FILE_SECRETS
+              value: "./secrets/unleash.secrets.yaml"
+            - name: SECURE_HEADERS
+              value: "true"
+            - name: LOG_LEVEL
+              value: "debug"
+            - name: CHECK_VERSION # https://docs.getunleash.io/deploy/getting_started#version-check
+              value: "false"
+            - name: UNLEASH_IMPORT_FILE
+              value: "import.yaml"
+            # Really don't why the value but in config file not change
+            # I added here for https://github.com/manabie-com/backend/blob/develop/deployments/helm/platforms/unleash/templates/proxy-deployment.yaml#L99-L104
+            - name: KEEP_EXISTING
+              value: "{{ .Values.unleash.keepExisting }}"
+            - name: DROP_BEFORE_IMPORT
+              value: "{{ .Values.unleash.dropBeforeImport }}"
+            - name: FORCE_IMPORT
+              value: "{{ .Values.unleash.forceImport }}"
+            ## ----
+            - name: PROXY_API_TOKEN
+              value: "{{ .Values.unleashProxy.apiToken }}"
+            - name: ENVIRONMENT
+              value: "{{ .Values.global.environment }}"
+            - name: UNLEASH_URL
+              value: "{{ .Values.unleashUrl }}"
+            # remove CLEAN_CLIENT_API when unleash team remove flag here https://github.com/Unleash/unleash/blob/v4.22.5/src/lib/services/feature-toggle-service.ts#L755
+            - name: CLEAN_CLIENT_API
+              value: "true"
+          image: "{{ default "unleashorg/unleash-server" .Values.unleash.image.repository }}:{{ .Values.unleash.image.tag }}"
+          imagePullPolicy: {{ .Values.unleash.image.pullPolicy }}
+          ports:
+            - name: unleash
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: "{{ .Values.baseUriPath }}/health"
+              port: {{ .Values.service.port }}
+            initialDelaySeconds: 5
+            timeoutSeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: "{{ .Values.baseUriPath }}/health"
+              port: {{ .Values.service.port }}
+            timeoutSeconds: 5
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: index-config
+              mountPath: /unleash/index.js
+              subPath: index.js
+            - name: decrypted-volume
+              mountPath: /unleash/secrets/
+            - name: import-file
+              mountPath: /unleash/import.yaml
+              subPath: import.yaml
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+      {{- if .Values.global.sqlProxy.enabled }}
+        - name: cloud-sql-proxy
+          image: "{{ .Values.global.sqlProxy.image.repository }}:{{ .Values.global.sqlProxy.image.tag }}"
+          imagePullPolicy: IfNotPresent
+          args:
+            - "{{ .Values.global.cloudSQLCommonInstance }}"
+            - "--auto-iam-authn"
+            - "--structured-logs"
+          {{- if not .Values.global.cloudSQLUsePublicIP }}
+            - "--private-ip"
+          {{- end }}
+            - "--max-sigterm-delay=30s"
+          securityContext:
+            runAsNonRoot: true
+          resources:
+            {{- toYaml .Values.global.sqlProxy.resources | nindent 12 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.unleash }}
+      {{- $context := (mustMerge (deepCopy .) $) }}
+      affinity: {{- include "util.affinityNew" $context | nindent 8 }}
+      tolerations: {{- include "util.tolerations" $context | nindent 8 }}
+      {{- end }}
+{{- end }}

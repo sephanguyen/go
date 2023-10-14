@@ -1,0 +1,19 @@
+connect:
+  image:
+    repository: asia-southeast1-docker.pkg.dev/student-coach-e1e95/ci/asia.gcr.io/student-coach-e1e95/customized_debezium_connect
+  heapOptions: "-Xms768M -Xmx768M"
+  resources:
+    requests:
+      cpu: 1000m
+      memory: 1024Mi
+    limits:
+      cpu: 2000m
+      memory: 1536Mi
+  imagePullSecrets:
+    - name: regcred
+initConnectorImage:
+  repository: kind-reg.actions-runner-system.svc/asia.gcr.io/student-coach-e1e95/kafkatools
+sopsImage:
+  repository: asia-southeast1-docker.pkg.dev/student-coach-e1e95/ci/mozilla/sops
+decryptorImage:
+  repository: asia-southeast1-docker.pkg.dev/student-coach-e1e95/ci/asia.gcr.io/student-coach-e1e95/decrypt-secret

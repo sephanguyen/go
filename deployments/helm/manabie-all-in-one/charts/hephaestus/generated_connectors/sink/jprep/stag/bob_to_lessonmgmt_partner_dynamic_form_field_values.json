@@ -1,0 +1,22 @@
+{
+  "name": "stag_jprep_bob_to_lessonmgmt_partner_dynamic_form_field_values_sink_connector",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+    "tasks.max": "1",
+    "topics": "stag.jprep.bob.public.partner_dynamic_form_field_values",
+    "connection.url": "${file:/config/kafka-connect-config.properties:lessonmgmt_url}",
+    "auto.create": "false",
+    "insert.mode": "upsert",
+    "table.name.format": "partner_dynamic_form_field_values",
+    "fields.whitelist": "bool_value,created_at,deleted_at,dynamic_form_field_value_id,field_id,field_render_guide,int_array_value,int_set_value,int_value,lesson_report_detail_id,resource_path,string_array_value,string_set_value,string_value,updated_at,value_type",
+    "transforms": "unwrap,route",
+    "transforms.route.type": "org.apache.kafka.connect.transforms.RegexRouter",
+    "transforms.route.regex": "([^.]+).([^.]+).([^.]+).([^.]+).([^.]+)",
+    "transforms.route.replacement": "$5",
+    "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+    "delete.enabled": "true",
+    "pk.mode": "record_key",
+    "transforms.unwrap.drop.tombstones": "false",
+    "transforms.unwrap.delete.handling.mode": "none"
+  }
+}

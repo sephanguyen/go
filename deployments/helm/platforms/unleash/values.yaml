@@ -1,0 +1,119 @@
+global:
+  sqlProxy:
+    enabled: true
+    image:
+      repository: asia.gcr.io/cloud-sql-connectors/cloud-sql-proxy
+      tag: 2.1.2-alpine
+    resources:
+      requests:
+        cpu: "5m"
+        memory: "16Mi"
+
+dbConfig:
+  ssl: false
+
+baseUriPath: /unleash
+unleashUrl: https://admin.local-green.manabie.io:31600/unleash
+
+unleash:
+  replicaCount: 2
+  image:
+    tag: 4.22.5
+    pullPolicy: IfNotPresent
+  keepExisting: true
+  dropBeforeImport: false
+  forceImport: false
+
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 1
+        podAffinityTerm:
+          topologyKey: kubernetes.io/hostname
+          labelSelector:
+            matchExpressions:
+            - key: app.kubernetes.io/name
+              operator: In
+              values: ["unleash"]
+
+service:
+  type: ClusterIP
+  port: 4242
+  annotations: {}
+
+unleashProxy:
+  replicaCount: 2
+  image:
+    tag: 0.13.1
+    pullPolicy: IfNotPresent
+  nodeImage:
+    tag: 14-alpine
+  secrets: 123
+  url: http://unleash:4242/unleash/api
+  apiToken: ce4ed2eba3a72d6b5be23c7aa9b71178753f5908cf2dcbbca29442b5b81d397f
+  service:
+    type: ClusterIP
+    port: 4243
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: cloud.google.com/gke-spot
+                operator: In
+                values: ["true"]
+  tolerations:
+    - effect: NoSchedule
+      key: cloud.google.com/gke-spot
+      operator: Exists
+  podAffinityIdentifier: unleash-proxy
+
+imagePullSecrets: []
+
+nodeSelector: {}
+
+# TODO: adjust these values for different environments
+podAnnotations:
+  sidecar.istio.io/proxyCPU: "5m"
+  sidecar.istio.io/proxyMemory: "72Mi"
+  cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+
+resourcesProxy:
+  requests:
+    cpu: 20m
+    memory: 128Mi
+
+resources:
+  limits:
+    memory: 128Mi
+  requests:
+    cpu: 80m
+    memory: 128Mi
+
+adminHttp:
+  - match:
+    - uri:
+        prefix: /unleash/proxy
+    rewrite:
+      uri: /proxy
+    route:
+    - destination:
+        host: unleash-proxy
+        port:
+          number: 4243
+  - match:
+    - uri:
+        exact: /unleash
+    - uri:
+        prefix: /unleash/
+    route:
+    - destination:
+        host: unleash
+        port:
+          number: 4242
+
+securityContext: {}
+
+vpa:
+  enabled: true
+  updateMode: "Auto"

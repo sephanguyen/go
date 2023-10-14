@@ -1,0 +1,1150 @@
+# set env to empty value to prevent this error:
+#   template: prometheus/templates/server/deploy.yaml:10:7:
+#   executing "prometheus/templates/server/deploy.yaml" at <ne .Values.env "local">: error calling ne: incompatible types for comparison
+# from happening on CI
+env: ""
+
+serviceAccounts:
+  pushgateway:
+    create: true
+  server:
+    annotations:
+      iam.gke.io/gcp-service-account: thanos-sidecar@student-coach-e1e95.iam.gserviceaccount.com
+
+alertmanager:
+  enabled: false
+  strategy:
+    type: Recreate
+  tolerations:
+    - effect: NoSchedule
+      key: monitoring
+      operator: Exists
+  persistentVolume:
+    size: 1Gi
+
+pushgateway:
+  enabled: false
+
+server:
+  global:
+    scrape_timeout: 25s
+  persistentVolume:
+    size: 50Gi
+  strategy:
+    type: Recreate
+  tolerations:
+    - effect: NoSchedule
+      key: monitoring
+      operator: Exists
+  retention: "2h"
+  startupProbe:
+    enabled: true
+    periodSeconds: 30
+    failureThreshold: 120
+
+  # thanos sidecar configuration
+  extraFlags:
+    - web.enable-lifecycle
+    - storage.tsdb.max-block-duration=2h
+    - storage.tsdb.min-block-duration=2h
+  extraVolumes:
+    - name: thanos-volume
+      configMap:
+        name: prometheus-server-thanos
+  sidecarContainers:
+    thanos-sidecar: |
+      image: thanosio/thanos:v0.27.0
+      args:
+        - sidecar
+        - --prometheus.url=http://localhost:9090
+        - --grpc-address=0.0.0.0:10901
+        - --http-address=0.0.0.0:10902
+        - --tsdb.path=/prometheus/
+        - --shipper.upload-compacted
+        - --objstore.config-file=/thanos/bucket.yaml
+      {{- if ne .Values.env "local" }}
+        - --prometheus.http-client-file=/thanos/prometheus_http_auth.yaml
+      {{- end }}
+      ports:
+        - name: grpc
+          containerPort: 10901
+          protocol: TCP
+        - name: http
+          containerPort: 10902
+          protocol: TCP
+      volumeMounts:
+        - name: storage-volume
+          mountPath: /prometheus
+        - name: thanos-volume
+          mountPath: /thanos
+      livenessProbe:
+        httpGet:
+          path: /-/healthy
+          port: http
+          scheme: HTTP
+        periodSeconds: 15
+      readinessProbe:
+        httpGet:
+          path: /-/ready
+          port: http
+          scheme: HTTP
+        periodSeconds: 15
+      startupProbe:
+        httpGet:
+          path: /-/healthy
+          port: http
+          scheme: HTTP
+        periodSeconds: 30
+        failureThreshold: 120
+
+serverFiles:
+  prometheus.yml:
+    scrape_configs:
+      # - job_name: prometheus
+      #   static_configs:
+      #     - targets:
+      #       - localhost:9090
+
+      # A scrape configuration for running Prometheus on a Kubernetes cluster.
+      # This uses separate scrape configs for cluster components (i.e. API server, node)
+      # and services to allow each to use different authentication configs.
+      #
+      # Kubernetes labels will be added as Prometheus labels on metrics via the
+      # `labelmap` relabeling action.
+
+      # Scrape config for API servers.
+      #
+      # Kubernetes exposes API servers as endpoints to the default/kubernetes
+      # service so this uses `endpoints` role and uses relabelling to only keep
+      # the endpoints associated with the default/kubernetes service using the
+      # default named port `https`. This works for single API server deployments as
+      # well as HA API server deployments.
+      - job_name: 'kubernetes-apiservers'
+
+        kubernetes_sd_configs:
+          - role: endpoints
+
+        # Default to scraping over https. If required, just disable this or change to
+        # `http`.
+        scheme: https
+
+        # This TLS & bearer token file config is used to connect to the actual scrape
+        # endpoints for cluster components. This is separate to discovery auth
+        # configuration because discovery & scraping are two separate concerns in
+        # Prometheus. The discovery auth config is automatic if Prometheus runs inside
+        # the cluster. Otherwise, more config options have to be provided within the
+        # <kubernetes_sd_config>.
+        tls_config:
+          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+          # If your node certificates are self-signed or use a different CA to the
+          # master CA, then disable certificate verification below. Note that
+          # certificate verification is an integral part of a secure infrastructure
+          # so this should only be disabled in a controlled environment. You can
+          # disable certificate verification by uncommenting the line below.
+          #
+          insecure_skip_verify: true
+        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+
+        # Keep only the default/kubernetes service endpoints for the https port. This
+        # will add targets for each API server which Kubernetes adds an endpoint to
+        # the default/kubernetes service.
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+            action: keep
+            regex: default;kubernetes;https
+
+      - job_name: 'kubernetes-nodes'
+
+        # Default to scraping over https. If required, just disable this or change to
+        # `http`.
+        scheme: https
+
+        # This TLS & bearer token file config is used to connect to the actual scrape
+        # endpoints for cluster components. This is separate to discovery auth
+        # configuration because discovery & scraping are two separate concerns in
+        # Prometheus. The discovery auth config is automatic if Prometheus runs inside
+        # the cluster. Otherwise, more config options have to be provided within the
+        # <kubernetes_sd_config>.
+        tls_config:
+          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+          # If your node certificates are self-signed or use a different CA to the
+          # master CA, then disable certificate verification below. Note that
+          # certificate verification is an integral part of a secure infrastructure
+          # so this should only be disabled in a controlled environment. You can
+          # disable certificate verification by uncommenting the line below.
+          #
+          insecure_skip_verify: true
+        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+
+        kubernetes_sd_configs:
+          - role: node
+
+        relabel_configs:
+          - action: labelmap
+            regex: __meta_kubernetes_node_label_(.+)
+          - target_label: __address__
+            replacement: kubernetes.default.svc:443
+          - source_labels: [__meta_kubernetes_node_name]
+            regex: (.+)
+            target_label: __metrics_path__
+            replacement: /api/v1/nodes/$1/proxy/metrics
+
+
+      - job_name: 'kubernetes-nodes-cadvisor'
+
+        # Default to scraping over https. If required, just disable this or change to
+        # `http`.
+        scheme: https
+
+        # This TLS & bearer token file config is used to connect to the actual scrape
+        # endpoints for cluster components. This is separate to discovery auth
+        # configuration because discovery & scraping are two separate concerns in
+        # Prometheus. The discovery auth config is automatic if Prometheus runs inside
+        # the cluster. Otherwise, more config options have to be provided within the
+        # <kubernetes_sd_config>.
+        tls_config:
+          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+          # If your node certificates are self-signed or use a different CA to the
+          # master CA, then disable certificate verification below. Note that
+          # certificate verification is an integral part of a secure infrastructure
+          # so this should only be disabled in a controlled environment. You can
+          # disable certificate verification by uncommenting the line below.
+          #
+          insecure_skip_verify: true
+        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+
+        kubernetes_sd_configs:
+          - role: node
+
+        # This configuration will work only on kubelet 1.7.3+
+        # As the scrape endpoints for cAdvisor have changed
+        # if you are using older version you need to change the replacement to
+        # replacement: /api/v1/nodes/$1:4194/proxy/metrics
+        # more info here https://github.com/coreos/prometheus-operator/issues/633
+        relabel_configs:
+          - action: labelmap
+            regex: __meta_kubernetes_node_label_(.+)
+          - target_label: __address__
+            replacement: kubernetes.default.svc:443
+          - source_labels: [__meta_kubernetes_node_name]
+            regex: (.+)
+            target_label: __metrics_path__
+            replacement: /api/v1/nodes/$1/proxy/metrics/cadvisor
+
+      # Scrape config for service endpoints.
+      #
+      # The relabeling allows the actual service scrape endpoint to be configured
+      # via the following annotations:
+      #
+      # * `prometheus.io/scrape`: Only scrape services that have a value of
+      # `true`, except if `prometheus.io/scrape-slow` is set to `true` as well.
+      # * `prometheus.io/scheme`: If the metrics endpoint is secured then you will need
+      # to set this to `https` & most likely set the `tls_config` of the scrape config.
+      # * `prometheus.io/path`: If the metrics path is not `/metrics` override this.
+      # * `prometheus.io/port`: If the metrics are exposed on a different port to the
+      # service then set this appropriately.
+      # * `prometheus.io/param_<parameter>`: If the metrics endpoint uses parameters
+      # then you can set any parameter
+      - job_name: 'kubernetes-service-endpoints'
+        honor_labels: true
+
+        kubernetes_sd_configs:
+          - role: endpoints
+
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
+            action: keep
+            regex: true
+          - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape_slow]
+            action: drop
+            regex: true
+          - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
+            action: replace
+            target_label: __scheme__
+            regex: (https?)
+          - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]
+            action: replace
+            target_label: __metrics_path__
+            regex: (.+)
+          - source_labels: [__address__, __meta_kubernetes_service_annotation_prometheus_io_port]
+            action: replace
+            target_label: __address__
+            regex: ([^:]+)(?::\d+)?;(\d+)
+            replacement: $1:$2
+          - action: labelmap
+            regex: __meta_kubernetes_service_annotation_prometheus_io_param_(.+)
+            replacement: __param_$1
+          - action: labelmap
+            regex: __meta_kubernetes_service_label_(.+)
+          - source_labels: [__meta_kubernetes_namespace]
+            action: replace
+            target_label: namespace
+          - source_labels: [__meta_kubernetes_service_name]
+            action: replace
+            target_label: service
+          - source_labels: [__meta_kubernetes_pod_node_name]
+            action: replace
+            target_label: node
+
+      # Scrape config for slow service endpoints; same as above, but with a larger
+      # timeout and a larger interval
+      #
+      # The relabeling allows the actual service scrape endpoint to be configured
+      # via the following annotations:
+      #
+      # * `prometheus.io/scrape-slow`: Only scrape services that have a value of `true`
+      # * `prometheus.io/scheme`: If the metrics endpoint is secured then you will need
+      # to set this to `https` & most likely set the `tls_config` of the scrape config.
+      # * `prometheus.io/path`: If the metrics path is not `/metrics` override this.
+      # * `prometheus.io/port`: If the metrics are exposed on a different port to the
+      # service then set this appropriately.
+      # * `prometheus.io/param_<parameter>`: If the metrics endpoint uses parameters
+      # then you can set any parameter
+      - job_name: 'kubernetes-service-endpoints-slow'
+        honor_labels: true
+
+        scrape_interval: 5m
+        scrape_timeout: 30s
+
+        kubernetes_sd_configs:
+          - role: endpoints
+
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape_slow]
+            action: keep
+            regex: true
+          - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
+            action: replace
+            target_label: __scheme__
+            regex: (https?)
+          - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]
+            action: replace
+            target_label: __metrics_path__
+            regex: (.+)
+          - source_labels: [__address__, __meta_kubernetes_service_annotation_prometheus_io_port]
+            action: replace
+            target_label: __address__
+            regex: ([^:]+)(?::\d+)?;(\d+)
+            replacement: $1:$2
+          - action: labelmap
+            regex: __meta_kubernetes_service_annotation_prometheus_io_param_(.+)
+            replacement: __param_$1
+          - action: labelmap
+            regex: __meta_kubernetes_service_label_(.+)
+          - source_labels: [__meta_kubernetes_namespace]
+            action: replace
+            target_label: namespace
+          - source_labels: [__meta_kubernetes_service_name]
+            action: replace
+            target_label: service
+          - source_labels: [__meta_kubernetes_pod_node_name]
+            action: replace
+            target_label: node
+
+      - job_name: 'prometheus-pushgateway'
+        honor_labels: true
+
+        kubernetes_sd_configs:
+          - role: service
+
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_probe]
+            action: keep
+            regex: pushgateway
+
+      # Example scrape config for probing services via the Blackbox Exporter.
+      #
+      # The relabeling allows the actual service scrape endpoint to be configured
+      # via the following annotations:
+      #
+      # * `prometheus.io/probe`: Only probe services that have a value of `true`
+      - job_name: 'kubernetes-services'
+
+        metrics_path: /probe
+        params:
+          module: [http_2xx]
+
+        kubernetes_sd_configs:
+          - role: service
+
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_probe]
+            action: keep
+            regex: true
+          - source_labels: [__address__]
+            target_label: __param_target
+          - target_label: __address__
+            replacement: blackbox
+          - source_labels: [__param_target]
+            target_label: instance
+          - action: labelmap
+            regex: __meta_kubernetes_service_label_(.+)
+          - source_labels: [__meta_kubernetes_namespace]
+            target_label: namespace
+          - source_labels: [__meta_kubernetes_service_name]
+            target_label: service
+
+      # Example scrape config for pods
+      #
+      # The relabeling allows the actual pod scrape endpoint to be configured via the
+      # following annotations:
+      #
+      # * `prometheus.io/scrape`: Only scrape pods that have a value of `true`,
+      # except if `prometheus.io/scrape-slow` is set to `true` as well.
+      # * `prometheus.io/scheme`: If the metrics endpoint is secured then you will need
+      # to set this to `https` & most likely set the `tls_config` of the scrape config.
+      # * `prometheus.io/path`: If the metrics path is not `/metrics` override this.
+      # * `prometheus.io/port`: Scrape the pod on the indicated port instead of the default of `9102`.
+      - job_name: 'kubernetes-pods'
+
+        kubernetes_sd_configs:
+          - role: pod
+
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+            action: keep
+            regex: true
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape_slow]
+            action: drop
+            regex: true
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scheme]
+            action: replace
+            regex: (https?)
+            target_label: __scheme__
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+            action: replace
+            target_label: __metrics_path__
+            regex: (.+)
+          - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+            action: replace
+            regex: ([^:]+)(?::\d+)?;(\d+)
+            replacement: $1:$2
+            target_label: __address__
+          - action: labelmap
+            regex: __meta_kubernetes_pod_annotation_prometheus_io_param_(.+)
+            replacement: __param_$1
+          - action: labelmap
+            regex: __meta_kubernetes_pod_label_(.+)
+          - source_labels: [__meta_kubernetes_namespace]
+            action: replace
+            target_label: namespace
+          - source_labels: [__meta_kubernetes_pod_name]
+            action: replace
+            target_label: pod
+          - source_labels: [__meta_kubernetes_pod_phase]
+            regex: Pending|Succeeded|Failed|Completed
+            action: drop
+
+      # Example Scrape config for pods which should be scraped slower. An useful example
+      # would be stackriver-exporter which queries an API on every scrape of the pod
+      #
+      # The relabeling allows the actual pod scrape endpoint to be configured via the
+      # following annotations:
+      #
+      # * `prometheus.io/scrape-slow`: Only scrape pods that have a value of `true`
+      # * `prometheus.io/scheme`: If the metrics endpoint is secured then you will need
+      # to set this to `https` & most likely set the `tls_config` of the scrape config.
+      # * `prometheus.io/path`: If the metrics path is not `/metrics` override this.
+      # * `prometheus.io/port`: Scrape the pod on the indicated port instead of the default of `9102`.
+      - job_name: 'kubernetes-pods-slow'
+
+        scrape_interval: 5m
+        scrape_timeout: 30s
+
+        kubernetes_sd_configs:
+          - role: pod
+
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape_slow]
+            action: keep
+            regex: true
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scheme]
+            action: replace
+            regex: (https?)
+            target_label: __scheme__
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+            action: replace
+            target_label: __metrics_path__
+            regex: (.+)
+          - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+            action: replace
+            regex: ([^:]+)(?::\d+)?;(\d+)
+            replacement: $1:$2
+            target_label: __address__
+          - action: labelmap
+            regex: __meta_kubernetes_pod_annotation_prometheus_io_param_(.+)
+            replacement: __param_$1
+          - action: labelmap
+            regex: __meta_kubernetes_pod_label_(.+)
+          - source_labels: [__meta_kubernetes_namespace]
+            action: replace
+            target_label: namespace
+          - source_labels: [__meta_kubernetes_pod_name]
+            action: replace
+            target_label: pod
+          - source_labels: [__meta_kubernetes_pod_phase]
+            regex: Pending|Succeeded|Failed|Completed
+            action: drop
+
+  alerting_rules.yml:
+    groups:
+      - name: kubernetes-cronjob-rules
+        rules:
+          - record: job:kube_job_status_start_time:max
+            expr: |
+              label_replace(
+                label_replace(
+                  max(
+                    kube_job_status_start_time
+                    * ON(job_name,namespace) GROUP_RIGHT()
+                    kube_job_owner{owner_name!=""}
+                  )
+                  BY (job_name, owner_name, namespace)
+                  == ON(owner_name) GROUP_LEFT()
+                  max(
+                    kube_job_status_start_time
+                    * ON(job_name,namespace) GROUP_RIGHT()
+                    kube_job_owner{owner_name!=""}
+                  )
+                  BY (owner_name),
+                "job", "$1", "job_name", "(.+)"),
+              "cronjob", "$1", "owner_name", "(.+)")
+
+          - record: job:kube_job_status_failed:sum
+            expr: |
+              clamp_max(job:kube_job_status_start_time:max, 1)
+                * ON(job, namespace) GROUP_LEFT()
+                label_replace(
+                  (kube_job_status_failed > 0),
+                  "job", "$1", "job_name", "(.+)"
+                )
+      - name: kubernetes-apps
+        rules:
+          - alert: KubernetesPodCrashLooping
+            expr: rate(kube_pod_container_status_restarts_total[15m]) * 60 * 5 > 0
+            for: 15m
+            labels:
+              app: kubernetes
+              severity: high
+            annotations:
+              summary: Pod {{ $labels.pod }} is crash looping
+              description: Pod {{ $labels.namespace }}/{{ $labels.pod }} ({{ $labels.container }}) is restarting {{ $value }} times / 15 minutes.
+
+          - alert: KubernetesPodNotReady
+            expr: sum by (namespace, pod) (max by (namespace, pod) (kube_pod_status_phase{phase=~"Pending|Unknown|Failed"}) * on(namespace, pod) group_left(owner_kind) max by (namespace, pod, owner_kind) (kube_pod_owner{owner_kind!="Job"})) > 0
+            for: 15m
+            labels:
+              app: kubernetes
+              severity: high
+            annotations:
+              summary: Pod {{ $labels.pod }} in a non-ready state
+              description: Pod {{ $labels.pod }} in {{ $labels.namespace }} namespace has been in a non-ready state for longer than 15 minutes.
+
+          - alert: KubernetesDeploymentReplicasMismatch
+            expr: kube_deployment_spec_replicas > 0 and (kube_deployment_spec_replicas / kube_deployment_status_replicas_available) != 1
+            for: 15m
+            labels:
+              app: kubernetes
+              severity: critical
+            annotations:
+              summary: Deployment {{ $labels.deployment }} count mismatch
+              description: Deployment {{ $labels.deployment }} in {{ $labels.namespace }} namespace has not matched the expected number of replicas for longer than 15 minutes.
+
+          - alert: KubernetesStatefulSetReplicasMismatch
+            expr: (kube_statefulset_status_replicas_ready / kube_statefulset_status_replicas_current) != 1
+            for: 10m
+            labels:
+              app: kubernetes
+              severity: critical
+            annotations:
+              summary: StatefulSet {{ $labels.statefulset }} replica mismatch
+              description: StatefulSet {{ $labels.statefulset }} in {{ $labels.namespace }} namespace has not matched the expected number of replicas for longer than 15 minutes.
+
+          - alert: KubernetesCronJobStatusFailed
+            expr: |
+              job:kube_job_status_failed:sum
+              * ON(cronjob, namespace) GROUP_LEFT()
+              (kube_cronjob_spec_suspend == 0)
+            for: 1m
+            labels:
+              app: kubernetes
+              severity: critical
+            annotations:
+              summary: Cronjob {{ $labels.cronjob }} is failing
+              description: Cronjob {{ $labels.cronjob }} with job name {{ $labels.job }} in {{ $labels.namespace }} namespace is failing.
+
+      - name: kubernetes-storage
+        rules:
+          - alert: KubernetesVolumeOutOfDiskSpace
+            expr: kubelet_volume_stats_available_bytes / kubelet_volume_stats_capacity_bytes < 0.15
+            for: 1m
+            labels:
+              app: kubernetes
+              severity: critical
+            annotations:
+              summary: PVC {{ $labels.persistentvolumeclaim }} is running out of storage capacity
+              description: PersistentVolume claimed by {{ $labels.persistentvolumeclaim }} in namespace {{ $labels.namespace }} is only {{ $value | humanizePercentage }} free.
+              runbook: https://github.com/manabie-com/backend/discussions/4210
+
+      - name: kubernetes-resources
+        rules:
+          - alert: HighMemoryUsageContainer
+            expr: sum by (pod, container, namespace) (container_memory_working_set_bytes{container!="POD",name!=""}) / (sum by (pod, container, namespace) (container_spec_memory_limit_bytes{container!="POD",name!=""}) > 0) > 0.95
+            for: 1h
+            labels:
+              app: kubernetes
+              severity: warning
+            annotations:
+              summary: Container in {{ $labels.namespace }} namespace uses more than 95% of the memory limit
+              description: Container {{ $labels.container }} in {{ $labels.pod }} pod is using {{ $value | humanizePercentage }} of available memory.
+
+      - name: nats-jetstream
+        rules:
+          - alert: NATSJetStreamTooManyPendingAckMessages
+            expr: sum(jetstream_consumer_num_ack_pending{is_consumer_leader="true"}) by (namespace, app_kubernetes_io_instance, stream_name, consumer_name) > 500
+            for: 5m
+            labels:
+              app: nats-jetstream
+              severity: warning
+            annotations:
+              summary: Too many pending ack messages in consumer {{ $labels.consumer_name }}
+              description: Consumer {{ $labels.consumer_name }} in {{ $labels.namespace }} namespace has {{ $value }} pending ack msgs for 5 minutes.
+
+          - alert: NATSJetStreamTooManyPendingMessages
+            expr: sum(jetstream_consumer_num_pending{is_consumer_leader="true"}) by (namespace, app_kubernetes_io_instance, stream_name, consumer_name) > 500
+            for: 5m
+            labels:
+              app: nats-jetstream
+              severity: warning
+            annotations:
+              summary: Too many pending messages in consumer {{ $labels.consumer_name }}
+              description: Consumer {{ $labels.consumer_name }} in {{ $labels.namespace }} namespace has {{ $value }} pending msgs for 5 minutes.
+
+          - alert: NATSJetStreamNewRedeliveredMessages
+            expr: sum(increase(jetstream_consumer_num_redelivered{is_consumer_leader="true"}[5m])) by (namespace, app_kubernetes_io_instance, stream_name, consumer_name) > 99999
+            labels:
+              app: nats-jetstream
+              severity: warning
+            annotations:
+              summary: New redelivered messages detected in consumer {{ $labels.consumer_name }}
+              description: Consumer {{ $labels.consumer_name }} in {{ $labels.namespace }} namespace has new {{ $value }} redelivered msgs in the last minute.
+
+          - alert: NATSJetStreamConsumerFailToProcessMessages
+            expr: sum by(jetstream_queue_name, jetstream_subject_name, namespace) (rate(jetstream_processed_messages{consumer_handler_status!="OK"}[5m])) / sum by(jetstream_queue_name, jetstream_subject_name, namespace) (rate(jetstream_processed_messages[5m])) > 0.05
+            for: 5m
+            labels:
+              severity: critical
+              app: nats-jetstream
+            annotations:
+              summary: High failure rate when processing Jetstream messages
+              description: Subject {{ $labels.jetstream_subject_name }} in {{ $labels.namespace }} namespace has {{ $value | humanizePercentage }} failure rate.
+
+      - name: backend-services
+        rules :
+          - alert: HighNumberOfFailedGrpcRequests
+            expr: sum (rate(grpc_io_server_completed_rpcs{grpc_server_method!~".+Health.+|.+Subscribe|.+SubscribeV2|.+StreamingEvent|.+RetrieveTopicIcon", grpc_server_status=~"UNKNOWN|INTERNAL|UNIMPLEMENTED", namespace!="old-prod-manabie-backend"}[5m])) by (grpc_server_method, namespace) / sum (rate(grpc_io_server_completed_rpcs{grpc_server_method!~".+Health.+|.+Subscribe|.+SubscribeV2|.+StreamingEvent|.+RetrieveTopicIcon", namespace!="old-prod-manabie-backend"}[5m])) by (grpc_server_method, namespace) > 0.1
+            for: 10m
+            labels:
+              severity: critical
+              app: backend
+            annotations:
+              summary: High number of failed GRPC requests
+              description: GRPC method {{ $labels.grpc_server_method }} in {{ $labels.namespace }} namespace has {{ $value | humanizePercentage }} failure rate.
+          - alert: HighNumberOfSlowGrpcRequests
+            expr: histogram_quantile(0.95, sum by (le, grpc_server_method, namespace) (rate(grpc_io_server_server_latency_bucket{grpc_server_method!~".+Health.+|.+Upload|.+Subscribe|.+SubscribeV2|.+StreamingEvent|.+RetrieveTopicIcon|.+SendScheduledNotification", namespace!="old-prod-manabie-backend"}[5m]))) / 1000 > 2.5
+            for: 10m
+            labels:
+              severity: warning
+              app: backend
+            annotations:
+              summary: GRPC requests slow
+              description: GRPC method {{ $labels.grpc_server_method }} in {{ $labels.namespace }} namespace slowing down, 95th pct is {{ $value | humanizeDuration }}.
+
+          - alert: HighNumberOfSlowHasuraRequests
+            expr: histogram_quantile(0.95, sum(rate(istio_request_duration_milliseconds_bucket{destination_service_name=~".+hasura"}[5m])) by (destination_service_name,destination_service_namespace, le)) / 1000 > 1
+            for: 10m
+            labels:
+              severity: warning
+              app: backend
+            annotations:
+              summary: Hasura requests slow
+              description: Hasura requests from service {{ $labels.destination_service_name }} in {{ $labels.destination_service_namespace }} namespace slowing down, 95th pct is {{ $value | humanizeDuration }}.
+
+      - name: istio-basic
+        rules:
+          - alert: IngressTrafficMissing
+            expr: absent(istio_requests_total{destination_service_namespace=~".+services|.+backend", reporter="source", source_workload="istio-ingressgateway"}) == 1
+            for: 5m
+            labels:
+              severity: critical
+              app: istio
+            annotations:
+              summary: Istio ingress gateway traffic missing
+              description: Istio ingress gateway traffic missing, likely other monitors are misleading, check client logs.
+          - alert: IstioMetricsMissing
+            expr: absent(istio_requests_total) == 1 or absent(istio_request_duration_milliseconds_bucket) == 1
+            for: 5m
+            labels:
+              severity: critical
+              app: istio
+            annotations:
+              summary: Istio metrics missing
+              description: Check Prometheus deployment or whether the Prometheus filters are applied correctly.
+          - alert: HighNumberOfUnimplementedGrpcRequests
+            expr: sum(rate(istio_requests_total{reporter="source", grpc_response_status="12"}[5m])) by (destination_service_name, destination_service_namespace) / sum(rate(istio_requests_total{reporter="source"}[5m])) by (destination_service_name, destination_service_namespace) > 0.05
+            for: 5m
+            labels:
+              severity: critical
+              app: istio
+            annotations:
+              summary: High number of Unimplemented GRPC requests
+              description: Service {{ $labels.destination_service_name }} in {{ $labels.destination_service_namespace }} namespace has {{ $value | humanizePercentage }} requests return Unimplemented status.
+          - alert: HighNumberOfUnavailableGrpcRequests
+            expr: sum(rate(istio_requests_total{reporter="source", grpc_response_status="14"}[5m])) by (destination_service_name, destination_service_namespace) / sum(rate(istio_requests_total{reporter="source"}[5m])) by (destination_service_name, destination_service_namespace) > 0.05
+            for: 5m
+            labels:
+              severity: critical
+              app: istio
+            annotations:
+              summary: High number of Unavailable GRPC requests
+              description: Service {{ $labels.destination_service_name }} in {{ $labels.destination_service_namespace }} namespace has {{ $value | humanizePercentage }} requests return Unavailable status, check Istio configuration.
+          - alert: HighNumberOfFailedHttpRequests
+            expr: sum(rate(istio_requests_total{reporter="source", response_code=~"5.."}[5m])) by (destination_service_name, destination_service_namespace, source_workload, source_workload_namespace) / sum(rate(istio_requests_total{reporter="source"}[5m])) by (destination_service_name, destination_service_namespace, source_workload, source_workload_namespace) > 0.05
+            for: 5m
+            labels:
+              severity: critical
+              app: istio
+            annotations:
+              summary: High number of failed HTTP requests
+              description: Service {{ $labels.destination_service_name }} in {{ $labels.destination_service_namespace }} namespace has {{ $value | humanizePercentage }} failure rate.
+
+      - name: istio-infras
+        rules:
+          - alert: HighCPUUsageProxyContainer
+            expr: (sum(rate(container_cpu_usage_seconds_total{namespace!="kube-system", container=~"istio-proxy", namespace!=""}[5m])) by (namespace, pod, container)) > 0.8
+            for: 5m
+            labels:
+              severity: warning
+              app: istio
+            annotations:
+              summary: Proxy container in {{ $labels.namespace }} namespace has high CPU usage
+              description: Proxy container {{ $labels.container }} in {{ $labels.pod }} pod is using {{ $value | humanizePercentage }} of cpu.
+          - alert: HighMemoryUsageProxyContainer
+            expr: sum(container_memory_working_set_bytes{namespace!="kube-system", container=~"istio-proxy", namespace!=""}) by (container, pod, namespace) / (sum(container_spec_memory_limit_bytes{namespace!="kube-system", container!="POD"}) by (container, pod, namespace) > 0) > 0.8
+            for: 5m
+            labels:
+              severity: warning
+              app: istio
+            annotations:
+              summary: Proxy container in {{ $labels.namespace }} namespace uses more than 80% of the memory limit
+              description: Proxy container {{ $labels.container }} in {{ $labels.pod }} pod is using {{ $value | humanizePercentage }} of available memory.
+          - alert: HighCPUUsageIstiodContainer
+            expr: (sum(rate(container_cpu_usage_seconds_total{namespace="istio-system", container="discovery"}[5m])) by (pod)) > 0.8
+            for: 5m
+            labels:
+              severity: warning
+              app: istio
+            annotations:
+              summary: Istiod container in {{ $labels.namespace }} namespace has high CPU usage
+              description: Istiod container {{ $labels.container }} in {{ $labels.pod }} pod is using {{ $value | humanizePercentage }} of cpu.
+          - alert: HighMemoryUsageIstiodContainer
+            expr: sum(container_memory_working_set_bytes{namespace="istio-system", container="discovery"}) by (pod) / (sum(container_spec_memory_limit_bytes{namespace="istio-system", container="discovery"}) by (pod) > 0) > 0.8
+            for: 5m
+            labels:
+              severity: warning
+              app: istio
+            annotations:
+              summary: Istiod container in {{ $labels.namespace }} namespace uses more than 80% of the memory limit
+              description: Istiod container {{ $labels.container }} in {{ $labels.pod }} pod is using {{ $value | humanizePercentage }} of available memory.
+
+      - name: elasticsearch
+        rules:
+
+        - alert: ElasticsearchHeapUsageTooHigh
+          expr: (elasticsearch_jvm_memory_used_bytes{area="heap"} / elasticsearch_jvm_memory_max_bytes{area="heap"}) * 100 > 90
+          for: 2m
+          labels:
+            severity: critical
+            app: elastic
+          annotations:
+            summary: "Elasticsearch {{ $labels.cluster }} is using more than 90% of the memory limit"
+            description: "Elasticsearch {{ $labels.cluster }} in namespace {{ $labels.namespace }} is using {{ $value | humanizePercentage }} of available memory"
+
+        - alert: ElasticsearchHeapUsageWarning
+          expr: (elasticsearch_jvm_memory_used_bytes{area="heap"} / elasticsearch_jvm_memory_max_bytes{area="heap"}) * 100 > 80
+          for: 2m
+          labels:
+            severity: warning
+            app: elastic
+          annotations:
+            summary: Elasticsearch {{ $labels.cluster }} is using more than 80% of the memory limit
+            description: "Elasticsearch {{ $labels.cluster }} in namespace {{ $labels.namespace }} is using {{ $value | humanizePercentage }} of available memory"
+
+        - alert: ElasticsearchDiskOutOfSpace
+          expr: elasticsearch_filesystem_data_available_bytes / elasticsearch_filesystem_data_size_bytes * 100 < 10
+          for: 0m
+          labels:
+            severity: critical
+            app: elastic
+          annotations:
+            summary: Elasticsearch {{ $labels.cluster }} disk out of space
+            description: "Elasticsearch {{ $labels.cluster }} in namespace {{ $labels.namespace }} disk usage is {{ $value | humanizePercentage }}"
+
+        - alert: ElasticsearchDiskSpaceLow
+          expr: elasticsearch_filesystem_data_available_bytes / elasticsearch_filesystem_data_size_bytes * 100 < 20
+          for: 2m
+          labels:
+            severity: warning
+            app: elastic
+          annotations:
+            summary: Elasticsearch {{ $labels.cluster }} disk space low
+            description: "Elasticsearch {{ $labels.cluster }} in namespace {{ $labels.namespace }} disk usage is {{ $value | humanizePercentage }}"
+
+        - alert: ElasticsearchPendingTasks
+          expr: elasticsearch_cluster_health_number_of_pending_tasks > 0
+          for: 15m
+          labels:
+            severity: warning
+            app: elastic
+          annotations:
+            summary: Elasticsearch {{ $labels.cluster }} cannot keep up with pending tasks.
+            description: "Elasticsearch {{ $labels.cluster }} in namespace {{ $labels.namespace }} has {{ $value }} pending tasks. Cluster is slow or overloaded"
+
+        - alert: ElasticsearchClusterRed
+          expr: elasticsearch_cluster_health_status{color="red"} == 1
+          for: 15m
+          labels:
+            severity: critical
+            app: elastic
+          annotations:
+            summary: Elasticsearch Cluster {{ $labels.cluster }} status Red.
+            description: "Elastic Cluster {{ $labels.cluster }} in namespace {{ $labels.namespace }} is status red. A red status indicates that not only has the primary shard been lost, but also that a replica has not been promoted to primary in its place." # https://opster.com/guides/elasticsearch/operations/elasticsearch-red-status/
+
+        - alert: ElasticsearchRelocatingShardsTooLong
+          expr: elasticsearch_cluster_health_relocating_shards > 0
+          for: 15m
+          labels:
+            severity: warning
+            app: elastic
+          annotations:
+            summary: Elasticsearch {{ $labels.cluster }} relocating shards too long
+            description: "Elasticsearch {{ $labels.cluster }} in namespace {{ $labels.namespace }} has been relocating shards for 15min"
+
+        - alert: ElasticsearchInitializingShardsTooLong
+          expr: elasticsearch_cluster_health_initializing_shards > 0
+          for: 15m
+          labels:
+            severity: warning
+            app: elastic
+          annotations:
+            summary: Elasticsearch {{ $labels.cluster }} initializing shards too long
+            description: "Elasticsearch {{ $labels.cluster }} in namespace {{ $labels.namespace }} has been initializing shards for 15 min"
+
+      - name: elasticsearch-cluster
+        rules:
+        - alert: ElasticsearchClusterYellow
+          expr: elasticsearch_cluster_health_status{color="yellow"} == 1
+          for: 15m
+          labels:
+            severity: warning
+            app: elastic-cluster
+          annotations:
+            summary: Elasticsearch Cluster {{ $labels.cluster }} status Yellow.
+            description: "Elastic Cluster {{ $labels.cluster }} in namespace {{ $labels.namespace }} is status yellow. Yellow status indicates that one or more of the replica shards on the Elasticsearch cluster are not allocated to a node." # https://opster.com/guides/elasticsearch/operations/elasticsearch-yellow-status/
+
+        - alert: ElasticsearchHealthyNodesWarning
+          expr: elasticsearch_cluster_health_number_of_nodes < max_over_time(elasticsearch_cluster_health_number_of_nodes[60m])
+          for: 15m
+          labels:
+            severity: warning
+            app: elastic-cluster
+          annotations:
+            summary: Elasticsearch Cluster {{ $labels.cluster }} less than 3 nodes
+            description: "Elasticsearch {{ $labels.cluster }} in namespace {{ $labels.namespace }} has only {{ $value }} nodes but needs at least 3"
+
+        # don't need for now, since the data node is also the master node
+        # - alert: ElasticsearchHealthyDataNodesWarning
+        #   expr: elasticsearch_cluster_health_number_of_data_nodes < max_over_time(elasticsearch_cluster_health_number_of_data_nodes[60m])
+        #   for: 5m
+        #   labels:
+        #     severity: critical
+        #     app: elastic-cluster
+        #   annotations:
+        #     summary: Elasticsearch Cluster {{ $labels.cluster }} has less than 3 data nodes.
+        #     description: "Elasticsearch {{ $labels.cluster }} in namespace {{ $labels.namespace }} has only {{ $value }} data nodes but needs at least 3"
+
+        - alert: ElasticsearchHealthyNodesCritical
+          expr: elasticsearch_cluster_health_number_of_nodes < floor((max_over_time(elasticsearch_cluster_health_number_of_nodes[60m]) / 2)) + 1
+          for: 5m
+          labels:
+            severity: critical
+            app: elastic-cluster
+          annotations:
+            summary: Elasticsearch Cluster {{ $labels.cluster }} less than 3 nodes
+            description: "Elasticsearch {{ $labels.cluster }} in namespace {{ $labels.namespace }} has only {{ $value }} nodes but needs at least 3"
+
+        # don't need for now, since the data node is also the master node
+        # - alert: ElasticsearchHealthyDataNodesCritical
+        #   expr: elasticsearch_cluster_health_number_of_data_nodes <= 1
+        #   for: 0m
+        #   labels:
+        #     severity: critical
+        #     app: elastic-cluster
+        #   annotations:
+        #     summary: Elasticsearch Cluster {{ $labels.cluster }} has less than 3 data nodes.
+        #     description: "Elasticsearch {{ $labels.cluster }} in namespace {{ $labels.namespace }} has only {{ $value }} data nodes but needs at least 3"
+
+        - alert: ElasticsearchUnassignedShards
+          expr: elasticsearch_cluster_health_unassigned_shards > 0
+          for: 15m
+          labels:
+            severity: critical
+            app: elastic-cluster
+          annotations:
+            summary: Elasticsearch {{ $labels.cluster }} has unassigned shards
+            description: "Elasticsearch {{ $labels.cluster }} in namespace {{ $labels.namespace }} has {{ $value }} unassigned shards"
+
+      - name: manabie-app-connect-natjs
+        rules:
+          - alert: ManabieAppDisconnectedFromNatJSTooLong
+            expr: manabie_app_nats_disconnect > 0
+            for: 5m
+            labels:
+              severity: critical
+            annotations:
+              summary: Pod {{ $labels.pod }} of {{ $labels.app }} app has been disconnected from Natjs for too long
+              description: Pod {{ $labels.pod }} in {{ $labels.namespace }} namespace has {{ $value }} disconnect errors to NatJs for 5 minutes.
+
+      - name: manabie-notification-push-message-error
+        rules:
+          - alert: ManabieNotificationPushedMessageOccurredError
+            expr: |
+              (
+                sum(rate(manabie_notification_error_pushed_counter{status!="OK"}[3h])) by (app)
+                /
+                sum(rate(manabie_notification_error_pushed_counter[3h])) by (app)
+              ) > 0.4
+            for: 0m
+            labels:
+              app: notification
+              severity: critical
+            annotations:
+              summary: High failure rate in push FCM messages
+              description: Notification service has occurred failures in pushing FCM with {{ $value | humanizePercentage }} failure rate in 3 hours.
+
+      - name: email-sending
+        rules:
+          - alert: EmailIsPendingToProcess
+            expr: |
+              ( 1 - (
+                sum(rate(manabie_email_event_counter{event="processed"}[3h])) by (app)
+                /
+                sum(rate(manabie_email_event_counter{event="queued"}[3h])) by (app)
+              )) > 0.4
+            for: 0m
+            labels:
+              app: spike
+              severity: critical
+            annotations:
+              summary: High PENDING rate in email sending process
+              description: There is/are {{ $value | humanizePercentage }} of QUEUED email(s) is/are pending to process in 3 hours.
+
+          - alert: EmailIsBounceAfterProcessed
+            expr: |
+              (
+                sum(rate(manabie_email_event_counter{event="bounce"}[3h])) by (app)
+                /
+                sum(rate(manabie_email_event_counter{event="processed"}[3h])) by (app)
+              ) > 0.3
+            for: 0m
+            labels:
+              app: spike
+              severity: critical
+            annotations:
+              summary: High BOUNCE rate in email sending process
+              description: There is/are {{ $value | humanizePercentage }} of PROCESSED email(s) is/are sent failed (BOUNCE/BLOCKED) in 3 hours.
+
+          - alert: EmailIsDroppedAfterProcessed
+            expr: |
+              (
+                sum(rate(manabie_email_event_counter{event="dropped"}[3h])) by (app)
+                /
+                sum(rate(manabie_email_event_counter{event="processed"}[3h])) by (app)
+              ) > 0.3
+            for: 0m
+            labels:
+              app: spike
+              severity: critical
+            annotations:
+              summary: High DROPPED rate in email sending process
+              description: There is/are {{ $value | humanizePercentage }} of PROCESSED email(s) is/are sent failed (DROPPED) in 3 hours.
+
+      - name: scheduled-notification-cronjob-unavailable
+        rules:
+          - alert: ScheduledNotificationCronjobUnavailable
+            expr: (time()-max(kube_job_status_start_time * ON(job_name,namespace) GROUP_RIGHT() kube_job_owner{owner_name="yasuo-send-scheduled-notification"}) BY (owner_name, namespace)) > 600
+            for: 0m
+            labels:
+              app: notification
+              severity: critical
+            annotations:
+              summary: Scheduled notification cronjob has not started since the last 10 minutes
+              description: Scheduled notification cronjob has not started since the last {{ $value }} seconds
+          - alert: ScheduledNotificationCronjobFailure
+            expr: |
+              (
+                time()-max(
+                  kube_job_status_start_time * ON(job_name,namespace) GROUP_RIGHT()
+                  kube_job_owner{owner_name="yasuo-send-scheduled-notification"}
+                  * ON (job_name, namespace) GROUP_LEFT() (kube_job_status_succeeded!=0)
+                ) BY (owner_name, namespace)
+              ) > 600
+            for: 0m
+            labels:
+              app: notification
+              severity: critical
+            annotations:
+              summary: Scheduled notification cronjob has no success status more than 10 minutes
+              description: Scheduled notification cronjob has not succeeded since the last {{ $value }} seconds
+          - alert: SlowGrpcRequestSendScheduledNotification
+            expr: histogram_quantile(0.95, sum by (le, grpc_server_method, namespace) (rate(grpc_io_server_server_latency_bucket{grpc_server_method=~".+SendScheduledNotification", namespace!="old-prod-manabie-backend"}[5m]))) / 1000 > 45
+            for: 10m
+            labels:
+              severity: warning
+              app: backend
+            annotations:
+              summary: GRPC requests slow
+              description: GRPC method {{ $labels.grpc_server_method }} in {{ $labels.namespace }} namespace slowing down, 95th pct is {{ $value | humanizeDuration }}.
+
+      - name: kafka-connect
+        rules:
+          - alert: KafkaConnectMetricsMissing
+            expr: up{app_kubernetes_io_instance="kafka-connect"} == 0
+            for: 5m
+            labels:
+              app: kafka-connect
+              severity: warning
+            annotations:
+              summary: Kafka Connect metrics missing
+              description: Failed to scrape Kafka Connect metrics in namespace {{ $labels.namespace }}
+          - alert: KafkaConnectFailedTask
+            expr: avg_over_time(kafka_connect_connector_worker_connector_failed_task_count[5m]) > 0.5
+            for: 3m
+            labels:
+              app: kafka-connect
+              severity: critical
+            annotations:
+              summary: There are some kafka task 's connector in namespace {{ $labels.namespace }} failed since the last 1 minutes
+              description: There are some task's connector {{ $labels.connector }} in namespace {{ $labels.namespace }} and pod {{ $labels.pod }} failed since the last 1 minutes
+          - alert: KafkaConnectPausedTask
+            expr: |
+              kafka_connect_connector_worker_connector_paused_task_count{
+                connector!~".+bob_to_newinstance_users_sink.+|.+bob_to_fatima_student_enrollment_status_history_sink.+|.+bob_to_mastermgmt_granted_permission_sink.+|.+bob_to_timesheet_location_types_sink.+|.+bob_to_timesheet_locations_sink.+|.+bob_to_entryexitmgmt_student_entryexit_records_sink.+|.+bob_to_entryexitmgmt_student_qr_sink.+|prod_jprep_bob_to_entryexitmgmt_user_basic_info_sink.+|.+bob_to_lessonmgmt_lessons.+sink_connector"
+              } > 0
+            labels:
+              app: kafka-connect
+              severity: warning
+            annotations:
+              summary: There are some kafka task's connector in namespace {{ $labels.namespace }} getting paused
+              description: There are some task's connector {{ $labels.connector }} in namespace {{ $labels.namespace }} and pod {{ $labels.pod }} getting paused
+
+      - name: kafka
+        rules:
+          - alert: KafkaMetricsMissing
+            expr: up{app_kubernetes_io_instance="kafka"} == 0
+            for: 5m
+            labels:
+              app: kafka
+              severity: warning
+            annotations:
+              summary: Kafka metrics missing
+              description: Failed to scrape Kafka metrics in namespace {{ $labels.namespace }}
+          - alert: CPSchemaRegistryRegisterSchemaError
+            expr: cp_kafka_schema_registry_jersey_metrics_subjects_versions_register_request_error_rate > 0
+            for: 0m
+            labels:
+              app: kafka
+              severity: critical
+            annotations:
+              summary: cp-schema-registry in namespace {{ $labels.namespace }} has error request which register schema
+              description: cp-schema-registry with pod {{ $labels.pod }} in namespace {{ $labels.namespace }} has error requests which register schema
+          - alert: KafkaConsumerLag
+            expr:  sum(kafka_consumergroup_lag {consumergroup !~ ".+to_alloydb_.+" }) by (consumergroup, namespace) > 50
+            for: 5m
+            labels:
+              app: kafka
+              severity: critical
+            annotations:
+              summary:  Kafka consumers group {{ $labels.consumergroup }} (instance {{ $labels.instance }}) have large of messages lag
+              description: Kafka consumers group consumer_group = {{ $labels.consumergroup }} namespace = {{ $labels.namespace }} have large of messages lag VALUE = {{ $value }}
+          - alert: KafkaConsumerLagForAlloyDB
+            expr:  sum(kafka_consumergroup_lag {consumergroup =~ ".+to_alloydb_.+" }) by (consumergroup, namespace) > 2000
+            for: 15m
+            labels:
+              app: kafka
+              severity: critical
+            annotations:
+              summary:  Kafka consumers group {{ $labels.consumergroup }} (instance {{ $labels.instance }}) have large of messages lag
+              description: Kafka consumers group consumer_group = {{ $labels.consumergroup }} namespace = {{ $labels.namespace }} have large of messages lag VALUE = {{ $value }}
+          - alert: KafkaMessageInDeadLetterQueueIncreasing
+            expr: kafka_topic_partition_current_offset{topic=~"dlq.+"} - kafka_topic_partition_oldest_offset{topic=~"dlq.+"} > 0
+            for: 5m
+            labels:
+              app: kafka
+              severity: critical
+            annotations:
+              summary:  Message in the deadletter queue of topic {{ $labels.topic }} (project {{ $labels.project }} namespace {{ $labels.namespace }} ) increasing!!!
+              description: Message in the deadletter queue of topic {{ $labels.topic }} namespace = {{ $labels.namespace }} project {{ $labels.project }} increasing.
+      - name: github-actions-exporter
+        rules:
+
+        - alert: HCMORunnerstatus
+          expr: count(github_runner_organization_status{name=~"arc-runner-hcm-8-32.+"}) < 1
+          for: 10m
+          labels:
+            severity: warning
+            app: github-actions-exporter
+          annotations:
+            summary: "Runner name arc-runner-hcm-8-32 isn't online"
+            description: "Runner name arc-runner-hcm-8-32 in HCMO isn't online"
+
+        - alert: iMacsRunnerstatus
+          expr: github_runner_status{name=~"Techs-iMac.+"} != 1
+          for: 10m
+          labels:
+            severity: warning
+            app: github-actions-exporter
+          annotations:
+            summary: "Runner name {{ $labels.name }} isn't online"
+            description: "Runner name {{ $labels.name }} in HCMO isn't online"
+
+        - alert: LongQueuedWorkflow
+          expr: github_workflow_job_duration_ms{status="queued"} >=10800000
+          for: 10m
+          labels:
+            severity: warning
+            app: github-actions-exporter
+          annotations:
+            summary: "Runner name {{ $labels.name }} queued for more than 3 hours"
+            description: "Runner name {{ $labels.name }} queued for more than 3 hours"
+
+        - alert: ContainerHighThrottlepRate
+          expr: rate(container_cpu_cfs_throttled_periods_total{namespace!~"kube-system|monitoring|actions-runner-system"}[5m])/rate(container_cpu_cfs_periods_total{namespace!~"kube-system|monitoring|actions-runner-system"}[5m]) > 0.2
+          for: 5m
+          labels:
+            app: kubernetes
+            severity: warning
+          annotations:
+            summary: Container {{ $labels.container }} high throttle rate on (instance {{ $labels.instance }})
+            description: "Container {{ $labels.container }} is being throttled\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+
+      #- name: meta
+      #  rules:
+      #    - alert: heartbeat
+      #      expr: vector(1)
+      #      labels:
+      #        severity: none
+      #      annotations:
+      #        summary: Grafana OnCall heartbeat alert
+      #        description: This is heartbeat alert for health check purpose. If you dont receive one of these alerts every 15 minutes, OnCall will issue an incident

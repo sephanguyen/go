@@ -1,0 +1,51 @@
+- function:
+    schema: public
+    name: find_parents_or_enrolled_students
+- function:
+    schema: public
+    name: find_schools_based_on_student_in_granted_locations
+- function:
+    schema: public
+    name: find_teacher_by_resource_path
+- function:
+    schema: public
+    name: find_teacher_by_school_id
+- function:
+    schema: public
+    name: find_teacher_by_school_id_v2
+- function:
+    schema: public
+    name: get_first_parent_from_student_ids
+- function:
+    schema: public
+    name: get_locations_active_by_course_id
+- function:
+    schema: public
+    name: get_locations_lowest_level
+- function:
+    schema: public
+    name: get_locations_lowest_level_by_name_and_access_path
+- function:
+    schema: public
+    name: get_lowest_location_types
+- function:
+    schema: public
+    name: get_lowest_location_types_v2
+- function:
+    schema: public
+    name: search_courses_by_name
+- function:
+    schema: public
+    name: get_sorted_students_list
+- function:
+    schema: public
+    name: get_sorted_user_groups
+- function:
+    schema: public
+    name: get_sorted_students_list_v2
+- function:
+    schema: public
+    name: get_sorted_students_list_v3
+- function:
+    schema: public
+    name: get_school_info_list

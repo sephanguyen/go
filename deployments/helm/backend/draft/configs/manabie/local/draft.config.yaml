@@ -1,0 +1,15 @@
+common:
+  stats_enabled: true
+  remote_trace:
+    enabled: true
+  google_cloud_project: dev-manabie-online
+issuers:
+  - issuer: http://firebase.emulator.svc.cluster.local:40401/fake_aud
+    audience: fake_aud
+    jwks_endpoint: http://firebase.emulator.svc.cluster.local:40401/jwkset
+  - issuer: manabie
+    audience: manabie-local
+    jwks_endpoint: http://shamir:5680/.well-known/jwks.json
+github:
+  app_id: 246581
+  installation_id: 30125001

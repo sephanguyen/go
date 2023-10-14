@@ -1,0 +1,235 @@
+package tests
+
+import (
+	"fmt"
+	"testing"
+
+	"github.com/manabie-com/backend/internal/golibs/configs"
+	skaffoldwrapper "github.com/manabie-com/backend/internal/golibs/execwrapper/skaffold"
+	vr "github.com/manabie-com/backend/internal/golibs/variants"
+
+	"github.com/stretchr/testify/require"
+	"gopkg.in/yaml.v3"
+	corev1 "k8s.io/api/core/v1"
+)
+
+// TestPostgresV2 tests the postgres_v2 and postgres_migrate fields in config.
+func TestPostgresV2(t *testing.T) {
+	vr.Iter(t).SkipE(vr.EnvPreproduction).IterPE(func(t *testing.T, p vr.P, e vr.E) {
+		testPostgresV2(t, e, p)
+	})
+}
+
+type postgresMigrateConfig struct {
+	Source   string                         `yaml:"source"`
+	Database configs.PostgresDatabaseConfig `yaml:"database"`
+}
+type postgresV2Config struct {
+	PostgresV2 configs.PostgresConfigV2 `yaml:"postgres_v2"`
+}
+
+type postgresMigrate struct {
+	PostgresMigrate postgresMigrateConfig `yaml:"postgres_migrate"`
+}
+
+func testPostgresV2(t *testing.T, e vr.E, p vr.P) {
+	manifestObjects, err := skaffoldwrapper.New().E(e).P(p).Filename("skaffold.manaverse.yaml").CachedRender()
+	require.NoError(t, err)
+
+	{
+		manifestObjects2, err := skaffoldwrapper.New().E(e).P(p).Filename("skaffold2.backend.yaml").V2CachedRender()
+		require.NoError(t, err)
+		manifestObjects = append(manifestObjects, manifestObjects2...)
+	}
+
+	configmaps := make(map[string]*corev1.ConfigMap, 64)
+	secrets := make(map[string]*corev1.Secret, 64)
+	for _, o := range manifestObjects {
+		switch v := o.(type) {
+		// TODO: there might be duplicates here (same name but different namespace)
+		case *corev1.ConfigMap:
+			configmaps[v.ObjectMeta.Name] = v
+		case *corev1.Secret:
+			secrets[v.ObjectMeta.Name] = v
+		}
+	}
+
+	svcList := []vr.S{
+		vr.ServiceBob,
+		vr.ServiceEnigma,
+		vr.ServiceEureka,
+		vr.ServiceFatima,
+		vr.ServiceZeus,
+		vr.ServiceInvoiceMgmt,
+		vr.ServiceLessonMgmt,
+		vr.ServiceMasterMgmt,
+		vr.ServiceNotificationMgmt,
+		vr.ServicePayment,
+		vr.ServiceShamir,
+		vr.ServiceTom,
+		vr.ServiceVirtualClassroom,
+		vr.ServiceUserMgmt,
+		vr.ServiceYasuo,
+	}
+	if p != vr.PartnerJPREP {
+		svcList = append(svcList,
+			vr.ServiceCalendar,
+			vr.ServiceEntryExitMgmt,
+			vr.ServiceTimesheet,
+		)
+	}
+	if e == vr.EnvStaging && p == vr.PartnerManabie {
+		svcList = append(svcList, vr.ServiceDraft)
+	}
+	for _, svc := range svcList {
+		svcName := svc.String()
+		if serviceHasMigration(svc) {
+			t.Run(fmt.Sprintf("check postgres_migrate of %v", svc), func(t *testing.T) {
+				conf, err := getConfigFromManifest[postgresMigrate](
+					configmaps, secrets, svcName,
+					commonConfigmapName(svcName), configmapName(svcName), migrateSecretName(svcName),
+				)
+				require.NoError(t, err)
+
+				require.Equal(t, "file:///migrations/"+svcName, conf.PostgresMigrate.Source)
+				require.Equal(t, getExpectedMigrationServiceAccountEmail(p, e, svc), conf.PostgresMigrate.Database.CloudSQLImpersonateServiceAccountEmail)
+				require.Equal(t, getExpectedDBMigrationUser(p, e, svc), conf.PostgresMigrate.Database.User)
+				require.Equal(t, getExpectedDBHost(e), conf.PostgresMigrate.Database.Host)
+				require.Equal(t, "5432", conf.PostgresMigrate.Database.Port)
+				require.Equal(t, vr.DatabaseName(p, e, svc), conf.PostgresMigrate.Database.DBName)
+			})
+		}
+
+		t.Run(fmt.Sprintf("check postgres_v2 of %v", svc), func(t *testing.T) {
+			pcv2, err := getConfigFromManifest[postgresV2Config](
+				configmaps, secrets, svcName,
+				commonConfigmapName(svcName), configmapName(svcName), secretName(svcName),
+			)
+			require.NoError(t, err)
+
+			expectedUser := svcName
+			if e != vr.EnvLocal {
+				expectedUser = vr.ServiceAccountDBUser(p, e, svc)
+			}
+			expectedHost := ""
+			if e == vr.EnvLocal {
+				expectedHost = "postgres-infras.emulator.svc.cluster.local"
+			}
+			for k, v := range pcv2.PostgresV2.Databases {
+				require.Equal(t, expectedUser, v.User)
+				require.Equal(t, expectedHost, v.Host)
+				require.Equal(t, "5432", v.Port)
+				require.Equal(t, vr.DatabaseNamePrefix(p, e)+k, v.DBName, "wrong dbname")
+			}
+		})
+	}
+}
+
+func getExpectedMigrationServiceAccountEmail(p vr.P, e vr.E, s vr.S) string {
+	if e == vr.EnvLocal || e == vr.EnvProduction || e == vr.EnvPreproduction {
+		return ""
+	}
+	return vr.MigrationServiceAccountEmail(p, e, s)
+}
+
+func getExpectedDBMigrationUser(p vr.P, e vr.E, s vr.S) string {
+	if e == vr.EnvLocal || e == vr.EnvProduction || e == vr.EnvPreproduction {
+		return "postgres"
+	}
+	return vr.ServiceAccountDBMigrationUser(p, e, s)
+}
+
+func getExpectedDBHost(e vr.E) string {
+	if e == vr.EnvLocal {
+		return "postgres-infras.emulator.svc.cluster.local"
+	}
+	return ""
+}
+
+func serviceHasMigration(s vr.S) bool {
+	switch s {
+	default:
+		return true
+	case vr.ServiceEnigma,
+		vr.ServiceShamir, vr.ServiceVirtualClassroom,
+		vr.ServicePayment, vr.ServiceUserMgmt, vr.ServiceYasuo:
+		return false
+	}
+}
+
+// getConfigFromManifest extracts and unmarshal data from k8s configmap/secret manifests.
+//
+// Input configmaps, secrets should be extracted from the manifest generated by `skaffold render`.
+//
+// commonConfigName, configName, secretName are the file name (corresponding to the key of the data
+// in the configmap/secret's `data` field). They can be nil to ignore extraction.
+//
+// Note that the secret's data are NOT decrypted before unmarshalling, so its data
+// should be validated for their existence only.
+func getConfigFromManifest[T any](
+	configmaps map[string]*corev1.ConfigMap,
+	secrets map[string]*corev1.Secret, svcName string,
+	commonConfigName, configName, secretName *string,
+) (*T, error) {
+	out := new(T)
+	cm, exists := configmaps[svcName]
+	if !exists {
+		return nil, fmt.Errorf("configmap %q does not exist", svcName)
+	}
+
+	if configmaps != nil && commonConfigName != nil {
+		commonConfigData, exists := cm.Data[*commonConfigName]
+		if !exists {
+			return nil, fmt.Errorf("failed to find data %q in configmap %q", *commonConfigName, svcName)
+		}
+		if err := yaml.Unmarshal([]byte(commonConfigData), out); err != nil {
+			return nil, fmt.Errorf("yaml.Unmarshal failed for common config: %s", err)
+		}
+	}
+
+	if configmaps != nil && configName != nil {
+		configData, exists := cm.Data[*configName]
+		if !exists {
+			return nil, fmt.Errorf("failed to find data %q in configmap %q", *configName, svcName)
+		}
+		if err := yaml.Unmarshal([]byte(configData), out); err != nil {
+			return nil, fmt.Errorf("yaml.Unmarshal failed for config: %s", err)
+		}
+	}
+
+	if secrets != nil && secretName != nil {
+		secret, exists := secrets[svcName]
+		if !exists {
+			return nil, fmt.Errorf("secret %q does not exist", svcName)
+		}
+		secretData, exists := secret.Data[*secretName]
+		if !exists {
+			return nil, fmt.Errorf("failed to find data %q in secret %q", *secretName, svcName)
+		}
+		if err := yaml.Unmarshal([]byte(secretData), out); err != nil {
+			return nil, fmt.Errorf("yaml.Unmarshal failed for secret: %s", err)
+		}
+	}
+
+	return out, nil
+}
+
+func commonConfigmapName(svcName string) *string {
+	res := svcName + ".common.config.yaml"
+	return &res
+}
+
+func configmapName(svcName string) *string {
+	res := svcName + ".config.yaml"
+	return &res
+}
+
+func migrateSecretName(svcName string) *string {
+	res := svcName + "_migrate.secrets.encrypted.yaml"
+	return &res
+}
+
+func secretName(svcName string) *string {
+	res := svcName + ".secrets.encrypted.yaml"
+	return &res
+}

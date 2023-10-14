@@ -1,0 +1,50 @@
+table:
+  schema: public
+  name: hubs
+object_relationships:
+  - name: city
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: cities
+        insertion_order: null
+        column_mapping:
+          city_id: city_id
+  - name: district
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: districts
+        insertion_order: null
+        column_mapping:
+          district_id: district_id
+array_relationships:
+  - name: hub_tours
+    using:
+      foreign_key_constraint_on:
+        column: hub_id
+        table:
+          schema: public
+          name: hub_tours
+select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+        - hub_id
+        - name
+        - description
+        - phone_number
+        - address
+        - country
+        - city_id
+        - district_id
+        - point
+        - images
+        - opening_hours
+        - created_at
+        - updated_at
+        - events
+      filter: {}
+      allow_aggregations: true

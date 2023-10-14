@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "graphql-mesh.fullname" . }}
+  labels:
+    {{- include "graphql-mesh.labels" . | nindent 4 }}
+data:
+  .meshrc.yaml: |
+{{ tpl ("configs/.meshrc.yaml" | .Files.Get) . | indent 4 }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "graphql-mesh.fullname" . }}-proto
+  labels:
+    {{- include "graphql-mesh.labels" . | nindent 4 }}
+data:
+  {{- $files := .Files }}
+  {{- range $path, $_ := .Files.Glob "proto/**/*.proto" }}
+  {{ $path | replace "/" "-" }}: |
+{{ $files.Get $path | indent 4 }}
+  {{- end }}

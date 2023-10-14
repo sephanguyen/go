@@ -1,0 +1,87 @@
+table:
+  schema: public
+  name: class_members
+object_relationships:
+  - name: class
+    using:
+      foreign_key_constraint_on: class_id
+  - name: student
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: students
+        insertion_order: null
+        column_mapping:
+          user_id: student_id
+  - name: student_subscription
+    using:
+      foreign_key_constraint_on: student_subscription_id
+  - name: teacher_by_school_id
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: teacher_by_school_id
+        insertion_order: null
+        column_mapping:
+          user_id: teacher_id
+  - name: teachers
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: teachers
+        insertion_order: null
+        column_mapping:
+          user_id: teacher_id
+  - name: user
+    using:
+      foreign_key_constraint_on: user_id
+select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+        - class_member_id
+        - class_id
+        - user_id
+        - status
+        - user_group
+        - is_owner
+        - updated_at
+        - created_at
+        - student_subscription_id
+        - deleted_at
+      filter: {}
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+        - is_owner
+        - class_id
+        - class_member_id
+        - status
+        - student_subscription_id
+        - user_group
+        - user_id
+        - created_at
+        - deleted_at
+        - updated_at
+      filter:
+        _and:
+          - class:
+              school_id:
+                _in: X-Hasura-School-Ids
+          - _or:
+              - student:
+                  school_id:
+                    _in: X-Hasura-School-Ids
+              - teacher_by_school_id:
+                  school_id:
+                    _in: X-Hasura-School-Ids
+              - user:
+                  class_members:
+                    class:
+                      school_id:
+                        _in: X-Hasura-School-Ids
+      allow_aggregations: true

@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+package eureka.v2;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/eureka/v2;epb";
+
+import "google/protobuf/timestamp.proto";
+import "eureka/v2/common/requests.proto";
+
+message ListStudentStudyPlanRequest {
+  string student_id = 1;
+  eureka.v2.common.Paging paging = 2;
+}
+
+message ListStudentStudyPlanResponse {
+  message StudentStudyPlan{
+    string study_plan_id = 1;
+    string study_plan_name = 2;
+    google.protobuf.Timestamp start_date = 3;
+    google.protobuf.Timestamp end_date = 4;
+  }
+  message Course{
+    string course_id = 4;
+    string course_name = 5;
+    repeated StudentStudyPlan study_plans=1;
+  }
+  repeated Course courses = 1;
+  eureka.v2.common.Paging next_page = 2;
+}
+
+message GetStudentStudyPlanStatusRequest {
+  repeated string study_plan_ids = 1;
+}
+
+message GetStudentStudyPlanStatusResponse {
+  message StudentStudyPlanStatus{
+    string study_plan_id = 1;
+    uint32 totalStudyPlanItems = 2;
+    uint32 totalTodoStudyPlanItems = 3;
+    uint32 totalCompletedStudyPlanItems = 4;
+    uint32 totalOverdueStudyPlanItems = 5;
+  }
+  repeated StudentStudyPlanStatus study_plans = 1;
+}
+
+message ListStudentStudyPlanItemRequest{
+  string study_plan_id = 1;
+  google.protobuf.Timestamp start_date = 2;
+  google.protobuf.Timestamp end_date = 3;
+  bool is_todo_study_plan_item = 4;
+}
+
+message ListStudentStudyPlanItemResponse{
+  message LearningMaterial{
+    string learning_material_id = 1;
+    bool is_completed = 2;
+  }
+
+  message StudyPlanItem{
+    string study_plan_item_id = 1;
+    string study_plan_item_name = 2;
+    google.protobuf.Timestamp start_date = 3;
+    google.protobuf.Timestamp end_date = 4;
+    uint32 completed_percentage = 5;
+    repeated LearningMaterial learning_materials = 6;
+  }
+  repeated StudyPlanItem study_plan_items = 1;
+}
+
+service StudentStudyPlanService {
+  rpc ListStudentStudyPlan(ListStudentStudyPlanRequest) returns (ListStudentStudyPlanResponse);
+  rpc GetStudentStudyPlanStatus(GetStudentStudyPlanStatusRequest) returns (GetStudentStudyPlanStatusResponse);
+  rpc ListStudentStudyPlanItem(ListStudentStudyPlanItemRequest) returns (ListStudentStudyPlanItemResponse);
+}

@@ -1,0 +1,70 @@
+apiVersion: skaffold/v4beta5
+kind: Config
+metadata:
+  name: camel-k
+profiles:
+  - name: camel-k
+    activation:
+      - env: CAMEL_K_ENABLED=true
+    deploy:
+      helm:
+        releases:
+          - name: camel-k
+            chartPath: deployments/helm/platforms/camel-k
+            namespace: camel-k
+            valuesFiles:
+              - deployments/helm/platforms/camel-k/values.yaml
+              - deployments/helm/platforms/camel-k/{{.ENV}}-{{.ORG}}-values.yaml
+            createNamespace: true
+            skipBuildDependencies: true
+            wait: true
+            skipTests: true
+            setValueTemplates:
+              global:
+                vendor: '{{.ORG}}'
+                environment: '{{.ENV}}'
+          - name: camel-k-resource
+            chartPath: deployments/helm/platforms/camel-k-resource
+            namespace: 'camel-k'
+            valuesFiles:
+              - deployments/helm/platforms/camel-k-resource/values.yaml
+              - deployments/helm/platforms/camel-k-resource/local-manabie-values.yaml
+            createNamespace: true
+            skipBuildDependencies: true
+            wait: false
+            skipTests: true
+            setValueTemplates:
+              global:
+                vendor: '{{.ORG}}'
+                environment: '{{.ENV}}'
+          - name: integrations
+            chartPath: deployments/helm/integrations
+            namespace: camel-k
+            skipBuildDependencies: true
+            skipTests: true
+            wait: true
+            setValueTemplates:
+              global:
+                vendor: '{{.ORG}}'
+                environment: '{{.ENV}}'
+      statusCheck: true
+      statusCheckDeadlineSeconds: 60
+
+  - name: local
+    activation:
+      - env: ENV=local
+      - env: CAMEL_K_ENABLED=true
+    requiresAllActivations: true
+    patches:
+      - op: add
+        path: /deploy/kubeContext
+        value: kind-kind
+
+  - name: stag
+    activation:
+      - env: ENV=stag
+    patches:
+      - op: remove
+        path: /deploy/helm/releases/2
+      - op: remove
+        path: /deploy/helm/releases/1

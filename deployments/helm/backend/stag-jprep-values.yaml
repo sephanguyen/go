@@ -1,0 +1,31 @@
+global:
+  dbPrefix: "stag_"
+  dbUserPrefix: "stag-jprep-"
+  serviceAccountEmailSuffix: "staging-manabie-online"
+  cloudSQLCommonInstance: "staging-manabie-online:asia-southeast1:jprep-uat"
+  cloudSQLLMSInstance: "staging-manabie-online:asia-southeast1:jprep-uat"
+  cloudSQLAuthInstance: "staging-manabie-online:asia-southeast1:jprep-uat"
+  replicaCount: 2
+  hasura:
+    replicaCount: 2
+    cronScheduledScaling:
+      - timezone: UTC
+        start: "0 13 * * *" # 20h ICT
+        end: "0 20 * * *" # 3h  ICT
+        desiredReplicas: "1"
+      - timezone: UTC
+        start: "1 20 * * *" # 3h01  ICT
+        end: "59 12 * * *" # 19h59 ICT
+        desiredReplicas: "2"
+  cronScheduledScaling:
+    - timezone: UTC
+      start: "0 13 * * *" # 20h ICT
+      end: "0 20 * * *" # 3h  ICT
+      desiredReplicas: "1"
+    - timezone: UTC
+      start: "1 20 * * *" # 3h01  ICT
+      end: "59 12 * * *" # 19h59 ICT
+      desiredReplicas: "2"
+
+  kedaScaledObjectMinReplicas: 1
+  kedaScaledObjectMaxReplicas: 2

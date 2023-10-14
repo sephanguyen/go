@@ -1,0 +1,59 @@
+name: 'Build Android App'
+description: 'A composite action for run build mobile app (Android)'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Get Release information
+      uses: actions/github-script@v6
+      with:
+        github-token: ${{ env.GITHUB_TOKEN }}
+        script: |
+          var response = await github.rest.repos.getReleaseByTag({
+            owner: context.repo.owner,
+            repo: '${{ env.REPO }}',
+            tag: process.env.RELEASE_TAG,
+          });
+
+          const fileName = '${{ env.RELEASE_TAG }}-${{ env.ORGANIZATION }}-${{ env.APP }}-${{ env.ENVIRONMENT }}.apk';
+          const build = response.data.assets.find((item) => item.name.includes(fileName));
+
+          core.exportVariable('FILE_NAME', fileName);
+          if (build) {
+            core.exportVariable('SKIP', true);
+          } else {
+            core.exportVariable('SKIP', false);
+            core.exportVariable('RELEASE_ID', response.data.id);
+          }
+
+    - uses: actions/checkout@v3
+      if: ${{ env.SKIP == 'false' }}
+      with:
+        repository: ${{github.repository_owner}}/${{ env.REPO }}
+        token: ${{ env.GITHUB_TOKEN }}
+        ref: ${{ env.RELEASE_TAG }}
+        path: 'repo-${{ env.REPO }}'
+
+    - name: Deploying Android Learner apps of ${{ env.ORGANIZATION }} to ${{ env.ENVIRONMENT }}
+      if: ${{ env.SKIP == 'false' }}
+      working-directory: 'repo-${{ env.REPO }}'
+      shell: bash
+      run: ORGANIZATION=$ORGANIZATION make docker-build-android
+
+    - name: Uploading build
+      if: ${{ env.SKIP == 'false' }}
+      uses: actions/github-script@v6
+      with:
+        github-token: ${{ env.GITHUB_TOKEN }}
+        script: |
+          const path = require('path');
+          const fs = require('fs');
+          const filePath = "repo-${{ env.REPO }}/app.apk";
+          await github.rest.repos.uploadReleaseAsset({
+            owner: context.repo.owner,
+            repo: '${{ env.REPO }}',
+            release_id: '${{ env.RELEASE_ID }}',
+            name: '${{ env.FILE_NAME }}',
+            data: await fs.readFileSync(filePath)
+          });
+

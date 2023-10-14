@@ -1,0 +1,108 @@
+apiVersion: skaffold/v4beta5
+kind: Config
+metadata:
+  name: mobile
+
+profiles:
+  - name: teacher
+    deploy:
+      helm:
+        hooks:
+          before:
+            - host:
+                command:
+                  - bash
+                  - -c
+                  - |
+                    if [[ "$ENV" == "local" ]]; then
+                        kind load docker-image asia.gcr.io/student-coach-e1e95/teacher-web:${TEACHER_TAG}
+                    fi
+          after:
+            - host:
+                command:
+                  - bash
+                  - -c
+                  - |
+                    echo "To access teacher, you need to add '$ip teacher.local.manabie.io' to your /etc/hosts, and visit:"
+                    echo "    https://teacher.local.manabie.io:31600 teacher"
+
+        releases:
+          - name: teacher
+            chartPath: deployments/helm/mobile/teacher
+            namespace: "{{.ENV}}-{{.ORG}}-frontend"
+            createNamespace: true
+            wait: true
+            skipBuildDependencies: true
+            valuesFiles:
+              - "deployments/helm/platforms/gateway/{{.ENV}}-{{.ORG}}-values.yaml"
+              - "deployments/helm/mobile/teacher/values.yaml"
+              - "deployments/helm/mobile/teacher/{{.ENV}}-{{.ORG}}-values.yaml"
+            setValueTemplates:
+              global:
+                environment: "{{.ENV}}"
+                vendor: "{{.ORG}}"
+              image:
+                repository: "asia.gcr.io/student-coach-e1e95/teacher-web"
+                tag: "{{.TEACHER_TAG}}"
+
+  - name: learner
+    activation:
+      - env: E2E=true
+    deploy:
+      helm:
+        hooks:
+          before:
+            - host:
+                command:
+                  - bash
+                  - -c
+                  - |
+                    if [[ "$ENV" == "local" ]]; then
+                        kind load docker-image asia.gcr.io/student-coach-e1e95/learner-web:${LEARNER_TAG}
+                    fi
+          after:
+            - host:
+                command:
+                  - bash
+                  - -c
+                  - |
+                    echo "To access learner, you need to add '$ip learner.local.manabie.io' to your /etc/hosts, and visit:"
+                    echo "    https://learner.local.manabie.io:31600 learner"
+
+        releases:
+          - name: learner
+            chartPath: deployments/helm/mobile/learner
+            namespace: "{{.ENV}}-{{.ORG}}-frontend"
+            createNamespace: true
+            wait: true
+            skipBuildDependencies: true
+            valuesFiles:
+              - "deployments/helm/platforms/gateway/{{.ENV}}-{{.ORG}}-values.yaml"
+              - "deployments/helm/mobile/learner/values.yaml"
+              - "deployments/helm/mobile/learner/{{.ENV}}-{{.ORG}}-values.yaml"
+            setValueTemplates:
+              global:
+                environment: "{{.ENV}}"
+                vendor: "{{.ORG}}"
+              image:
+                repository: "asia.gcr.io/student-coach-e1e95/learner-web"
+                tag: "{{.LEARNER_TAG}}"
+  - name: learnosity-web-view
+    deploy:
+      helm:
+        releases:
+          - name: learnosity-web-view
+            chartPath: deployments/helm/mobile/learnosity-web-view
+            valuesFiles:
+              - deployments/helm/platforms/gateway/{{.ENV}}-{{.ORG}}-values.yaml
+              - deployments/helm/mobile/learnosity-web-view/values.yaml
+              - deployments/helm/mobile/learnosity-web-view/{{.ENV}}-{{.ORG}}-values.yaml
+            setValueTemplates:
+              global:
+                vendor: '{{.ORG}}'
+                environment: '{{.ENV}}'
+              image:
+                repository: "asia.gcr.io/student-coach-e1e95/learnosity-web-view"
+                tag: "{{.LEARNOSITY_TAG}}"
+            namespace: '{{.ENV}}-{{.ORG}}-frontend'
+            createNamespace: true

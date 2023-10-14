@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package virtualclassroom.v1;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
+import "virtualclassroom/v1/enums.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/virtualclassroom/v1;vpb";
+
+message Media {
+    string media_id = 1;
+    string name = 2;
+    string resource = 3;
+    repeated Comment comments = 4;
+    MediaType type = 5;
+    google.protobuf.Timestamp created_at = 6;
+    google.protobuf.Timestamp updated_at = 7;
+    repeated ConvertedImage images = 8;
+  }
+
+message ConvertedImage {
+  int32 width = 1;
+  int32 height = 2;
+  string image_url = 3;
+}
+
+message Comment {
+  string comment = 1;
+  google.protobuf.Duration duration = 2;
+}

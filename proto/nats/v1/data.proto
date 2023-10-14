@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package nats.v1;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/nats/v1;npb";
+
+import "nats/v1/wrapper.proto";
+
+message DataInMessage {
+    bytes payload = 1;
+    string resource_path = 2;
+    B3TraceInfo trace_info = 3;
+    string user_id = 4;
+}

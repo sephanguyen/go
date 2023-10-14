@@ -1,0 +1,268 @@
+syntax = "proto3";
+
+package bob.v1;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/bob/v1;bpb";
+
+import "bob/v1/enums.proto";
+import "bob/v1/courses.proto";
+import "eureka/v1/assignments.proto";
+import "common/v1/profiles.proto";
+import "common/v1/requests.proto";
+import "common/v1/contents.proto";
+import "common/v1/enums.proto";
+import "google/protobuf/timestamp.proto";
+
+message EvtStudentQuestion {
+  message CreateStudentQuestion {
+    string student_id = 1;
+    string student_question_id = 2;
+    string quiz_id = 3;
+    string content = 4;
+    repeated string url_medias = 5;
+    string title = 6;
+  }
+
+  message AllocateStudentQuestion {
+    string student_question_id = 1;
+    string tutor_id = 2;
+    string notification_title = 3;
+    string notification_body = 4;
+  }
+
+  message EventMessageChat {
+    string student_question_id = 1;
+    string content = 2;
+    string notification_title = 3;
+    string notification_body = 4;
+  }
+
+  message EventArchivedQuestion {
+    string student_question_id = 1;
+  }
+
+  oneof message {
+    CreateStudentQuestion create_student_question = 1;
+    AllocateStudentQuestion allocate_student_question = 2;
+    EventMessageChat event_message_chat = 3;
+    EventArchivedQuestion event_archived_question = 4;  // archived after 3 days
+  }
+}
+
+message EvtAllocateStudentQuestion {
+  string student_question_id = 1;
+}
+
+message RetryWithDelayEvent {
+  google.protobuf.Timestamp when = 1;
+  oneof message {
+    EvtAllocateStudentQuestion evt_allocate_student_question = 2;
+  }
+}
+
+message StudentLearning {
+  string student_id = 1;
+  StudentLearningEvent event = 2;
+  int32 promotion_id = 3;
+}
+
+message EvtClassRoom {
+  message CreateClass {
+    int32 class_id = 1;
+    string teacher_id = 2;
+    string class_name = 3;
+    repeated string teacher_ids = 4;
+  }
+
+  message JoinClass {
+    int32 class_id = 1;
+    string user_id = 2;
+    common.v1.UserGroup user_group = 3;
+  }
+
+  message LeaveClass {
+    int32 class_id = 1;
+    repeated string user_ids = 2;
+    bool is_kicked = 3;
+  }
+
+  message EditClass {
+    int32 class_id = 1;
+    string class_name = 2;
+  }
+
+  message ActiveConversation {
+    int32 class_id = 1;
+    bool active = 2;
+  }
+
+  oneof message {
+    CreateClass create_class = 1;
+    JoinClass join_class = 2;
+    LeaveClass leave_class = 3;
+    EditClass edit_class = 4;
+    ActiveConversation active_conversation = 5;
+  }
+}
+
+message EvtLesson {
+  message Lesson {
+    string lesson_id = 1;
+    string name = 2;
+    repeated string learner_ids = 3;
+    repeated string teacher_ids = 4;
+    string location_id = 5;
+    google.protobuf.Timestamp start_at = 6;
+    google.protobuf.Timestamp end_at = 7;
+    common.v1.LessonSchedulingStatus scheduling_status = 8;
+  }
+
+  message CreateLessons {
+    repeated Lesson lessons = 1;
+  }
+
+  message JoinLesson {
+    string lesson_id = 1;
+    string user_id = 2;
+    common.v1.UserGroup user_group = 3;
+  }
+
+  message UpdateLesson {
+    string lesson_id = 1;
+    string class_name = 2;
+    repeated string learner_ids = 3;
+    string location_id_before = 4;
+    string location_id_after = 5;
+    google.protobuf.Timestamp start_at_before = 6;
+    google.protobuf.Timestamp start_at_after = 7;
+    google.protobuf.Timestamp end_at_before = 8;
+    google.protobuf.Timestamp end_at_after = 9;
+    repeated string teacher_ids_before = 10;
+    repeated string teacher_ids_after = 11;
+    common.v1.LessonSchedulingStatus scheduling_status_before = 12;
+    common.v1.LessonSchedulingStatus scheduling_status_after = 13;
+  }
+
+  message LeaveLesson {
+    string lesson_id = 1;
+    string user_id = 2;
+  }
+
+  message DeletedLessons {
+    repeated string lesson_ids = 1;
+  }
+
+  message EndLiveLesson {
+    string lesson_id = 1;
+    string user_id = 2;
+  }
+
+  oneof message {
+    CreateLessons create_lessons = 1;
+    JoinLesson join_lesson = 2;
+    UpdateLesson update_lesson = 3;
+    LeaveLesson leave_lesson = 4;
+    DeletedLessons deleted_lessons = 5;
+    EndLiveLesson end_live_lesson = 6;
+  }
+}
+
+message EvtUserInfo {
+  string user_id = 1;
+  string device_token = 2;
+  bool allow_notification = 3;
+  string name = 4;
+}
+
+message EvtUser{
+  message CreateStudent{
+    string student_id = 1;
+    string student_name = 2;
+    string school_id = 3;
+  }
+  message CreateParent{
+    string student_id = 1;
+    string student_name = 2;
+    string parent_id = 3;
+    string school_id = 4;
+  }
+  message ParentRemovedFromStudent{
+    string student_id = 1;
+    string parent_id = 2;
+  }
+
+  oneof message {
+    CreateStudent create_student = 1;
+    CreateParent create_parent = 2;
+    ParentRemovedFromStudent parent_removed_from_student = 3;
+  }
+}
+
+message ContentStructures {
+  repeated eureka.v1.ContentStructure content_structures = 1;
+}
+
+message RetrieveContentStructuresByTopicsRequest {
+  repeated string topic_ids = 1;
+  string organization_id = 2;
+}
+
+message RetrieveContentStructuresByTopicsResponse {
+  map<string, ContentStructures> topic_content_structures = 1;
+}
+
+message Assignment {
+  string id = 1;
+  int32 display_order = 2;
+}
+
+message VerifyAppVersionRequest {
+}
+
+message VerifyAppVersionResponse {
+  bool isValid = 1;
+}
+
+message RetrieveTopicsRequest {
+  common.v1.Paging paging = 1;
+  repeated string book_ids = 2;
+  repeated string topic_ids = 3;
+}
+
+message RetrieveTopicsResponse {
+  common.v1.Paging next_page = 1;
+  repeated common.v1.Topic items = 2;
+}
+
+message CourseBook {
+  string course_id = 1;
+  string book_id = 2;
+  google.protobuf.Timestamp created_at = 3;
+  google.protobuf.Timestamp updated_at = 4;
+}
+
+message SubmitQuizAnswersRequest {
+  string set_id = 1;
+  repeated QuizAnswer quiz_answer = 2;
+  string organization_id = 3;
+}
+
+message SubmitQuizAnswersResponse {
+  repeated common.v1.AnswerLog logs = 1;
+}
+
+message QuizAnswer {
+  string quiz_id = 1;
+  repeated Answer answer = 2;
+}
+
+service InternalModifierService {
+  rpc SubmitQuizAnswers(SubmitQuizAnswersRequest) returns (SubmitQuizAnswersResponse);
+}
+
+service InternalReaderService {
+  rpc RetrieveTopics(RetrieveTopicsRequest) returns (RetrieveTopicsResponse);
+
+  rpc VerifyAppVersion(VerifyAppVersionRequest) 
+      returns (VerifyAppVersionResponse);
+}

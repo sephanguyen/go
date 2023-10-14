@@ -1,0 +1,15 @@
+common:
+  sa_email: ""
+  google_cloud_project: production-renseikai
+issuers:
+  - issuer: manabie
+    audience: prod-renseikai
+    jwks_endpoint: http://shamir:5680/.well-known/jwks.json
+postgres_v2:
+  eureka:
+    max_conns: 12
+school_information:
+  school_id: -2147483645
+  school_name: Renseikai School
+storage:
+  bucket: renseikai-backend

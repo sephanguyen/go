@@ -1,0 +1,83 @@
+alertmanager:
+  extraArgs:
+    web.config.file: /etc/config/web_config.yml
+  probeHeaders:
+    - name: Authorization
+      value: Basic YWRtaW46NmEyODU1ZjRiZTk4YjRjNjJjNGIxNzg4
+  baseURL: https://alertmanager.prod.manabie-vn.manabie.io
+  tolerations:
+    - key: monitoring
+      operator: Equal
+      value: "true"
+      effect: NoSchedule
+  persistentVolume:
+    size: 2Gi
+
+alertmanagerFiles:
+  web_config.yml:
+    basic_auth_users:
+      admin: $2y$12$5UgAQjxgZrcJydKQO9jPkufJ5aI13Ol..YCylxwrI3pHw/ymnNYxa
+
+server:
+  extraArgs:
+    web.config.file: /etc/config/web_config.yml
+  probeHeaders:
+    - name: Authorization
+      value: Basic YWRtaW46YzA0ODdhM2I2YzY4MGUxNDZjYTZjYTE4
+  global:
+    external_labels:
+      gke_cluster: manabie
+      project: student-coach-e1e95
+  alertmanagers:
+    - static_configs:
+      - targets:
+        - prometheus-alertmanager
+      basic_auth:
+        username: admin
+        password: 6a2855f4be98b4c62c4b1788
+  baseURL: https://prometheus.prod.manabie-vn.manabie.io
+  tolerations:
+    - key: monitoring
+      operator: Equal
+      value: "true"
+      effect: NoSchedule
+
+  extraTemplates:
+    - |
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: {{ template "prometheus.server.fullname" . }}-thanos
+        labels:
+      {{- include "prometheus.server.labels" . | nindent 4 }}
+      data:
+        bucket.yaml: |
+          type: GCS
+          config:
+            bucket: manabie-thanos
+        prometheus_http_auth.yaml: |
+          basic_auth:
+            username: admin
+            password: c0487a3b6c680e146ca6ca18
+    - |
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: {{ template "prometheus.server.fullname" . }}-thanos
+        labels:
+      {{- include "prometheus.server.labels" . | nindent 4 }}
+      spec:
+        type: ClusterIP
+        ports:
+          - name: grpc
+            port: 10901
+            targetPort: grpc
+            protocol: TCP
+        selector:
+        {{- include "prometheus.server.matchLabels" . | nindent 4 }}
+
+serverFiles:
+  alerting_rules.yml: null
+  web_config.yml:
+    basic_auth_users:
+      admin: $2y$12$drLAgouD2e28sX9vhJSkS.qRmMgps8DDBaaodNZyH8U6Jg.FzzFPq

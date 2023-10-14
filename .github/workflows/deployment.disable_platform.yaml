@@ -1,0 +1,70 @@
+name: deployment.disable_platform.yml
+on:
+  workflow_dispatch:
+    inputs:
+      organizations:
+        type: choice
+        description: "Choose an organization to deploy"
+        required: true
+        options:
+          - manabie
+          - jprep
+          - synersia
+          - renseikai
+          - ga
+          - aic
+          - tokyo
+      environment:
+        type: choice
+        description: "Choose an environment to deploy"
+        required: true
+        options:
+          - stag
+          - uat
+          - prod
+          - dorp  # preproduction
+      uninstall_nats_jetstream:
+        description: "Uninstall NATS Jetstream"
+        required: true
+        default: true
+        type: boolean
+      uninstall_kafka:
+        description: "Uninstall Kafka"
+        required: true
+        default: true
+        type: boolean
+
+env:
+  ORG: ${{ github.event.inputs.organization }}
+  ENV: ${{ github.event.inputs.environment }}
+
+jobs:
+  uninstall:
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    runs-on: ["self-hosted", "100m-400mi", "spot", "persistent"]
+    steps:
+      - name: Checkout backend source
+        uses: actions/checkout@v3
+        timeout-minutes: 5
+
+      - name: Setup Cloud SDK
+        uses: ./.github/actions/setup-k8s
+        with:
+          organization: ${{ env.ORG }}
+          environment: ${{ env.ENV }}
+
+      - name: Uninstall NATS Jetstream
+        if: github.event.inputs.uninstall_nats_jetstream == 'true'
+        run: |
+          set -eu
+          . ./deployments/disable_platform.bash
+          disable_nats_jetstream
+
+      - name: Uninstall Kafka
+        if: github.event.inputs.uninstall_kafka == 'true'
+        run: |
+          set -eu
+          . ./deployments/disable_platform.bash
+          disable_kakfa

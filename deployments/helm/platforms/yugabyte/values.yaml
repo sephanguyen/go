@@ -1,0 +1,92 @@
+replicaCount: 1
+
+image:
+  repository: yugabytedb/yugabyte
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "2.5.3.1-b10"
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+
+securityContext: {}
+
+service:
+  type: ClusterIP
+  port: 80
+
+storage:
+  master:
+    size: 5Gi
+    storageClass: standard
+  tserver:
+    size: 256Gi
+    storageClass: standard
+
+resource:
+  master:
+    requests:
+      cpu: 0.5
+      memory: 0.5Gi
+    limits:
+      cpu: 0.5
+      memory: 0.5Gi
+  tserver:
+    requests:
+      cpu: 1
+      memory: 1Gi
+    limits:
+      cpu: 1
+      memory: 1Gi
+
+tolerations:
+  - key: "db-pool"
+    operator: "Equal"
+    value: "true"
+    effect: "NoSchedule"
+
+affinity:
+  podAntiAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      - topologyKey: "kubernetes.io/hostname"
+
+replicas:
+  master: 1
+  tserver: 1
+
+backups:
+  enabled: false
+  schedule: "*/30 * * * *"
+  bucket: "gs://dev-yugabyte-backup/manabie"
+
+podAnnotations:
+  master:
+    prometheus.io/scrape: "true"
+    prometheus.io/path: /prometheus-metrics
+    prometheus.io/port: "7000"
+  tserver:
+    prometheus.io/scrape: "true"
+    prometheus.io/path: /prometheus-metrics
+    prometheus.io/port: "13000"
+
+createSuperUser:
+  enabled: false
+  password: ""
+
+createBackendDbs:
+  enabled: false
+  pgPassword: ""
+
+#/home/yugabyte/postgres/bin/ysql_dump -h 10.111.7.3 -p 5432 -U postgres -d eureka --exclude-table study_plan_items --format=plain --no-owner --no-acl --data-only | sed -E 's/(DROP|CREATE|COMMENT ON) EXTENSION/-- \1 EXTENSION/g' > exclude_spi.sql
+
+  # 14:06 : 14:30

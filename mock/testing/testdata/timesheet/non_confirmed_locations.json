@@ -1,0 +1,70 @@
+{
+	"schema": [
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "location_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "non_confirmed_locations",
+			"policyname": "rls_non_confirmed_locations",
+			"qual": "permission_check(resource_path, 'non_confirmed_locations'::text)",
+			"with_check": "permission_check(resource_path, 'non_confirmed_locations'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "non_confirmed_locations",
+			"policyname": "rls_non_confirmed_locations_restrictive",
+			"qual": "permission_check(resource_path, 'non_confirmed_locations'::text)",
+			"with_check": "permission_check(resource_path, 'non_confirmed_locations'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [],
+	"table_name": "non_confirmed_locations",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

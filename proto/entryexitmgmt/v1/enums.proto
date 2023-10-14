@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package entryexitmgmt.v1;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/entryexitmgmt/v1;eepb";
+
+enum TouchEvent {
+  TOUCH_ENTRY = 0;
+  TOUCH_EXIT = 1;
+  TOUCH_MANUAL_RECORD = 2;
+}
+
+enum RecordType {
+  CREATE_MANUAL = 0;
+  UPDATE_MANUAL = 1;
+  QR_CODE_SCAN = 2;
+}
+
+enum RecordFilter {
+  ALL = 0;
+  THIS_MONTH = 1;
+  LAST_MONTH = 2;
+  THIS_YEAR = 3;
+}

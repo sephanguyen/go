@@ -1,0 +1,68 @@
+global:
+  dbPrefix: ""
+  dbUserPrefix: "uat-"
+  serviceAccountEmailSuffix: "staging-manabie-online"
+  replicaCount: 2
+  cloudSQLCommonInstance: "staging-manabie-online:asia-southeast1:jprep-uat"
+  cloudSQLLMSInstance: "staging-manabie-online:asia-southeast1:jprep-uat"
+  cloudSQLAuthInstance: "staging-manabie-online:asia-southeast1:jprep-uat"
+
+  hasura:
+    replicaCount: 2
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: cloud.google.com/gke-spot
+                  operator: In
+                  values: ["true"]
+                - key: n2d-highmem-2-uat-spot
+                  operator: In
+                  values: ["true"]
+    tolerations:
+      - effect: NoSchedule
+        key: cloud.google.com/gke-spot
+        operator: Exists
+      - effect: NoSchedule
+        key: n2d-highmem-2-uat-spot
+        operator: Exists
+    cronScheduledScaling:
+      - timezone: UTC
+        start: "0 13 * * *" # 20h ICT
+        end: "0 20 * * *"   # 3h  ICT
+        desiredReplicas: "1"
+      - timezone: UTC
+        start: "1 20 * * *" # 3h01  ICT
+        end: "59 12 * * *"  # 19h59 ICT
+        desiredReplicas: "2"
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: cloud.google.com/gke-spot
+                operator: In
+                values: ["true"]
+              - key: n2d-highmem-2-uat-spot
+                operator: In
+                values: ["true"]
+  tolerations:
+    - effect: NoSchedule
+      key: cloud.google.com/gke-spot
+      operator: Exists
+    - effect: NoSchedule
+      key: n2d-highmem-2-uat-spot
+      operator: Exists
+
+  cronScheduledScaling:
+    - timezone: UTC
+      start: "0 13 * * *" # 20h ICT
+      end: "0 20 * * *"   # 3h  ICT
+      desiredReplicas: "1"
+    - timezone: UTC
+      start: "1 20 * * *" # 3h01  ICT
+      end: "59 12 * * *"  # 19h59 ICT
+      desiredReplicas: "2"
+  kedaScaledObjectMinReplicas: 1
+  kedaScaledObjectMaxReplicas: 2

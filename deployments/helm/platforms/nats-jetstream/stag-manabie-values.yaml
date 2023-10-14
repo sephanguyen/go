@@ -1,0 +1,5 @@
+jetstream:
+  resources:
+    requests:
+      cpu: "80m"
+      memory: "512Mi"

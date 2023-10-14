@@ -1,0 +1,163 @@
+syntax = "proto3";
+
+package mastermgmt.v1;
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/mastermgmt/v1;mpb";
+
+message ImportLocationRequest {
+  bytes payload = 1;
+}
+
+
+message ImportLocationResponse {
+  message ImportLocationError {
+    int32 row_number = 1;
+    string error = 2;
+  }
+  repeated ImportLocationError errors = 1;
+  int32 total_success = 2;
+  int32 total_failed = 3;
+}
+
+message ImportLocationTypeRequest {
+  bytes payload = 1;
+}
+
+message ImportLocationTypeResponse {
+  message ImportLocationTypeError {
+    int32 row_number = 1;
+    string error = 2;
+  }
+  repeated ImportLocationTypeError errors = 1;
+  int32 total_success = 2;
+  int32 total_failed = 3;
+}
+
+message ImportLocationTypeV2Request {
+  bytes payload = 1;
+}
+message ImportLocationTypeV2Response {
+}
+
+message ImportLocationV2Request {
+  bytes payload = 1;
+}
+message ImportLocationV2Response {
+}
+
+service LocationManagementGRPCService {
+  rpc ImportLocation(ImportLocationRequest) returns (ImportLocationResponse);
+  rpc ImportLocationType(ImportLocationTypeRequest) returns (ImportLocationTypeResponse);
+  rpc ImportLocationV2(ImportLocationV2Request) returns (ImportLocationV2Response){
+    option (google.api.http) = {
+      post: "/mastermgmt/api/v1/proxy/locations",
+      body: "*"
+    };
+  };
+  rpc ImportLocationTypeV2(ImportLocationTypeV2Request) returns (ImportLocationTypeV2Response)
+  {
+    option (google.api.http) = {
+      post: "/mastermgmt/api/v1/proxy/location_types",
+      body: "*"
+    };
+  };
+}
+
+message RetrieveLocationTypesRequest{}
+message RetrieveLocationTypesResponse {
+  message LocationType {
+    string location_type_id = 1;
+    string name = 2;
+    string display_name = 3;
+    string parent_name = 4;
+    string parent_location_type_id = 5;
+    int32 level = 6;
+  }
+  repeated LocationType location_types = 1;
+}
+
+message RetrieveLocationTypesV2Request{}
+message RetrieveLocationTypesV2Response {
+  message LocationType {
+    string location_type_id = 1;
+    string name = 2;
+    string display_name = 3;
+    int32 level = 4;
+  }
+  repeated LocationType location_types = 1;
+}
+
+message RetrieveLocationsRequest{
+  bool is_archived = 1;
+}
+message RetrieveLocationsResponse {
+  message Location {
+    string location_id = 1;
+    string name = 2;
+    string location_type = 3;
+    string parent_location_id = 4;
+    google.protobuf.Timestamp created_at = 5;
+    string access_path = 6;
+    bool is_unauthorized = 7;
+  }
+  repeated Location locations = 1;
+}
+
+message GetLocationTreeRequest{
+  bool include_is_archived = 1;
+}
+message GetLocationTreeResponse {
+  string tree = 1; // IN JSON format
+}
+
+message RetrieveLowestLevelLocationsRequest{
+  string name = 1;
+  int32 limit = 2;
+  int32 offset = 3;
+  repeated string location_ids = 4;
+}
+message RetrieveLowestLevelLocationsResponse{
+  message Location {
+    string location_id = 1;
+    string name = 2;
+  }
+  repeated Location locations = 1;
+}
+
+message ExportLocationsRequest {
+}
+
+message ExportLocationsResponse {
+  bytes data = 1;
+}
+
+message ExportLocationTypesRequest {
+}
+
+message ExportLocationTypesResponse {
+  bytes data = 1;
+}
+
+service MasterDataReaderService {
+  rpc RetrieveLocations (RetrieveLocationsRequest) returns (RetrieveLocationsResponse) {
+      option (google.api.http) = {
+        get: "/mastermgmt/api/v1/proxy/locations"
+      };
+  };
+  rpc RetrieveLocationTypes (RetrieveLocationTypesRequest) returns (RetrieveLocationTypesResponse);
+  rpc RetrieveLocationTypesV2 (RetrieveLocationTypesV2Request) returns (RetrieveLocationTypesV2Response);
+  rpc RetrieveLowestLevelLocations (RetrieveLowestLevelLocationsRequest) returns (RetrieveLowestLevelLocationsResponse);
+  rpc GetLocationTree (GetLocationTreeRequest) returns (GetLocationTreeResponse);
+
+  rpc ExportLocations (ExportLocationsRequest) returns (ExportLocationsResponse) {
+    option (google.api.http) = {
+        get: "/mastermgmt/api/v1/proxy/locations/export"
+    };
+  };
+  rpc ExportLocationTypes (ExportLocationTypesRequest) returns (ExportLocationTypesResponse) {
+    option (google.api.http) = {
+        get: "/mastermgmt/api/v1/proxy/location_types/export"
+    };
+  };
+}

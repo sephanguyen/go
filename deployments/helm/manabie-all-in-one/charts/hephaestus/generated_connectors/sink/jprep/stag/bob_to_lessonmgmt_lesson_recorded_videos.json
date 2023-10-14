@@ -1,0 +1,22 @@
+{
+  "name": "stag_jprep_bob_to_lessonmgmt_lesson_recorded_videos_sink_connector",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+    "tasks.max": "1",
+    "topics": "stag.jprep.bob.public.lesson_recorded_videos",
+    "connection.url": "${file:/config/kafka-connect-config.properties:lessonmgmt_url}",
+    "auto.create": "false",
+    "insert.mode": "upsert",
+    "table.name.format": "lesson_recorded_videos",
+    "fields.whitelist": "created_at,creator,date_time_recorded,deleted_at,description,lesson_id,media_id,recorded_video_id,resource_path,updated_at",
+    "transforms": "unwrap,route",
+    "transforms.route.type": "org.apache.kafka.connect.transforms.RegexRouter",
+    "transforms.route.regex": "([^.]+).([^.]+).([^.]+).([^.]+).([^.]+)",
+    "transforms.route.replacement": "$5",
+    "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+    "delete.enabled": "true",
+    "pk.mode": "record_key",
+    "transforms.unwrap.drop.tombstones": "false",
+    "transforms.unwrap.delete.handling.mode": "none"
+  }
+}

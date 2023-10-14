@@ -1,0 +1,5 @@
+*.encrypted.yaml diff=sopsdiffer
+*.encrypted.env diff=sopsdiffer
+
+# Auto-collapse diff on Github for auto-generated files by `make sync-chart`
+camel/integrations/demo/templates/util/** linguist-generated=true

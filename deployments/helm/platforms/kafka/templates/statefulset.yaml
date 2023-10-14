@@ -1,0 +1,129 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "kafka.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "kafka.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: kafka
+    {{- include "kafka.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "kafka.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: kafka
+  serviceName: {{ include "kafka.fullname" . }}-svc-headless
+  {{- if .Values.kafka.cluster.enabled }}
+  replicas: {{ .Values.kafka.cluster.replicas }}
+  {{- else }}
+  replicas: 1
+  {{- end }}
+  {{- if eq "local" .Values.environment }}
+  podManagementPolicy: Parallel
+  {{- else }}
+  podManagementPolicy: OrderedReady
+  {{- end }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "kafka.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: kafka
+      annotations:
+      {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- with .Values.kafka }}
+      {{- $context := (mustMerge (deepCopy .) $) }}
+      affinity: {{- include "util.affinityNew" $context | nindent 8 }}
+      tolerations: {{- include "util.tolerations" $context | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.securityContext | nindent 8 }}
+      {{- with .Values.kafka.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+      - name: jmx-config
+        configMap:
+          name: {{ template "kafka.fullname" . }}-jmx-configmap
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.kafka.image.repository }}:{{ .Values.kafka.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: {{ .Values.kafka.image.pullPolicy }}
+        env:
+        - name: HOSTNAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: CLUSTER_ID
+          value: ZbxI0SJZRiKLJNHusxNHQQ
+        - name: EXTRA_ARGS
+          value: "-javaagent:/kafka/etc/jmx_prometheus_javaagent.jar=5555:/kafka/etc/jmx-kafka/jmx-kafka-prometheus.yml"
+        - name: JMXHOST
+          value: "0.0.0.0"
+        - name: JMXPORT
+          value: "1976"
+        - name: KAFKA_AUTO_CREATE_TOPICS_ENABLE
+          value: "false"
+        - name: KAFKA_MESSAGE_MAX_BYTES
+          value: "10485760"
+        - name: KAFKA_REPLICA_FETCH_MAX_BYTES
+          value: "10485760"
+        - name: KAFKA_HEAP_OPTS
+          value: "{{ .Values.kafka.heapOptions }}"
+        - name: LOG_LEVEL
+          value: "WARN"
+        ports:
+        - containerPort: 9092
+          name: client
+          protocol: TCP
+        - containerPort: 9093
+          name: cluster
+          protocol: TCP
+        resources:
+          {{- toYaml .Values.kafka.resources | nindent 10 }}
+        volumeMounts:
+        - name: kafka-pvc
+          mountPath: {{ .Values.kafka.fileStorage.storageDirectory }}
+        - name: jmx-config
+          mountPath: /kafka/etc/jmx-kafka
+        command:
+        - bash
+        - "-c"
+        - |
+          ordinal=${HOSTNAME##*-}
+          export NODE_ID=$(($ordinal + 1))
+          export KAFKA_CONTROLLER_QUORUM_VOTERS=""
+
+          {{- if .Values.kafka.cluster.enabled }}
+          export NUM_HOST={{ .Values.kafka.cluster.replicas }}
+          {{- else }}
+          export NUM_HOST=1
+          {{- end }}
+          for i in $( seq 0 $(($NUM_HOST-1)) )
+          do
+            if [ ! "$KAFKA_CONTROLLER_QUORUM_VOTERS" ];then
+              export KAFKA_CONTROLLER_QUORUM_VOTERS=$(($i+1))@kafka-$i.{{ include "kafka.fullname" . }}-svc-headless.{{ $.Release.Namespace }}.svc.cluster.local:9093
+            else
+              export KAFKA_CONTROLLER_QUORUM_VOTERS=$KAFKA_CONTROLLER_QUORUM_VOTERS,$(($i+1))@kafka-$i.{{ include "kafka.fullname" . }}-svc-headless.{{ $.Release.Namespace }}.svc.cluster.local:9093
+            fi
+          done
+          /docker-entrypoint.sh start
+      {{- with .Values.kafka.readinessProbe }}
+        readinessProbe: {{- toYaml . | nindent 10 }}
+      {{- end }}
+  volumeClaimTemplates:
+  - metadata:
+      name: kafka-pvc
+      labels:
+        app.kubernetes.io/name: kafka
+    spec:
+      accessModes: {{ .Values.kafka.fileStorage.accessModes }}
+      storageClassName: {{ .Values.kafka.fileStorage.storageClassName }}
+      resources:
+        requests:
+          storage: {{ .Values.kafka.fileStorage.size }}

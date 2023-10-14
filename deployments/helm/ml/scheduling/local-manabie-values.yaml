@@ -1,0 +1,13 @@
+dnsNames:
+  - api.local-green.manabie.io
+  - api.local-blue.manabie.io
+
+
+httpEndpoint:
+  image:
+    repository: asia-docker.pkg.dev/student-coach-e1e95/manaverse/auto-scheduling-http
+    pullPolicy: IfNotPresent
+    tag: "2023061200"
+  service:
+    type: ClusterIP
+    port: 7280

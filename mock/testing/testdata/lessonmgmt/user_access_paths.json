@@ -1,0 +1,105 @@
+{
+	"schema": [
+		{
+			"column_name": "access_path",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "location_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "user_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "user_access_paths",
+			"policyname": "rls_user_access_paths_location",
+			"qual": "(location_id IN ( SELECT p.location_id\n   FROM granted_permissions p\n  WHERE ((p.user_id = current_setting('app.user_id'::text)) AND (p.permission_id = ( SELECT p2.permission_id\n           FROM permission p2\n          WHERE ((p2.permission_name = 'user.user.read'::text) AND (p2.resource_path = current_setting('permission.resource_path'::text))))))))",
+			"with_check": "(location_id IN ( SELECT p.location_id\n   FROM granted_permissions p\n  WHERE ((p.user_id = current_setting('app.user_id'::text)) AND (p.permission_id = ( SELECT p2.permission_id\n           FROM permission p2\n          WHERE ((p2.permission_name = 'user.user.write'::text) AND (p2.resource_path = current_setting('permission.resource_path'::text))))))))",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "user_access_paths",
+			"policyname": "rls_user_access_paths_restrictive",
+			"qual": "permission_check(resource_path, 'user_access_paths'::text)",
+			"with_check": "permission_check(resource_path, 'user_access_paths'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "user_access_paths_pk",
+			"column_name": "location_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "user_access_paths_pk",
+			"column_name": "user_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "user_access_paths",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

@@ -1,0 +1,64 @@
+table:
+  schema: public
+  name: lesson_student_subscription_access_path
+object_relationships:
+  - name: lesson_student_subscription
+    using:
+      foreign_key_constraint_on: student_subscription_id
+  - name: location
+    using:
+      foreign_key_constraint_on: location_id
+select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+        - created_at
+        - deleted_at
+        - location_id
+        - student_subscription_id
+        - updated_at
+      filter:
+        deleted_at:
+          _is_null: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+        - created_at
+        - deleted_at
+        - location_id
+        - student_subscription_id
+        - updated_at
+      filter:
+        _and:
+          - resource_path:
+              _eq: X-Hasura-Resource-Path
+          - deleted_at:
+              _is_null: true
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+        - created_at
+        - deleted_at
+        - location_id
+        - student_subscription_id
+        - updated_at
+      filter:
+        _and:
+          - resource_path:
+              _eq: X-Hasura-Resource-Path
+          - deleted_at:
+              _is_null: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+        - created_at
+        - deleted_at
+        - location_id
+        - student_subscription_id
+        - updated_at
+      filter:
+        _and:
+          - resource_path:
+              _eq: X-Hasura-Resource-Path
+          - deleted_at:
+              _is_null: true

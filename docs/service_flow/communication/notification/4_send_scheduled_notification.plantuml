@@ -1,0 +1,19 @@
+@startuml communication_simplified
+hide circle
+DockerCronjob   -> Yasuo:  Call "NotificationModifierService.SendScheduledNotification"
+note right DockerCronjob
+    every 1 minute
+end note
+activate Yasuo
+Yasuo -> DB: get all tenants
+loop for each tenant: [goroutine] sendScheduledNotifyOfTenant
+    Yasuo -> DB: find scheduled notifications that ready to send 
+    loop for each notification: [gorountine] sendNotification
+        Yasuo -> Yasuo: send notification
+        note right Yasuo
+            1. the same logic as sendNotification flow
+        end note
+    end 
+end
+deactivate Yasuo
+@enduml

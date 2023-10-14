@@ -1,0 +1,249 @@
+{{- if .Values.elasticsearch.runApplyConfigs }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: elasticsearch-{{ template "elastic.fullname" . }}-apply-config
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation
+  labels:
+    {{- include "elastic.labels" . | nindent 4 }}
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      restartPolicy: Never
+      serviceAccountName: {{ include "elastic.serviceAccountName" . }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+      - name: decrypted-volume
+        emptyDir: {}
+      - name: secrets-volume
+        secret:
+          secretName: elasticsearch-{{ include "elastic.fullname" . }}
+          items:
+{{- if eq "local" .Values.environment }}
+          - key: service_credential.json
+            path: service_credential.json
+{{- end }}
+          - key: root-ca.pem.encrypted.yaml
+            path: root-ca.pem.encrypted.yaml
+          - key: root-ca-key.pem.encrypted.yaml
+            path: root-ca-key.pem.encrypted.yaml
+          - key: admin-key.pem.encrypted.yaml
+            path: admin-key.pem.encrypted.yaml
+          - key: admin.pem.encrypted.yaml
+            path: admin.pem.encrypted.yaml
+          - key: root-ca_v2.pem.encrypted.yaml
+            path: root-ca_v2.pem.encrypted.yaml
+          - key: root-ca-key_v2.pem.encrypted.yaml
+            path: root-ca-key_v2.pem.encrypted.yaml
+          - key: admin-key_v2.pem.encrypted.yaml
+            path: admin-key_v2.pem.encrypted.yaml
+          - key: admin_v2.pem.encrypted.yaml
+            path: admin_v2.pem.encrypted.yaml
+      - name: config-volume
+        configMap:
+          name: elasticsearch-{{ include "elastic.fullname" . }}
+          items:
+          - key: elasticsearch.yml
+            path: elasticsearch.yml
+          - key: internal_users.yml
+            path: internal_users.yml
+          - key: roles_mapping.yml
+            path: roles_mapping.yml
+          - key: tenants.yml
+            path: tenants.yml
+          - key: action_groups.yml
+            path: action_groups.yml
+          - key: config.yml
+            path: config.yml
+          - key: roles.yml
+            path: roles.yml
+      initContainers:
+      - name: elasticsearch-decrypt-secret
+        image: "{{ .Values.decryptorImage.repository }}:{{ .Values.decryptorImage.legacyTag }}"
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          privileged: true
+        command:
+          - /bin/bash
+          - -c
+          - |
+
+            set -eu
+            sysctl -w vm.max_map_count=262144
+
+          {{- if eq "local" .Values.environment }}
+            gcloud auth activate-service-account --key-file /configs/service_credential.json
+          {{- end }}
+
+            INDEX=${HOSTNAME##*-}
+
+            code=0
+            sops --decrypt --output-type binary --output /usr/share/elasticsearch/config/decrypted/root-ca.pem /usr/share/elasticsearch/config/root-ca_v2.pem.encrypted.yaml || code=$?
+            if [ "$code" -ne 0 ]; then
+              sops --decrypt --output-type binary /usr/share/elasticsearch/config/root-ca.pem.encrypted.yaml > /usr/share/elasticsearch/config/decrypted/root-ca.pem
+              echo "=============  decrypt old secret file: root-ca.pem.encrypted.yaml"
+            fi
+
+            code=0
+            sops --decrypt --output-type binary --output /usr/share/elasticsearch/config/decrypted/root-ca-key.pem /usr/share/elasticsearch/config/root-ca-key_v2.pem.encrypted.yaml || code=$?
+            if [ "$code" -ne 0 ]; then
+              sops --decrypt --output-type binary /usr/share/elasticsearch/config/root-ca-key.pem.encrypted.yaml > /usr/share/elasticsearch/config/decrypted/root-ca-key.pem
+              echo "============= decrypt old secret file: root-ca-key.pem.encrypted.yaml"
+            fi
+
+            code=0
+            sops --decrypt --output-type binary --output /usr/share/elasticsearch/config/decrypted/admin-key.pem /usr/share/elasticsearch/config/admin-key_v2.pem.encrypted.yaml || code=$?
+            if [ "$code" -ne 0 ]; then
+              sops --decrypt --output-type binary /usr/share/elasticsearch/config/admin-key.pem.encrypted.yaml > /usr/share/elasticsearch/config/decrypted/admin-key.pem
+              echo "============= decrypt old secret file: admin-key.pem.encrypted.yaml"
+            fi
+
+            code=0
+            sops --decrypt --output-type binary --output /usr/share/elasticsearch/config/decrypted/admin.pem /usr/share/elasticsearch/config/admin_v2.pem.encrypted.yaml || code=$?
+            if [ "$code" -ne 0 ];then
+              sops --decrypt --output-type binary /usr/share/elasticsearch/config/admin.pem.encrypted.yaml > /usr/share/elasticsearch/config/decrypted/admin.pem
+              echo "============= decrypt old secret file: admin.pem.encrypted.yaml"
+            fi
+
+            openssl genrsa -out ./node-key-temp.pem 2048
+            openssl pkcs8 -inform PEM -outform PEM -in ./node-key-temp.pem -topk8 -nocrypt -v1 PBE-SHA1-3DES \
+              -out /usr/share/elasticsearch/config/decrypted/node-key.pem
+            openssl req -new -key /usr/share/elasticsearch/config/decrypted/node-key.pem \
+              -out ./node.csr -subj "/CN=$HOSTNAME"
+            openssl x509 -req -in ./node.csr \
+              -CA /usr/share/elasticsearch/config/decrypted/root-ca.pem \
+              -CAkey /usr/share/elasticsearch/config/decrypted/root-ca-key.pem \
+              -extfile <(printf "subjectAltName=DNS:elasticsearch-{{ include "elastic.fullname" . }}") \
+              -CAcreateserial -sha256 -out /usr/share/elasticsearch/config/decrypted/node.pem -days 3650
+
+            openssl genrsa -out /usr/share/elasticsearch/config/decrypted/client.key 2048
+            openssl req -new -key /usr/share/elasticsearch/config/decrypted/client.key -out client.csr -subj "/CN=elasticsearch-{{ include "elastic.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local"
+            openssl x509 -req -in client.csr \
+              -CA /usr/share/elasticsearch/config/decrypted/root-ca.pem \
+              -CAkey /usr/share/elasticsearch/config/decrypted/root-ca-key.pem \
+              -CAcreateserial -sha256 -out /usr/share/elasticsearch/config/decrypted/client.crt -days 1825
+
+            openssl pkcs12 -export -out bundle.p12 \
+              -in /usr/share/elasticsearch/config/decrypted/client.crt \
+              -inkey /usr/share/elasticsearch/config/decrypted/client.key -password pass:elasticsecret
+
+            keytool -noprompt -srcstorepass elasticsecret -deststorepass elasticsecret -destkeystore /usr/share/elasticsearch/config/decrypted/keystore.jks -importkeystore -srckeystore bundle.p12 -srcstoretype PKCS12
+
+            # don't know which should be minium permission for node key
+            chmod -v 640 /usr/share/elasticsearch/config/decrypted/node-key.pem
+            rm /usr/share/elasticsearch/config/decrypted/root-ca-key.pem
+
+        volumeMounts:
+        - name: decrypted-volume
+          mountPath: /usr/share/elasticsearch/config/decrypted/
+        - name: secrets-volume
+          mountPath: /usr/share/elasticsearch/config/root-ca-key.pem.encrypted.yaml
+          subPath: root-ca-key.pem.encrypted.yaml
+          readOnly: true
+        - name: secrets-volume
+          mountPath: /usr/share/elasticsearch/config/root-ca.pem.encrypted.yaml
+          subPath: root-ca.pem.encrypted.yaml
+          readOnly: true
+        - name: secrets-volume
+          mountPath: /usr/share/elasticsearch/config/admin-key.pem.encrypted.yaml
+          subPath: admin-key.pem.encrypted.yaml
+          readOnly: true
+        - name: secrets-volume
+          mountPath: /usr/share/elasticsearch/config/admin.pem.encrypted.yaml
+          subPath: admin.pem.encrypted.yaml
+          readOnly: true
+        - name: secrets-volume
+          mountPath: /usr/share/elasticsearch/config/root-ca-key_v2.pem.encrypted.yaml
+          subPath: root-ca-key_v2.pem.encrypted.yaml
+          readOnly: true
+        - name: secrets-volume
+          mountPath: /usr/share/elasticsearch/config/root-ca_v2.pem.encrypted.yaml
+          subPath: root-ca_v2.pem.encrypted.yaml
+          readOnly: true
+        - name: secrets-volume
+          mountPath: /usr/share/elasticsearch/config/admin-key_v2.pem.encrypted.yaml
+          subPath: admin-key_v2.pem.encrypted.yaml
+          readOnly: true
+        - name: secrets-volume
+          mountPath: /usr/share/elasticsearch/config/admin_v2.pem.encrypted.yaml
+          subPath: admin_v2.pem.encrypted.yaml
+          readOnly: true
+{{- if eq "local" .Values.environment }}
+        - name: secrets-volume
+          mountPath: /configs/service_credential.json
+          subPath: service_credential.json
+          readOnly: true
+{{- end }}
+        env:
+{{- if eq "local" .Values.environment }}
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: "/configs/service_credential.json"
+{{- end }}
+        - name: HOSTNAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+      containers:
+      - name: elastic-apply-config
+        image: "{{ .Values.elasticsearch.image.repository }}:{{ .Values.elasticsearch.image.tag }}"
+        imagePullPolicy: IfNotPresent
+        command:
+          - /bin/sh
+          - -c
+          - |
+
+            set -eu
+
+            echo "Waiting for Elasticsearch to be ready..."
+            while ! nc -z "{{ printf "elasticsearch-%s-0.elasticsearch-%s-headless" (include "elastic.fullname" .) (include "elastic.fullname" .) }}" 9300; do
+              sleep 1
+            done
+
+            cd /usr/share/elasticsearch/plugins/opendistro_security/tools/
+            chmod +x ./securityadmin.sh
+            ./securityadmin.sh -cd ../securityconfig/ -icl -nhnv \
+              -h "{{ printf "elasticsearch-%s-0.elasticsearch-%s-headless" (include "elastic.fullname" .) (include "elastic.fullname" .) }}"  \
+              -cacert ../../../config/decrypted/root-ca.pem \
+              -cert ../../../config/decrypted/admin.pem \
+              -key ../../../config/decrypted/admin-key.pem
+        env:
+        - name: ELASTICSEARCH_URI
+          value: {{ printf "https://elasticsearch-%s:%.0f" (include "elastic.fullname" .) .Values.elasticsearch.service.port }}
+        volumeMounts:
+        - name: decrypted-volume
+          mountPath: /usr/share/elasticsearch/config/decrypted/
+        - name: config-volume
+          mountPath: /usr/share/elasticsearch/config/elasticsearch.yml
+          subPath: elasticsearch.yml
+          readOnly: true
+        - name: config-volume
+          mountPath: /usr/share/elasticsearch/plugins/opendistro_security/securityconfig/internal_users.yml
+          subPath: internal_users.yml
+          readOnly: true
+        - name: config-volume
+          mountPath: /usr/share/elasticsearch/plugins/opendistro_security/securityconfig/roles_mapping.yml
+          subPath: roles_mapping.yml
+          readOnly: true
+        - name: config-volume
+          mountPath: /usr/share/elasticsearch/plugins/opendistro_security/securityconfig/tenants.yml
+          subPath: tenants.yml
+          readOnly: true
+        - name: config-volume
+          mountPath: /usr/share/elasticsearch/plugins/opendistro_security/securityconfig/action_groups.yml
+          subPath: action_groups.yml
+          readOnly: true
+        - name: config-volume
+          mountPath: /usr/share/elasticsearch/plugins/opendistro_security/securityconfig/config.yml
+          subPath: config.yml
+          readOnly: true
+        - name: config-volume
+          mountPath: /usr/share/elasticsearch/plugins/opendistro_security/securityconfig/roles.yml
+          subPath: roles.yml
+          readOnly: true
+{{- end -}}

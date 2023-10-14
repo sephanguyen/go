@@ -1,0 +1,90 @@
+minio:
+  config:
+    accessKey: access_key
+    secretKey: secret_key
+    region: us-east-1
+
+  image:
+    repository: kind-reg.actions-runner-system.svc/minio/minio
+    pullPolicy: IfNotPresent
+    tag: "RELEASE.2020-12-23T02-24-12Z"
+
+  clientImage: kind-reg.actions-runner-system.svc/minio/mc:RELEASE.2020-12-18T10-53-53Z
+
+  imagePullSecrets: []
+  nameOverride: ""
+  fullnameOverride: ""
+
+  service:
+    type: ClusterIP
+    port: 9000
+
+  resources:
+    requests:
+      cpu: 10m
+      memory: 20Mi
+
+  adminHttp:
+    - match:
+      - uri:
+          prefix: /
+      route:
+      - destination:
+          host: minio-infras.emulator.svc.cluster.local
+          port:
+            number: 9000
+
+postgresqlPersistentEnabled: true
+postgres:
+  config:
+    password: example
+
+  image:
+    repository: kind-reg.actions-runner-system.svc/postgres
+    pullPolicy: IfNotPresent
+
+    # Our Cloud SQL (our database server) is running on Debian,
+    # thus we should use Debian distro PostgreSQL image.
+    tag: "13.11-bookworm"
+
+  imagePullSecrets: []
+  nameOverride: ""
+  fullnameOverride: ""
+
+  service:
+    type: ClusterIP
+    port: 5432
+
+  resources:
+    requests:
+      cpu: 10m
+      memory: 20Mi
+alloydb:
+  config:
+    password: example
+  service:
+    type: ClusterIP
+    port: 5433
+
+  resources:
+    requests:
+      cpu: 10m
+      memory: 20Mi
+yugabyte:
+  image:
+    repository: yugabytedb/yugabyte
+    pullPolicy: IfNotPresent
+    tag: "2.5.1.0-b153"
+
+  imagePullSecrets: []
+  nameOverride: ""
+  fullnameOverride: ""
+
+  service:
+    type: ClusterIP
+    port: 5433
+
+  resources:
+    requests:
+      cpu: 10m
+      memory: 20Mi

@@ -1,0 +1,359 @@
+syntax = "proto3";
+
+package virtualclassroom.v1;
+
+import "virtualclassroom/v1/enums.proto";
+import "virtualclassroom/v1/media.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
+import "common/v1/requests.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/virtualclassroom/v1;vpb";
+
+service VirtualClassroomReaderService {
+  rpc RetrieveWhiteboardToken(RetrieveWhiteboardTokenRequest) returns (RetrieveWhiteboardTokenResponse);
+  rpc GetLiveLessonState (GetLiveLessonStateRequest) returns (GetLiveLessonStateResponse);
+  rpc GetUserInformation (GetUserInformationRequest) returns (GetUserInformationResponse);
+}
+
+message RetrieveWhiteboardTokenRequest { 
+  string lesson_id = 1; 
+}
+
+message RetrieveWhiteboardTokenResponse {
+  string whiteboard_token = 1;
+  string room_id = 2;
+  string whiteboard_app_id = 3;
+}
+
+message GetLiveLessonStateRequest {
+  string lesson_id = 1;
+}
+
+message GetLiveLessonStateResponse {
+  string lesson_id = 1;
+  VirtualClassroomState.CurrentMaterial current_material = 2;
+  message UsersState {
+    message LearnerState {
+      string user_id = 1;
+      VirtualClassroomState.HandsUp hands_up = 2;
+      VirtualClassroomState.Annotation annotation = 3;
+      VirtualClassroomState.PollingAnswer polling_answer = 4;
+      VirtualClassroomState.Chat chat = 5;
+    }
+    repeated LearnerState learners = 1;
+  }
+  UsersState users_state = 3;
+  google.protobuf.Timestamp current_time = 4;
+  VirtualClassroomState.CurrentPolling current_polling = 5;
+  VirtualClassroomState.Recording recording = 6;
+  VirtualClassroomState.Spotlight spotlight = 7;
+  VirtualClassroomState.WhiteboardZoomState whiteboard_zoom_state = 8;
+  google.protobuf.Timestamp session_time = 9;
+}
+
+message GetUserInformationRequest {
+  repeated string user_ids = 1;
+}
+
+message UserInfo {
+  string user_id = 1;
+  string name = 2;
+  string first_name = 3;
+  string last_name = 4;
+  string full_name_phonetic = 5;
+  string first_name_phonetic = 6;
+  string last_name_phonetic = 7;
+}
+
+message GetUserInformationResponse {
+  repeated UserInfo user_infos = 1;
+}
+
+service VirtualClassroomModifierService {
+  rpc JoinLiveLesson (JoinLiveLessonRequest) returns (JoinLiveLessonResponse);
+  rpc LeaveLiveLesson (LeaveLiveLessonRequest) returns (LeaveLiveLessonResponse);
+  rpc EndLiveLesson (EndLiveLessonRequest) returns (EndLiveLessonResponse);
+  rpc ModifyVirtualClassroomState (ModifyVirtualClassroomStateRequest) returns (ModifyVirtualClassroomStateResponse);
+  rpc PreparePublish (PreparePublishRequest) returns(PreparePublishResponse);
+  rpc Unpublish (UnpublishRequest) returns(UnpublishResponse);
+}
+
+message VirtualClassroomState {
+  message CurrentMaterial {
+    string media_id = 1;                          // required
+    google.protobuf.Timestamp updated_at = 2;     // required
+    message VideoState {
+      google.protobuf.Duration current_time = 1;  // the elapsed time since the video started playing.
+      PlayerState player_state = 2;
+    }
+    message PDFState {// empty, currently just discriminate with VideoState
+    }
+    message AudioState {
+      google.protobuf.Duration current_time = 1;  // the elapsed time since the audio started playing.
+      PlayerState player_state = 2;
+    }
+    oneof state {// required
+      VideoState video_state = 3;
+      PDFState pdf_state = 4;
+      AudioState audio_state = 6; // 5 is used by Media already
+    };
+    Media data = 5;                               // required
+  }
+  message HandsUp {
+    bool value = 1;
+    google.protobuf.Timestamp updated_at = 2;
+  }
+  message Annotation {
+    bool value = 1;
+    google.protobuf.Timestamp updated_at = 2;
+  }
+  message PollingOption {
+    string answer = 1;
+    bool is_correct = 2;
+    string content = 3;
+  }
+  message PollingSharing{
+    bool is_shared = 1;
+  }
+  message CurrentPolling {
+    repeated PollingOption options = 1;      
+    PollingState status = 2;
+    google.protobuf.Timestamp created_at = 3;
+    google.protobuf.Timestamp stopped_at = 4;
+    PollingSharing is_shared = 5;
+    string question = 6;
+  }
+  message PollingAnswer {
+    repeated string string_array_value = 1;
+    google.protobuf.Timestamp updated_at = 2;
+  }
+  message Recording {
+    bool is_recording = 1;
+    string creator = 2;
+  }
+  message Spotlight {
+    bool is_spotlight = 2;
+    string user_id = 1;
+  }
+  message WhiteboardZoomState {
+    double pdf_scale_ratio = 1;
+    double center_x = 2;
+    double center_y = 3;
+    double pdf_width = 4;
+    double pdf_height = 5;
+  }
+  message Chat {
+    bool value = 1;
+    google.protobuf.Timestamp updated_at = 2;
+  }
+}
+
+message ModifyVirtualClassroomStateRequest {
+  string id = 1;  // required
+  message CurrentMaterialCommand {
+    string media_id = 1;
+    oneof state {
+      VirtualClassroomState.CurrentMaterial.VideoState video_state = 2;
+      VirtualClassroomState.CurrentMaterial.PDFState pdf_state = 3;
+      VirtualClassroomState.CurrentMaterial.AudioState audio_state = 4;
+    };
+  }
+  message Learners {
+    repeated string learners = 1;
+  }
+  message PollingOption {
+    string answer = 1;
+    bool is_correct = 2;
+    string content = 3;
+  }
+  message PollingOptions {
+    repeated PollingOption options = 1;
+    string question = 2;
+  }
+  message PollingAnswer {
+    repeated string string_array_value = 1;
+  }
+  message Spotlight {
+    string user_id = 1;
+    bool is_spotlight = 2;
+  }
+  message WhiteboardZoomState {
+    double pdf_scale_ratio = 1;
+    double center_x = 2;
+    double center_y = 3;
+    double pdf_width = 4;
+    double pdf_height = 5;
+  }
+  oneof command {// required
+    CurrentMaterialCommand share_a_material = 2;      // only for teacher
+    bool stop_sharing_material = 3;                   // only for teacher
+    bool fold_hand_all = 4;                           // only for teacher
+    string fold_user_hand = 5;                        // only for teacher
+    bool raise_hand = 6;                              // only for student
+    bool hand_off = 7;                                // only for student
+    Learners annotation_enable = 8;                   // only for teacher
+    Learners annotation_disable = 9;                  // only for teacher
+    PollingOptions start_polling = 10;                // only for teacher
+    bool stop_polling = 11;                           // only for teacher
+    bool end_polling = 12;                            // only for teacher
+    PollingAnswer submit_polling_answer = 13;         // only for learner
+    bool request_recording = 14;                      // only for teacher
+    bool stop_recording = 15;                         // only for teacher
+    Spotlight spotlight = 16;                         // only for teacher
+    bool start_recording = 17;                        // only for teacher
+    bool share_polling = 18;                          // only for teacher
+    WhiteboardZoomState whiteboard_zoom_state = 19;   // only for teacher
+    Learners chat_enable = 20;                        // only for teacher
+    Learners chat_disable = 21;                       // only for teacher
+    bool annotation_disable_all = 22;                 // only for teacher
+    bool upsert_session_time = 23;                    // only for teacher
+  }
+}
+
+message ModifyVirtualClassroomStateResponse {}
+
+message JoinLiveLessonRequest {
+  string lesson_id = 1;
+}
+
+message JoinLiveLessonResponse {
+  string stream_token = 1;
+  string whiteboard_token = 2;
+  string room_id = 3;
+  string stm_token = 4;
+  string video_token = 5;
+  string agora_app_id = 6;
+  string whiteboard_app_id = 7;
+  string screen_recording_token = 8;
+}
+
+message LeaveLiveLessonRequest {
+  string user_id = 1;
+  string lesson_id = 2;
+}
+
+message LeaveLiveLessonResponse {}
+
+message EndLiveLessonRequest {
+  string lesson_id = 1;
+}
+
+message EndLiveLessonResponse {}
+
+message PreparePublishRequest {
+  string lesson_id = 1;
+  string learner_id = 2;
+}
+
+message PreparePublishResponse {
+  PrepareToPublishStatus status = 1;
+}
+
+message UnpublishRequest {
+  string lesson_id = 1;
+  string learner_id = 2;
+}
+
+message UnpublishResponse {
+  UnpublishStatus status = 1;
+}
+
+service LessonRecordingService {
+  rpc StartRecording(StartRecordingRequest) returns (StartRecordingResponse);
+  rpc StopRecording(StopRecordingRequest) returns (StopRecordingResponse);
+  rpc GetRecordingByLessonID (GetRecordingByLessonIDRequest) returns (GetRecordingByLessonIDResponse);
+  rpc GetRecordingDownloadLinkByID (GetRecordingDownloadLinkByIDRequest) returns (GetRecordingDownloadLinkByIDResponse);
+}
+
+message StartRecordingRequest{
+  message TranscodingConfig{
+    int32 height = 1;
+    int32 width = 2;
+    int32 bitrate = 3;
+    int32 fps = 4;
+    int32 mixed_video_layout = 5;
+    string background_color = 6;
+  }
+  string lesson_id = 1;
+  repeated string subscribe_video_uids = 2;
+  repeated string subscribe_audio_uids = 3;
+  repeated string file_name_prefix = 4;
+  TranscodingConfig transcoding_config = 5;
+  string channel_id = 6;
+}
+
+message StartRecordingResponse{
+  string user_id = 1;
+}
+
+message GetRecordingByLessonIDRequest {
+  string lesson_id = 1; // required
+  common.v1.Paging paging = 2; // required
+}
+
+message GetRecordingByLessonIDResponse{
+  message RecordingItem{
+    string id = 1;
+    google.protobuf.Timestamp start_time = 2;
+    google.protobuf.Duration duration = 3;
+    float file_size = 4;
+  }
+  repeated RecordingItem items = 1;
+  common.v1.Paging next_page = 2;
+  common.v1.Paging previous_page = 3;
+  uint32 total_items = 4;
+}
+
+message GetRecordingDownloadLinkByIDRequest {
+  string recording_id = 1; // required
+  google.protobuf.Duration expiry = 2;
+  string file_name = 3;
+}
+
+message GetRecordingDownloadLinkByIDResponse {
+  string url = 1;
+}
+
+
+message StopRecordingRequest{
+  string lesson_id = 1;
+  string channel_id = 2;
+}
+
+message StopRecordingResponse{}
+
+message UpcomingLiveLessonNotificationRequest {
+  repeated string lesson_ids = 1;
+}
+
+service VirtualClassroomChatService {
+  rpc GetConversationID (GetConversationIDRequest) returns (GetConversationIDResponse);
+  rpc GetPrivateConversationIDs (GetPrivateConversationIDsRequest) returns (GetPrivateConversationIDsResponse);
+}
+
+message GetConversationIDRequest {
+  string lesson_id = 1;
+  repeated string participant_list = 2;
+  LiveLessonConversationType conversation_type = 3;
+}
+
+message GetConversationIDResponse {
+  string conversation_id = 1; 
+}
+
+message GetPrivateConversationIDsRequest {
+  string lesson_id = 1;
+  repeated string participant_ids = 2;
+}
+
+message GetPrivateConversationIDsResponse {
+  repeated string conversation_ids = 1; // deprecated
+  message FailedPrivateConversation {
+    string lesson_id = 1;
+    repeated string participant_ids = 2;
+    string error_msg = 3; 
+  }
+  FailedPrivateConversation failed_priv_conv = 2;
+  map<string, string> participant_conversation_map = 3; // key: participant ID; val: conversation ID
+}

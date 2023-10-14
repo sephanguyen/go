@@ -1,0 +1,9 @@
+CREATE INDEX IF NOT EXISTS user_group_member__user_id__idx ON public.user_group_member USING btree (user_id);
+CREATE INDEX IF NOT EXISTS user_group_member__user_group_id__user_id__idx ON public.user_group_member USING btree (user_group_id);
+CREATE INDEX IF NOT EXISTS user_group_member__user_group_id__idx ON public.user_group_member USING btree (user_group_id);
+CREATE INDEX IF NOT EXISTS role__role_name__idx ON public.role USING btree (role_name);
+CREATE INDEX IF NOT EXISTS granted_role__role_id__idx ON public.granted_role USING btree (role_id);
+CREATE INDEX IF NOT EXISTS granted_role__user_group_id__idx ON public.granted_role USING btree (user_group_id);
+CREATE INDEX IF NOT EXISTS granted_role_access_path__granted_role_id__idx ON public.granted_role_access_path USING btree (granted_role_id);
+CREATE INDEX IF NOT EXISTS granted_role_access_path__location_id__idx ON public.granted_role_access_path USING btree (location_id);
+CREATE INDEX IF NOT EXISTS users_pk ON public.users USING btree (user_id);

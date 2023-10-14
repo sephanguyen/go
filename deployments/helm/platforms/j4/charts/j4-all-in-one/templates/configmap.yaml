@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "j4.fullname" . }}
+  labels:
+    {{- include "j4.labels" . | nindent 4 }}
+data:
+  j4.config.yaml: |
+{{ tpl (printf "configs/%s/%s/j4.config.yaml" .Values.global.vendor .Values.global.environment | .Files.Get) . | indent 4 }}
+
+

@@ -1,0 +1,40 @@
+common:
+  google_cloud_project: production-renseikai
+  firebase_project: production-renseikai
+  identity_platform_project: student-coach-e1e95
+jwt_applicant: prod-renseikai
+issuers:
+  - issuer: manabie
+    audience: prod-renseikai
+    jwks_endpoint: http://shamir:5680/.well-known/jwks.json
+postgres_v2:
+  bob:
+    max_conns: 12
+storage:
+  bucket: renseikai-backend
+brightcove:
+  account_id: 6248889468001
+  client_id: 79ceb2e7-7b44-408d-a765-58edb5a1ae20
+  profile: multi-platform-standard-dynamic
+fake_apple_server: --
+whiteboard:
+  app_id: V7mZoJt9Eeqxp_kxzbwYqQ/a2ayE1XY7HIteQ
+agora:
+  app_id: 4ce88e1ddf8b4be9beeb87d32138fe22
+check_client_versions:
+  - com.manabie.student_manabie_app:1.5.0
+  - com.manabie.studentManabieApp:1.5.0
+  - com.manabie.liz:1.0.0
+  - com.manabie.lms_manabie_app:1.0.0
+  - com.manabie.lmsManabieApp:1.0.0
+  - com.manabie.enigma:1.0.0
+  - com.renseikai.learner:1.0.0
+  - com.renseikai.teacher:1.0.0
+  - com.manabie.learner:2.0.20230509020728
+  - com.manabie.teacher:2.0.20230509020728
+  - jp.jprep.learner:2.0.20230509020728
+  - jp.jprep.teacher:2.0.20230509020728
+partner:
+  domain_bo: "https://backoffice.prod.renseikai.manabie.io/"
+  domain_teacher: "https://teacher.prod.renseikai.manabie.io/"
+  domain_learner: "https://learner.prod.renseikai.manabie.io/"

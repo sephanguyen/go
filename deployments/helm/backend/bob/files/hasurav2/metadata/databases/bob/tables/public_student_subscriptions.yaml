@@ -1,0 +1,56 @@
+table:
+  schema: public
+  name: student_subscriptions
+object_relationships:
+  - name: plan
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: plans
+        insertion_order: null
+        column_mapping:
+          country: country
+          plan_id: plan_id
+  - name: student
+    using:
+      foreign_key_constraint_on: student_id
+  - name: user
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: users
+        insertion_order: null
+        column_mapping:
+          student_id: user_id
+array_relationships:
+  - name: class_members
+    using:
+      foreign_key_constraint_on:
+        column: student_subscription_id
+        table:
+          schema: public
+          name: class_members
+select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+        - amount
+        - country
+        - coupon_amount
+        - created_at
+        - end_time
+        - extend_from
+        - grades
+        - plan_id
+        - start_time
+        - status
+        - student_id
+        - student_order_id
+        - student_subscription_id
+        - subject
+        - updated_at
+      filter: {}
+      limit: 100
+      allow_aggregations: true

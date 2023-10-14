@@ -1,0 +1,8 @@
+rules:
+  - name: rule1
+  - name: rule2
+    force_value: '0'
+  - name: rule3
+    values: ['a', 'b']
+  - name: rule3
+    values: ['c', 'd']

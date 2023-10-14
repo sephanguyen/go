@@ -1,0 +1,48 @@
+table:
+  schema: public
+  name: centers
+object_relationships:
+  - name: brands
+    using:
+      foreign_key_constraint_on: brand_id
+array_relationships:
+  - name: scheduler_items
+    using:
+      foreign_key_constraint_on:
+        column: center_id
+        table:
+          schema: public
+          name: scheduler_items
+  - name: scheduler_patterns
+    using:
+      foreign_key_constraint_on:
+        column: center_id
+        table:
+          schema: public
+          name: scheduler_patterns
+select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+        - center_id
+        - name
+        - brand_id
+        - created_at
+        - updated_at
+        - deleted_at
+        - owner
+        - time_zone
+      filter: {}
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+        - center_id
+        - name
+        - brand_id
+        - created_at
+        - updated_at
+        - deleted_at
+        - owner
+        - time_zone
+      filter: {}
+      allow_aggregations: true

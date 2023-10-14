@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-{{ include "infras.fullname" . }}
+  labels:
+    app.kubernetes.io/name: postgres-{{ include "infras.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "infras.labels" . | nindent 4 }}
+data: {{ (.Files.Glob "migrations/*.sql").AsConfig | nindent 2 }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alloydb-{{ include "infras.fullname" . }}
+  labels:
+    app.kubernetes.io/name: alloydb-{{ include "infras.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "infras.labels" . | nindent 4 }}
+data: {{ (.Files.Glob "alloyDb/*.sql").AsConfig | nindent 2 }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "infras.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "infras.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "infras.labels" . | nindent 4 }}
+data:
+  minio.sh: |-
+    #!/bin/sh
+    while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' minio-infras:9000)" != "403" ]]; do echo "waiting" && sleep 5; done; echo "done";
+
+    mc config host add minio http://minio-infras:9000 ${MINIO_ACCESS_KEY} ${MINIO_SECRET_KEY}
+    mc config host add minio https://minio.local.manabie.io:31600 ${MINIO_ACCESS_KEY} ${MINIO_SECRET_KEY}
+    mc config host add minio http://minio-infras.emulator.svc.cluster.local:9000 ${MINIO_ACCESS_KEY} ${MINIO_SECRET_KEY}
+    mc mb minio/${INIT_BUCKET_NAME}
+    mc policy set download minio/${INIT_BUCKET_NAME}

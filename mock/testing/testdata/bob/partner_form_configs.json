@@ -1,0 +1,111 @@
+{
+	"schema": [
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "feature_name",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "form_config_data",
+			"data_type": "jsonb",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "form_config_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "partner_id",
+			"data_type": "integer",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "partner_form_configs",
+			"policyname": "rls_partner_form_configs",
+			"qual": "permission_check(resource_path, 'partner_form_configs'::text)",
+			"with_check": "permission_check(resource_path, 'partner_form_configs'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "partner_form_configs",
+			"policyname": "rls_partner_form_configs_restrictive",
+			"qual": "permission_check(resource_path, 'partner_form_configs'::text)",
+			"with_check": "permission_check(resource_path, 'partner_form_configs'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "partner_id_fk",
+			"column_name": "partner_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "partner_form_configs_pk",
+			"column_name": "form_config_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "partner_form_configs",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

@@ -1,0 +1,22 @@
+table:
+  schema: public
+  name: staff
+object_relationships:
+  - name: user
+    using:
+      foreign_key_constraint_on: staff_id
+select_permissions:
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+        - created_at
+        - deleted_at
+        - staff_id
+        - updated_at
+      filter:
+        _and:
+          - resource_path:
+              _eq: X-Hasura-Resource-Path
+          - deleted_at:
+              _is_null: true
+      allow_aggregations: true

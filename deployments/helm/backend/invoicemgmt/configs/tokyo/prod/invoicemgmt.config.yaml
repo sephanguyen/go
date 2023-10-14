@@ -1,0 +1,11 @@
+common:
+  google_cloud_project: student-coach-e1e95
+issuers:
+  - issuer: manabie
+    audience: prod-tokyo
+    jwks_endpoint: http://shamir:5680/.well-known/jwks.json
+storage:
+  bucket: prod-tokyo-backend
+invoice_schedule_config:
+  slack_webhook: https://hooks.slack.com/services/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
+  slack_channel: C035EC89UG1 # squad-adobo-alerts channel

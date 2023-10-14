@@ -1,0 +1,121 @@
+{
+	"schema": [
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "credit_note_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "credit_note_sequence_number",
+			"data_type": "integer",
+			"column_default": "nextval('credit_note_sequence_number_seq'::regclass)",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "invoice_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "price",
+			"data_type": "numeric",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "reason",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "invoice_credit_note",
+			"policyname": "rls_invoice_credit_note",
+			"qual": "permission_check(resource_path, 'invoice_credit_note'::text)",
+			"with_check": "permission_check(resource_path, 'invoice_credit_note'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "invoice_credit_note",
+			"policyname": "rls_invoice_credit_note_restrictive",
+			"qual": "permission_check(resource_path, 'invoice_credit_note'::text)",
+			"with_check": "permission_check(resource_path, 'invoice_credit_note'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "invoice_credit_note_invoice_fk",
+			"column_name": "invoice_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "invoice_credit_note_pk",
+			"column_name": "credit_note_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "credit_note_sequence_number_resource_path_unique",
+			"column_name": "credit_note_sequence_number",
+			"constraint_type": "UNIQUE"
+		},
+		{
+			"constraint_name": "credit_note_sequence_number_resource_path_unique",
+			"column_name": "resource_path",
+			"constraint_type": "UNIQUE"
+		}
+	],
+	"table_name": "invoice_credit_note",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

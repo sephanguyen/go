@@ -1,0 +1,2 @@
+ALTER PUBLICATION debezium_publication ADD TABLE public.activity_logs;
+ALTER PUBLICATION debezium_publication ADD TABLE public.virtual_classroom_log;

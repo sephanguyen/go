@@ -1,0 +1,2776 @@
+- table:
+    schema: public
+    name: location_types
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - created_at
+      - deleted_at
+      - display_name
+      - is_archived
+      - location_type_id
+      - name
+      - parent_location_type_id
+      - parent_name
+      - updated_at
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - created_at
+      - deleted_at
+      - display_name
+      - is_archived
+      - location_type_id
+      - name
+      - parent_location_type_id
+      - parent_name
+      - updated_at
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - created_at
+      - deleted_at
+      - display_name
+      - is_archived
+      - location_type_id
+      - name
+      - parent_location_type_id
+      - parent_name
+      - updated_at
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+      - created_at
+      - deleted_at
+      - display_name
+      - location_type_id
+      - name
+      - parent_name
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - created_at
+      - deleted_at
+      - display_name
+      - location_type_id
+      - name
+      - parent_name
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+- table:
+    schema: public
+    name: locations
+  object_relationships:
+  - name: locations_location_permission
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: granted_permissions
+        column_mapping:
+          location_id: location_id
+  array_relationships:
+  - name: course_access_paths
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: course_access_paths
+        column_mapping:
+          location_id: location_id
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - access_path
+      - created_at
+      - deleted_at
+      - is_archived
+      - location_id
+      - location_type
+      - name
+      - parent_location_id
+      - partner_internal_id
+      - updated_at
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - locations_location_permission:
+            _and:
+            - user_id:
+                _eq: X-Hasura-User-Id
+            - permission_name:
+                _eq: master.location.read
+      allow_aggregations: true
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - access_path
+      - created_at
+      - deleted_at
+      - is_archived
+      - location_id
+      - location_type
+      - name
+      - parent_location_id
+      - partner_internal_id
+      - updated_at
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - locations_location_permission:
+            _and:
+            - user_id:
+                _eq: X-Hasura-User-Id
+            - permission_name:
+                _eq: master.location.read
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - access_path
+      - created_at
+      - deleted_at
+      - is_archived
+      - location_id
+      - location_type
+      - name
+      - parent_location_id
+      - partner_internal_id
+      - updated_at
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - locations_location_permission:
+            _and:
+            - user_id:
+                _eq: X-Hasura-User-Id
+            - permission_name:
+                _eq: master.location.read
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+      - created_at
+      - deleted_at
+      - location_id
+      - name
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+        - locations_location_permission:
+            _and:
+            - user_id:
+                _eq: X-Hasura-User-Id
+            - permission_name:
+                _eq: master.location.read
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - created_at
+      - deleted_at
+      - location_id
+      - name
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+        - locations_location_permission:
+            _and:
+            - user_id:
+                _eq: X-Hasura-User-Id
+            - permission_name:
+                _eq: master.location.read
+- table:
+    schema: public
+    name: classroom
+  array_relationships:
+  - name: lesson_classrooms
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: lesson_classrooms
+        column_mapping:
+          classroom_id: classroom_id
+  insert_permissions:
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      check:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      set:
+        resource_path: x-hasura-Resource-Path
+      columns:
+      - classroom_id
+      - is_archived
+      - location_id
+      - name
+      - remarks
+      backend_only: false
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - classroom_id
+      - is_archived
+      - location_id
+      - name
+      - remarks
+      - room_area
+      - seat_capacity
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - classroom_id
+      - is_archived
+      - location_id
+      - name
+      - remarks
+      - room_area
+      - seat_capacity
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - classroom_id
+      - is_archived
+      - location_id
+      - name
+      - remarks
+      - room_area
+      - seat_capacity
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  update_permissions:
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      check:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      set:
+        resource_path: x-hasura-Resource-Path
+      columns:
+      - classroom_id
+      - is_archived
+      - location_id
+      - name
+      - remarks
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+- table:
+    schema: public
+    name: lesson_classrooms
+  object_relationships:
+  - name: classroom
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: classroom
+        column_mapping:
+          classroom_id: classroom_id
+  - name: lesson
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: lessons
+        column_mapping:
+          lesson_id: lesson_id
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - classroom_id
+      - lesson_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - classroom_id
+      - lesson_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - classroom_id
+      - lesson_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+- table:
+    schema: public
+    name: lesson_groups
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - course_id
+      - created_at
+      - lesson_group_id
+      - media_ids
+      - resource_path
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - lesson_group_id
+      - course_id
+      - media_ids
+      - updated_at
+      - created_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - course_id
+      - lesson_group_id
+      - media_ids
+      - created_at
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+      - lesson_group_id
+      - course_id
+      - media_ids
+      - updated_at
+      - created_at
+      - resource_path
+      filter:
+        resource_path:
+          _eq: X-Hasura-Resource-Path
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - media_ids
+      - course_id
+      - lesson_group_id
+      - resource_path
+      - created_at
+      - updated_at
+      filter:
+        resource_path:
+          _eq: X-Hasura-Resource-Path
+- table:
+    schema: public
+    name: lesson_members
+  object_relationships:
+  - name: lesson
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: lessons
+        column_mapping:
+          lesson_id: lesson_id
+  - name: course
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: courses
+        column_mapping:
+          course_id: course_id
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - attendance_note
+      - attendance_notice
+      - attendance_reason
+      - attendance_remark
+      - attendance_status
+      - course_id
+      - created_at
+      - deleted_at
+      - lesson_id
+      - resource_path
+      - updated_at
+      - user_id
+      - user_first_name
+      - user_last_name
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - lesson_id
+      - user_id
+      - updated_at
+      - created_at
+      - deleted_at
+      - resource_path
+      - attendance_note
+      - attendance_notice
+      - attendance_reason
+      - attendance_status
+      - attendance_remark
+      - course_id
+      - user_first_name
+      - user_last_name
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - attendance_note
+      - attendance_notice
+      - attendance_reason
+      - attendance_remark
+      - attendance_status
+      - course_id
+      - lesson_id
+      - resource_path
+      - user_id
+      - created_at
+      - deleted_at
+      - updated_at
+      - user_first_name
+      - user_last_name
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+      - attendance_remark
+      - attendance_note
+      - attendance_notice
+      - attendance_reason
+      - attendance_status
+      - course_id
+      - lesson_id
+      - resource_path
+      - user_id
+      - created_at
+      - deleted_at
+      - updated_at
+      - user_first_name
+      - user_last_name
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - lesson_id
+      - user_id
+      - updated_at
+      - created_at
+      - deleted_at
+      - resource_path
+      - attendance_note
+      - attendance_notice
+      - attendance_reason
+      - attendance_status
+      - attendance_remark
+      - course_id
+      - user_first_name
+      - user_last_name
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+- table:
+    schema: public
+    name: lesson_report_details
+  object_relationships:
+  - name: lesson_report
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: lesson_reports
+        column_mapping:
+          lesson_report_id: lesson_report_id
+  array_relationships:
+  - name: partner_dynamic_form_field_values
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: partner_dynamic_form_field_values
+        column_mapping:
+          lesson_report_detail_id: lesson_report_detail_id
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - created_at
+      - deleted_at
+      - lesson_report_detail_id
+      - lesson_report_id
+      - resource_path
+      - student_id
+      - updated_at
+      - report_version
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - lesson_report_id
+      - student_id
+      - created_at
+      - updated_at
+      - deleted_at
+      - resource_path
+      - lesson_report_detail_id
+      - report_version
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - lesson_report_detail_id
+      - lesson_report_id
+      - resource_path
+      - student_id
+      - report_version
+      - created_at
+      - deleted_at
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+      - lesson_report_detail_id
+      - lesson_report_id
+      - resource_path
+      - student_id
+      - report_version
+      - created_at
+      - deleted_at
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - lesson_report_id
+      - student_id
+      - created_at
+      - updated_at
+      - deleted_at
+      - resource_path
+      - lesson_report_detail_id
+      - report_version
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+- table:
+    schema: public
+    name: lesson_reports
+  object_relationships:
+  - name: lesson
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: lessons
+        column_mapping:
+          lesson_id: lesson_id
+  - name: partner_form_config
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: partner_form_configs
+        column_mapping:
+          form_config_id: form_config_id
+  array_relationships:
+  - name: lesson_report_details
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: lesson_report_details
+        column_mapping:
+          lesson_report_id: lesson_report_id
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - created_at
+      - deleted_at
+      - form_config_id
+      - lesson_id
+      - lesson_report_id
+      - report_submitting_status
+      - resource_path
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - lesson_report_id
+      - report_submitting_status
+      - created_at
+      - updated_at
+      - deleted_at
+      - resource_path
+      - form_config_id
+      - lesson_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - form_config_id
+      - lesson_id
+      - lesson_report_id
+      - report_submitting_status
+      - resource_path
+      - created_at
+      - deleted_at
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+      - form_config_id
+      - lesson_id
+      - lesson_report_id
+      - report_submitting_status
+      - resource_path
+      - created_at
+      - deleted_at
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - lesson_report_id
+      - report_submitting_status
+      - created_at
+      - updated_at
+      - deleted_at
+      - resource_path
+      - form_config_id
+      - lesson_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+- table:
+    schema: public
+    name: lesson_student_subscription_access_path
+  object_relationships:
+  - name: lesson_student_subscription
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: lesson_student_subscriptions
+        column_mapping:
+          student_subscription_id: student_subscription_id
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - created_at
+      - deleted_at
+      - location_id
+      - student_subscription_id
+      - updated_at
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - created_at
+      - deleted_at
+      - location_id
+      - student_subscription_id
+      - updated_at
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - created_at
+      - deleted_at
+      - location_id
+      - student_subscription_id
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+      - created_at
+      - deleted_at
+      - location_id
+      - student_subscription_id
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - created_at
+      - deleted_at
+      - location_id
+      - student_subscription_id
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+- table:
+    schema: public
+    name: lesson_student_subscriptions
+  array_relationships:
+  - name: lesson_student_subscription_access_paths
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: lesson_student_subscription_access_path
+        column_mapping:
+          student_subscription_id: student_subscription_id
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - course_id
+      - created_at
+      - deleted_at
+      - end_at
+      - package_type
+      - start_at
+      - student_id
+      - student_subscription_id
+      - subscription_id
+      - updated_at
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - course_id
+      - created_at
+      - deleted_at
+      - end_at
+      - package_type
+      - start_at
+      - student_id
+      - student_subscription_id
+      - subscription_id
+      - updated_at
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - course_id
+      - created_at
+      - deleted_at
+      - end_at
+      - package_type
+      - start_at
+      - student_id
+      - student_subscription_id
+      - subscription_id
+      - updated_at
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+      - course_id
+      - created_at
+      - deleted_at
+      - end_at
+      - package_type
+      - start_at
+      - student_id
+      - student_subscription_id
+      - subscription_id
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - course_id
+      - created_at
+      - deleted_at
+      - end_at
+      - package_type
+      - start_at
+      - student_id
+      - student_subscription_id
+      - subscription_id
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+- table:
+    schema: public
+    name: lessons
+  object_relationships:
+  - name: lessons_location_permission
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: granted_permissions
+        column_mapping:
+          center_id: location_id
+  - name: course
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: courses
+        column_mapping:
+          course_id: course_id
+  array_relationships:
+  - name: lesson_classrooms
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: lesson_classrooms
+        column_mapping:
+          lesson_id: lesson_id
+  - name: lesson_members
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: lesson_members
+        column_mapping:
+          lesson_id: lesson_id
+  - name: lesson_reports
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: lesson_reports
+        column_mapping:
+          lesson_id: lesson_id
+  - name: lessons_courses
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: lessons_courses
+        column_mapping:
+          lesson_id: lesson_id
+  - name: lessons_teachers
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: lessons_teachers
+        column_mapping:
+          lesson_id: lesson_id
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - center_id
+      - class_id
+      - control_settings
+      - course_id
+      - created_at
+      - deleted_at
+      - end_at
+      - end_time
+      - is_locked
+      - learner_ids
+      - lesson_group_id
+      - lesson_id
+      - lesson_type
+      - name
+      - room_id
+      - scheduler_id
+      - scheduling_status
+      - start_time
+      - status
+      - stream_learner_counter
+      - teacher_id
+      - teaching_medium
+      - teaching_method
+      - teaching_model
+      - updated_at
+      - zoom_id
+      - zoom_link
+      - zoom_owner_id
+      - lesson_capacity
+      - classdo_link
+      - classdo_owner_id
+      - classdo_room_id
+      filter:
+        _and:
+        - lessons_location_permission:
+            _and:
+            - user_id:
+                _eq: X-Hasura-User-Id
+            - permission_name:
+                _eq: lesson.lesson.read
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - center_id
+      - class_id
+      - control_settings
+      - course_id
+      - created_at
+      - deleted_at
+      - end_at
+      - end_time
+      - is_locked
+      - lesson_group_id
+      - lesson_id
+      - lesson_type
+      - name
+      - room_id
+      - scheduler_id
+      - scheduling_status
+      - start_time
+      - status
+      - teacher_id
+      - teaching_medium
+      - teaching_method
+      - teaching_model
+      - updated_at
+      - zoom_id
+      - zoom_link
+      - zoom_owner_id
+      - lesson_capacity
+      - classdo_link
+      - classdo_owner_id
+      - classdo_room_id
+      filter:
+        _and:
+        - lessons_location_permission:
+            _and:
+            - user_id:
+                _eq: X-Hasura-User-Id
+            - permission_name:
+                _eq: lesson.lesson.read
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - center_id
+      - class_id
+      - control_settings
+      - course_id
+      - created_at
+      - deleted_at
+      - end_at
+      - end_time
+      - is_locked
+      - learner_ids
+      - lesson_group_id
+      - lesson_id
+      - lesson_type
+      - name
+      - room_id
+      - scheduler_id
+      - scheduling_status
+      - start_time
+      - status
+      - stream_learner_counter
+      - teacher_id
+      - teaching_medium
+      - teaching_method
+      - teaching_model
+      - updated_at
+      - zoom_id
+      - zoom_link
+      - zoom_owner_id
+      - lesson_capacity
+      - classdo_link
+      - classdo_owner_id
+      - classdo_room_id
+      filter:
+        _and:
+        - lessons_location_permission:
+            _and:
+            - user_id:
+                _eq: X-Hasura-User-Id
+            - permission_name:
+                _eq: lesson.lesson.read
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+      - center_id
+      - class_id
+      - control_settings
+      - course_id
+      - created_at
+      - deleted_at
+      - end_at
+      - end_time
+      - is_locked
+      - lesson_group_id
+      - lesson_id
+      - lesson_type
+      - room_id
+      - scheduler_id
+      - scheduling_status
+      - start_time
+      - status
+      - teacher_id
+      - teaching_medium
+      - teaching_method
+      - teaching_model
+      - updated_at
+      - zoom_id
+      - zoom_link
+      - zoom_owner_id
+      - lesson_capacity
+      - classdo_link
+      - classdo_owner_id
+      - classdo_room_id
+      filter:
+        _and:
+        - lessons_location_permission:
+            _and:
+            - user_id:
+                _eq: X-Hasura-User-Id
+            - permission_name:
+                _eq: lesson.lesson.read
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - center_id
+      - class_id
+      - control_settings
+      - course_id
+      - created_at
+      - deleted_at
+      - end_at
+      - end_time
+      - is_locked
+      - lesson_group_id
+      - lesson_id
+      - lesson_type
+      - name
+      - room_id
+      - scheduler_id
+      - scheduling_status
+      - start_time
+      - status
+      - teacher_id
+      - teaching_medium
+      - teaching_method
+      - teaching_model
+      - updated_at
+      - zoom_id
+      - zoom_link
+      - zoom_owner_id
+      - lesson_capacity
+      - classdo_link
+      - classdo_owner_id
+      - classdo_room_id
+      filter:
+        _and:
+        - lessons_location_permission:
+            _and:
+            - user_id:
+                _eq: X-Hasura-User-Id
+            - permission_name:
+                _eq: lesson.lesson.read
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+- table:
+    schema: public
+    name: lessons_courses
+  object_relationships:
+  - name: lesson
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: lessons
+        column_mapping:
+          lesson_id: lesson_id
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - course_id
+      - created_at
+      - deleted_at
+      - lesson_id
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - lesson_id
+      - course_id
+      - created_at
+      - deleted_at
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - lesson_id
+      - course_id
+      - created_at
+      - deleted_at
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+- table:
+    schema: public
+    name: lessons_teachers
+  object_relationships:
+  - name: lesson
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: lessons
+        column_mapping:
+          lesson_id: lesson_id
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - created_at
+      - deleted_at
+      - lesson_id
+      - resource_path
+      - teacher_id
+      - teacher_name
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - lesson_id
+      - teacher_id
+      - created_at
+      - deleted_at
+      - teacher_name
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - lesson_id
+      - teacher_id
+      - created_at
+      - deleted_at
+      - teacher_name
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - lesson_id
+      - teacher_id
+      - created_at
+      - deleted_at
+      - resource_path
+      - teacher_name
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+- table:
+    schema: public
+    name: media
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - comments
+      - converted_images
+      - created_at
+      - deleted_at
+      - media_id
+      - name
+      - resource
+      - resource_path
+      - type
+      - updated_at
+      - file_size_bytes
+      - duration_seconds
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - comments
+      - converted_images
+      - created_at
+      - deleted_at
+      - media_id
+      - name
+      - resource
+      - resource_path
+      - type
+      - updated_at
+      - file_size_bytes
+      - duration_seconds
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - comments
+      - converted_images
+      - created_at
+      - deleted_at
+      - media_id
+      - name
+      - resource
+      - resource_path
+      - type
+      - updated_at
+      - file_size_bytes
+      - duration_seconds
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+      - media_id
+      - name
+      - resource
+      - comments
+      - updated_at
+      - created_at
+      - deleted_at
+      - type
+      - converted_images
+      - resource_path
+      - file_size_bytes
+      - duration_seconds
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - comments
+      - converted_images
+      - media_id
+      - name
+      - resource
+      - resource_path
+      - type
+      - created_at
+      - deleted_at
+      - updated_at
+      - file_size_bytes
+      - duration_seconds
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+- table:
+    schema: public
+    name: partner_dynamic_form_field_values
+  object_relationships:
+  - name: lesson_report_detail
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: lesson_report_details
+        column_mapping:
+          lesson_report_detail_id: lesson_report_detail_id
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - bool_value
+      - created_at
+      - deleted_at
+      - dynamic_form_field_value_id
+      - field_id
+      - field_render_guide
+      - int_array_value
+      - int_set_value
+      - int_value
+      - lesson_report_detail_id
+      - resource_path
+      - string_array_value
+      - string_set_value
+      - string_value
+      - updated_at
+      - value_type
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - dynamic_form_field_value_id
+      - field_id
+      - lesson_report_detail_id
+      - created_at
+      - updated_at
+      - deleted_at
+      - value_type
+      - string_value
+      - bool_value
+      - string_array_value
+      - int_array_value
+      - string_set_value
+      - int_set_value
+      - field_render_guide
+      - resource_path
+      - int_value
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - bool_value
+      - int_array_value
+      - int_set_value
+      - int_value
+      - field_render_guide
+      - string_array_value
+      - string_set_value
+      - dynamic_form_field_value_id
+      - field_id
+      - lesson_report_detail_id
+      - resource_path
+      - string_value
+      - value_type
+      - created_at
+      - deleted_at
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+      - bool_value
+      - int_array_value
+      - int_set_value
+      - int_value
+      - field_render_guide
+      - string_array_value
+      - string_set_value
+      - dynamic_form_field_value_id
+      - field_id
+      - lesson_report_detail_id
+      - resource_path
+      - string_value
+      - value_type
+      - created_at
+      - deleted_at
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - dynamic_form_field_value_id
+      - field_id
+      - lesson_report_detail_id
+      - created_at
+      - updated_at
+      - deleted_at
+      - value_type
+      - string_value
+      - bool_value
+      - string_array_value
+      - int_array_value
+      - string_set_value
+      - int_set_value
+      - field_render_guide
+      - resource_path
+      - int_value
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+- table:
+    schema: public
+    name: partner_form_configs
+  array_relationships:
+  - name: lesson_reports
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: lesson_reports
+        column_mapping:
+          form_config_id: form_config_id
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - created_at
+      - deleted_at
+      - feature_name
+      - form_config_data
+      - form_config_id
+      - partner_id
+      - resource_path
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - form_config_id
+      - partner_id
+      - feature_name
+      - created_at
+      - updated_at
+      - deleted_at
+      - form_config_data
+      - resource_path
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - partner_id
+      - form_config_data
+      - feature_name
+      - form_config_id
+      - resource_path
+      - created_at
+      - deleted_at
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+      - partner_id
+      - form_config_data
+      - feature_name
+      - form_config_id
+      - resource_path
+      - created_at
+      - deleted_at
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - form_config_id
+      - partner_id
+      - feature_name
+      - created_at
+      - updated_at
+      - deleted_at
+      - form_config_data
+      - resource_path
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+- table:
+    schema: public
+    name: reallocation
+  object_relationships:
+  - name: lessonByOriginalLessonId
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: lessons
+        column_mapping:
+          original_lesson_id: lesson_id
+  select_permissions:
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - course_id
+      - new_lesson_id
+      - original_lesson_id
+      - student_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - course_id
+      - new_lesson_id
+      - original_lesson_id
+      - student_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+- table:
+    schema: public
+    name: scheduler
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - end_date
+      - freq
+      - scheduler_id
+      - start_date
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - end_date
+      - freq
+      - scheduler_id
+      - start_date
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - end_date
+      - freq
+      - scheduler_id
+      - start_date
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+      - end_date
+      - freq
+      - scheduler_id
+      - start_date
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - end_date
+      - freq
+      - scheduler_id
+      - start_date
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+- table:
+    schema: public
+    name: student_enrollment_status_history
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - comment
+      - created_at
+      - deleted_at
+      - end_date
+      - enrollment_status
+      - location_id
+      - start_date
+      - student_id
+      - updated_at
+      - order_id
+      - order_sequence_number
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - comment
+      - created_at
+      - deleted_at
+      - end_date
+      - enrollment_status
+      - location_id
+      - resource_path
+      - start_date
+      - student_id
+      - order_id
+      - order_sequence_number
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - comment
+      - created_at
+      - deleted_at
+      - end_date
+      - enrollment_status
+      - location_id
+      - resource_path
+      - start_date
+      - student_id
+      - order_id
+      - order_sequence_number
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+- table:
+    schema: public
+    name: user_basic_info
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - created_at
+      - current_grade
+      - deleted_at
+      - email
+      - first_name
+      - first_name_phonetic
+      - full_name_phonetic
+      - gender
+      - grade_id
+      - last_name
+      - last_name_phonetic
+      - name
+      - updated_at
+      - user_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - created_at
+      - current_grade
+      - deleted_at
+      - email
+      - first_name
+      - first_name_phonetic
+      - full_name_phonetic
+      - gender
+      - grade_id
+      - last_name
+      - last_name_phonetic
+      - name
+      - updated_at
+      - user_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - created_at
+      - current_grade
+      - deleted_at
+      - email
+      - first_name
+      - first_name_phonetic
+      - full_name_phonetic
+      - gender
+      - grade_id
+      - last_name
+      - last_name_phonetic
+      - name
+      - updated_at
+      - user_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+- table:
+    schema: public
+    name: granted_permissions
+  object_relationships:
+  - name: lessons_location_permission
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: lessons
+        column_mapping:
+          location_id: center_id
+  - name: locations_location_permission
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: locations
+        column_mapping:
+          location_id: location_id
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - user_id
+      - permission_name
+      - location_id
+      - permission_id
+      filter:
+        _and:
+        - user_id:
+            _eq: X-Hasura-User-Id
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - user_id
+      - permission_name
+      - location_id
+      - permission_id
+      filter:
+        _and:
+        - user_id:
+            _eq: X-Hasura-User-Id
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - user_id
+      - permission_name
+      - location_id
+      - permission_id
+      filter:
+        _and:
+        - user_id:
+            _eq: X-Hasura-User-Id
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - user_id
+      - permission_name
+      - location_id
+      - permission_id
+      filter:
+        _and:
+        - user_id:
+            _eq: X-Hasura-User-Id
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+      - user_id
+      - permission_name
+      - location_id
+      - permission_id
+      filter:
+        _and:
+        - user_id:
+            _eq: X-Hasura-User-Id
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+- table:
+    schema: public
+    name: academic_week
+  select_permissions:
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - academic_week_id
+      - academic_year_id
+      - end_date
+      - location_id
+      - name
+      - period
+      - start_date
+      - week_order
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - academic_week_id
+      - academic_year_id
+      - end_date
+      - location_id
+      - name
+      - period
+      - start_date
+      - week_order
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+- table:
+    schema: public
+    name: class
+  array_relationships:
+  - name: class_members
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: class_member
+        column_mapping:
+          class_id: class_id
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - class_id
+      - course_id
+      - location_id
+      - name
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - class_id
+      - course_id
+      - location_id
+      - name
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - class_id
+      - course_id
+      - location_id
+      - name
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+      - class_id
+      - course_id
+      - location_id
+      - name
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - class_id
+      - course_id
+      - location_id
+      - name
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+- table:
+    schema: public
+    name: class_member
+  object_relationships:
+  - name: class
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: class
+        column_mapping:
+          class_id: class_id
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - class_id
+      - class_member_id
+      - user_id
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - class_id
+      - class_member_id
+      - user_id
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - class_id
+      - class_member_id
+      - user_id
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+      - class_id
+      - class_member_id
+      - user_id
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - class_id
+      - class_member_id
+      - user_id
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+- table:
+    schema: public
+    name: zoom_account
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - email
+      - zoom_id
+      - created_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - email
+      - zoom_id
+      - created_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - email
+      - zoom_id
+      - created_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+      - email
+      - zoom_id
+      - created_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - email
+      - zoom_id
+      - created_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+- table:
+    schema: public
+    name: courses
+  array_relationships:
+  - name: course_access_paths
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: course_access_paths
+        column_mapping:
+          course_id: course_id
+  - name: course_lessons
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: lessons
+        column_mapping:
+          course_id: course_id
+  - name: lesson_groups
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: lesson_groups
+        column_mapping:
+          course_id: course_id
+  - name: lesson_members
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: lesson_members
+        column_mapping:
+          course_id: course_id
+  - name: lessons_courses
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: lessons_courses
+        column_mapping:
+          course_id: course_id
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - country
+      - course_id
+      - course_type
+      - created_at
+      - deleted_at
+      - display_order
+      - end_date
+      - grade
+      - icon
+      - name
+      - preset_study_plan_id
+      - school_id
+      - start_date
+      - status
+      - subject
+      - teacher_ids
+      - teaching_method
+      - updated_at
+      filter:
+        _and:
+        - _exists:
+            _table:
+              name: granted_permissions
+              schema: public
+            _where:
+              _and:
+              - user_id:
+                  _eq: X-Hasura-User-Id
+              - permission_name:
+                  _eq: master.course.read
+        - deleted_at:
+            _is_null: true
+        - school_id:
+            _in: X-Hasura-School-Ids
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - country
+      - course_id
+      - course_type
+      - created_at
+      - deleted_at
+      - display_order
+      - end_date
+      - grade
+      - icon
+      - name
+      - preset_study_plan_id
+      - school_id
+      - start_date
+      - status
+      - subject
+      - teacher_ids
+      - teaching_method
+      - updated_at
+      filter:
+        _and:
+        - _exists:
+            _table:
+              name: granted_permissions
+              schema: public
+            _where:
+              _and:
+              - user_id:
+                  _eq: X-Hasura-User-Id
+              - permission_name:
+                  _eq: master.course.read
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - country
+      - course_id
+      - course_type
+      - created_at
+      - deleted_at
+      - display_order
+      - end_date
+      - grade
+      - icon
+      - name
+      - preset_study_plan_id
+      - school_id
+      - start_date
+      - status
+      - subject
+      - teacher_ids
+      - teaching_method
+      - updated_at
+      filter:
+        _and:
+        - _exists:
+            _table:
+              name: granted_permissions
+              schema: public
+            _where:
+              _and:
+              - user_id:
+                  _eq: X-Hasura-User-Id
+              - permission_name:
+                  _eq: master.course.read
+        - deleted_at:
+            _is_null: true
+        - school_id:
+            _in: X-Hasura-School-Ids
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+      - country
+      - course_id
+      - course_type
+      - created_at
+      - deleted_at
+      - display_order
+      - end_date
+      - grade
+      - icon
+      - name
+      - preset_study_plan_id
+      - school_id
+      - start_date
+      - status
+      - subject
+      - teacher_ids
+      - teaching_method
+      - updated_at
+      filter:
+        _and:
+        - _exists:
+            _table:
+              name: granted_permissions
+              schema: public
+            _where:
+              _and:
+              - user_id:
+                  _eq: X-Hasura-User-Id
+              - permission_name:
+                  _eq: master.course.read
+        - school_id:
+            _in: X-Hasura-School-Ids
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - country
+      - course_id
+      - course_type
+      - created_at
+      - deleted_at
+      - display_order
+      - end_date
+      - grade
+      - icon
+      - name
+      - preset_study_plan_id
+      - school_id
+      - start_date
+      - subject
+      - teacher_ids
+      - teaching_method
+      - updated_at
+      filter:
+        _and:
+        - _exists:
+            _table:
+              name: granted_permissions
+              schema: public
+            _where:
+              _and:
+              - user_id:
+                  _eq: X-Hasura-User-Id
+              - permission_name:
+                  _eq: master.course.read
+        - school_id:
+            _in: X-Hasura-School-Ids
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+- table:
+    schema: public
+    name: course_access_paths
+  object_relationships:
+  - name: course
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: courses
+        column_mapping:
+          course_id: course_id
+  - name: location
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: locations
+        column_mapping:
+          location_id: location_id
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - course_id
+      - created_at
+      - deleted_at
+      - location_id
+      - updated_at
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - course_id
+      - created_at
+      - deleted_at
+      - location_id
+      - updated_at
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - course_id
+      - created_at
+      - deleted_at
+      - location_id
+      - updated_at
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+      - course_id
+      - created_at
+      - deleted_at
+      - location_id
+      - updated_at
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - course_id
+      - created_at
+      - location_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+- table:
+    schema: public
+    name: day_info
+  select_permissions:
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - date
+      - day_type_id
+      - location_id
+      - opening_time
+      - status
+      - time_zone
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - date
+      - day_type_id
+      - location_id
+      - opening_time
+      - status
+      - time_zone
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+- table:
+    schema: public
+    name: classdo_account
+  select_permissions:
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - classdo_email
+      - classdo_id
+      - created_at
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - classdo_email
+      - classdo_id
+      - created_at
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path

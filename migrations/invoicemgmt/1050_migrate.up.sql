@@ -1,0 +1,1 @@
+ALTER TABLE public.invoice ADD COLUMN IF NOT EXISTS is_exported BOOLEAN DEFAULT false;

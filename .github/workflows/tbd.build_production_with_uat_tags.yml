@@ -1,0 +1,174 @@
+name: tbd.build_production_with_uat_tags.yml
+
+on:
+  schedule:
+    - cron: "00 8 * * 5" #3PM Friday auto build PROD
+    - cron: "00 15 * * 0" #10PM on Sun, to backup if they having any hotfix
+  workflow_dispatch:
+    inputs:
+      release_method:
+        description: Build or deploy
+        required: true
+        default: build
+        type: choice
+        options:
+          - build
+          - deploy
+      uat_tag_org:
+        description: Organization to get UAT tags from
+        required: true
+        default: manabie
+        type: choice
+        options:
+          - manabie
+          - jprep
+      release_be:
+        description: Built BE on Production
+        required: true
+        type: boolean
+        default: false
+      release_fe:
+        description: Built FE on Production
+        required: true
+        type: boolean
+        default: true
+      release_me:
+        description: Built ME on Production
+        required: true
+        type: boolean
+        default: true
+      release_orgs:
+        description: Organizations to be built on Production
+        required: true
+        default: "manabie, jprep, synersia, renseikai, ga, aic, tokyo"
+
+jobs:
+  prepare-inputs:
+    runs-on: ["self-hosted", "100m-400mi", "spot", "persistent"]
+    outputs:
+      release_method: ${{ steps.prepare.outputs.release_method }}
+      uat_tag_org: ${{ steps.prepare.outputs.uat_tag_org }}
+      release_be: ${{ steps.prepare.outputs.release_be }}
+      release_fe: ${{ steps.prepare.outputs.release_fe }}
+      release_me: ${{ steps.prepare.outputs.release_me }}
+      release_orgs: ${{ steps.prepare.outputs.release_orgs }}
+    steps:
+      - id: prepare
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.BUILD_GITHUB_TOKEN }}
+          script: |
+            const isScheduled = process.env.GITHUB_EVENT_NAME === "schedule"
+            const release_method = isScheduled ? "build" : "${{ inputs.release_method }}"
+            const uat_tag_org = isScheduled ? "manabie" : "${{ inputs.uat_tag_org }}"
+
+            const release_be_input = "${{ inputs.release_be }}" === "true"
+            const release_fe_input = "${{ inputs.release_fe }}" === "true"
+            const release_me_input = "${{ inputs.release_me }}" === "true"
+
+            const release_be = isScheduled ? true : release_be_input
+            const release_fe = isScheduled ? true : release_fe_input
+            const release_me = isScheduled ? true : release_me_input
+            const release_orgs = isScheduled ? "manabie, jprep, synersia, renseikai, ga, aic, tokyo" : "${{ inputs.release_orgs }}"
+
+            core.setOutput('release_method', release_method)
+            core.setOutput('uat_tag_org', uat_tag_org)
+            core.setOutput('release_be', release_be)
+            core.setOutput('release_fe', release_fe)
+            core.setOutput('release_me', release_me)
+            core.setOutput('release_orgs', release_orgs)
+
+  get-current-tag-on-uat:
+    needs: prepare-inputs
+    permissions:
+      contents: "read"
+      id-token: "write"
+    timeout-minutes: 5
+    runs-on: ["self-hosted", "100m-400mi", "spot", "persistent"]
+    outputs:
+      be_tag: ${{ steps.set-release-tags.outputs.be_release_tag }}
+      fe_tag: ${{ steps.set-release-tags.outputs.fe_release_tag }}
+      me_tag: ${{ steps.set-release-tags.outputs.me_release_tag }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Get current UAT tags
+        id: uat-release
+        uses: ./.github/actions/tbd.get-current-tags
+        with:
+          summary: false
+          organization: ${{ needs.prepare-inputs.outputs.uat_tag_org }}
+          environment: uat
+
+      - name: Set release tags
+        id: set-release-tags
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.BUILD_GITHUB_TOKEN }}
+          script: |
+            let be_release_tag = ${{ needs.prepare-inputs.outputs.release_be }} ? "${{ steps.uat-release.outputs.be_release_tag }}" : ""
+            let fe_release_tag = ${{ needs.prepare-inputs.outputs.release_fe }} ? "${{ steps.uat-release.outputs.fe_release_tag }}" : ""
+            let me_release_tag = ${{ needs.prepare-inputs.outputs.release_me }} ? "${{ steps.uat-release.outputs.me_release_tag }}" : ""
+
+            core.setOutput("be_release_tag", be_release_tag)
+            core.setOutput("fe_release_tag", fe_release_tag)
+            core.setOutput("me_release_tag", me_release_tag)
+
+  build-production:
+    needs: [prepare-inputs, get-current-tag-on-uat]
+    if: needs.prepare-inputs.outputs.release_method == 'build'
+    timeout-minutes: 2
+    runs-on: ["self-hosted", "100m-400mi", "spot", "persistent"]
+    steps:
+      - name: Build
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.BUILD_GITHUB_TOKEN }}
+          script: |
+            await github.rest.repos.createDispatchEvent({
+              owner: context.repo.owner,
+              repo: "backend",
+              event_type: 'tbd.build_all',
+              client_payload: {
+                  payload: {
+                      be_release_tag: "${{ needs.get-current-tag-on-uat.outputs.be_tag }}", 
+                      fe_release_tag: "${{ needs.get-current-tag-on-uat.outputs.fe_tag }}",
+                      me_release_tag: "${{ needs.get-current-tag-on-uat.outputs.me_tag }}",
+                      env: "production",
+                      orgs: "${{ needs.prepare-inputs.outputs.release_orgs }}",
+                      me_apps: "learner, teacher",
+                      me_platforms: "android, ios, web",
+                      auto_deploy: false,
+                      workflow_ref: context.ref,
+                  },
+              },
+            });
+
+  deploy-production:
+    needs: [prepare-inputs, get-current-tag-on-uat]
+    if: needs.prepare-inputs.outputs.release_method == 'deploy'
+    timeout-minutes: 2
+    runs-on: ["self-hosted", "100m-400mi", "spot", "persistent"]
+    steps:
+      - name: Deploy
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.BUILD_GITHUB_TOKEN }}
+          script: |
+            await github.rest.repos.createDispatchEvent({
+              owner: context.repo.owner,
+              repo: "backend",
+              event_type: 'tbd.deploy_all',
+              client_payload: {
+                  payload: {
+                      be_release_tag: "${{ needs.get-current-tag-on-uat.outputs.be_tag }}", 
+                      fe_release_tag: "${{ needs.get-current-tag-on-uat.outputs.fe_tag }}",
+                      me_release_tag: "${{ needs.get-current-tag-on-uat.outputs.me_tag }}",
+                      env: "production",
+                      orgs: "${{ needs.prepare-inputs.outputs.release_orgs }}",
+                      me_apps: "learner, teacher",
+                      me_platforms: "android, ios, web",
+                      workflow_ref: context.ref,
+                  },
+              },
+            });

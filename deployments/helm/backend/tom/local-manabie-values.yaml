@@ -1,0 +1,11 @@
+enabled: true
+metrics:
+    enabled: false
+podAnnotations:
+    sidecar.istio.io/proxyCPU: 5m
+    sidecar.istio.io/proxyMemory: 72Mi
+replicaCount: 2
+resources:
+    requests:
+        cpu: 5m
+        memory: 64Mi

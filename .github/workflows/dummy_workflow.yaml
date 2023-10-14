@@ -1,0 +1,23 @@
+name: dummy_workflow
+
+on: workflow_dispatch
+
+env:
+  GITHUB_TOKEN: ${{ secrets.BUILD_GITHUB_TOKEN }}
+
+jobs:
+  create-release-tag:
+    runs-on: ["self-hosted", "100m-400mi", "spot", "persistent"]
+    permissions:
+      contents: "read"
+      id-token: "write"
+    steps:
+      - uses: actions/checkout@v3
+
+      - run: timeout 2 sleep 1
+
+      - run: timeout 1 sleep 2
+
+      - id: alert
+        if: ${{ !cancelled() && contains(steps.*.outcome, 'failure') }}
+        run: echo 'ALERT TRIGGERED'

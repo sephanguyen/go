@@ -1,0 +1,134 @@
+name: deployment.uninstall_preproduction
+on:
+  workflow_dispatch:
+    inputs:
+      organization:
+        description: "Organization (partner)"
+        required: true
+        default: manabie
+        type: choice
+        options:
+          - manabie
+          - jprep
+          - synersia
+          - renseikai
+          - ga
+          - aic
+      uninstall_gateway:
+        description: "Uninstall Istio Gateway"
+        required: true
+        default: true
+        type: boolean
+      uninstall_nats_jetstream:
+        description: "Uninstall NATS Jetstream"
+        required: true
+        default: true
+        type: boolean
+      uninstall_elastic:
+        description: "Uninstall ElasticSearch"
+        required: true
+        default: true
+        type: boolean
+      uninstall_services:
+        description: "Uninstall services"
+        required: true
+        default: true
+        type: boolean
+      uninstall_kafka:
+        description: "Uninstall Kafka"
+        required: true
+        default: true
+        type: boolean
+      uninstall_unleash:
+        description: "Uninstall Unleash"
+        required: true
+        default: true
+        type: boolean
+
+env:
+  ORG: ${{ github.event.inputs.organization }}
+  ENV: dorp
+  ENVIRONMENT: preproduction
+
+jobs:
+  uninstall:
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    runs-on: ["self-hosted", "100m-400mi", "spot", "persistent"]
+    steps:
+      - name: Checkout backend source
+        uses: actions/checkout@v3
+        timeout-minutes: 5
+
+      - name: Setup Cloud SDK
+        uses: ./.github/actions/setup-k8s
+        with:
+          organization: ${{ env.ORG }}
+          environment: ${{ env.ENVIRONMENT }}
+
+      - name: Get deployment configuration
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const organization = '${{ env.ORG }}';
+            const environment = '${{ env.ENVIRONMENT }}';
+            const getDeploymentConfiguration = require('./.github/scripts/get-deployment-configuration.js');
+            const c = await getDeploymentConfiguration({ organization, environment });
+
+            if (c) {
+              console.log('Found configuration', c)
+              core.exportVariable('CLUSTER', c.cluster);
+              core.exportVariable('REGION', c.region);
+              core.exportVariable('PROJECT_ID', c.projectId);
+              core.exportVariable('SQL_INSTANCE', c.sqlInstance);
+              core.exportVariable('SQL_SOURCE_INSTANCE', c.sqlSourceInstance);
+              core.exportVariable('ELASTIC_RELEASE_NAME', c.elasticReleaseName);
+              core.exportVariable('ELASTIC_NAMESPACE', c.elasticNamespace);
+              core.exportVariable('ELASTIC_NAME_OVERRIDE', c.elasticNameOverride);
+            } else {
+              core.setFailed(`No deployment configuration found for organization: ${organization} and environment: ${environment}`);
+            }
+
+      - name: Uninstall gateway
+        if: github.event.inputs.uninstall_gateway == 'true'
+        run: |
+          set -eu
+          . ./deployments/uninstall.bash
+          uninstall_gateway
+
+      - name: Uninstall Kafka
+        if: github.event.inputs.uninstall_kafka == 'true'
+        run: |
+          set -eu
+          . ./deployments/uninstall.bash
+          uninstall_kakfa
+
+      - name: Uninstall services
+        if: github.event.inputs.uninstall_services == 'true'
+        run: |
+          set -eu
+          . ./deployments/uninstall.bash
+          uninstall_services
+
+      - name: Uninstall NATS Jetstream
+        if: github.event.inputs.uninstall_nats_jetstream == 'true'
+        run: |
+          set -eu
+          . ./deployments/uninstall.bash
+          uninstall_nats_jetstream
+
+      - name: Uninstall ElasticSearch
+        if: github.event.inputs.uninstall_elastic == 'true'
+        run: |
+          set -eu
+          . ./deployments/uninstall.bash
+          uninstall_elasticsearch
+
+      - name: Uninstall Unleash
+        if: github.event.inputs.uninstall_unleash == 'true'
+        run: |
+          set -eu
+          . ./deployments/uninstall.bash
+          uninstall_unleash

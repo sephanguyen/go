@@ -1,0 +1,136 @@
+{
+	"schema": [
+		{
+			"column_name": "available_from",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "available_until",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "course_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "fee_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "is_added_by_default",
+			"data_type": "boolean",
+			"column_default": "false",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "package_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "package_course_fee",
+			"policyname": "rls_package_course_fee",
+			"qual": "permission_check(resource_path, 'package_course_fee'::text)",
+			"with_check": "permission_check(resource_path, 'package_course_fee'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "package_course_fee",
+			"policyname": "rls_package_course_fee_restrictive",
+			"qual": "permission_check(resource_path, 'package_course_fee'::text)",
+			"with_check": "permission_check(resource_path, 'package_course_fee'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "fk_course_id",
+			"column_name": "course_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "fk_course_id",
+			"column_name": "course_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "fk_package_course_fee_fee_id",
+			"column_name": "fee_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "fk_package_course_fee_package_id",
+			"column_name": "package_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "package_course_fee_pk",
+			"column_name": "course_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "package_course_fee_pk",
+			"column_name": "fee_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "package_course_fee_pk",
+			"column_name": "package_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "package_course_fee",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

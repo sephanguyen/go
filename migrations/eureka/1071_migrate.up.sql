@@ -1,0 +1,1 @@
+CREATE INDEX CONCURRENTLY IF NOT EXISTS student_submission_grades_student_submission_id ON public.student_submission_grades (student_submission_id);

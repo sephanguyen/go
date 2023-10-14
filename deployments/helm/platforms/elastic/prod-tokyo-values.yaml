@@ -1,0 +1,16 @@
+nameOverride: ""
+elasticsearch:
+  replicas: 3
+  storage:
+    storageClass: "premium-rwo"
+    storageSize: "10Gi"
+  snapshot:
+    enabled: true
+    storageClass: "premium-rwo"
+    storageSize: "10Gi"
+  initIndices: true
+  resources:
+    requests:
+      memory: 1024Mi
+      cpu: 50m
+  javaopts: "-Xms512m -Xmx512m"

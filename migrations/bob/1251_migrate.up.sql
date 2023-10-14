@@ -1,0 +1,1 @@
+CREATE INDEX idx__info_notifications__updated_at ON public.info_notifications USING btree (updated_at DESC);

@@ -1,0 +1,40 @@
+table:
+  schema: public
+  name: topics_assignments
+object_relationships:
+  - name: assignment
+    using:
+      foreign_key_constraint_on: assignment_id
+select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+        - topic_id
+        - assignment_id
+        - display_order
+        - created_at
+        - updated_at
+        - deleted_at
+        - resource_path
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: false
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+        - display_order
+        - assignment_id
+        - resource_path
+        - topic_id
+        - created_at
+        - deleted_at
+        - updated_at
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+          - assignment:
+              _and:
+                - resource_path:
+                    _eq: X-Hasura-Resource-Path

@@ -1,0 +1,1 @@
+ALTER TABLE public.bill_item ADD COLUMN IF NOT EXISTS reference TEXT DEFAULT NULL;

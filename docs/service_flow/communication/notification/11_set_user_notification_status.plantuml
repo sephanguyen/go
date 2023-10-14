@@ -1,0 +1,10 @@
+@startuml communication_simplified
+hide circle
+User   -> Bob:  Call "NotificationModifierService.SetUserNotificationStatus"
+note right User
+    param: notification_ids, user_id from context
+end note
+activate Bob
+Bob -> DB: setStatus(userId, notificationIds)
+deactivate Bob
+@enduml

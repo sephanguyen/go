@@ -1,0 +1,290 @@
+syntax = "proto3";
+
+package eureka.v2.common;
+
+import "eureka/v2/common/enums.proto";
+import "eureka/v2/common/profiles.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/eureka/v2/common;cpb";
+
+message ContentBasicInfo {
+  string id = 1;
+  string name = 2;
+  Country country = 3;
+  Subject subject = 4;
+  int32 grade = 5;
+  int32 school_id = 6;
+  int32 display_order = 7;
+  string master_id = 8;
+  string icon_url = 9;
+  google.protobuf.Timestamp updated_at = 10;
+  google.protobuf.Timestamp created_at = 11;
+  google.protobuf.Timestamp deleted_at = 12;
+}
+
+message Course {
+  ContentBasicInfo info = 1;
+  CourseStatus course_status = 2;
+  repeated string lesson_ids = 3;
+  repeated string book_ids = 4;
+  repeated string class_ids = 5;
+  repeated BasicProfile teachers = 6;
+}
+
+message Lesson {
+  ContentBasicInfo info = 1;
+  string course_id = 2;
+  LessonStatus status = 3;
+  Topic topic = 4;
+  int32 total_learner = 5;
+  repeated BasicProfile teachers = 6;
+  repeated string users_class_ids = 7;
+}
+
+message Book { ContentBasicInfo info = 1; }
+
+message Chapter {
+  ContentBasicInfo info = 1;
+  string book_id = 2;
+  repeated string topic_ids = 3;
+}
+
+message Topic {
+  ContentBasicInfo info = 1;
+  string chapter_id = 2;
+  TopicType type = 3;
+  TopicStatus status = 4;
+  string instruction = 5;
+  repeated string lo_ids = 6;
+  repeated Attachment attachments = 7;
+}
+
+message LearningObjective {
+  ContentBasicInfo info = 1;
+  string topic_id = 2;
+  string video = 3;
+  string study_guide = 4;
+  repeated string quiz_ids = 5;
+  repeated string prerequisites = 6;
+  LearningObjectiveType type = 7;
+  string instruction = 8;
+  google.protobuf.Int32Value grade_to_pass = 9;
+  bool manual_grading = 10;
+  google.protobuf.Int32Value time_limit = 11;
+  google.protobuf.Int32Value maximum_attempt = 12;
+  bool approve_grading = 13;
+  bool grade_capping = 14;
+  ExamLOReviewOption review_option = 15;
+  LearningMaterialVendorType vendor_type = 16;
+}
+
+message TopicLearningObjective {
+  string topic_id = 1;
+  string lo_id = 2;
+  int32 display_order = 3;
+  google.protobuf.Timestamp updated_at = 4;
+  google.protobuf.Timestamp created_at = 5;
+}
+
+enum QuizConfig { QUIZ_CONFIG_OPTIONS_PLAIN_LIST = 0; }
+
+// this enum for setting configs for any quiz
+enum QuizItemAttributeConfig {
+  // language configs for flashcard
+  FLASHCARD_LANGUAGE_CONFIG_NONE = 0;
+  FLASHCARD_LANGUAGE_CONFIG_ENG = 1;
+  FLASHCARD_LANGUAGE_CONFIG_JP = 2;
+
+  // new configs stay here...
+  LANGUAGE_CONFIG_JP = 3;
+  LANGUAGE_CONFIG_ENG = 4;
+  MATH_CONFIG = 5;
+}
+
+message QuizItemAttribute {
+  string img_link = 1;
+  string audio_link = 2;
+  repeated QuizItemAttributeConfig configs = 3;
+}
+
+message QuizCore { // use for upsert request
+  ContentBasicInfo info = 1;
+  string external_id = 2;
+  QuizType kind = 3;
+  RichText question = 4;
+  RichText explanation = 5;
+  int32 difficulty_level = 6;
+  repeated string tagged_los = 7;
+  repeated QuizOption options = 8;
+  repeated QuizConfig config = 9;
+  QuizItemAttribute attribute = 10;
+  google.protobuf.Int32Value point = 11;
+  google.protobuf.StringValue question_group_id = 12;
+  repeated string question_tag_ids = 13;
+  oneof answer_config { EssayConfig essay = 14; }
+  repeated string tag_names = 15;
+}
+
+message Quiz { // for listing
+  QuizCore core = 1;
+  string lo_id = 2;
+  string question_url = 3;
+  repeated string answers_url = 4;
+  string explanation_url = 5;
+  QuizStatus status = 6;
+}
+
+enum QuizType {
+  // Multiple Choice Quiz
+  QUIZ_TYPE_MCQ = 0;
+  // Fill In The Blank Quiz
+  QUIZ_TYPE_FIB = 1;
+  // Pair Of Word Quiz
+  QUIZ_TYPE_POW = 2;
+  // Term And Definition Quiz
+  QUIZ_TYPE_TAD = 3;
+  // Manual Input Quiz
+  QUIZ_TYPE_MIQ = 4;
+  // Multi Answer Quiz
+  QUIZ_TYPE_MAQ = 5;
+  // Ordering Quiz
+  QUIZ_TYPE_ORD = 6;
+  // Essay Quiz
+  QUIZ_TYPE_ESQ = 7;
+}
+
+enum QuizStatus {
+  QUIZ_STATUS_NEW = 0;
+  QUIZ_STATUS_APPROVED = 1;
+  QUIZ_STATUS_DELETED = 2;
+}
+
+message RichText {
+  string raw = 1;
+  string rendered = 2;
+}
+
+enum QuizOptionConfig {
+  QUIZ_OPTION_CONFIG_CASE_SENSITIVE = 0;
+  QUIZ_OPTION_CONFIG_PARTIAL_CREDIT = 1;
+  QUIZ_OPTION_CONFIG_PLAN_LIST = 2;
+}
+
+message QuizOption {
+  RichText content = 1;
+  bool correctness = 2;
+  repeated QuizOptionConfig configs = 3;
+  string label = 4;
+  string key = 5;
+  QuizItemAttribute attribute = 6;
+}
+
+message OrderingResult {
+  repeated string submitted_keys = 1;
+  repeated string correct_keys = 2;
+}
+
+message AnswerLog {
+  string quiz_id = 1;
+  QuizType quiz_type = 2;
+  repeated uint32 selected_index = 3;
+  repeated uint32 correct_index = 4;
+  repeated string filled_text = 5;
+  repeated string correct_text = 6;
+  repeated bool correctness = 7;
+  bool is_accepted = 8;
+  QuizCore core = 9;
+  google.protobuf.Timestamp submitted_at = 10;
+  oneof result { OrderingResult ordering_result = 11; }
+}
+
+message QuizTestInfo {
+  string set_id = 1;
+  int32 total_correctness = 2;
+  int32 total_quiz = 3;
+  google.protobuf.Timestamp created_at = 4;
+  google.protobuf.Timestamp completed_at = 5;
+  int64 totalLearningTime = 6;
+  bool is_retry = 7;
+}
+
+message HighestQuizScore {
+  int32 correct_question = 1;
+  int32 total_question = 2;
+}
+
+message QuizTests { repeated QuizTestInfo items = 1; }
+
+message Attachment {
+  string name = 1;
+  string url = 2;
+}
+
+message Completenes {
+  bool quiz_finished = 1;
+  bool video_finished = 2;
+  bool study_guide_finished = 3;
+  float first_quiz_correctness = 4;
+}
+
+message CourseAccessibility {
+  bool can_watch_video = 1;
+  bool can_view_study_guide = 2;
+  bool can_do_quiz = 3;
+}
+
+enum CourseStatus {
+  COURSE_STATUS_NONE = 0;
+  COURSE_STATUS_ACTIVE = 1;
+  COURSE_STATUS_COMPLETED = 2;
+  COURSE_STATUS_ON_GOING = 3;
+  COURSE_STATUS_INACTIVE = 4;
+}
+
+enum LessonStatus {
+  LESSON_STATUS_NONE = 0;
+  LESSON_STATUS_COMPLETED = 1;
+  LESSON_STATUS_IN_PROGRESS = 2;
+  LESSON_STATUS_NOT_STARTED = 3;
+  LESSON_STATUS_DRAFT = 4;
+}
+
+enum LiveLessonView {
+  LIVE_LESSON_VIEW_NONE = 0;
+  LIVE_LESSON_VIEW_GALLERY = 1;
+  LIVE_LESSON_VIEW_SPEAKER = 2;
+}
+
+enum TopicType {
+  TOPIC_TYPE_NONE = 0;
+  TOPIC_TYPE_LEARNING = 1;
+  TOPIC_TYPE_PRACTICAL = 2;
+  TOPIC_TYPE_EXAM = 3;
+  TOPIC_TYPE_ASSIGNMENT = 4;
+  TOPIC_TYPE_LIVE_LESSON = 5;
+}
+
+enum TopicStatus {
+  TOPIC_STATUS_NONE = 0;
+  TOPIC_STATUS_DRAFT = 1;
+  TOPIC_STATUS_PUBLISHED = 2;
+}
+
+enum BookType {
+  BOOK_TYPE_NONE = 0;
+  BOOK_TYPE_GENERAL = 1;
+  BOOK_TYPE_ADHOC = 2;
+}
+
+enum EssayLimitType {
+  ESSAY_LIMIT_TYPE_WORD = 0;
+  ESSAY_LIMIT_TYPE_CHAR = 1;
+}
+
+message EssayConfig {
+  bool limit_enabled = 1;
+  EssayLimitType limit_type = 2;
+  int32 limit = 3;
+}

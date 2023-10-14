@@ -1,0 +1,78 @@
+name: "diff"
+description: "composite action run.e2e.with.diff"
+
+inputs:
+  diff_path:
+    required: true
+    description: "path to your diff config file"
+    default: ".github/diff_config.yml"
+  token:
+    description: "Github token"
+    required: false
+outputs:
+  requirements:
+    description: "Get PR's description to run extra tests"
+    value: ${{ steps.prepare_jobs.outputs.requirements }}
+  jobs:
+    description: "Jobs to run in this PR"
+    value: ${{ steps.prepare_jobs.outputs.jobs }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        path: 'repo-to-diff'
+        fetch-depth: 2
+    - name: Determine required tests
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+      id: requirements
+      shell: bash
+      run: |
+        set -e
+
+        cd repo-to-diff/
+
+        # go build -o diff cmd/citools/diff/main.go
+        gh release download diff-v0.0.8 \
+          --pattern 'diff-linux-amd64' \
+          --clobber \
+          --repo manabie-com/backend \
+          --output diff
+
+        chmod +x ./diff
+        ./diff \
+          --base-ref="HEAD~1" \
+          --head-ref="HEAD" \
+          --config-path="${{ inputs.diff_path }}" \
+          -v=debug \
+          --output-path="$GITHUB_OUTPUT"
+
+        echo "output debug"
+        cat "$GITHUB_OUTPUT"
+
+    - name: Group by jobName
+      id: group_by_job_name
+      uses: mikefarah/yq@master
+      with:
+        cmd: yq '.rules[] | select(.jobName != null ) | [.]' `pwd`/repo-to-diff/${{ inputs.diff_path }} | yq 'group_by(.jobName)' -o json -I=0
+
+    - uses: actions/github-script@v6
+      id: prepare_jobs
+      env:
+        GROUP: "${{ steps.group_by_job_name.outputs.result }}"
+        GITHUB_TOKEN: "${{ inputs.token }}"
+      with:
+        github-token: "${{ inputs.token || 'mock-github-token-to-fully-compatible' }}"
+        script: |
+          const { prepareJobs } = require('${{ github.workspace }}/.github/actions/diff/diff.js');
+          var requirements = ${{ toJSON(steps.requirements.outputs) }};
+          var result = prepareJobs({
+              configJson: JSON.parse(process.env.GROUP),
+              requirements: requirements,
+          });
+          console.log(result);
+          core.setOutput('jobs', result);
+          core.setOutput('requirements', requirements);

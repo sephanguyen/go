@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package syllabus.v1;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/syllabus/v1;sspb";
+
+message GetSignedRequestRequest {
+    string request_data = 1; // Json stringify format
+    string domain = 2;
+}
+  
+message GetSignedRequestResponse {
+    string signed_request = 1;
+}
+
+service Assessment {
+    rpc GetSignedRequest (GetSignedRequestRequest) returns (GetSignedRequestResponse);
+}

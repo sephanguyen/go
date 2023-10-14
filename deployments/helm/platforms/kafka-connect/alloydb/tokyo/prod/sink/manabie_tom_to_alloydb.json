@@ -1,0 +1,29 @@
+{
+  "name": "prod_tokyo_manabie_tom_to_alloydb_sink_connector",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+    "tasks.max": "10",
+    "topics.regex": "prod.tokyo.alloydb_tom.public.([^.]+)",
+    "connection.url": "${file:/decrypted/kafka-connect.secrets.properties:alloydb_prod_tokyo_manabie}",
+    "transforms": "unwrap,route,filterResourcePath",
+    "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+    "transforms.unwrap.drop.tombstones": "false",
+    "transforms.unwrap.delete.handling.mode": "none",
+    "transforms.filterResourcePath.type"            : "io.confluent.connect.transforms.Filter$Value",
+    "transforms.filterResourcePath.filter.condition": "$[?(@.resource_path =~ /-2147483648/)]",
+    "transforms.filterResourcePath.filter.type"     : "include",
+    "transforms.route.type": "org.apache.kafka.connect.transforms.RegexRouter",
+    "transforms.route.regex": "([^.]+).([^.]+).([^.]+).([^.]+).([^.]+)",
+    "transforms.route.replacement": "$5",
+    "table.name.format": "tom.${topic}",
+    "auto.create": "true",
+    "auto.evolve": "true",
+    "insert.mode": "upsert",
+    "delete.enabled": "true",
+    "pk.mode": "record_key",
+    "consumer.override.max.poll.records": "500",
+    "offset.flush.interval.ms": "200000",
+    "offset.flush.timeout.ms": "20000",
+    "consumer.override.max.poll.interval.ms": "600000"
+  }
+}

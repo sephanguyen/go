@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package notificationmgmt.v1;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/notificationmgmt/v1;npb";
+
+service InternalService {
+  rpc RetrievePushedNotificationMessages(
+    RetrievePushedNotificationMessageRequest)
+    returns (RetrievePushedNotificationMessageResponse);
+}
+
+message PushedNotificationMessage {
+  string title = 1;
+  string body = 2;
+  google.protobuf.Struct data = 3;
+  google.protobuf.Timestamp pushed_at = 4;
+}
+
+message RetrievePushedNotificationMessageRequest {
+  string device_token = 1;
+  int32 limit = 2;
+  google.protobuf.Timestamp since = 3;
+}
+
+message RetrievePushedNotificationMessageResponse {
+  repeated PushedNotificationMessage messages = 1;
+}

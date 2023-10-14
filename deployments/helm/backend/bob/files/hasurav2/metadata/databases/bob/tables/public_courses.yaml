@@ -1,0 +1,175 @@
+table:
+  schema: public
+  name: courses
+object_relationships:
+  - name: school
+    using:
+      foreign_key_constraint_on: school_id
+array_relationships:
+  - name: course_access_paths
+    using:
+      foreign_key_constraint_on:
+        column: course_id
+        table:
+          schema: public
+          name: course_access_paths
+  - name: course_classes
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: courses_classes
+        insertion_order: null
+        column_mapping:
+          course_id: course_id
+  - name: course_lessons
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: lessons
+        insertion_order: null
+        column_mapping:
+          course_id: course_id
+  - name: lesson_groups
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: lesson_groups
+        insertion_order: null
+        column_mapping:
+          course_id: course_id
+  - name: lesson_members
+    using:
+      foreign_key_constraint_on:
+        column: course_id
+        table:
+          schema: public
+          name: lesson_members
+  - name: lessons_courses
+    using:
+      foreign_key_constraint_on:
+        column: course_id
+        table:
+          schema: public
+          name: lessons_courses
+  - name: teacher
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: teacher_by_school_id
+        insertion_order: null
+        column_mapping:
+          school_id: school_id
+select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+        - country
+        - course_id
+        - course_type
+        - created_at
+        - deleted_at
+        - display_order
+        - end_date
+        - grade
+        - icon
+        - name
+        - preset_study_plan_id
+        - school_id
+        - start_date
+        - status
+        - subject
+        - teacher_ids
+        - teaching_method
+        - updated_at
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+        - country
+        - course_id
+        - course_type
+        - created_at
+        - deleted_at
+        - display_order
+        - end_date
+        - grade
+        - icon
+        - name
+        - preset_study_plan_id
+        - school_id
+        - start_date
+        - status
+        - subject
+        - teacher_ids
+        - teaching_method
+        - updated_at
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+          - school_id:
+              _in: X-Hasura-School-Ids
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+        - country
+        - course_id
+        - course_type
+        - created_at
+        - deleted_at
+        - display_order
+        - end_date
+        - grade
+        - icon
+        - name
+        - preset_study_plan_id
+        - school_id
+        - start_date
+        - status
+        - subject
+        - teacher_ids
+        - teaching_method
+        - updated_at
+      filter:
+        _and:
+          - school_id:
+              _in: X-Hasura-School-Ids
+          - deleted_at:
+              _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+        - country
+        - course_id
+        - course_type
+        - created_at
+        - deleted_at
+        - display_order
+        - end_date
+        - grade
+        - icon
+        - name
+        - preset_study_plan_id
+        - school_id
+        - start_date
+        - subject
+        - teacher_ids
+        - teaching_method
+        - updated_at
+      filter:
+        _and:
+          - school_id:
+              _in: X-Hasura-School-Ids
+          - deleted_at:
+              _is_null: true
+      allow_aggregations: true

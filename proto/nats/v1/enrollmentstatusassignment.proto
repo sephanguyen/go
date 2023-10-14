@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package nats.v1;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/nats/v1;npb";
+
+import "google/protobuf/timestamp.proto";
+
+enum StudentEnrollmentStatus {
+    STUDENT_ENROLLMENT_STATUS_TEMPORARY = 0;
+}
+
+message LessonReallocateStudentEnrollmentStatusEvent {
+    message StudentEnrollmentStatusInfo {
+        string student_id = 1;
+        string location_id = 2;
+        google.protobuf.Timestamp start_date = 3;
+        google.protobuf.Timestamp end_date = 4;
+        StudentEnrollmentStatus enrollment_status = 5;
+    }
+    repeated StudentEnrollmentStatusInfo student_enrollment_status = 1;
+}

@@ -1,0 +1,42 @@
+common:
+  google_cloud_project: student-coach-e1e95
+  firebase_project: student-coach-e1e95
+issuers:
+  - issuer: manabie
+    audience: prod-tokyo
+    jwks_endpoint: http://shamir:5680/.well-known/jwks.json
+jwt_applicant: prod-tokyo
+storage:
+  bucket: prod-tokyo-backend
+scheduled_notification:
+  is_running_for_all_tenants: false
+  tenant_ids:
+    - "-2147483648"
+    - "-2147483644"
+    - "-2147483642"
+    - "-2147483639"
+    - "-2147483638"
+    - "-2147483637"
+    - "-2147483635"
+    - "-2147483634"
+    - "-2147483633"
+    - "-2147483632"
+    - "-2147483631"
+    - "-2147483630"
+    - "-2147483629"
+    - "-2147483628"
+    - "-2147483627"
+    - "-2147483626"
+    - "-2147483624"
+    - "2147483646"
+    - "2147483631"
+    - "2147483630"
+    - "2147483629"
+    - "2147483626"
+    - "2147483625"
+    - "2147483624"
+    - "-2147483623"
+    - "-2147483622"
+    - "2147483645"
+    - "2147483643"
+    - "2147483641"

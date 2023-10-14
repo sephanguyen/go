@@ -1,0 +1,1 @@
+ALTER TABLE public.invoice_action_log ADD COLUMN IF NOT EXISTS payment_sequence_number int;

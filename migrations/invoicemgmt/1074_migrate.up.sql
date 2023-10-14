@@ -1,0 +1,1 @@
+ALTER TABLE new_customer_code_history RENAME account_number TO bank_account_number;

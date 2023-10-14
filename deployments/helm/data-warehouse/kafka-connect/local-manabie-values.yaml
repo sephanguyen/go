@@ -1,0 +1,11 @@
+connect:
+  heapOptions: "-Xms768M -Xmx768M"
+  resources:
+    requests:
+      cpu: 1000m
+      memory: 1024Mi
+    limits:
+      cpu: 2000m
+      memory: 1536Mi
+  imagePullSecrets:
+    - name: regcred

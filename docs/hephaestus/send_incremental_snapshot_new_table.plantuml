@@ -1,0 +1,65 @@
+@startuml
+participant hephaestus as hephaestus order 1
+participant NATS as nats order 2
+participant bob as bob order 3
+participant calendar as calendar order 3
+participant fatima as fatima order 3
+participant mastermgmt as mastermgmt order 3
+
+note over hephaestus
+Run: upsert kafka connect connector
+- Upsert connector
+- If connector type == source:
+  + Publish message to nats
+end note
+
+hephaestus --> nats: Publish Subject "DebeziumIncrementalSnapshot.Send"
+activate nats
+note over nats
+type DataCollection struct {
+	SourceID string
+	Tables   []string
+	RepName  string
+}
+end note
+
+bob -> nats: Subscribe Subject "DebeziumIncrementalSnapshot.Send"
+note over bob
+<font color=blue>QueueSubscribe</font><b> "QueueBobDebeziumIncrementalSnapshotSend"
+if SourceID == "bob" then
+  insert into 
+  dbz_signal(id,type,data) 
+  values (
+    "bob-xxx",
+    "execute-snapshot",
+    "{"data-collections": ["public.users"]}"
+  );
+end if
+end note
+
+calendar -> nats: Subscribe Subject "DebeziumIncrementalSnapshot.Send"
+note over calendar
+<font color=blue>QueueSubscribe</font><b>"QueueCalendarDebeziumIncrementalSnapshotSend"
+if SourceID == "calendar" then
+  ...
+end if
+end note
+
+
+fatima -> nats: Subscribe Subject "DebeziumIncrementalSnapshot.Send"
+note over fatima
+<font color=blue>QueueSubscribe</font><b> "QueueFatimaDebeziumIncrementalSnapshotSend"
+if SourceID == "fatima" then
+  ...
+end if
+end note
+
+
+mastermgmt -> nats: Subscribe Subject "DebeziumIncrementalSnapshot.Send"
+note over mastermgmt
+<font color=blue>QueueSubscribe</font><b> "QueueMastermgmtDebeziumIncrementalSnapshotSend"
+if SourceID == "mastermgmt" then
+  ...
+end if
+end note
+@enduml

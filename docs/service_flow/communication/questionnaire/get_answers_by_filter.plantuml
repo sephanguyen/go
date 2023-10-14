@@ -1,0 +1,22 @@
+@startuml AddNewNotification
+hide circle
+
+actor User as User order 10
+participant Bob as Bob order 40
+User -> Bob:  Call "NotificationReader.GetAnswersByFilter"
+note over User,Bob
+request payload: 
+    {
+        questionnaire_id
+        keyword
+        paging
+    }
+end note
+
+activate Bob
+note right Bob
+1. get questionnaire question with questionnaire_id
+2. get only responders with search by name (join with users table of usermnmgt squad)
+3. get questionnaire user answers for each responders
+end note
+deactivate Bob

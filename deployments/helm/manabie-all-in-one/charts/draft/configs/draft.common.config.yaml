@@ -1,0 +1,138 @@
+common:
+  name: draft
+  organization: {{ .Values.global.vendor }}
+  environment: '{{ include "util.runtimeEnvironment" . }}'
+  actual_environment: '{{ include "util.environment" . }}'
+  sa_email: {{ include "util.serviceAccountEmail" . }}
+  log:
+    app_level: debug
+    log_payload: true
+  stats_enabled: false
+  grpc:
+    trace_enabled: true
+    handler_timeout_v2:
+      default: 5s
+    handler_timeout_v2_enabled: true
+    client_name: draft
+    client_version: "{{ .Values.clientVersion }}"
+  image_tag: {{ include "util.imageTag" . }}
+postgres_migrate:
+  source: file:///migrations/draft
+  database:
+    cloudsql_instance: '{{ .Values.global.cloudSQLCommonInstance }}'
+    cloudsql_use_public_ip: {{ .Values.global.cloudSQLUsePublicIP }}
+    cloudsql_auto_iam_authn: true
+    cloudsql_impersonate_service_account_email: '{{ include "util.databaseMigrationServiceAccountEmail" .}}'
+    user: '{{ include "util.databaseMigrationUser" . }}'
+    host: '{{ include "util.databaseHost" . }}'
+    port: '5432'
+    dbname: '{{ .Values.global.dbPrefix }}draft'
+    max_conns: 2
+    retry_attempts: 10
+    retry_wait_internal: 5s
+postgres_v2:
+  draft:
+    cloudsql_instance: '{{ .Values.global.cloudSQLCommonInstance }}'
+    cloudsql_use_public_ip: {{ .Values.global.cloudSQLUsePublicIP }}
+    cloudsql_auto_iam_authn: true
+    user: '{{ include "util.databaseUser" . }}'
+    host: '{{ include "util.databaseHost" . }}'
+    port: '5432'
+    dbname: '{{ .Values.global.dbPrefix }}draft'
+    max_conns: 8
+    retry_attempts: 10
+    retry_wait_interval: '5s'
+natsjs:
+  address: "nats://nats-jetstream.{{ .Values.global.environment }}-{{ .Values.global.vendor }}-nats-jetstream.svc.cluster.local:4223"
+  user: "Draft"
+  max_redelivery: 10
+  jprep_ack_wait: 3s #should be 30s, for local we set small value
+  default_ack_wait: 10s
+  reconnect_wait: 10s
+  max_reconnect: -1
+  is_local: {{ include "util.natsIsLocal" . }}
+data_prune:
+  postgres_common_instance:
+    cloudsql_instance: '{{ .Values.global.cloudSQLCommonInstance }}'
+    cloudsql_use_public_ip: {{ .Values.global.cloudSQLUsePublicIP }}
+    cloudsql_auto_iam_authn: true
+    user: '{{ include "util.databaseUser" . }}'
+    host: '{{ include "util.databaseHost" . }}'
+    port: '5432'
+    dbname: ''
+    max_conns: 2
+    retry_attempts: 10
+    retry_wait_internal: 5s
+  postgres_lms_instance:
+    cloudsql_instance: '{{ .Values.global.cloudSQLLMSInstance }}'
+    cloudsql_use_public_ip: {{ .Values.global.cloudSQLUsePublicIP }}
+    cloudsql_auto_iam_authn: true
+    user: '{{ include "util.databaseUser" . }}'
+    host: '{{ include "util.databaseHost" . }}'
+    port: '5432'
+    dbname: ''
+    max_conns: 2
+    retry_attempts: 10
+    retry_wait_internal: 5s
+  clean_data:
+    conversations:
+      ignore_fks: ["last_message_id"]
+    users:
+      extra_cond: |
+        and email not in (
+          'schedule_job+notification@manabie.com','product.test+jprep.staging@manabie.com','phuc.chau+e2ehcmschooladmin@manabie.com',
+          'quangkhai.nguyen+uatmanabie+schooladmin@gmail.com', 'quangkhai.nguyen+uatsynersia+schooladmin@gmail.com', 'quangkhai.nguyen+uatrenseikai+schooladmin@gmail.com'
+        ) and email not like '%thu.vo+e2e%' and email not like '%schedule_job+%' and email not like '%virtual-classroom%' and email not like '%lesson-teacher-e2e%' and email not like '%lesson-student-e2e%'
+    students:
+      ignore_fks: ["school_id"]
+      extra_cond: |
+        and student_id in (
+            select user_id from users where email not in (
+              'schedule_job+notification@manabie.com','product.test+jprep.staging@manabie.com','phuc.chau+e2ehcmschooladmin@manabie.com',
+              'quangkhai.nguyen+uatmanabie+schooladmin@gmail.com', 'quangkhai.nguyen+uatsynersia+schooladmin@gmail.com', 'quangkhai.nguyen+uatrenseikai+schooladmin@gmail.com'
+            ) and email not like '%thu.vo+e2e%' and email not like '%schedule_job+%' and email not like '%virtual-classroom%' and email not like '%lesson-teacher-e2e%' and email not like '%lesson-student-e2e%'
+        )
+    staff:
+      extra_cond: |
+        and staff_id in (
+          select user_id from users where email not in (
+            'schedule_job+notification@manabie.com','product.test+jprep.staging@manabie.com','phuc.chau+e2ehcmschooladmin@manabie.com',
+            'quangkhai.nguyen+uatmanabie+schooladmin@gmail.com', 'quangkhai.nguyen+uatsynersia+schooladmin@gmail.com', 'quangkhai.nguyen+uatrenseikai+schooladmin@gmail.com'
+          ) and email not like '%thu.vo+e2e%' and email not like '%schedule_job+%' and email not like '%virtual-classroom%' and email not like '%lesson-teacher-e2e%' and email not like '%lesson-student-e2e%'
+        )
+    media:
+      extra_cond: "and media_id not in (
+        '01GBPSXE5XXY0N49080Y5X8N6D','01GBPT7QQCRPW1RVA1W4Q3ZZ5K',
+        '01GBPSQR1E5CH7GFH4X65BNA26','01GBPSQR1F9RTPBXN70NT7FYQZ',
+        '01GBPSQR1F9RTPBXN70RPNR2WB','01GBPSQR1F9RTPBXN70S1JHP5X',
+        '01GCTEG1F4017JCX881SXK9NPN','01GCTEG1F4017JCX881W0V2NX7'
+        ) and media_id not in (
+        select unnest(media_ids) from lessons l, lesson_groups lg
+        where l.lesson_group_id = lg.lesson_group_id and l.course_id  = '01GBPS6YPZ800YDZPBZKXJZ7W9'
+        )"
+    lessons:
+      extra_cond: "and course_id not in ('01GBPS6YPZ800YDZPBZKXJZ7W9')"
+    courses:
+      extra_cond: "and course_id not in ('01GBPS6YPZ800YDZPBZKXJZ7W9') and name not like '%Lesson Course%'"
+    locations:
+      extra_cond: "and name not like '%E2E%' and name != 'End-to-end' and name not like '%Lesson Location%'"
+      ignore_fks: ["parent_location_id"]
+      self_ref_fks:
+        - referencing: parent_location_id
+          referenced: location_id
+    study_plans:
+      ignore_fks: ["master_study_plan_id"]
+      self_ref_fks:
+        - referencing: master_study_plan_id
+          referenced: study_plan_id
+    student_submissions:
+      # this is a circular fk, we ignore one (typically ignore the nullable fk)
+      ignore_fks: ["student_submission_grade_id"]
+    class_members:
+      ignore_fks: ["student_subscription_id"]
+    student_submission_grades:
+      # if have conflict on this we set null using the query ()
+      set_null_on_circular_fk:
+        student_submissions: student_submission_grade_id
+    class:
+      extra_cond: "and name not like '%Lesson Class E2E #%'"

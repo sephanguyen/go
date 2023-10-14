@@ -1,0 +1,91 @@
+# This is a common workflow to build and push j4 image on demand:
+#   - backend's server
+name: build.j4
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "Branch used to compile j4"
+        required: true
+        type: string
+      tag:
+        required: false
+        type: string
+        description: "Image should have format $branchname-$suffix, in case you want to build new image for the same branch"
+        default: "yourbranch-0"
+
+
+
+env:
+  GITHUB_TOKEN: ${{ secrets.BUILD_GITHUB_TOKEN }}
+  J4_TAG: ${{ inputs.tag }}
+  REPO_OWNER: ${{ github.repository_owner }}
+  BE_REPO: backend
+  BE_IMG: asia.gcr.io/student-coach-e1e95/backend-j4
+
+
+jobs:
+  build-j4:
+    permissions:
+      contents: "read"
+      id-token: "write"
+    runs-on: ["self-hosted", "4-8-large-runner"]
+    steps:
+      - name: Checkout Backend Source
+        uses: actions/checkout@v3
+        timeout-minutes: 5
+        with:
+          repository: ${{ env.REPO_OWNER }}/${{ env.BE_REPO }}
+          ref: ${{ inputs.branch }}
+          token: ${{ secrets.BUILD_GITHUB_TOKEN }}
+
+      - name: Authenticate to Google Cloud using Workload Identity Federation
+        id: auth
+        uses: google-github-actions/auth@v1
+        with:
+          token_format: access_token
+          workload_identity_provider: 'projects/418860883682/locations/global/workloadIdentityPools/gh-action-pool/providers/build-bot-provider'
+          service_account: 'prod-build-bot@student-coach-e1e95.iam.gserviceaccount.com'
+
+      - name: Login to GCR
+        uses: docker/login-action@v2
+        with:
+          registry: asia.gcr.io
+          username: oauth2accesstoken
+          password: '${{ steps.auth.outputs.access_token }}'
+
+      - name: Check Backend Image availability
+        id: availability
+        run: |
+          set -eu
+
+          IMAGE_TAG=${BE_IMG}:${J4_TAG}
+          EXIT_CODE=0
+          docker manifest inspect ${IMAGE_TAG} > /dev/null || EXIT_CODE=$?
+          if [ $EXIT_CODE -eq 0 ]; then
+            echo "Image ${IMAGE_TAG} already exists, skipping builds"
+            echo "build=0" >> $GITHUB_OUTPUT
+          else
+            echo "Image ${IMAGE_TAG} is not available"
+            echo "build=1" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Set up Docker Buildx
+        if: steps.availability.outputs.build == '1'
+        uses: docker/setup-buildx-action@v1
+
+      - name: Build Backend Image
+        if: steps.availability.outputs.build == '1'
+        uses: docker/build-push-action@v2
+        env:
+          GOPRIVATE: "github.com/manabie-com"
+        with:
+          context: .
+          file: ./developments/release.Dockerfile
+          tags: asia.gcr.io/student-coach-e1e95/backend-j4:${{ env.J4_TAG }}
+          target: j4-runner
+          push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            GITHUB_TOKEN=${{ secrets.BUILD_GITHUB_TOKEN }}

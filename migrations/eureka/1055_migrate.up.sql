@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS lo_study_plan_items_lo_id_idx ON public.lo_study_plan_items USING btree (lo_id);

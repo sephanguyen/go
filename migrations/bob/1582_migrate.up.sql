@@ -1,0 +1,1 @@
+ALTER PUBLICATION debezium_publication ADD TABLE public.live_lesson_sent_notifications;

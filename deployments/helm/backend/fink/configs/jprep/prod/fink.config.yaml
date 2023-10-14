@@ -1,0 +1,5 @@
+common:
+  google_cloud_project: student-coach-e1e95
+
+natsjs:
+  address: "nats://nats-jetstream.prod-jprep-nats-jetstream.svc.cluster.local:4223"

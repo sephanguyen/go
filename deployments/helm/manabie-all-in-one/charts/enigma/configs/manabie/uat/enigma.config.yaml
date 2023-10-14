@@ -1,0 +1,14 @@
+common:
+  google_cloud_project: staging-manabie-online
+route_checker_hosts:
+  - web-api.uat.jprep.manabie.io
+  - web-api.uat2.jprep.manabie.io
+  - web-api.uat.manabie.io
+  - web-api.uat2.manabie.io
+route_checker_services:
+  - manabie.bob.UserService
+  - manabie.tom.ChatService
+  - manabie.yasuo.SchoolService
+  - eureka.v1.AssignmentReaderService
+  - usermgmt.v2.UserModifierService
+  - fatima.v1.SubscriptionModifierService

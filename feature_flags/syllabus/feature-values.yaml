@@ -1,0 +1,1720 @@
+unleash:
+  featureFlags:
+    syllabus:
+      - name: Syllabus_GenerateGqlPaginationQuery_BackOffice
+        description: "A feature flag to enable experiment utilizing gql pagination query for backoffice (LT-46294)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+      - name: Syllabus_GrpcServices_BackOffice
+        description: "A feature flag to enable new grpc service in backoffice (LT-41795)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_StudyPlanManagement_BackOffice_Master
+        description: "A feature flag to enable using new master_study_plan_view table"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "none"
+            constraints: []
+      - name: Syllabus_StudyPlanManagement_BackOffice_Individual
+        description: "A feature flag to enable using new individual_study_plan_view table"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "none"
+            constraints: []
+      - name: Syllabus_GradeBook_BackOffice_View
+        description: "A feature flag to enable Grade Book (LT-25926), except AIC"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_organization
+            parameters:
+              organizations: "-2147483639,-2147483640,-2147483634,-2147483642,-2147483643,-2147483644,-2147483645,-2147483648,-2147483638,-2147483637,-2147483635,-2147483633,-2147483631,-2147483630,-2147483629,-2147483646,-2147483628,-2147483627,-2147483626"
+            constraints: []
+      - name: Syllabus_GradeBook_BackOffice_PDFExport
+        description: "A feature flag to enable Grade Book PDF Export (LT-32862), except AIC"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_organization
+            parameters:
+              organizations: "-2147483639,-2147483640,-2147483634,-2147483642,-2147483643,-2147483644,-2147483645,-2147483648,-2147483638,-2147483637,-2147483635,-2147483633,-2147483631,-2147483630,-2147483629,-2147483646,-2147483628,-2147483627,-2147483626"
+            constraints: []
+      - name: Syllabus_AssignmentManagement_BackOffice_AssignmentManagement
+        description: "A feature flag to enable Assignment"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_FlashcardManagement_BackOffice_FlashcardManagement
+        description: "A feature flag to enable Flashcard"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_ExamLOManagement_BackOffice_ExamLOManagement
+        description: "A feature flag to enable Exam LO (LT-8094)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_Assignment_TaskAssignmentManagement
+        description: "A feature flag to enable task assignment (LT-12517)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_Migration_BackOffice_RedirectAPIEndPointToEureka
+        description: "A feature flag to redirect API's endpoint to eureka service (LT-14449)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_Migration_Mobile_RedirectReadQueryBobToEureka
+        description: "A feature flag for mobile to redirect read query from bob to eureka (LT-14450)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_Migration_Mobile_RedirectWriteQueryBobToEureka
+        description: "A feature flag for mobile to redirect write query from bob to eureka (LT-16361)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_ClassManagement_Mobile_NewRetrieveClassEndpoint
+        description: "A feature flag for new class table data from mastermgmt.ClassService/RetrieveClassByIDs (LT-15049)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: Syllabus_Quiz_BackOffice_Handwriting
+        description: "A feature flag for BO to enable handwriting answer for quiz (LT-76)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_Quiz_Mobile_Handwriting
+        description: "A feature flag for mobile to enable handwriting answer for quiz (LT-76)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_Handwriting_Mobile_MLKit
+        description: "A feature flag for mobile only to enable using ML Kit for handwriting (LT-39570)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_Handwriting_Mobile_SaveImageLocal
+        description: "A feature flag for mobile to enable Save Image Local when using handwriting (LT-36291)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: Syllabus_Quiz_Mobile_MobileHandwriting
+        description: "A feature flag for enable handwriting answer on mobile (LT-19203)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_Quiz_BackOffice_MathHandwriting
+        description: "A feature flag for BO to enable Math handwriting in quiz answers (LT-17578)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_Quiz_Mobile_MathHandwriting
+        description: "A feature flag for mobile to enable Math handwriting in quiz answers (LT-17578)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_Quiz_Handwriting_SubmitImprovement
+        description: "A feature flag for mobile to enable submit button at whiteboard handwriting answer for quiz (LT-36250)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_Assignment_TeacherTextFeedback
+        description: "A feature flag to enable teacher's text feedback for assignment (LT-10398)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_Assignment_StudentSubmissionsByFilterV2
+        description: "A feature flag to enable students' submissions filtered with course_student under location (LT-8831)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_StudyPlan_CourseStatistic
+        description: "A feature flag to enable courses' study plan filtered with class (LT-8607)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_Assignment_Teacher_ToReview
+        description: "A feature flag to enable to review screen on Teacher web"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_Assignment_Teacher_ToReview_FilterImprovements
+        description: "A feature flag to enable assignment filter improvements in to review screen on Teacher web (LT-32228)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_Learner_PassedRate
+        description: "A feature flag to enable passed rate on Learner web (LT-39275)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_StudyPlan_Teacher_People
+        description: "A feature flag to enable people tab on Teacher web"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_StudyPlan_Teacher_StudyPlan
+        description: "A feature flag to enable study plan tab on Teacher web"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "none"
+            constraints: []
+      - name: Syllabus_Assignment_Learner_RecordVideoAssignment
+        description: "A feature flag to enable assignment record on learner app"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+      - name: Syllabus_StudyPlan_Mobile_StatsAtTopicChapterLevel
+        description: "A feature flag to enable calculate stats at topic chapter level"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_Assignment_Teacher_ResetSubmission
+        description: "A feature flag to enable reset assignment submission"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+      - name: Syllabus_LearningMaterials_Mobile_FlashcardV1
+        description: "A feature flag to enable flashcard V1 on mobile app"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_StudyPlan_Mobile_QuizRetryMode
+        description: "A feature flag to enable quiz retry mode on mobile app"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_LearningMaterials_Learner_CreateTaskAssignment
+        description: "A feature flag to enable create task assignment on learner app (LT-10912)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_ExamLO_Mobile_ExamLOTimer
+        description: "A feature flag to enable Timer on Exam LO (LT-19202)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_Quiz_BackOffice_Optimization
+        description: "A feature flag to enable Quiz Optimization (LT-16849)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_Quiz_Mobile_AudioVolumeReduction
+        description: "A feature flag to reducing audio volume (LT-23746)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_ExamLO_ExamLOInstruction
+        description: "A feature toggle to enable Exam LO Instruction (LT-21145)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_LearningMaterials_OrderingQuestion
+        description: "A feature toggle to enable Ordering Question for ExamLO (LT-14060, LT-22211)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_LearningMaterials_LearningObjective_OrderingQuestion
+        description: "A feature toggle to enable Ordering Question for LO (Learning objective) (LT-29174)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_Quiz_Mobile_EssayQuestion
+        description: "A feature toggle to enable Essay Question (LT-29835)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_Quiz_BackOffice_EssayQuestion
+        description: "A feature toggle to enable Essay Question (LT-22358)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_ManualGradingExam_Mobile_ManualGradingExamManagement
+        description: "Create feature flag toggle to enable Manual Grading Exam (LT-13216)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_ExamLO_Mobile_RemoveSubmission
+        description: "Create feature flag toggle to enable Remove Submission (LT-24460)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_ExamLO_BackOffice_PointsPerQuestion
+        description: "A feature flag for BO to enable points per question in Exam LO (LT-17510)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_BookManagement_BackOffice_LearningObjective
+        description: "A feature flag to enable new page and query for LearningObjective (LT-21732)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_BookManagement_BackOffice_OfflineLearning
+        description: "A feature flag to enable new page and query for OfflineLearning (LT-21732)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: Syllabus_BookManagement_BackOffice_ExamLO
+        description: "A feature flag to enable new page and query for ExamLO (LT-21732)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: Syllabus_BookManagement_BackOffice_Flashcard
+        description: "A feature flag to enable new page and query for Flashcard (LT-21732)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_BookManagement_BackOffice_Assignment
+        description: "A feature flag to enable new query for Assignment (LT-21732)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_BookManagement_BackOffice_TaskAssignment
+        description: "A feature flag to enable new query for TaskAssignment (LT-21732)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_BookManagement_BackOffice_LearningMaterial
+        description: "A feature flag to enable new query for LearningMaterial (LT-21411)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_StudyPlan_CourseStatistic_Phase2_DateEditting
+        description: "A feature flag to enable Course Statistic date editting (LT-15079)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_ManualGradingExam_BackOffice_ManualGradingExamManagement
+        description: "A feature flag to enable Manual grading options (LT-13216)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_ManualGradingExam_BackOffice_GradeToPass
+        description: "A feature flag to enable Grade to pass setting (LT-17511)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_StudyPlan_CourseStatistic_Phase3_CourseLevel
+        description: "A feature flag to enable Course Statistic course level (LT-20598)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_BookManagement_BackOffice_SwapOrderLearningMaterial
+        description: "A feature flag to enable using new swap order learning material endpoint (LT-23628)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "none"
+            constraints: []
+      - name: Syllabus_BookManagement_BackOffice_DeleteLearningMaterial
+        description: "A feature flag to enable using new delete learning material endpoint (LT-23786)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "none"
+            constraints: []
+      - name: Syllabus_BookManagement_BackOffice_InsertLearningMaterial
+        description: "A feature flag to enable using new insert learning material endpoint (LT-23791)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "none"
+            constraints: []
+      - name: Syllabus_BookManagement_BackOffice_UpdateLearningMaterial
+        description: "A feature flag to enable using new update learning material endpoint (LT-23791)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "none"
+            constraints: []
+      - name: Syllabus_Quiz_Learner_GradeToPass_ExamLOAttemptHistoryScreen
+        description: "A feature flag to enable attempt history screen for only ExamLO on Learner App (LT-22461)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_ManualGradingExam_Teacher_ToReview
+        description: "A feature flag to enable manual grading exam in to review screen on Teacher web (LT-23504)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_ManualGradingExam_Teacher_ToReview_FilterImprovements
+        description: "A feature flag to enable manual grading exam filter improvements in to review screen on Teacher web (LT-27023)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_Quiz_BackOffice_PreviewAlternativeAnswers
+        description: "A feature flag to show alternative answers in preview question (LT-24920)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_ManualGradingExam_Mobile_GradeToPass
+        description: "A feature flag to enable Grade To Pass on Learner and Teacher Apps (LT-17511)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_Quiz_GroupOfQuestions
+        description: "A feature flag to enable group of questions feature (LT-22716, LT-23472,LT-37345). DO NOT enable for AIC(-2147483641) until Release Phrase 2 for AIC"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+          - name: strategy_organization
+            parameters:
+              organizations: "-2147483639,-2147483640,-2147483634,-2147483642,-2147483643,-2147483644,-2147483645,-2147483648,-2147483638,-2147483637,-2147483635,-2147483633,-2147483631,-2147483630,-2147483629,-2147483646,-2147483627,-2147483626,-2147483625,-2147483624"
+            constraints: []
+      - name: Syllabus_ExamLO_BackOffice_TimeSetting
+        description: "A feature flag to enable the Exam LO time setting on BO (LT-25376),(LT-25383)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_ExamLO_Mobile_PointsPerQuestion
+        description: "A feature toggle to enable Points per Question in Exam LO on mobile (LT-27215)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_ExamLO_Mobile_JPREP_To_ManabieUI
+        description: "A feature flag to use manabie ui on Exam LO for JPREP (LT-27941)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "none"
+            constraints: []
+      - name: Syllabus_SystemRefactoring_Mobile_NewLearningMaterialAPIs
+        description: "A feature flag to use new list learning material APIs for system refactoring (LT-18660)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: Syllabus_SystemRefactoring_Mobile_RetrieveSubmissionsV2
+        description: "A flag for use new retrieve submission api (LT-31257)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "none"
+            constraints: []
+      - name: Syllabus_SystemRefactoring_Mobile_CreateQuizTestV2
+        description: "A feature flag to use new createQuizTestV2 for system refactoring (LT-18660)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "none"
+            constraints: []
+      - name: Syllabus_SystemRefactoring_Mobile_CreateRetryQuizTestV2
+        description: "A feature flag to use new CreateRetryQuizTestV2 for system refactoring (LT-18660)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "none"
+            constraints: []
+      - name: Syllabus_SystemRefactoring_Mobile_FinishFlashCardStudyProgressV2
+        description: "A feature flag to use new FinishFlashCardStudyProgressV2 for system refactoring (LT-18660)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "none"
+            constraints: []
+      - name: Syllabus_SystemRefactoring_Mobile_ListSubmissionsV3
+        description: "A feature flag to use new ListSubmissionsV3 for system refactoring (LT-18660)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: Syllabus_SystemRefactoring_Mobile_CreateFlashCardStudyV2
+        description: "A feature flag to use new CreateFlashCardStudyV2 for system refactoring (LT-18660)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "none"
+            constraints: []
+      - name: Syllabus_SystemRefactoring_Mobile_RetrieveQuizTestsV2
+        description: "A feature flag to use new RetrieveQuizTestsV2 for system refactoring (LT-18660)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: Syllabus_SystemRefactoring_Mobile_RetrieveLastFlashcardStudyProgressV2
+        description: "A feature flag to use new RetrieveLastFlashcardStudyProgressV2 for system refactoring (LT-18660)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "none"
+            constraints: []
+      - name: Syllabus_SystemRefactoring_Mobile_UpsertAdhocTaskAssignmentV2
+        description: "A feature flag to use new UpsertAdhocTaskAssignmentV2 for system refactoring (LT-18660)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: Syllabus_BookManagement_BackOffice_UseUpdateLearningMaterialNameAPI
+        description: "A feature flag to use new API UpdateLearningMaterialName (LT-27470)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "none"
+            constraints: []
+      - name: Syllabus_Quiz_BackOffice_MetadataTagging
+        description: "A feature flag to enable meta-data tagging for quiz (LT-21060)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_ApproveGrading_Teacher_ToReview
+        description: "A feature flag to enable approve grading in to review screen on Teacher web (LT-21276)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_Refactoring_Mobile_GetStudentProgress
+        description: "A feature flag to enable using new API GetStudentProgress to replace StudentBookStudyProgress and LitStudentAvailableContents APIs (LT-26167)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "none"
+            constraints: []
+      - name: Syllabus_StudyPlan_GradeBook_Learner_View
+        description: "A feature flag to enable Grade Book on Mobile (LT-29106)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+          - name: strategy_organization
+            parameters:
+              organizations: "-2147483639,-2147483640,-2147483634,-2147483642,-2147483643,-2147483645,-2147483648,-2147483638,-2147483637,-2147483635,-2147483633,-2147483631,-2147483630,-2147483629,-2147483646,-2147483628,-2147483627,-2147483626"
+            constraints: []
+      - name: Syllabus_Exam_BackOffice_ApproveGrading
+        description: "A feature flag to enable approve grading settting in exam (LT-21276)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_Exam_BackOffice_SubmissionAttempt
+        description: "A feature flag to enable submission attempt setting in exam (LT-22075)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_Exam_BackOffice_ShowAnswerKey
+        description: "A feature flag to enable show answer key setting in exam (LT-22049)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_ExamLO_Mobile_SubmissionAttempt
+        description: "A feature flag to enable submission attempt in exam lo (LT-22075)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_StudyPlan_ContentLoSetting
+        description: "A flag for Learning Management Configuration for Study Plan(LT-27679)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_Flashcard_BackOffice_ApplyHandwriting
+        description: "A flag for apply handwriting for card in flashcard(LT-25366)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_Quiz_Mobile_MetadataTagging_Phase1
+        description: "A flag for apply metadata tagging phase 1(LT-30495)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+          - name: strategy_organization
+            parameters:
+              organizations: "-2147483639,-2147483640,-2147483634,-2147483642,-2147483643,-2147483644,-2147483645,-2147483648,-2147483638,-2147483637,-2147483635,-2147483633,-2147483631,-2147483630,-2147483629,-2147483646"
+            constraints: []
+      - name: Syllabus_StudentPackageV2_Sync
+        description: "A flag for apply new refactor flow for StudentPackageV2 (LT-26236)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: Syllabus_ExamLO_Mobile_ReviewOptions
+        description: "A flag enabled review option on learner and teacher apps (LT-22049)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_StudyPlan_Mobile_ExamLO_AllocateMarker
+        description: "A flag for allocate marker on teacher apps (LT-19934)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_StudyPlan_ShowBookAndStatsForParent
+        description: "A flag for show book flow & stats for parent app (LT-18206 & LT-32159)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_Quiz_BackOffice_UseNewLatexOCREndpoint
+        description: "A feature flag for BO to use new Latex OCR endpoint (LT-30353)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_SystemRefactoring_Mobile_RetrieveCourseStatistics
+        description: "A flag for use new retrieve course statistics api (LT-32038)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_Refactoring_Mobile_RemoveListCourseTodoEndpoint
+        description: "A flag for refactor remove list course todo endpoint (LT-40360)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_SystemRefactoring_Mobile_SubmitAssignment
+        description: "A flag for use new submit assignment api (LT-29473)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "none"
+            constraints: []
+      - name: Syllabus_SplitTeamRefactoring_Mobile_ListTodoItems
+        description: "A flag for use new list todo items api (LT-30223)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "none"
+            constraints: []
+      - name: Syllabus_ExamLO_BackOffice_GradeCappingSetting
+        description: "A flag for enabling grade capping setting (LT-30356)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_LearningMaterials_Mobile_ShowExternalVideoLink
+        description: "A flag for enabling showing external video link (LT-29506)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_StudyPlan_CourseStatistics_StudentTagFilter
+        description: "A flag for enabling Course Statistics Student Tag Filter (LT-29885)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_StudyPlan_CourseStatistics_FilterImprovement
+        description: "A flag for enabling Course Statistics filter improvement (LT-40466)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_ExamLO_Mobile_RetainQuizProgress
+        description: "A flag for enabling Retain Quiz Progress (LT-32635)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_StudyPlan_CourseStatistics_SchoolFilter
+        description: "A flag for enabling Course Statistics School Filter (LT-23066)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_BookManagement_BackOffice_DuplicateBookLM
+        description: "A flag to enable using new duplicate book endpoint (LT-35873)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "none"
+            constraints: []
+      - name: Syllabus_Quiz_Mobile_MetadataTagging_TagsPerQuiz
+        description: "A flag for apply metadata tagging tags per quiz (LT-35386)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_StudyPlanManagement_BackOffice_CSVUpload
+        description: "A flag for enabling export and import study plan csv file (LT-30725)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_SystemRefactoring_Mobile_ListToDoItemStructuredBookTree
+        description: "A feature flag to use ListToDoItemStructuredBookTree API to replace ListTopicsByStudyPlan and ListToDoItemsByTopics APIs for system refactoring (LT-30480)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: Syllabus_SystemRefactoring_Mobile_ListStudentStudyPlans
+        description: "A feature flag to use syllabus.v1.StudyPlan/ListStudentStudyPlans API to replace eureka.v1.AssignmentReaderService/ListStudyPlans API for system refactoring (LT-22053)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "none"
+            constraints: []
+      - name: Syllabus_SystemRefactoring_Mobile_RetrieveLearningProgress
+        description: "A feature flag to use syllabus.v1.Statistics/RetrieveLearningProgress API to replace eureka.v1.StudyPlanReaderService/RetrieveLearningProgress API for system refactoring (LT-32484)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "none"
+            constraints: []
+      - name: Syllabus_SystemRefactoring_Mobile_CheckQuizCorrectnessV3
+        description: "A feature flag to use syllabus.v1.Quiz/CheckQuizCorrectness API to replace eureka.v1.QuizModifierService/CheckQuizCorrectness API for system refactoring (LT-29222)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: Syllabus_SystemRefactoring_Mobile_RetrieveStatV2
+        description: "A feature flag to use eureka.v1.StudyPlanReaderService/RetrieveStatV2 API to replace eureka.v1.StudyPlanReaderService/RetrieveStat API for system refactoring (LT-32484)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: Syllabus_Learnosity_Mobile_CompletionFlow
+        description: "A feature flag to use new completion flow for Learnosity Integration (LT-38572)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: Syllabus_Learnosity_Mobile_RetrieveLOs
+        description: "A feature flag to use new RetrieveLOs for Learnosity Integration (LT-36517)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: Syllabus_Learnosity_Mobile_StudentBookStudyProgress
+        description: "A feature flag to use new StudentBookStudyProgress for Learnosity Integration (LT-36517)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: Syllabus_Learnosity_Mobile_RetrieveTotalQuizLOs
+        description: "A feature flag to use new RetrieveTotalQuizLOs for Learnosity Integration (LT-36517)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: Syllabus_Learnosity_Mobile_ListLOSubmissionResult
+        description: "A feature flag to use new ListLOSubmissionResult for Learnosity Integration (LT-36517)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: Syllabus_Learnosity_Mobile_Course_Statistics_Splitting
+        description: "A feature flag to split Course Statistics for Learnosity Integration (LT-36518)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: Syllabus_Learnosity_Mobile_ListAssessmentSubmissionResult
+        description: "A feature flag to use ListAssessmentSubmissionResult for Learnosity Integration (LT-36518)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: Syllabus_Mobile_Learnosity_Session_Management
+        description: "A feature flag to start Learnosity quizzes in Learner (LT-38661)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: Syllabus_BackOffice_New_Search_Filter
+        description: "A feature flag to enable new search and filter behavior (LT-36620)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_BookManagement_BackOffice_UseUpdateLearningObjectiveNameAPI
+        description: "A feature flag to use new API UpdateLearningObjectiveName (LT-39559)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+      - name: Syllabus_Appsmith_BackOffice_Bulk_Upload
+        description: "A feature toggle to enable Bulk Upload question in back office (LT-34847)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_Quiz_Mobile_Unanswered_Indicator
+        description: "A feature flag to update ui for quiz question review progress unanswered indicator (LT-39270)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_Quiz_BackOffice_LabelType
+        description: "A feature flag to store and use label type for quiz (LT-39749)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_Quiz_Mobile_QuestionDotsIndicatorBasedOnScoreChanges
+        description: "A feature flag to update ui for question dots indicator based on score changes (LT-39270)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_StudyPlan_Teacher_StudentStudyPlan_Improvement
+        description: "A feature flag to enable student study plan improvement on Teacher web (LT-33738)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_StudyPlan_CourseStatistics_RetrieveCourseStatisticsV2
+        description: "A feature flag to using retrieveCourseStatisticsV2 on Teacher web (LT-40738)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+      - name: Syllabus_StudyPlan_CourseStatistics_UnassignClassFilter
+        description: "A feature flag to add unassign option to course statistics class filter on Teacher web (LT-42174)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_Quiz_Mobile_MathLatex_OverlineAndUnderlineImprovements
+        description: "A feature flag to improve showing latex that contains lines must be drawn over and under letters and symbols (LT-35236)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_StudyPlan_Teacher_Student_Refactor
+        description: "A feature flag to refactor Student Study Plan to a reusable component (LT-41436)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_BackOffice_Flashcard_OptimizeUpsertFlashcardContent
+        description: "A feature flag to enable optimize upsert flashcard content(LT-42087)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_Teacher_ToReview_FilterImprovements_ApplyButton
+        description: "A feature flag to enable filter improvements apply button in to review screen on Teacher web (LT-40672)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_StudyPlan_Teacher_StudentStudyPlan_Sticky_Header
+        description: "A feature flag to enable student study plan sticky header on Teacher web (LT-41525)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_StudyPlanManagement_BackOffice_BulkUploadStudyPlanItemsImprovement
+        description: "A flag for enabling bulk upload study plan items improvement (LT-43523)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_Mobile_LMSv2_Student_Statistics
+        description: "A feature flag to enable LMSv2 Student Stats on Learner (LT-37475)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: Syllabus_ImageBank_Appsmith_BulkDeleteImages
+        description: "A flag for enabling bulk delete images in Image Bank (LT-38100)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: Syllabus_BackOffice_LMSv2_FlashCard
+        description: "A flag to enable Flashcard feature in LMSv2 (LT-44273)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+      - name: Syllabus_Teacher_ToReview_Refactoring
+        description: "A feature flag to enable refactoring to review screen on Teacher web (LT-17136)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_StudyPlanManagement_BackOffice_UpdateLOExamSubmissionPointsOnQuizPointUpdate
+        description: "A flag for enabling recalculations on exam LO submission points when quiz item points are updated (LT-43809)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_Brightcove_Mobile_ImproveUXPlayButton
+        description: "A feature flag to enable improve ux play pause button at brightcove (LT-44397)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_StudyPlan_Resume_Video
+        description: "A feature flag to enable resume video (LT-42175)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_BackOffice_LMSv2_ToReview
+        description: "A flag to enable To Review feature in BO LMSv2 (LT-43909)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: Syllabus_Mobile_LMSv2_AutoGradedLO_ViewAnswerKeys
+        description: "A feature flag to enable LMSv2 Auto Graded LO View Answer Keys on Learner (LT-45258)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Syllabus_Mobile_LMSv2_ManualGradedLO_ViewAnswerKeys
+        description: "A feature flag to enable LMSv2 Manual Graded LO View Answer Keys on Learner (LT-45873)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: Syllabus_BackOffice_LMSv2_MasterStudyPlan
+        description: "A feature flag to enable Study Plan feature in BO LMSv2 (LT-6870)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: Syllabus_BackOffice_LMSv2_MasterStudyPlanItem
+        description: "A feature flag to enable Master Study Plan Item feature in BO LMSv2 (LT-46131)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: Syllabus_BackOffice_LMSv2_BulkEditStudentStudyPlanItems
+        description: "A feature flag to enable Bulk Edit Student Study Plan Items feature in BO LMSv2 (LT-46132)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: Syllabus_BackOffice_LMSv2_ImageBankManaUi
+        description: "A feature flag to enable Mana UI version of Image Bank (LT-46121)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: Syllabus_Mobile_LMSv2_RetryIncorrectMode
+        description: "A feature flag to enable retry incorrect mode in Mobile (LT-45999)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: Syllabus_Mobile_LMSv2_Todo
+        description: "A feature flag to enable Todo Flow LMSv2 in Mobile (LT-22089)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []

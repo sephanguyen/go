@@ -1,0 +1,83 @@
+service:
+  type: ClusterIP
+  port: 5380
+httpPort: 5380
+
+metrics:
+  enabled: true
+  podAnnotations:
+    prometheus.io/scheme: "http"
+    prometheus.io/port: "8888"
+    prometheus.io/scrape: "true"
+
+clientVersion: "1.0.0"
+
+resources:
+  requests:
+    memory: 32Mi
+
+affinity: {}
+affinityOverride: {}
+
+apiHttp:
+  - match:
+      - uri:
+          prefix: /payment/asiapay
+      - uri:
+          prefix: /payment/ghn
+      - uri:
+          prefix: /image/picture
+      - uri:
+          prefix: /image/topic
+    route:
+      - destination:
+          host: enigma
+          port:
+            number: 5380
+
+webHttp:
+  - match:
+      - uri:
+          prefix: /upload/file
+      - uri:
+          prefix: /jprep
+      - uri:
+          prefix: /healthcheck
+      - uri:
+          prefix: /cloud-convert
+    route:
+      - destination:
+          host: enigma
+          port:
+            number: 5380
+    corsPolicy:
+      allowOrigins:
+        - regex: ".*"
+      allowMethods:
+        - POST
+        - GET
+        - OPTIONS
+        - PUT
+        - DELETE
+      allowHeaders:
+        - grpc-timeout
+        - content-type
+        - keep-alive
+        - user-agent
+        - cache-control
+        - content-type
+        - content-transfer-encoding
+        - token
+        - x-accept-content-transfer-encoding
+        - x-accept-response-streaming
+        - x-user-agent
+        - x-grpc-web
+        - pkg
+        - version
+        - JPREP-Signature
+        - CloudConvert-Signature
+      allowCredentials: true
+      maxAge: 100s
+
+pdb:
+  enabled: false

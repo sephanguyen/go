@@ -1,0 +1,98 @@
+
+
+@startuml
+
+    class InfoNotificationMsg <<entity>> {
+        ...
+    }
+
+    class UserInfoNotification <<entity>>{
+        user_notification_id: string
+        notification_id: string
+        user_id: string
+        status: string
+        course_ids: []string
+        current_grade: int
+        is_individual:bool
+        created_at: timestamp
+        updated_at: timestamp
+        deleted_at: timestamp
+        user_group: string
+        parent_id: string
+        student_id: string
+        <color:#green>qn_status: string
+        <color:#green>qn_submitted_at: timestamp
+    }
+    note right of UserInfoNotification::qn_status
+        USER_NOTIFICATION_QUESTIONNAIRE_STATUS_ANSWERED
+        USER_NOTIFICATION_QUESTIONNAIRE_STATUS_UNANSWERED
+    end note
+
+    class InfoNotification<<entity>>{
+        notification_id: string
+        notification_msg_id: string
+        ...
+        <color:#green>+is_important: bool
+        <color:#green>+questionnaire_id: string
+    }
+
+    class Questionnaire<<entity>> #green{
+        questionnaire_id: string
+        resubmit_allowed: bool
+        expiration_date: timestamp
+        created_at: timestamp
+        updated_at: timestamp
+        deleted_at: timestamp
+    }
+
+    class QuestionnaireQuestion<<entity>> #green{
+        questionnaire_question_id: string
+        questionnaire_id: string
+        order_index: int
+        type: string
+        title: string
+        choices: []string
+        is_required: bool
+        created_at: timestamp
+        updated_at: timestamp
+        deleted_at: timestamp
+    }
+
+    note left of QuestionnaireQuestion::type
+        QUESTION_TYPE_MULTIPLE_CHOICE
+        QUESTION_TYPE_CHECK_BOX
+        QUESTION_TYPE_FREE_TEXT
+    end note
+
+    QuestionnaireQuestion -[hidden]>  Questionnaire
+    Questionnaire -[hidden]> InfoNotification
+    Questionnaire -[hidden]d-> QuestionnaireUserAnswer
+    InfoNotification -[hidden]d-> UserInfoNotification
+    UserInfoNotification -[hidden]l-> QuestionnaireUserAnswer
+
+    InfoNotification "1" --> "many" UserInfoNotification
+    QuestionnaireQuestion "many" --> "1"  Questionnaire
+    Questionnaire "1" <-- "1" InfoNotification
+    Questionnaire "1" --> "many" QuestionnaireUserAnswer
+    QuestionnaireQuestion "1" <-- "many 0..n" QuestionnaireUserAnswer
+    UserInfoNotification "1" <-- "many 0..n" QuestionnaireUserAnswer
+
+
+    class QuestionnaireUserAnswer<<entity>> #green{
+        answer_id: string
+        user_notification_id: string
+        questionnaire_question_id: string
+        user_id: string
+        target_id: string
+        answer: string
+        submitted_at: timestamp
+        deleted_at: timestamp
+    }
+    note left of QuestionnaireUserAnswer::target_id
+        target_id is student_id for now 
+        for both case user_id 
+        is parent/student
+    end note
+
+
+@enduml

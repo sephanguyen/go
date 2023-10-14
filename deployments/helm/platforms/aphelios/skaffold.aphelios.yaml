@@ -1,0 +1,52 @@
+apiVersion: skaffold/v2beta29
+kind: Config
+profiles:
+  - name: aphelios-enabled
+    activation:
+      - env: APHELIOS_DEPLOYMENT_ENABLED=true
+    build:
+      artifacts:
+        - image: asia.gcr.io/student-coach-e1e95/aphelios
+          context: ../../../..
+          custom:
+            buildCommand: |
+              DOCKER_BUILDKIT=1 docker build \
+              --tag "$IMAGE" \
+              --file ./developments/python.Dockerfile "$BUILD_CONTEXT"
+            dependencies:
+              paths:
+                - ./cmd/aphelios/**
+                - ./internal/aphelios/**
+      tagPolicy: # Using the same tag policy as in skaffold.manabie-all-in-one.yaml
+        customTemplate:
+          template: '{{.DATETIME}}.0'
+          components:
+            - name: DATETIME
+              dateTime:
+                format: '20060102150405'
+    deploy:
+      helm:
+        releases:
+          - name: aphelios
+            chartPath: .
+            artifactOverrides:
+              image: asia.gcr.io/student-coach-e1e95/aphelios
+            namespace: '{{.ENV}}-{{.ORG}}-machine-learning'
+            createNamespace: true
+            setValueTemplates:
+              appVersion: '{{.IMAGE_TAG}}'
+              environment: '{{.ENV}}'
+              vendor: '{{.ORG}}'
+              serviceAccountEmailSuffix: '{{.SERVICE_ACCOUNT_EMAIL_SUFFIX}}'
+            imageStrategy:
+              helm: {}
+
+  # Rendering manifest for testing purposes, so we set the image tag
+  # to a constant value.
+  - name: mock-render
+    patches:
+      - op: replace
+        path: /build/tagPolicy
+        value:
+          envTemplate:
+            template: 'local'

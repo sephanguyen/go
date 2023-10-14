@@ -1,0 +1,81 @@
+table:
+  schema: public
+  name: study_plans
+object_relationships:
+  - name: study_plan
+    using:
+      foreign_key_constraint_on: master_study_plan_id
+array_relationships:
+  - name: course_study_plans
+    using:
+      foreign_key_constraint_on:
+        column: study_plan_id
+        table:
+          schema: public
+          name: course_study_plans
+  - name: student_study_plans
+    using:
+      foreign_key_constraint_on:
+        column: study_plan_id
+        table:
+          schema: public
+          name: student_study_plans
+  - name: study_plan_items
+    using:
+      foreign_key_constraint_on:
+        column: study_plan_id
+        table:
+          schema: public
+          name: study_plan_items
+  - name: study_plans
+    using:
+      foreign_key_constraint_on:
+        column: master_study_plan_id
+        table:
+          schema: public
+          name: study_plans
+select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+        - book_id
+        - course_id
+        - created_at
+        - deleted_at
+        - grades
+        - master_study_plan_id
+        - name
+        - school_id
+        - status
+        - study_plan_id
+        - study_plan_type
+        - track_school_progress
+        - updated_at
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+        - book_id
+        - course_id
+        - created_at
+        - deleted_at
+        - grades
+        - master_study_plan_id
+        - name
+        - school_id
+        - status
+        - study_plan_id
+        - study_plan_type
+        - track_school_progress
+        - updated_at
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+          - school_id:
+              _in: X-Hasura-School-Ids
+      allow_aggregations: true

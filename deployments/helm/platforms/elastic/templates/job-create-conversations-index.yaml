@@ -1,0 +1,176 @@
+{{- if .Values.elasticsearch.initIndices }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: elasticsearch-{{ template "elastic.fullname" . }}-create-conversations-index
+  labels:
+    {{- include "elastic.labels" . | nindent 4 }}
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      restartPolicy: OnFailure
+      serviceAccountName: {{ include "elastic.serviceAccountName" . }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: elastic-create-conversations-index
+        image: "{{ .Values.decryptorImage.repository }}:{{ .Values.decryptorImage.tag }}"
+        imagePullPolicy: IfNotPresent
+        command:
+          - /bin/sh
+          - -c
+          - |
+            set -euo pipefail
+
+            code=0
+            sops --decrypt --output ./kibana.yml /usr/share/kibana/config/kibana_v2.encrypted.yaml || code=$?
+            if [ "$code" -ne 0 ]; then
+              sops --decrypt /usr/share/kibana/config/kibana.encrypted.yaml > ./kibana.yml
+              echo "============= decrypt old secret file: kibana.encrypted.yaml"
+            fi
+
+            {{- if eq "local" .Values.environment }}
+            gcloud auth activate-service-account --key-file /configs/service_credential.json
+            {{- end }}
+
+            user=$(grep elasticsearch.username ./kibana.yml | awk '{print$2}' | tr -d \")
+            pass=$(grep elasticsearch.password ./kibana.yml | awk '{print$2}' | tr -d \")
+
+            until $(curl -k --fail --silent --output /dev/null --user ${user}:${pass} ${ELASTICSEARCH_URI}/_cluster/health?wait_for_status=yellow); do
+              echo "Elasticsearch is not ready..."
+              sleep 10
+            done
+
+            curl -k -u ${user}:${pass} -H "Content-type: application/json" -XPUT ${ELASTICSEARCH_URI}/conversations -d '{
+              "settings":{
+              "index":{
+                  "analysis":{
+                      "analyzer":{
+                          "access_path_prefix": {
+                              "tokenizer": "path_hierarchy"
+                          },
+                          "kuromoji_normalize":{
+                          "char_filter":[
+                              "icu_normalizer"
+                          ],
+                          "tokenizer":"kuromoji_tokenizer",
+                          "mode":"search",
+                          "filter":[
+                              "lowercase",
+                              "edge_ngram"
+                          ]
+                          },
+                          "english_normalize":{
+                          "tokenizer":"standard",
+                          "filter":[
+                              "lowercase",
+                              "edge_ngram"
+                          ]
+                          }
+                      },
+                      "filter":{
+                          "edge_ngram":{
+                          "type":"edge_ngram",
+                          "min_gram":"1",
+                          "max_gram":"25",
+                          "token_chars":[
+                              "letter",
+                              "digit"
+                          ]
+                          },
+                          "1_2_grams":{
+                          "type":"ngram",
+                          "min_gram":1,
+                          "max_gram":2
+                          }
+                      }
+                  }
+              }
+              },
+              "mappings":{
+              "_field_names":{
+                  "enabled":false
+              },
+              "properties":{
+                  "conversation_id":{
+                      "type":"keyword"
+                  },
+                  "conversation_name":{
+                      "properties":{
+                          "english":{
+                          "type":"text",
+                          "analyzer":"english_normalize",
+                          "search_analyzer":"standard"
+                          },
+                          "japanese":{
+                          "type":"text",
+                          "analyzer":"kuromoji_normalize"
+                          }
+                      }
+                  },
+                  "last_message":{
+                      "properties":{
+                          "updated_at":{
+                          "type":"date"
+                          }
+                      }
+                  },
+                  "is_replied":{
+                      "type":"boolean"
+                  },
+                  "owner":{
+                      "type":"keyword"
+                  },
+                  "conversation_type":{
+                      "type":"keyword"
+                  },
+                  "resource_path": {
+                      "type": "keyword"
+                  },
+                  "access_paths": {
+                      "type": "text",
+                      "analyzer": "access_path_prefix"
+                  }
+                }
+              }
+            }'
+
+        env:
+        - name: ELASTICSEARCH_URI
+          value: {{ printf "https://elasticsearch-%s:%.0f" (include "elastic.fullname" .) .Values.elasticsearch.service.port }}
+        {{- if eq "local" .Values.environment }}
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: /configs/service_credential.json
+        {{- end }}
+        volumeMounts:
+        {{- if eq "local" .Values.environment }}
+        - name: secrets-volume
+          mountPath: /configs/service_credential.json
+          subPath: service_credential.json
+          readOnly: true
+        {{- end }}
+        - name: secrets-volume
+          mountPath: /usr/share/kibana/config/kibana.encrypted.yaml
+          subPath: kibana.encrypted.yaml
+          readOnly: true
+        - name: secrets-volume
+          mountPath: /usr/share/kibana/config/kibana_v2.encrypted.yaml
+          subPath: kibana_v2.encrypted.yaml
+          readOnly: true
+      volumes:
+      - name: secrets-volume
+        secret:
+          secretName: kibana-{{ include "elastic.fullname" . }}
+          items:
+          {{- if eq "local" .Values.environment }}
+          - key: service_credential.json
+            path: service_credential.json
+          {{- end }}
+          - key: kibana.encrypted.yaml
+            path: kibana.encrypted.yaml
+          - key: kibana_v2.encrypted.yaml
+            path: kibana_v2.encrypted.yaml
+{{- end }}

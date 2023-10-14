@@ -1,0 +1,292 @@
+global:
+  dbPrefix: ""
+  dbUserPrefix: "prod-"
+  serviceAccountEmailSuffix: "production-renseikai"
+  replicaCount: 2
+  hasura:
+    replicaCount: 2
+    cronScheduledScaling:
+      - timezone: UTC
+        start: "0 17 * * *" # 0h00  ICT
+        end: "59 4 * * *"   # 11h59 ICT
+        desiredReplicas: "2"
+      - timezone: UTC
+        start: "0 5 * * *"  # 12h00 ICT
+        end: "59 16 * * *"  # 23h59 ICT
+        desiredReplicas: "3"
+  cloudSQLUsePublicIP: true
+  cloudSQLCommonInstance: "production-renseikai:asia-northeast1:renseikai-83fc"
+  cloudSQLLMSInstance: "production-renseikai:asia-northeast1:renseikai-83fc"
+  cloudSQLAuthInstance: "production-renseikai:asia-northeast1:renseikai-83fc"
+  requirePodAntiAffinity: true
+
+  kedaScaledObjectMinReplicas: 2
+  kedaScaledObjectMaxReplicas: 3
+
+  onDemandNodeDeployment:
+    replicaCount: 1
+    cronScheduledScaling:
+      - timezone: UTC
+        start: "0 13 * * *" # 20h ICT
+        end: "0 20 * * *" # 3h  ICT
+        desiredReplicas: "0"
+      - timezone: UTC
+        start: "1 20 * * *" # 3h01  ICT
+        end: "59 12 * * *" # 19h59 ICT
+        desiredReplicas: "1"
+
+backoffice:
+  resources:
+    requests:
+      memory: 5Mi
+      cpu: 3m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "3m"
+    sidecar.istio.io/proxyMemory: "92Mi"
+  onDemandNodeDeployment:
+    enabled: true
+bob:
+  resources:
+    requests:
+      memory: 164Mi
+      cpu: 10m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "3m"
+    sidecar.istio.io/proxyMemory: "92Mi"
+  onDemandNodeDeployment:
+    enabled: true
+  hasura:
+    onDemandNodeDeployment:
+      enabled: true
+    resources:
+      requests:
+        memory: 396Mi
+        cpu: 10m
+enigma:
+  resources:
+    requests:
+      memory: 50Mi
+      cpu: 3m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "3m"
+    sidecar.istio.io/proxyMemory: "92Mi"
+  onDemandNodeDeployment:
+    enabled: true
+entryexitmgmt:
+  resources:
+    requests:
+      memory: 50Mi
+      cpu: 3m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "3m"
+    sidecar.istio.io/proxyMemory: "92Mi"
+  onDemandNodeDeployment:
+    enabled: true
+  hasura:
+    onDemandNodeDeployment:
+      enabled: true
+    resources:
+      requests:
+        memory: 128Mi
+        cpu: 3m
+eureka:
+  resources:
+    requests:
+      memory: 128Mi
+      cpu: 10m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "3m"
+    sidecar.istio.io/proxyMemory: "92Mi"
+  onDemandNodeDeployment:
+    enabled: true
+  hasura:
+    onDemandNodeDeployment:
+      enabled: true
+    resources:
+      requests:
+        memory: 192Mi
+        cpu: 10m
+fatima:
+  resources:
+    requests:
+      memory: 50Mi
+      cpu: 5m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "3m"
+    sidecar.istio.io/proxyMemory: "92Mi"
+  onDemandNodeDeployment:
+    enabled: true
+  hasura:
+    onDemandNodeDeployment:
+      enabled: true
+    resources:
+      requests:
+        memory: 192Mi
+        cpu: 5m
+invoicemgmt:
+  resources:
+    requests:
+      memory: 50Mi
+      cpu: 5m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "3m"
+    sidecar.istio.io/proxyMemory: "92Mi"
+  onDemandNodeDeployment:
+    enabled: true
+  hasura:
+    onDemandNodeDeployment:
+      enabled: true
+    resources:
+      requests:
+        memory: 150Mi
+        cpu: 5m
+learner-web:
+  resources:
+    requests:
+      memory: 5Mi
+      cpu: 3m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "5m"
+    sidecar.istio.io/proxyMemory: "96Mi"
+  onDemandNodeDeployment:
+    enabled: true
+lessonmgmt:
+  resources:
+    requests:
+      memory: 32Mi
+      cpu: 3m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "3m"
+    sidecar.istio.io/proxyMemory: "92Mi"
+  onDemandNodeDeployment:
+    enabled: true
+mastermgmt:
+  resources:
+    requests:
+      memory: 32Mi
+      cpu: 3m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "3m"
+    sidecar.istio.io/proxyMemory: "92Mi"
+  onDemandNodeDeployment:
+    enabled: true
+  hasura:
+    onDemandNodeDeployment:
+      enabled: true
+    resources:
+      requests:
+        memory: 150Mi
+        cpu: 4m
+payment:
+  resources:
+    requests:
+      memory: 32Mi
+      cpu: 5m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "3m"
+    sidecar.istio.io/proxyMemory: "92Mi"
+  onDemandNodeDeployment:
+    enabled: true
+shamir:
+  resources:
+    requests:
+      memory: 50Mi
+      cpu: 3m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "3m"
+    sidecar.istio.io/proxyMemory: "92Mi"
+  onDemandNodeDeployment:
+    enabled: true
+  migrationEnabled: true
+teacher-web:
+  resources:
+    requests:
+      memory: 10Mi
+      cpu: 3m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "3m"
+    sidecar.istio.io/proxyMemory: "92Mi"
+  onDemandNodeDeployment:
+    enabled: true
+tom:
+  resources:
+    requests:
+      memory: 128Mi
+      cpu: 30m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "20m"
+    sidecar.istio.io/proxyMemory: "92Mi"
+usermgmt:
+  resources:
+    requests:
+      memory: 50Mi
+      cpu: 3m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "3m"
+    sidecar.istio.io/proxyMemory: "92Mi"
+  onDemandNodeDeployment:
+    enabled: true
+  cronjobs:
+    check-enrollment-status-date:
+      cmd: usermgmt_cronjob_check_enrollment_status_date
+      schedule: "0 0 * * *"
+    cronjob-itee-download-data-file:
+      cmd: usermgmt_itee_download_data_file
+      schedule: "13 19 * * *"
+      disabled: true
+    cronjob-withus-download-data-file:
+      cmd: usermgmt_withus_download_data_file
+      schedule: "13 19 * * *"
+      disabled: true
+yasuo:
+  resources:
+    requests:
+      memory: 64Mi
+      cpu: 3m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "3m"
+    sidecar.istio.io/proxyMemory: "92Mi"
+  onDemandNodeDeployment:
+    enabled: true
+zeus:
+  resources:
+    requests:
+      memory: 32Mi
+      cpu: "10m"
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "3m"
+    sidecar.istio.io/proxyMemory: "92Mi"
+timesheet:
+  resources:
+    requests:
+      memory: 32Mi
+      cpu: 3m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "3m"
+    sidecar.istio.io/proxyMemory: "92Mi"
+  onDemandNodeDeployment:
+    enabled: true
+  hasura:
+    onDemandNodeDeployment:
+      enabled: true
+    resources:
+      requests:
+        memory: 145Mi
+        cpu: 5m
+calendar:
+  resources:
+    requests:
+      memory: 50Mi
+      cpu: 3m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "3m"
+    sidecar.istio.io/proxyMemory: "92Mi"
+  onDemandNodeDeployment:
+    enabled: true
+  hasura:
+    onDemandNodeDeployment:
+      enabled: true
+    resources:
+      requests:
+        memory: 120Mi
+        cpu: 3m

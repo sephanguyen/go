@@ -1,0 +1,80 @@
+syntax = "proto3";
+
+package nats.v1;
+
+import "common/v1/contents.proto";
+import "eureka/v1/assignments.proto";
+import "syllabus/v1/study_plan_service.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/nats/v1;npb";
+
+import "google/protobuf/timestamp.proto";
+
+message EventStudentPackage {
+  message Package {
+    repeated string course_ids = 1;
+    google.protobuf.Timestamp start_date = 2;
+    google.protobuf.Timestamp end_date = 3;
+    repeated string location_ids = 4;
+    string student_package_id = 5;
+  }
+
+  message StudentPackage {
+    string student_id = 1;
+    Package package = 2;
+    bool is_active = 3;
+  }
+
+  StudentPackage student_package = 1;
+  repeated string location_ids = 2 [ deprecated = true ];
+}
+
+message EventStudentPackageV2 {
+  message PackageV2 {
+    string course_id = 1;
+    string location_id = 2;
+    string class_id = 3;
+    google.protobuf.Timestamp start_date = 4;
+    google.protobuf.Timestamp end_date = 5;
+  }
+
+  message StudentPackageV2 {
+    string student_id = 1;
+    PackageV2 package = 2;
+    bool is_active = 3;
+  }
+
+  StudentPackageV2 student_package = 1;
+}
+
+// TODO: deprecate this
+message EventConversation {
+  repeated string conversation_ids = 1;
+  repeated string user_ids = 2;
+}
+
+// TODO: deprecate this
+message EventMessage {
+  repeated string conversation_ids = 1;
+  repeated string message_ids = 2;
+}
+message EventCourseStudent {
+  repeated string student_ids = 1;
+}
+message ContentStructures {
+  repeated eureka.v1.ContentStructure content_structures = 1;
+}
+
+message EventLearningObjectivesCreated {
+  repeated common.v1.LearningObjective learning_objectives = 1;
+  map<string, ContentStructures> lo_content_structures = 2;
+}
+
+message EventAssignmentsCreated {
+  repeated eureka.v1.Assignment assignments = 1;
+}
+
+message EventImportStudyPlan {
+  string task_id = 1;
+  repeated syllabus.v1.StudyPlanItemImport study_plan_items = 2;
+}

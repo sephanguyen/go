@@ -1,0 +1,27 @@
+cronjobs:
+    check-enrollment-status-date:
+        cmd: usermgmt_cronjob_check_enrollment_status_date
+        disabled: true
+        schedule: 0 0 * * *
+    cronjob-itee-download-data-file:
+        cmd: usermgmt_itee_download_data_file
+        disabled: true
+        schedule: 13 19 * * *
+    cronjob-withus-download-data-file:
+        cmd: usermgmt_withus_download_data_file
+        disabled: true
+        schedule: 13 19 * * *
+enabled: true
+hpa:
+    averageCPUUtilization: 300
+    averageMemoryValue: 512Mi
+    maxReplicas: 3
+    minReplicas: 2
+podAnnotations:
+    sidecar.istio.io/proxyCPU: 10m
+    sidecar.istio.io/proxyMemory: 64Mi
+resources:
+    requests:
+        cpu: 10m
+        memory: 50Mi
+useGlobalCronScheduledScaling: true

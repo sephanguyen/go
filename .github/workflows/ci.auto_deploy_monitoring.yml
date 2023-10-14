@@ -1,0 +1,31 @@
+name: ci.auto_deploy_monitoring.yml
+on:
+  push:
+    branches:
+      - 'develop'
+    paths:
+      - 'deployments/helm/platforms/monitoring/grafana/**'
+jobs:
+  deploy-monitoring:
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    runs-on: ["self-hosted", "100m-400mi", "spot", "persistent"]
+    env:
+      SERVICE_ACCOUNT_EMAIL_SUFFIX: "production-manabie-vn"
+      ENV: "prod"
+      ORG: "manabie"
+      SQL_PROXY_CONN_NAME: "student-coach-e1e95:asia-southeast1:manabie-2db8"
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v3
+        timeout-minutes: 5
+
+      - name: Setup Kubernetes for ${{ env.ENV }}.${{ env.ORG }}
+        uses: ./.github/actions/setup-k8s
+        with:
+          organization: ${{ env.ORG }}
+          environment: ${{ env.ENV }}
+
+      - name: Helm deploy monitoring
+        run: skaffold deploy -f skaffold.monitoring.yaml

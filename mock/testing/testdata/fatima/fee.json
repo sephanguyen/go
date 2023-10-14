@@ -1,0 +1,81 @@
+{
+	"schema": [
+		{
+			"column_name": "fee_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "fee_type",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "fee",
+			"policyname": "rls_fee",
+			"qual": "permission_check(resource_path, 'fee'::text)",
+			"with_check": "permission_check(resource_path, 'fee'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "fee",
+			"policyname": "rls_fee_restrictive",
+			"qual": "permission_check(resource_path, 'fee'::text)",
+			"with_check": "permission_check(resource_path, 'fee'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "fk_fee_fee_id",
+			"column_name": "fee_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "fee_pk",
+			"column_name": "fee_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "fee",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

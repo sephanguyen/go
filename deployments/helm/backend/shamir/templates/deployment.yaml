@@ -1,0 +1,214 @@
+{{- if .Values.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "shamir.fullname" . }}
+  labels:
+    {{- include "shamir.labels" . | nindent 4 }}
+spec:
+  replicas: {{ default .Values.global.replicaCount .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "shamir.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/shamir.common.config.yaml: {{ tpl ("configs/shamir.common.config.yaml" | .Files.Get) . | sha256sum }}
+        checksum/shamir.config.yaml: {{ tpl (printf "configs/%s/%s/shamir.config.yaml" .Values.global.vendor .Values.global.environment | .Files.Get) . | sha256sum }}
+{{- if eq "local" .Values.global.environment }}
+        checksum/service_credential.json: {{ include "util.serviceCredential" . | sha256sum }}
+{{- end }}
+        checksum/shamir.secrets.encrypted.yaml: {{ printf "secrets/%s/%s/shamir.secrets.encrypted.yaml" .Values.global.vendor .Values.global.environment | .Files.Get | sha256sum }}
+        checksum/private_key_01.pem.encrypted.yaml: {{ printf "secrets/%s/%s/private_key_01.pem.encrypted.yaml" .Values.global.vendor .Values.global.environment | .Files.Get | sha256sum }}
+        checksum/private_key_02.pem.encrypted.yaml: {{ printf "secrets/%s/%s/private_key_02.pem.encrypted.yaml" .Values.global.vendor .Values.global.environment | .Files.Get | sha256sum }}
+        checksum/private_key_03.pem.encrypted.yaml: {{ printf "secrets/%s/%s/private_key_03.pem.encrypted.yaml" .Values.global.vendor .Values.global.environment | .Files.Get | sha256sum }}
+{{- if .Values.podAnnotations }}
+{{ toYaml .Values.podAnnotations | indent 8 }}
+{{- end }}
+{{- if .Values.metrics.podAnnotations }}
+{{ toYaml .Values.metrics.podAnnotations | indent 8 }}
+{{- end }}
+      labels:
+        {{- include "shamir.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with (default .Values.global.imagePullSecrets .Values.imagePullSecrets) }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "util.serviceAccountName" . }}
+      volumes:
+{{- if eq "local" .Values.global.environment }}
+      - name: service-credential
+        secret:
+          secretName: {{ include "shamir.fullname" . }}
+          items:
+          - key: service_credential.json
+            path: service_credential.json
+{{- end }}
+      - name: private-key-01-volume
+        secret:
+          secretName: {{ include "shamir.fullname" . }}
+          items:
+          - key: private_key_01.pem.encrypted.yaml
+            path: private_key_01.pem.encrypted.yaml
+      - name: private-key-02-volume
+        secret:
+          secretName: {{ include "shamir.fullname" . }}
+          items:
+          - key: private_key_02.pem.encrypted.yaml
+            path: private_key_02.pem.encrypted.yaml
+      - name: private-key-03-volume
+        secret:
+          secretName: {{ include "shamir.fullname" . }}
+          items:
+          - key: private_key_03.pem.encrypted.yaml
+            path: private_key_03.pem.encrypted.yaml
+      - name: secrets-volume
+        secret:
+          secretName: {{ include "shamir.fullname" . }}
+          items:
+          - key: shamir.secrets.encrypted.yaml
+            path: shamir.secrets.encrypted.yaml
+          {{- if .Values.migrationEnabled }}
+          - key: shamir_migrate.secrets.encrypted.yaml
+            path: shamir_migrate.secrets.encrypted.yaml
+          {{- end }}
+      - name: config-volume
+        configMap:
+          name: {{ include "shamir.fullname" . }}
+          items:
+          - key: shamir.common.config.yaml
+            path: shamir.common.config.yaml
+          - key: shamir.config.yaml
+            path: shamir.config.yaml
+      initContainers:
+      {{- $isPartnerMigrationDisabled := or (eq "synersia" .Values.global.vendor) -}}
+      {{- if and .Values.migrationEnabled (not $isPartnerMigrationDisabled) }}
+        - name: {{ .Chart.Name }}-migrate
+          image: {{ include "util.image" . }}
+          imagePullPolicy: IfNotPresent
+          command: ["/server"]
+          args:
+            - gjob
+            - sql_migrate
+            - --commonConfigPath=/configs/shamir.common.config.yaml
+            - --configPath=/configs/shamir.config.yaml
+            - --secretsPath=/configs/shamir_migrate.secrets.encrypted.yaml
+          volumeMounts:
+          - name: config-volume
+            mountPath: /configs/shamir.common.config.yaml
+            subPath: shamir.common.config.yaml
+            readOnly: true
+          - name: config-volume
+            mountPath: /configs/shamir.config.yaml
+            subPath: shamir.config.yaml
+            readOnly: true
+          - name: secrets-volume
+            mountPath: /configs/shamir_migrate.secrets.encrypted.yaml
+            subPath: shamir_migrate.secrets.encrypted.yaml
+            readOnly: true
+        {{- if eq "local" .Values.global.environment }}
+          - name: service-credential
+            mountPath: /configs/service_credential.json
+            subPath: service_credential.json
+            readOnly: true
+          env:
+          - name: GOOGLE_APPLICATION_CREDENTIALS
+            value: "/configs/service_credential.json"
+        {{- end }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: {{ include "util.image" . }}
+          imagePullPolicy: IfNotPresent
+        {{- if .Values.global.liveReloadEnabled }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              #!/bin/bash
+              set -eu
+              cat <<EOF > modd.conf
+              /server {
+                daemon +sigterm: /server \\
+                  gserver \\
+                  shamir \\
+                  --commonConfigPath=/configs/shamir.common.config.yaml \\
+                  --configPath=/configs/shamir.config.yaml \\
+                  --secretsPath=/configs/shamir.secrets.encrypted.yaml
+              }
+              EOF
+
+              exec modd
+        {{- else }}
+          args:
+          - "gserver"
+          - "shamir"
+          - "--commonConfigPath=/configs/shamir.common.config.yaml"
+          - "--configPath=/configs/shamir.config.yaml"
+          - "--secretsPath=/configs/shamir.secrets.encrypted.yaml"
+        {{- end }}
+          ports:
+            - name: grpc
+              containerPort: {{ .Values.service.grpcPort }}
+              protocol: TCP
+            - name: http
+              containerPort: {{ .Values.service.httpPort }}
+              protocol: TCP
+          {{- if .Values.global.debug }}
+            - name: delve
+              containerPort: 40000
+              protocol: TCP
+          {{- end }}
+          readinessProbe:
+            httpGet:
+              path: /.well-known/jwks.json
+              port: 5680
+            # initialDelaySeconds: 15
+            periodSeconds: 5
+          volumeMounts:
+          - name: config-volume
+            mountPath: /configs/shamir.common.config.yaml
+            subPath: shamir.common.config.yaml
+            readOnly: true
+          - name: config-volume
+            mountPath: /configs/shamir.config.yaml
+            subPath: shamir.config.yaml
+            readOnly: true
+          - name: secrets-volume
+            mountPath: /configs/shamir.secrets.encrypted.yaml
+            subPath: shamir.secrets.encrypted.yaml
+            readOnly: true
+          - name: private-key-01-volume
+            mountPath: /configs/private_key_01.pem.encrypted.yaml
+            subPath: private_key_01.pem.encrypted.yaml
+            readOnly: true
+          - name: private-key-02-volume
+            mountPath: /configs/private_key_02.pem.encrypted.yaml
+            subPath: private_key_02.pem.encrypted.yaml
+            readOnly: true
+          - name: private-key-03-volume
+            mountPath: /configs/private_key_03.pem.encrypted.yaml
+            subPath: private_key_03.pem.encrypted.yaml
+            readOnly: true
+{{- if eq "local" .Values.global.environment }}
+          - name: service-credential
+            mountPath: /configs/service_credential.json
+            subPath: service_credential.json
+            readOnly: true
+          env:
+          - name: GOOGLE_APPLICATION_CREDENTIALS
+            value: "/configs/service_credential.json"
+{{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values }}
+      {{- $context := (mustMerge (deepCopy .) $) }}
+      affinity: {{- include "util.affinityNew" $context | nindent 8 }}
+      tolerations: {{- include "util.tolerations" $context | nindent 8 }}
+      {{- end }}
+{{- end -}}

@@ -1,0 +1,73 @@
+syntax = "proto3";
+
+package manabie.yasuo;
+
+import "ysenum.proto";
+import "bob/enum.proto";
+import "yslocation.proto";
+import "google/protobuf/timestamp.proto";
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option (gogoproto.goproto_registration) = true;
+option go_package = "github.com/manabie-com/backend/pkg/genproto/yasuo;pb";
+
+message School {
+  int32 id = 1;
+  string name = 2;
+  manabie.bob.Country country = 3;
+  int32 city_id = 4;
+  int32 district_id = 5;
+  Point point = 6;
+  string phone = 7;
+}
+message SchoolConfig {
+  int32 school_id = 1;
+  string plan_id = 2;
+  manabie.bob.Country country = 3;
+  google.protobuf.Timestamp plan_expired_at = 4;
+  int32 plan_duration = 5;
+  repeated PlanPrivilege privileges = 6;
+}
+
+message MergeSchoolsRequest {
+  repeated int32 school_ids = 1;
+  int32 system_school_id = 2;
+}
+
+message MergeSchoolsResponse { bool successful = 1; }
+
+message UpdateSchoolRequest { School school = 1; }
+
+message UpdateSchoolResponse { bool successful = 1; }
+
+message AddTeacherRequest {
+  int32 school_id = 1;
+  string teacher_id = 2;
+}
+
+message AddTeacherResponse {}
+message RemoveTeacherFromSchoolRequest {
+  int32 school_id = 1;
+  string teacher_id = 2;
+}
+
+message RemoveTeacherFromSchoolResponse {}
+message CreateSchoolConfigRequest { SchoolConfig school_config = 1; }
+
+message CreateSchoolConfigResponse { int32 school_id = 1; }
+
+message UpdateSchoolConfigRequest { SchoolConfig school_config = 1; }
+
+message UpdateSchoolConfigResponse { int32 school_id = 1; }
+
+service SchoolService {
+  rpc MergeSchools(MergeSchoolsRequest) returns (MergeSchoolsResponse);
+  rpc UpdateSchool(UpdateSchoolRequest) returns (UpdateSchoolResponse);
+  rpc RemoveTeacherFromSchool(RemoveTeacherFromSchoolRequest)
+      returns (RemoveTeacherFromSchoolResponse);
+  rpc AddTeacher(AddTeacherRequest) returns (AddTeacherResponse);
+  rpc CreateSchoolConfig(CreateSchoolConfigRequest)
+      returns (CreateSchoolConfigResponse);
+  rpc UpdateSchoolConfig(UpdateSchoolConfigRequest)
+      returns (UpdateSchoolConfigResponse);
+}

@@ -1,0 +1,167 @@
+apiVersion: skaffold/v2beta29
+kind: Config
+metadata:
+  name: manabie-all-in-one
+deploy:
+  statusCheck: false  # helm --wait is already enough
+  helm:
+    flags:
+      install: ["--timeout=15m"]
+      upgrade: ["--timeout=15m"]
+    releases:
+      - name: manabie-all-in-one
+        chartPath: deployments/helm/manabie-all-in-one
+        namespace: '{{if eq "local" .ENV}}backend{{else}}{{.ENV}}-{{.ORG}}-services{{end}}'
+        wait: true
+        createNamespace: true
+        skipBuildDependencies: true
+        valuesFiles:
+          - deployments/helm/platforms/gateway/{{.ENV}}-{{.ORG}}-values.yaml
+          - deployments/helm/manabie-all-in-one/{{.ENV}}-{{.ORG}}-values.yaml
+        setValueTemplates:
+          global.image.tag: '{{.TAG}}'
+          global.environment: '{{.ENV}}'
+          global.vendor: '{{.ORG}}'
+profiles:
+  # Use the local registry (localhost:5001) when running with kind
+  - name: local
+    activation:
+      - env: ENV=local
+    patches:
+      - op: add
+        path: /deploy/kubeContext
+        value: kind-kind
+      - op: replace
+        path: /deploy/helm/flags/install/0
+        value: "--timeout=10m"
+      - op: replace
+        path: /deploy/helm/flags/upgrade/0
+        value: "--timeout=10m"
+      - op: add
+        path: /deploy/helm/releases/0/setValueTemplates/hephaestus.ksqldb.migrate.image.repository
+        value: '{{.ARTIFACT_REGISTRY_DOMAIN}}/confluentinc/ksqldb-cli'
+      - op: add
+        path: /deploy/helm/releases/0/setValueTemplates/hephaestus.hookLocalInitData.image.repository
+        value: '{{.ARTIFACT_REGISTRY_DOMAIN}}/jbergknoff/postgresql-client'
+      - op: add
+        path: /deploy/helm/releases/0/setValueTemplates/hephaestus.postHookMigrateDataLake
+        value: '{{if .DATA_WH }}true{{else}}false{{end}}'
+      - op: add
+        path: /deploy/helm/releases/0/setValueTemplates/hephaestus.postHookMigrateDatawarehouses
+        value: '{{if .DATA_WH }}true{{else}}false{{end}}'
+      - op: add
+        path: /deploy/helm/releases/0/setValueTemplates/hephaestus.postHookSyncDataLake
+        value: '{{if .DATA_WH }}true{{else}}false{{end}}'
+      - op: add
+        path: /deploy/helm/releases/0/setValueTemplates/hephaestus.postHookSyncDataWarehouse
+        value: '{{if .DATA_WH }}true{{else}}false{{end}}'
+      - op: add
+        path: /deploy/helm/releases/0/setValueTemplates/hephaestus.enableAC
+        value: '{{if .DATA_WH_AC }}true{{else}}false{{end}}'
+      - op: add
+        path: /deploy/helm/hooks
+        value:
+          before:
+            - host:
+                command: ["skaffoldv2", "run", "-f", "skaffold2.backend.yaml"]
+
+  - name: dorp-synersia
+    patches:
+      - op: add
+        path: /deploy/helm/releases/0/setValueTemplates/global.hephaestus.enabled
+        value: false
+
+  - name: debug
+    activation:
+      - env: DEBUG_ENABLED=true
+    build:
+      artifacts:
+        - image: asia.gcr.io/student-coach-e1e95/backend
+          context: .
+          custom:
+            buildCommand: |
+              cat <<EOF | bash
+              #!/bin/bash
+              set -eu
+              CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -gcflags='all=-N -l' -v -o ./build/server ./cmd/server/
+              CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -gcflags='all=-N -l' -v -o ./build/bdd.test ./features/
+              CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -gcflags='all=-N -l' -v -o ./build/stub ./features/stub/
+              DOCKER_BUILDKIT=1 docker build --progress=plain \
+                --tag "$IMAGE" \
+                --file ./developments/development.Dockerfile \
+                --build-arg GO_VERSION=$(cat ./deployments/versions/go)
+                --target developer-debug "$BUILD_CONTEXT" --no-cache
+
+              docker tag "$IMAGE" asia.gcr.io/student-coach-e1e95/backend:locally
+              echo "Loading asia.gcr.io/student-coach-e1e95/backend:locally into kind"
+              kind load docker-image asia.gcr.io/student-coach-e1e95/backend:locally
+
+              if [ "$PUSH_IMAGE" == "true" ]; then
+                >&2 echo "Arfifacts built in local should NOT be pushed"
+                exit 1
+              fi
+              EOF
+    patches:
+      - op: add
+        path: /deploy/helm/releases/0/setValueTemplates/global.debug
+        value: true
+      - op: add
+        path: /deploy/helm/releases/0/setValueTemplates/global.liveReloadEnabled
+        value: false
+
+  - name: ci
+    activation:
+      - env: CI=true
+    patches:
+      # Adjust log level on CI to suppress some logs
+      - op: add
+        path: /deploy/helm/releases/0/setValueTemplates/global.localLogLevel
+        value: dpanic
+      # If running on CI (testing), bump to 15m
+      - op: replace
+        path: /deploy/helm/flags/install/0
+        value: "--timeout=15m"
+      - op: replace
+        path: /deploy/helm/flags/upgrade/0
+        value: "--timeout=15m"
+
+  - name: no-hasura
+    patches:
+      - op: add
+        path: /deploy/helm/releases/0/setValueTemplates/global.hasura.replicaCount
+        value: 0
+
+  - name: local-e2e
+    activation:
+      - env: ORG=e2e
+    build:
+      artifacts:
+        - image: asia.gcr.io/student-coach-e1e95/backend
+          context: .
+          custom:
+            buildCommand: |
+              cat <<EOF | bash
+              #!/bin/bash
+              set -eu
+              CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ./build/server ./cmd/server/
+              CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ./build/bdd.test ./features/
+              CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ./build/stub ./features/stub/
+              DOCKER_BUILDKIT=1 docker build --progress=plain \
+                --tag "$IMAGE" \
+                --file ./developments/development.Dockerfile \
+                --build-arg GO_VERSION=$(cat ./deployments/versions/go) \
+                --target developer "$BUILD_CONTEXT"
+              docker tag "$IMAGE" asia.gcr.io/student-coach-e1e95/backend:$TAG
+              echo "Loading asia.gcr.io/student-coach-e1e95/backend:$TAG into kind"
+              kind load docker-image asia.gcr.io/student-coach-e1e95/backend:$TAG
+
+              if [ "$PUSH_IMAGE" == "true" ]; then
+                >&2 echo "Arfifacts built in local should NOT be pushed"
+                exit 1
+              fi
+              EOF
+      tagPolicy:
+        customTemplate:
+          template: '{{.TAG}}'
+      local:
+        push: false

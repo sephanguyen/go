@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS messages_conversation_id__idx ON public.messages (conversation_id);

@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package virtualclassroom.v1;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/virtualclassroom/v1;vpb";
+
+service ZegoCloudService {
+  rpc GetAuthenticationToken (GetAuthenticationTokenRequest) returns (GetAuthenticationTokenResponse);
+  rpc GetAuthenticationTokenV2 (GetAuthenticationTokenV2Request) returns (GetAuthenticationTokenV2Response);
+  rpc GetChatConfig (GetChatConfigRequest) returns (GetChatConfigResponse);
+}
+
+message GetAuthenticationTokenRequest { 
+  string user_id = 1; 
+}
+
+message GetAuthenticationTokenResponse {
+  string auth_token = 1;
+  int32 app_id = 2;
+  string app_sign = 3;
+}
+
+message GetAuthenticationTokenV2Request { 
+  string user_id = 1; 
+}
+
+message GetAuthenticationTokenV2Response {
+  string auth_token = 1;
+}
+
+message GetChatConfigRequest {}
+
+message GetChatConfigResponse {
+  int32 app_id = 1;
+  string app_sign = 2;
+}

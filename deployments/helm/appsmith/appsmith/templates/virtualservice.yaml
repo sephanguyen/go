@@ -1,0 +1,13 @@
+{{ include "virtualservice.appsmith.tpl" . }}
+---
+{{- if and .Values.internalHttp .Values.dnsNames.internal }}
+{{ include "virtualservice.internal.tpl" . }}
+{{- end }}
+---
+{{- if and .Values.uatInternalHttp .Values.dnsNames.uatInternal }}
+{{ include "virtualservice.uatInternal.tpl" . }}
+{{- end }}
+---
+{{- if and .Values.internalToolHttp .Values.dnsNames.internalTool }}
+{{ include "virtualservice.internalTool.tpl" . }}
+{{- end }}

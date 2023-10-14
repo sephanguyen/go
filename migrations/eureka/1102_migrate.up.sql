@@ -1,0 +1,1 @@
+CREATE INDEX CONCURRENTLY IF NOT EXISTS learning_objective_topic_id_idx ON public.learning_objective USING btree (topic_id);

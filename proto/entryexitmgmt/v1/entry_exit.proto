@@ -1,0 +1,112 @@
+syntax = "proto3";
+
+package entryexitmgmt.v1;
+import "google/protobuf/timestamp.proto";
+import "entryexitmgmt/v1/enums.proto";
+import "common/v1/requests.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/entryexitmgmt/v1;eepb";
+
+message EntryExitPayload {
+	string student_id = 1;
+	google.protobuf.Timestamp entry_date_time = 2;
+	google.protobuf.Timestamp exit_date_time = 3;
+	bool notify_parents = 4;
+}
+
+message CreateEntryExitRequest {
+	string student_id = 1 [ deprecated = true ];
+	google.protobuf.Timestamp entry_date_time = 2 [ deprecated = true ];
+	google.protobuf.Timestamp exit_date_time = 3 [ deprecated = true ];
+	bool notify_parents = 4 [ deprecated = true ];
+	EntryExitPayload entry_exit_payload = 5;
+}
+
+message CreateEntryExitResponse {
+	bool successful = 1;
+	string message = 2;
+	bool parent_notified = 3;
+}
+
+message ScanRequest {
+	string qrcode_content = 1;
+	google.protobuf.Timestamp touch_time = 2;
+	string timezone = 3;
+}
+
+message ScanResponse {
+	bool successful = 1;
+	TouchEvent touch_event = 2;
+	bool parent_notified = 3;
+	string student_name = 4;
+}
+
+message UpdateEntryExitRequest {
+	EntryExitPayload entry_exit_payload = 1;
+	int32 entryexit_id = 2;
+}
+
+message UpdateEntryExitResponse {
+	bool successful = 1;
+	bool parent_notified = 2;
+}
+
+message DeleteEntryExitRequest {
+	int32 entryexit_id = 1;
+	string student_id = 2;
+}
+
+message DeleteEntryExitResponse {
+	bool successful = 1;
+}
+
+message GenerateBatchQRCodesRequest {
+	repeated string student_ids = 1;
+}
+
+message GenerateBatchQRCodesResponse {
+	message GeneratedQRCodesURL {
+		string student_id = 1;
+		string url = 2;
+	}
+	message GenerateBatchQRCodesError {
+		string student_id = 1;
+		string error = 2;
+	}
+	repeated GenerateBatchQRCodesError errors = 1;
+	repeated GeneratedQRCodesURL qr_codes = 2;
+}
+
+message RetrieveEntryExitRecordsRequest {
+	string student_id = 1;
+	common.v1.Paging paging = 2;
+	RecordFilter record_filter = 3;
+}
+
+message EntryExitRecord {
+	google.protobuf.Timestamp entry_at = 1;
+	google.protobuf.Timestamp exit_at = 2;
+	int32 entryexit_id = 3;
+}
+
+message RetrieveEntryExitRecordsResponse {
+	common.v1.Paging next_page = 1;
+	repeated EntryExitRecord entry_exit_records = 2;
+}
+
+message RetrieveStudentQRCodeRequest {
+	string student_id = 1;
+}
+
+message RetrieveStudentQRCodeResponse {
+	string qr_url = 1;
+}
+service EntryExitService {
+	rpc Scan(ScanRequest) returns (ScanResponse);
+	rpc GenerateBatchQRCodes(GenerateBatchQRCodesRequest) returns (GenerateBatchQRCodesResponse);
+	rpc CreateEntryExit(CreateEntryExitRequest) returns (CreateEntryExitResponse);
+	rpc UpdateEntryExit(UpdateEntryExitRequest) returns (UpdateEntryExitResponse);
+	rpc DeleteEntryExit(DeleteEntryExitRequest) returns (DeleteEntryExitResponse);
+	rpc RetrieveEntryExitRecords(RetrieveEntryExitRecordsRequest) returns (RetrieveEntryExitRecordsResponse);
+	rpc RetrieveStudentQRCode(RetrieveStudentQRCodeRequest) returns (RetrieveStudentQRCodeResponse);
+}

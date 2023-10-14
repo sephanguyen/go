@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+package eureka.v1;
+
+import "eureka/v1/enums.proto";
+import "eureka/v1/assignments.proto";
+import "eureka/v1/assignment_writer.proto";
+import "google/protobuf/wrappers.proto";
+
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/eureka/v1;epb";
+
+message AssignStudyPlanEvent {
+  string course_id = 1;
+  string name = 2;
+  int32 school_id = 3;
+  repeated string student_ids = 4;
+  StudyPlanType type = 5;
+  ImportMode mode = 6;
+  repeated string study_plan_ids = 7;
+  repeated StudyPlanItem study_plan_items = 8;
+  repeated ScheduleStudyPlan schedule_study_plan_items = 9;
+  string task_id = 10;
+  string book_id = 11;
+}
+
+message DeleteLOStudyPlanItemsRequest{
+  repeated string lo_ids = 1; 
+}
+
+message DeleteLOStudyPlanItemsResponse{
+}
+
+message UpsertAdHocIndividualStudyPlanRequest {
+  google.protobuf.StringValue study_plan_id = 1;
+  int32 school_id = 2;
+  string name = 3;
+  string course_id = 4;
+  string student_id = 5;
+  // New fields
+  string book_id = 6;
+  StudyPlanStatus status = 7;
+  repeated int32 grades = 8;
+}
+
+message UpsertAdHocIndividualStudyPlanResponse {
+  string study_plan_id = 1;
+}
+
+service InternalModifierService {
+  rpc DeleteLOStudyPlanItems(DeleteLOStudyPlanItemsRequest)//TODO: verify and delete it
+      returns (DeleteLOStudyPlanItemsResponse);
+  rpc UpsertAdHocIndividualStudyPlan(UpsertAdHocIndividualStudyPlanRequest)// TODO: verify and delete it 
+      returns (UpsertAdHocIndividualStudyPlanResponse);
+}

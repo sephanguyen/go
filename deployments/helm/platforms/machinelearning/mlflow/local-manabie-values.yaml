@@ -1,0 +1,16 @@
+
+environment: "local"
+vendor: "manabie"
+
+secret:
+  serviceCredential: ""
+
+artifact:
+  gcs_path: "gs://dev-manabie-data/mlflow"
+
+postgres:
+  host: "postgres-infras.emulator.svc.cluster.local"
+  port: 5432
+  database: "mlflow"
+  users: "postgres"
+  password: "example"

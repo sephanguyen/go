@@ -1,0 +1,118 @@
+syntax = "proto3";
+
+package syllabus.v1;
+
+import "common/v1/requests.proto";
+import "common/v1/contents.proto";
+import "syllabus/v1/enums.proto";
+import "syllabus/v1/study_plan.proto";
+import "syllabus/v1/learning_material.proto";
+import "google/protobuf/wrappers.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/syllabus/v1;sspb";
+
+
+//FlashcardBase is flash card learning type metadata
+message FlashcardBase {
+    //Learning Material metadata
+    LearningMaterialBase base = 1;
+    //total_question is total learning material question
+    int32 total_question = 2;
+}
+
+message InsertFlashcardRequest{
+    // We only need send some fields bellow
+    // 1. LearningMaterialBase 
+        // 1. No learning_material 
+        // 2. topic_id
+        // 3. name
+        // 4. No send type
+    FlashcardBase flashcard = 1;
+}
+
+message InsertFlashcardResponse{
+    // return generated Learning Material ULID
+    string learning_material_id = 1;
+}
+
+message UpdateFlashcardRequest{
+    // We only need send some fields bellow
+    // 1. LearningMaterialBase 
+        // 1. No learning_material 
+        // 2. No topic_id
+        // 3. name
+        // 4. No type
+    FlashcardBase flashcard = 1;
+}
+
+// UpdateFlashcardResponse is empty message 
+message UpdateFlashcardResponse{
+}
+
+message ListFlashcardRequest {
+    repeated string learning_material_ids = 1;
+}
+
+message ListFlashcardResponse {
+    repeated FlashcardBase flashcards = 1;
+}
+
+message GetLastestProgressRequest {
+    StudyPlanItemIdentity study_plan_item_identity = 1;
+    //return the last study set id with completed_at or not, default is false
+    bool is_completed = 2;
+}
+
+message GetLastestProgressResponse {
+    // return null if no records
+    google.protobuf.StringValue study_set_id = 1;
+}
+
+message FlashcardQuizzes {
+    common.v1.Quiz item = 1;
+    FlashcardQuizStudyStatus status = 2;
+}
+
+message CreateFlashCardStudyRequest  {
+    string study_plan_id = 1;
+    string lm_id = 2;
+    string student_id = 3;
+    string study_set_id = 4;
+    common.v1.Paging paging = 5;
+    bool keep_order = 6;
+  }
+  
+message CreateFlashCardStudyResponse {
+    common.v1.Paging next_page = 1;
+    string study_set_id = 2;
+    repeated FlashcardQuizzes items = 3;
+    int32 studying_index = 4;
+}
+
+message FinishFlashCardStudyRequest  {
+    StudyPlanItemIdentity study_plan_item_identity = 1;
+    string study_set_id = 2;
+    bool is_restart = 3;
+}
+
+message FinishFlashCardStudyResponse {
+}
+
+// Flashcard is a gRPC service used for Flash Card learning material type 
+service Flashcard {
+    // InsertFlashcard insert a flash card
+    rpc InsertFlashcard(InsertFlashcardRequest)
+        returns (InsertFlashcardResponse);
+    // UpdateFlashcard update a flash card
+    rpc UpdateFlashcard(UpdateFlashcardRequest)
+        returns (UpdateFlashcardResponse);
+    // CreateFlashCardStudy create a flashcard study
+    rpc CreateFlashCardStudy(CreateFlashCardStudyRequest) returns (CreateFlashCardStudyResponse);
+    // FinishFlashCardStudy finish the flashcard study progress
+    rpc FinishFlashCardStudy(FinishFlashCardStudyRequest)
+        returns (FinishFlashCardStudyResponse);
+    rpc ListFlashcard(ListFlashcardRequest)
+        returns (ListFlashcardResponse);
+    rpc GetLastestProgress (GetLastestProgressRequest) //RetrieveLastFlashcardStudyProgress TODO: PHSE 3
+        returns (GetLastestProgressResponse);
+}

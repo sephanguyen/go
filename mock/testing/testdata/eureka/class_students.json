@@ -1,0 +1,99 @@
+{
+	"schema": [
+		{
+			"column_name": "class_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "student_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "class_students",
+			"policyname": "rls_class_students",
+			"qual": "permission_check(resource_path, 'class_students'::text)",
+			"with_check": "permission_check(resource_path, 'class_students'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "class_students",
+			"policyname": "rls_class_students_restrictive",
+			"qual": "permission_check(resource_path, 'class_students'::text)",
+			"with_check": "permission_check(resource_path, 'class_students'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "class_students_pk",
+			"column_name": "class_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "class_students_pk",
+			"column_name": "student_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "class_students",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

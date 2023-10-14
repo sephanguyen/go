@@ -1,0 +1,241 @@
+apiVersion: skaffold/v2beta28
+kind: Config
+metadata:
+  name: monitoring
+profiles:
+  - name: monitoring
+    activation:
+      - kubeContext: ^kind-kind$
+        env: INSTALL_MONITORING_STACKS=true # auto activated whenever this env is set to true on local
+      - kubeContext: ^staging-2$
+      - kubeContext: ^manabie$
+      - kubeContext: ^production$
+      - kubeContext: ^jp-partners$
+      - kubeContext: ^tokyo$
+      - kubeContext: ^gke_staging-manabie-online_asia-southeast1-b_staging-2$
+      - kubeContext: ^gke_student-coach-e1e95_asia-southeast1_manabie$
+      - kubeContext: ^gke_student-coach-e1e95_asia-northeast1_jp-partners$
+      - kubeContext: ^gke_student-coach-e1e95_asia-northeast1_tokyo$
+    deploy:
+      helm:
+        releases:
+          - name: prometheus
+            namespace: monitoring
+            createNamespace: true
+            chartPath: deployments/helm/platforms/monitoring/prometheus/prometheus-22.3.2.tgz
+            skipBuildDependencies: true
+            wait: false
+          - name: opentelemetry-collector
+            namespace: monitoring
+            createNamespace: true
+            chartPath: deployments/helm/platforms/monitoring/opentelemetry-collector/opentelemetry-collector-0.30.0.tgz
+            skipBuildDependencies: true
+            wait: true
+          - name: jaeger-all-in-one
+            namespace: monitoring
+            createNamespace: true
+            chartPath: deployments/helm/platforms/monitoring/jaeger-all-in-one
+            skipBuildDependencies: true
+            wait: true
+          - name: kiali
+            chartPath: deployments/helm/platforms/monitoring/kiali-server
+            namespace: istio-system
+            createNamespace: true
+            skipBuildDependencies: true
+            wait: false
+          - name: thanos
+            namespace: monitoring
+            createNamespace: true
+            chartPath: deployments/helm/platforms/monitoring/thanos
+            wait: true
+            skipBuildDependencies: true
+          - name: grafana
+            chartPath: deployments/helm/platforms/monitoring/grafana
+            namespace: monitoring
+            createNamespace: true
+            wait: true
+            skipBuildDependencies: true
+          - name: oncall
+            chartPath: deployments/helm/platforms/monitoring/oncall/oncall-1.3.26.tgz
+            namespace: monitoring
+            createNamespace: true
+            skipBuildDependencies: true
+            wait: false
+
+    patches:
+      # patch Prometheus deployment
+      - op: add
+        path: /deploy/helm/releases/0/valuesFiles
+        value:
+          - deployments/helm/platforms/monitoring/prometheus/values.yaml
+          - deployments/helm/platforms/monitoring/prometheus/local-values.yaml
+      # patch OpenTelemetry deployment
+      - op: add
+        path: /deploy/helm/releases/1/valuesFiles
+        value:
+          - deployments/helm/platforms/monitoring/opentelemetry-collector/values.yaml
+      # patch jaeger-all-in-one deployment
+      - op: add
+        path: /deploy/helm/releases/2/setValues
+        value:
+          persistence.storageClassName: standard
+      # patch Thanos deployment
+      - op: add
+        path: /deploy/helm/releases/3/valuesFiles
+        value:
+          - deployments/helm/platforms/monitoring/thanos/local-values.yaml
+      # patch Oncall deployment
+      - op: add
+        path: /deploy/helm/releases/6/valuesFiles
+        value:
+          - deployments/helm/platforms/monitoring/oncall/values.yaml
+
+  - name: staging-2
+    activation:
+      - kubeContext: ^staging-2$
+      - kubeContext: ^gke_staging-manabie-online_asia-southeast1-b_staging-2$
+    patches:
+      # patch Prometheus deployment
+      - op: add
+        path: /deploy/helm/releases/0/valuesFiles
+        value:
+          - deployments/helm/platforms/monitoring/prometheus/values.yaml
+          - deployments/helm/platforms/monitoring/prometheus/stag-values.yaml
+      # patch OpenTelemetry deployment
+      - op: add
+        path: /deploy/helm/releases/1/valuesFiles
+        value:
+          - deployments/helm/platforms/monitoring/opentelemetry-collector/values.yaml
+      # patch jaeger-all-in-one deployment
+      - op: add
+        path: /deploy/helm/releases/2/setValues
+        value:
+          persistence.storageClassName: premium-rwo
+      # patch kiali-server deployment
+      - op: add
+        path: /deploy/helm/releases/3/valuesFiles
+        value:
+          - deployments/helm/platforms/monitoring/kiali-server/stag-values.yaml
+      # remove Grafana oncall deployment for Staging cluster
+      - op: remove
+        path: /deploy/helm/releases/6
+      # remove Grafana deployment for Staging cluster
+      - op: remove
+        path: /deploy/helm/releases/5
+      # remove Thanos deployment for staging cluster
+      - op: remove
+        path: /deploy/helm/releases/4
+
+  - name: manabie
+    activation:
+      - kubeContext: ^manabie$
+      - kubeContext: ^gke_student-coach-e1e95_asia-southeast1_manabie$
+    patches:
+      # patch Thanos deployment
+      - op: add
+        path: /deploy/helm/releases/4/valuesFiles
+        value:
+          - deployments/helm/platforms/monitoring/thanos/production-values.yaml
+      # patch Grafana deployment
+      - op: add
+        path: /deploy/helm/releases/5/valuesFiles
+        value:
+          - deployments/helm/platforms/monitoring/grafana/values.yaml
+          - deployments/helm/platforms/monitoring/grafana/production-values.yaml
+      - op: add
+        path: /deploy/helm/releases/6/valuesFiles
+        value:
+          - deployments/helm/platforms/monitoring/oncall/production-values.yaml
+      # remove Kiali server deployment for Manabie cluster
+      - op: remove
+        path: /deploy/helm/releases/3
+      # remove Prometheus deployment for Manabie cluster
+      - op: remove
+        path: /deploy/helm/releases/0
+
+  - name: jp-partners
+    activation:
+      - kubeContext: ^jp-partners$
+      - kubeContext: ^gke_student-coach-e1e95_asia-northeast1_jp-partners$
+    patches:
+      # patch Prometheus deployment
+      - op: add
+        path: /deploy/helm/releases/0/valuesFiles
+        value:
+          - deployments/helm/platforms/monitoring/prometheus/values.yaml
+          - deployments/helm/platforms/monitoring/prometheus/prod-values.yaml
+          - deployments/helm/platforms/monitoring/prometheus/jp-partners-values.yaml
+      # patch OpenTelemetry deployment
+      - op: add
+        path: /deploy/helm/releases/1/valuesFiles
+        value:
+          - deployments/helm/platforms/monitoring/opentelemetry-collector/values.yaml
+      # patch jaeger-all-in-one deployment
+      - op: add
+        path: /deploy/helm/releases/2/setValues
+        value:
+          persistence.size: 15Gi
+          persistence.storageClassName: premium-rwo
+      # patch kiali-server deployment
+      - op: add
+        path: /deploy/helm/releases/3/valuesFiles
+        value:
+          - deployments/helm/platforms/monitoring/kiali-server/jp-partners-values.yaml
+      # remove Grafana oncall deployment for Staging cluster
+      - op: remove
+        path: /deploy/helm/releases/6
+      # remove Grafana deployment for jp-partners cluster
+      - op: remove
+        path: /deploy/helm/releases/5
+      # remove Thanos deployment for jp-partners cluster
+      - op: remove
+        path: /deploy/helm/releases/4
+
+  - name: tokyo
+    activation:
+      - kubeContext: ^tokyo$
+      - kubeContext: ^gke_student-coach-e1e95_asia-northeast1_tokyo$
+    patches:
+      # patch Prometheus deployment
+      - op: add
+        path: /deploy/helm/releases/0/valuesFiles
+        value:
+          - deployments/helm/platforms/monitoring/prometheus/values.yaml
+          - deployments/helm/platforms/monitoring/prometheus/prod-values.yaml
+          - deployments/helm/platforms/monitoring/prometheus/prod-tokyo-values.yaml
+      # patch OpenTelemetry deployment
+      - op: add
+        path: /deploy/helm/releases/1/valuesFiles
+        value:
+          - deployments/helm/platforms/monitoring/opentelemetry-collector/values.yaml
+      # patch jaeger-all-in-one deployment
+      - op: add
+        path: /deploy/helm/releases/2/setValues
+        value:
+          persistence.size: 15Gi
+          persistence.storageClassName: premium-rwo
+      # patch kiali-server deployment
+      - op: add
+        path: /deploy/helm/releases/3/valuesFiles
+        value:
+          - deployments/helm/platforms/monitoring/kiali-server/prod-tokyo-values.yaml
+      # remove Grafana oncall deployment for Staging cluster
+      - op: remove
+        path: /deploy/helm/releases/6
+      # remove Grafana deployment for jp-partners cluster
+      - op: remove
+        path: /deploy/helm/releases/5
+      # remove Thanos deployment for jp-partners cluster
+      - op: remove
+        path: /deploy/helm/releases/4
+
+  - name: local
+    activation:
+      - kubeContext: ^kind-kind$
+        env: INSTALL_MONITORING_STACKS=true
+    patches:
+      # patch Grafana deployment
+      - op: add
+        path: /deploy/helm/releases/5/valuesFiles
+        value:
+          - deployments/helm/platforms/monitoring/grafana/local-manabie-values.yaml

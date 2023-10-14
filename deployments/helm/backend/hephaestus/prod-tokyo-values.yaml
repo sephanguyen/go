@@ -1,0 +1,17 @@
+alloydbProxy:
+    alloydbConnName: projects/student-coach-e1e95/locations/asia-northeast1/clusters/prod-alloydb/instances/prod-alloydb-primary-01?port=6432
+    enabled: true
+    image:
+        repository: asia.gcr.io/alloydb-connectors/alloydb-auth-proxy
+        tag: 0.5.0
+    resources:
+        requests:
+            cpu: 5m
+            memory: 16Mi
+enableAC: true
+onDemandNodeDeployment:
+    enabled: true
+resources:
+    requests:
+        cpu: 5m
+        memory: 50Mi

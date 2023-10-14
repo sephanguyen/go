@@ -1,0 +1,92 @@
+alertmanager:
+  extraArgs:
+    web.config.file: /etc/config/web_config.yml
+  probeHeaders:
+    - name: Authorization
+      value: Basic YWRtaW46N2I0YWZkZTEzOWNiOTVlOTdjM2RjM2My
+  baseURL: https://alertmanager.prod.jprep.manabie.io
+  nodeSelector:
+    cloud.google.com/gke-nodepool: n2d-custom-2-16
+
+alertmanagerFiles:
+  web_config.yml:
+    basic_auth_users:
+      admin: $2y$12$.HxAl.H8syWLApGeO3vJb.tZ2OYsyjmSIzZoenbIk87d6MuR6bTZe
+
+server:
+  persistentVolume:
+    size: 20Gi
+    storageClass: ssd
+  extraArgs:
+    web.config.file: /etc/config/web_config.yml
+  probeHeaders:
+    - name: Authorization
+      value: Basic YWRtaW46YTA4ZDI4MmI2M2ZmYWVhZDcyODk2Mzlj
+  global:
+    external_labels:
+      gke_cluster: production
+      project: live-manabie
+  alertmanagers:
+    - static_configs:
+      - targets:
+        - prometheus-alertmanager
+      basic_auth:
+        username: admin
+        password: 7b4afde139cb95e97c3dc3c2
+  baseURL: https://prometheus.prod.jprep.manabie.io
+  tolerations:
+    - key: monitoring
+      operator: Equal
+      value: "true"
+      effect: NoSchedule
+  nodeSelector:
+    cloud.google.com/gke-nodepool: n2d-custom-2-16
+
+  extraTemplates:
+    - |
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: {{ template "prometheus.server.fullname" . }}-thanos
+        labels:
+      {{- include "prometheus.server.labels" . | nindent 4 }}
+      data:
+        bucket.yaml: |
+          type: GCS
+          config:
+            bucket: manabie-thanos
+        prometheus_http_auth.yaml: |
+          basic_auth:
+            username: admin
+            password: a08d282b63ffaead7289639c
+    - |
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: {{ template "prometheus.server.fullname" . }}-thanos
+        labels:
+      {{- include "prometheus.server.labels" . | nindent 4 }}
+      spec:
+        type: ClusterIP
+        ports:
+          - name: grpc
+            port: 10901
+            targetPort: grpc
+            protocol: TCP
+        selector:
+        {{- include "prometheus.server.matchLabels" . | nindent 4 }}
+
+serverFiles:
+  web_config.yml:
+    basic_auth_users:
+      admin: $2y$12$afu4iLzrWAyPBRpNhLKdKeJwE2LYZInkqwnF760TpXNPQX82rBuPC
+
+configmapReload:
+  prometheus:
+    enabled: true
+    extraArgs:
+      webhook-url: http://admin:a08d282b63ffaead7289639c@127.0.0.1:9090/-/reload
+  alertmanager:
+    enabled: true
+    extraArgs:
+      webhook-url: http://admin:7b4afde139cb95e97c3dc3c2@127.0.0.1:9093/-/reload

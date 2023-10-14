@@ -1,0 +1,4 @@
+- permissionPrefix: lesson.lessons
+  permissions:
+    postgres: []
+    hasura: []

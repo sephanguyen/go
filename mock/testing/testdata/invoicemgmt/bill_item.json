@@ -1,0 +1,313 @@
+{
+	"schema": [
+		{
+			"column_name": "adjustment_price",
+			"data_type": "numeric",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "bill_item_sequence_number",
+			"data_type": "integer",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "bill_type",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "billing_approval_status",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "billing_date",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "billing_from",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "billing_item_description",
+			"data_type": "jsonb",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "billing_ratio_denominator",
+			"data_type": "integer",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "billing_ratio_numerator",
+			"data_type": "integer",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "billing_schedule_period_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "billing_status",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "billing_to",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "discount_amount",
+			"data_type": "numeric",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "discount_amount_type",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "discount_amount_value",
+			"data_type": "numeric",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "discount_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "final_price",
+			"data_type": "numeric",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "is_latest_bill_item",
+			"data_type": "boolean",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "is_reviewed",
+			"data_type": "boolean",
+			"column_default": "false",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "location_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "location_name",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "old_price",
+			"data_type": "numeric",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "order_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "previous_bill_item_sequence_number",
+			"data_type": "integer",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "previous_bill_item_status",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "price",
+			"data_type": "numeric",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "product_description",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "product_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "product_pricing",
+			"data_type": "integer",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "raw_discount_amount",
+			"data_type": "numeric",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "reference",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "student_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "student_product_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "tax_amount",
+			"data_type": "numeric",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "tax_category",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "tax_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "tax_percentage",
+			"data_type": "integer",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "bill_item",
+			"policyname": "rls_bill_item_location",
+			"qual": "(location_id IN ( SELECT p.location_id\n   FROM granted_permissions p\n  WHERE ((p.user_id = current_setting('app.user_id'::text)) AND (p.permission_id = ( SELECT p2.permission_id\n           FROM permission p2\n          WHERE ((p2.permission_name = 'payment.bill_item.read'::text) AND (p2.resource_path = current_setting('permission.resource_path'::text))))))))",
+			"with_check": "(location_id IN ( SELECT p.location_id\n   FROM granted_permissions p\n  WHERE ((p.user_id = current_setting('app.user_id'::text)) AND (p.permission_id = ( SELECT p2.permission_id\n           FROM permission p2\n          WHERE ((p2.permission_name = 'payment.bill_item.write'::text) AND (p2.resource_path = current_setting('permission.resource_path'::text))))))))",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "bill_item",
+			"policyname": "rls_bill_item_restrictive",
+			"qual": "permission_check(resource_path, 'bill_item'::text)",
+			"with_check": "permission_check(resource_path, 'bill_item'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "bill_item_product_pk",
+			"column_name": "bill_item_sequence_number",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "bill_item_product_pk",
+			"column_name": "order_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "bill_item_sequence_number_resource_path_unique",
+			"column_name": "bill_item_sequence_number",
+			"constraint_type": "UNIQUE"
+		},
+		{
+			"constraint_name": "bill_item_sequence_number_resource_path_unique",
+			"column_name": "resource_path",
+			"constraint_type": "UNIQUE"
+		}
+	],
+	"table_name": "bill_item",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

@@ -1,0 +1,132 @@
+suite: fatima hasura deployment yaml file
+templates:
+  - charts/fatima/templates/app.yaml
+values:
+  - ../charts/fatima/values.yaml
+  - ../values.yaml
+  - ../local-manabie-values.yaml
+  - ../../platforms/gateway/local-manabie-values.yaml
+tests:
+  - it: First template should be hasura-configmaps
+    set:
+      global.fatima.enabled: true
+      global.fatima.sops.enabled: true
+      global.environment: local
+      global.vendor: manabie
+      global.image.repository: local
+      fatima.image.tag: v1
+      fatima.service.port: 5450
+      global.sqlProxy.enabled: true
+    documentIndex: 9
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - isNotNull:
+          path: data.[allow_list.yaml]
+      - isNotNull:
+          path: data.[actions.yaml]
+  - it: 2nd template should be hasura-deployment
+    set:
+      global.fatima.enabled: true
+      global.fatima.sops.enabled: true
+      global.environment: local
+      global.vendor: manabie
+      global.image.repository: local
+      fatima.image.tag: v1
+      fatima.service.port: 5450
+      global.sqlProxy.enabled: true
+    documentIndex: 10
+    asserts:
+      - isKind:
+          of: Deployment
+      - equal:
+          path: spec.template.spec.initContainers[0].name
+          value: wait-for-shamir
+      # metadata
+      - equal:
+          path: spec.template.metadata.labels.[app.kubernetes.io/name]
+          value: "fatima-hasura"
+
+      # containers
+      - equal:
+          path: spec.template.spec.containers[0].name
+          value: hasura
+      - contains:
+          path: spec.template.spec.containers[0].ports
+          content:
+            name: http
+            containerPort: 8080
+            protocol: TCP
+      # volumes
+      - equal:
+          path: spec.template.spec.volumes[0].name
+          value: hasura-secrets-decrypted-volume
+      - equal:
+          path: spec.template.spec.volumes[1].configMap.name
+          value: fatima-hasura-metadata
+
+      #affinity
+      - contains:
+          path: spec.template.spec.affinity.nodeAffinity.preferredDuringSchedulingIgnoredDuringExecution
+          content:
+            weight: 10
+            preference:
+              matchExpressions:
+              - key: cloud.google.com/gke-spot
+                operator: In
+                values:
+                - "true"
+      - contains:
+          path: spec.template.spec.affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution
+          content:
+            weight: 100
+            podAffinityTerm:
+              labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: fatima-hasura
+              topologyKey: kubernetes.io/hostname
+      - contains:
+          path: spec.template.spec.tolerations
+          content:
+            effect: NoSchedule
+            key: "cloud.google.com/gke-spot"
+            operator: Exists
+
+  - it: 3rd template should be hasura-pdb
+    set:
+      global.fatima.enabled: true
+      global.fatima.sops.enabled: true
+      global.environment: local
+      global.vendor: manabie
+      global.image.repository: local
+      fatima.image.tag: v1
+      fatima.service.port: 5450
+      global.sqlProxy.enabled: true
+    documentIndex: 11
+    asserts:
+      - isKind:
+          of: PodDisruptionBudget
+      - equal:
+          path: spec.maxUnavailable
+          value: 1
+  - it: 4th template should be hasura-service
+    set:
+      global.fatima.enabled: true
+      global.fatima.sops.enabled: true
+      global.environment: local
+      global.vendor: manabie
+      global.image.repository: local
+      fatima.image.tag: v1
+      fatima.service.port: 5450
+      global.sqlProxy.enabled: true
+    documentIndex: 12
+    asserts:
+      - isKind:
+          of: Service
+      - contains:
+          path: spec.ports
+          content:
+            name: http
+            protocol: TCP
+            targetPort: http
+            port: 8080

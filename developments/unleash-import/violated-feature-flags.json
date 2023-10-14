@@ -1,0 +1,1024 @@
+{
+  "manabie": {
+    "Architecture_MasterManagement_BackOffice_EnableExportMasterData": {
+      "name": "Architecture_MasterManagement_BackOffice_EnableExportMasterData",
+      "description": "A feature flag to enable exporting master data (LT-21540)",
+      "type": "release",
+      "stale": false,
+      "variants": [],
+      "enabled": true,
+      "strategies": [
+        {
+          "name": "strategy_organization",
+          "parameters": {
+            "organizations": "-2147483635,-2147483639,-2147483628,-2147483630,-2147483629,-2147483624,-2147483623"
+          },
+          "constraints": []
+        },
+        {
+          "name": "strategy_environment",
+          "parameters": {
+            "environments": "stag,uat"
+          },
+          "constraints": []
+        }
+      ]
+    },
+    "Architecture_BackOffice_LowCode_Master_Data_Import": {
+      "name": "Architecture_BackOffice_LowCode_Master_Data_Import",
+      "description": "A feature flag to enable apply lowcode for master data import (LT-37941)",
+      "type": "release",
+      "stale": false,
+      "variants": [],
+      "enabled": true,
+      "strategies": [
+        {
+          "name": "strategy_organization",
+          "parameters": {
+            "organizations": "-2147483648,-2147483643,-2147483642,-2147483640,-2147483639,-2147483638,-2147483637,-2147483635,-2147483634,-2147483633,-2147483632,-2147483631,-2147483630,-2147483629,-2147483628,-2147483627,-2147483626,-2147483625,-2147483624,-2147483623,-2147483622"
+          },
+          "constraints": []
+        },
+        {
+          "name": "strategy_environment",
+          "parameters": {
+            "environments": "stag,uat"
+          },
+          "constraints": []
+        }
+      ]
+    },
+    "Architecture_BACKEND_MasterData_Course_TeachingMethod": {
+      "name": "Architecture_BACKEND_MasterData_Course_TeachingMethod",
+      "description": "A feature flag to add teaching_method to master data import export course (LT-43174)",
+      "type": "release",
+      "stale": false,
+      "variants": [],
+      "enabled": true,
+      "strategies": [
+        {
+          "name": "strategy_organization",
+          "parameters": {
+            "organizations": "-2147483635,-2147483642,-2147483639,-2147483623,-2147483628"
+          },
+          "constraints": []
+        },
+        {
+          "name": "strategy_environment",
+          "parameters": {
+            "environments": "stag,uat"
+          },
+          "constraints": []
+        }
+      ]
+    },
+    "Lesson_Course_BackOffice_TeachingMethod": {
+      "name": "Lesson_Course_BackOffice_TeachingMethod",
+      "description": "A feature flag to use teaching method in course page (LT-13371)",
+      "type": "release",
+      "stale": false,
+      "variants": [],
+      "enabled": true,
+      "strategies": [
+        {
+          "name": "strategy_organization",
+          "parameters": {
+            "organizations": "-2147483635,-2147483642,-2147483639,-2147483623,-2147483628"
+          },
+          "constraints": []
+        },
+        {
+          "name": "strategy_environment",
+          "parameters": {
+            "environments": "stag,uat"
+          },
+          "constraints": []
+        }
+      ]
+    },
+    "Lesson_LessonManagement_BackOffice_RecurringSlotTab": {
+      "name": "Lesson_LessonManagement_BackOffice_RecurringSlotTab",
+      "description": "A feature flag to enable recurring/slot tab in assign student list(LT-21190)",
+      "type": "release",
+      "stale": false,
+      "variants": [],
+      "enabled": true,
+      "strategies": [
+        {
+          "name": "strategy_organization",
+          "parameters": {
+            "organizations": "-2147483635,-2147483642,-2147483639,-2147483628"
+          },
+          "constraints": []
+        },
+        {
+          "name": "strategy_environment",
+          "parameters": {
+            "environments": "stag,uat"
+          },
+          "constraints": []
+        }
+      ]
+    },
+    "Lesson_LessonManagement_BackOffice_FilterByAttendanceStatus": {
+      "name": "Lesson_LessonManagement_BackOffice_FilterByAttendanceStatus",
+      "description": "A feature flag to enable filter Student by Attendance Status (LT-44005)",
+      "type": "release",
+      "stale": false,
+      "variants": [],
+      "enabled": true,
+      "strategies": [
+        {
+          "name": "strategy_organization",
+          "parameters": {
+            "organizations": "-2147483623,-2147483635,-2147483642"
+          },
+          "constraints": []
+        },
+        {
+          "name": "strategy_environment",
+          "parameters": {
+            "environments": "stag,uat"
+          },
+          "constraints": []
+        }
+      ]
+    },
+    "Lesson_LessonManagement_FilterAttendanceListByCurrentYear": {
+      "name": "Lesson_LessonManagement_FilterAttendanceListByCurrentYear",
+      "description": "A feature flag to enable filter attendance list by current academic year (LT-46187)",
+      "type": "release",
+      "stale": false,
+      "variants": [],
+      "enabled": true,
+      "strategies": [
+        {
+          "name": "strategy_organization",
+          "parameters": {
+            "organizations": "-2147483623,-2147483635,-2147483642"
+          },
+          "constraints": []
+        },
+        {
+          "name": "strategy_environment",
+          "parameters": {
+            "environments": "stag,uat"
+          },
+          "constraints": []
+        }
+      ]
+    },
+    "Payment_MasterManagement_BackOffice_MasterData": {
+      "name": "Payment_MasterManagement_BackOffice_MasterData",
+      "description": "A feature flag to show master management menu item (LT-14055),(LT-18080)",
+      "type": "release",
+      "stale": false,
+      "variants": [],
+      "enabled": true,
+      "strategies": [
+        {
+          "name": "strategy_organization",
+          "parameters": {
+            "organizations": "-2147483635,-2147483639,-2147483628,-2147483623"
+          },
+          "constraints": []
+        },
+        {
+          "name": "strategy_environment",
+          "parameters": {
+            "environments": "stag,uat,prod"
+          },
+          "constraints": []
+        }
+      ]
+    },
+    "Payment_MasterManagement_BackOffice_MasterDataImportsSelections": {
+      "name": "Payment_MasterManagement_BackOffice_MasterDataImportsSelections",
+      "description": "A feature flag to show master management imports selections for Order Management Entities (LT-20372)",
+      "type": "release",
+      "stale": false,
+      "variants": [],
+      "enabled": true,
+      "strategies": [
+        {
+          "name": "strategy_organization",
+          "parameters": {
+            "organizations": "-2147483635,-2147483639,-2147483628,-2147483623"
+          },
+          "constraints": []
+        },
+        {
+          "name": "strategy_environment",
+          "parameters": {
+            "environments": "stag,uat"
+          },
+          "constraints": []
+        }
+      ]
+    },
+    "Payment_OrderManagement_BackOffice_BillingTab": {
+      "name": "Payment_OrderManagement_BackOffice_BillingTab",
+      "description": "A feature flag to show Billing Tab in Student Detail",
+      "type": "release",
+      "stale": false,
+      "variants": [],
+      "enabled": true,
+      "strategies": [
+        {
+          "name": "strategy_organization",
+          "parameters": {
+            "organizations": "-2147483635,-2147483639,-2147483628,-2147483623"
+          },
+          "constraints": []
+        },
+        {
+          "name": "strategy_environment",
+          "parameters": {
+            "environments": "stag,uat"
+          },
+          "constraints": []
+        }
+      ]
+    },
+    "Payment_OrderManagement_BackOffice_BulkOrder": {
+      "name": "Payment_OrderManagement_BackOffice_BulkOrder",
+      "description": "A feature flag to enable Bulk Order feature (LT-16358)",
+      "type": "release",
+      "stale": false,
+      "variants": [],
+      "enabled": true,
+      "strategies": [
+        {
+          "name": "strategy_organization",
+          "parameters": {
+            "organizations": "-2147483635,-2147483639,-2147483628,-2147483623"
+          },
+          "constraints": []
+        },
+        {
+          "name": "strategy_environment",
+          "parameters": {
+            "environments": "stag,uat"
+          },
+          "constraints": []
+        }
+      ]
+    },
+    "Payment_OrderManagement_BackOffice_CreateCustomBilling": {
+      "name": "Payment_OrderManagement_BackOffice_CreateCustomBilling",
+      "description": "A feature flag to enable dropdown option to open Create Custom Billing dialog in Student details (LT-17027)",
+      "type": "release",
+      "stale": false,
+      "variants": [],
+      "enabled": true,
+      "strategies": [
+        {
+          "name": "strategy_organization",
+          "parameters": {
+            "organizations": "-2147483635,-2147483639,-2147483628,-2147483623"
+          },
+          "constraints": []
+        },
+        {
+          "name": "strategy_environment",
+          "parameters": {
+            "environments": "stag,uat"
+          },
+          "constraints": []
+        }
+      ]
+    },
+    "Payment_OrderManagement_BackOffice_CreateEnrollment": {
+      "name": "Payment_OrderManagement_BackOffice_CreateEnrollment",
+      "description": "A feature flag to enable dropdown option to open Create Enrollment dialog in Student details (LT-14745)",
+      "type": "release",
+      "stale": false,
+      "variants": [],
+      "enabled": true,
+      "strategies": [
+        {
+          "name": "strategy_organization",
+          "parameters": {
+            "organizations": "-2147483635,-2147483639,-2147483628,-2147483623"
+          },
+          "constraints": []
+        },
+        {
+          "name": "strategy_environment",
+          "parameters": {
+            "environments": "stag,uat"
+          },
+          "constraints": []
+        }
+      ]
+    },
+    "Payment_OrderManagement_BackOffice_CreateOrder": {
+      "name": "Payment_OrderManagement_BackOffice_CreateOrder",
+      "description": "A feature flag to enable dropdown option to open Create Order dialog in Student details (LT-10595)",
+      "type": "release",
+      "stale": false,
+      "variants": [],
+      "enabled": true,
+      "strategies": [
+        {
+          "name": "strategy_organization",
+          "parameters": {
+            "organizations": "-2147483635,-2147483639,-2147483628,-2147483623"
+          },
+          "constraints": []
+        },
+        {
+          "name": "strategy_environment",
+          "parameters": {
+            "environments": "stag,uat"
+          },
+          "constraints": []
+        }
+      ]
+    },
+    "Payment_OrderManagement_BackOffice_OrderList": {
+      "name": "Payment_OrderManagement_BackOffice_OrderList",
+      "description": "A feature flag to show order management order list (LT-10204)",
+      "type": "release",
+      "stale": false,
+      "variants": [],
+      "enabled": true,
+      "strategies": [
+        {
+          "name": "strategy_organization",
+          "parameters": {
+            "organizations": "-2147483635,-2147483639,-2147483628,-2147483623"
+          },
+          "constraints": []
+        },
+        {
+          "name": "strategy_environment",
+          "parameters": {
+            "environments": "stag,uat"
+          },
+          "constraints": []
+        }
+      ]
+    },
+    "Payment_OrderManagement_BackOffice_UpdateOrder": {
+      "name": "Payment_OrderManagement_BackOffice_UpdateOrder",
+      "description": "A feature flag to enable action option to open Update Order dialog in Student Billing Page (LT-15543)",
+      "type": "release",
+      "stale": false,
+      "variants": [],
+      "enabled": true,
+      "strategies": [
+        {
+          "name": "strategy_organization",
+          "parameters": {
+            "organizations": "-2147483635,-2147483639,-2147483628,-2147483623"
+          },
+          "constraints": []
+        },
+        {
+          "name": "strategy_environment",
+          "parameters": {
+            "environments": "stag,uat"
+          },
+          "constraints": []
+        }
+      ]
+    },
+    "Payment_OrderManagement_BackOffice_VoidOrder": {
+      "name": "Payment_OrderManagement_BackOffice_VoidOrder",
+      "description": "A feature flag to show Menu Item Panel in Order details to void an order (LT-17291)",
+      "type": "release",
+      "stale": false,
+      "variants": [],
+      "enabled": true,
+      "strategies": [
+        {
+          "name": "strategy_organization",
+          "parameters": {
+            "organizations": "-2147483635,-2147483639,-2147483628,-2147483623"
+          },
+          "constraints": []
+        },
+        {
+          "name": "strategy_environment",
+          "parameters": {
+            "environments": "stag,uat"
+          },
+          "constraints": []
+        }
+      ]
+    },
+    "Payment_OrderManagement_BackOffice_Overview_UI_Mode": {
+      "name": "Payment_OrderManagement_BackOffice_Overview_UI_Mode",
+      "description": "A feature flag to show overview UI mode (LT-26157)",
+      "type": "release",
+      "stale": false,
+      "variants": [],
+      "enabled": true,
+      "strategies": [
+        {
+          "name": "strategy_organization",
+          "parameters": {
+            "organizations": "-2147483635,-2147483639,-2147483628,-2147483623"
+          },
+          "constraints": []
+        },
+        {
+          "name": "strategy_environment",
+          "parameters": {
+            "environments": "stag,uat"
+          },
+          "constraints": []
+        }
+      ]
+    },
+    "Payment_OrderManagement_BackOffice_Reviewed_Flag": {
+      "name": "Payment_OrderManagement_BackOffice_Reviewed_Flag",
+      "description": "A feature flag to show reviewed flag (LT-17899)",
+      "type": "release",
+      "stale": false,
+      "variants": [],
+      "enabled": true,
+      "strategies": [
+        {
+          "name": "strategy_organization",
+          "parameters": {
+            "organizations": "-2147483635,-2147483639,-2147483628"
+          },
+          "constraints": []
+        },
+        {
+          "name": "strategy_environment",
+          "parameters": {
+            "environments": "stag,uat"
+          },
+          "constraints": []
+        }
+      ]
+    },
+    "Payment_OrderManagement_BackOffice_SecurityFilter": {
+      "name": "Payment_OrderManagement_BackOffice_SecurityFilter",
+      "description": "A feature flag to apply security filter in Order Management(LT-31708)",
+      "type": "release",
+      "stale": false,
+      "variants": [],
+      "enabled": true,
+      "strategies": [
+        {
+          "name": "strategy_organization",
+          "parameters": {
+            "organizations": "-2147483635,-2147483639,-2147483628,-2147483623"
+          },
+          "constraints": []
+        },
+        {
+          "name": "strategy_environment",
+          "parameters": {
+            "environments": "stag,uat"
+          },
+          "constraints": []
+        }
+      ]
+    },
+    "Payment_OrderManagement_BackOffice_LinkClassManagement": {
+      "name": "Payment_OrderManagement_BackOffice_LinkClassManagement",
+      "description": "A feature flag to enable link from order details to register class management in Order Management(LT-33361)",
+      "type": "release",
+      "stale": false,
+      "variants": [],
+      "enabled": true,
+      "strategies": [
+        {
+          "name": "strategy_organization",
+          "parameters": {
+            "organizations": "-2147483635,-2147483639,-2147483628,-2147483623"
+          },
+          "constraints": []
+        },
+        {
+          "name": "strategy_environment",
+          "parameters": {
+            "environments": "stag,uat"
+          },
+          "constraints": []
+        }
+      ]
+    },
+    "Payment_OrderManagement_BackOffice_Logo_In_Preview_Enrollment_Form": {
+      "name": "Payment_OrderManagement_BackOffice_Logo_In_Preview_Enrollment_Form",
+      "description": "A feature flag to enable to show company logo in preview enrollment form (LT-38074)",
+      "type": "release",
+      "stale": false,
+      "variants": [],
+      "enabled": true,
+      "strategies": [
+        {
+          "name": "strategy_organization",
+          "parameters": {
+            "organizations": "-2147483635"
+          },
+          "constraints": []
+        },
+        {
+          "name": "strategy_environment",
+          "parameters": {
+            "environments": "stag,uat"
+          },
+          "constraints": []
+        }
+      ]
+    },
+    "Payment_StudentCourse_BackOffice_ClassManagementByArch": {
+      "name": "Payment_StudentCourse_BackOffice_ClassManagementByArch",
+      "description": "A feature flag to enable Class Management to support Arch team in student course page (LT-42161)",
+      "type": "release",
+      "stale": false,
+      "variants": [],
+      "enabled": true,
+      "strategies": [
+        {
+          "name": "strategy_organization",
+          "parameters": {
+            "organizations": "-2147483623,-2147483635,-2147483642"
+          },
+          "constraints": []
+        },
+        {
+          "name": "strategy_environment",
+          "parameters": {
+            "environments": "stag,uat"
+          },
+          "constraints": []
+        }
+      ]
+    },
+    "Payment_OrderManagement_BackOffice_LinkCalendarManagement": {
+      "name": "Payment_OrderManagement_BackOffice_LinkCalendarManagement",
+      "description": "A feature flag to enable link from order details to calendar management in Order Management(LT-42931)",
+      "type": "release",
+      "stale": false,
+      "variants": [],
+      "enabled": true,
+      "strategies": [
+        {
+          "name": "strategy_organization",
+          "parameters": {
+            "organizations": "-2147483635,-2147483639,-2147483628,-2147483623"
+          },
+          "constraints": []
+        },
+        {
+          "name": "strategy_environment",
+          "parameters": {
+            "environments": "stag,uat"
+          },
+          "constraints": []
+        }
+      ]
+    },
+    "Payment_OrderManagement_BackOffice_UpdateStudentStatusOrderTypeOptions": {
+      "name": "Payment_OrderManagement_BackOffice_UpdateStudentStatusOrderTypeOptions",
+      "description": "A feature flag to hide orderType option in Update Student Status at pre-prod kec-test tenant (LT-44774)",
+      "type": "release",
+      "stale": false,
+      "variants": [],
+      "enabled": true,
+      "strategies": [
+        {
+          "name": "default",
+          "parameters": {},
+          "constraints": [
+            {
+              "contextName": "env",
+              "operator": "IN",
+              "values": [
+                "prod"
+              ],
+              "inverted": false,
+              "caseInsensitive": false
+            },
+            {
+              "contextName": "org",
+              "operator": "IN",
+              "values": [
+                "-2147483623"
+              ],
+              "inverted": false,
+              "caseInsensitive": false
+            }
+          ]
+        }
+      ]
+    },
+    "Toggle_using_multiple_constraint": {
+      "name": "Toggle_using_multiple_constraint",
+      "description": "Flag to test multiple constraint",
+      "type": "release",
+      "stale": false,
+      "variants": [],
+      "enabled": true,
+      "strategies": [
+        {
+          "name": "default",
+          "parameters": {},
+          "constraints": [
+            {
+              "contextName": "env",
+              "operator": "IN",
+              "values": [
+                "prod"
+              ],
+              "inverted": false,
+              "caseInsensitive": false
+            },
+            {
+              "contextName": "org",
+              "operator": "IN",
+              "values": [
+                "-1234"
+              ],
+              "inverted": false,
+              "caseInsensitive": false
+            }
+          ]
+        }
+      ]
+    },
+    "Toggle_using_inverted_operator": {
+      "name": "Toggle_using_inverted_operator",
+      "description": "Flag to test inverted operator",
+      "type": "release",
+      "stale": false,
+      "variants": [],
+      "enabled": true,
+      "strategies": [
+        {
+          "name": "default",
+          "parameters": {},
+          "constraints": [
+            {
+              "contextName": "org",
+              "operator": "IN",
+              "values": [
+                "-1234",
+                "-7777"
+              ],
+              "inverted": true,
+              "caseInsensitive": false
+            }
+          ]
+        }
+      ]
+    },
+    "Toggle_using_strategy_and_constraint": {
+      "name": "Toggle_using_strategy_and_constraint",
+      "description": "Flag to test combination of strategies and constrains",
+      "type": "release",
+      "stale": false,
+      "variants": [],
+      "enabled": true,
+      "strategies": [
+        {
+          "name": "default",
+          "parameters": {},
+          "constraints": [
+            {
+              "contextName": "env",
+              "operator": "IN",
+              "values": [
+                "stag",
+                "uat"
+              ],
+              "inverted": false,
+              "caseInsensitive": false
+            },
+            {
+              "contextName": "org",
+              "operator": "IN",
+              "values": [
+                "-1234"
+              ],
+              "inverted": false,
+              "caseInsensitive": false
+            }
+          ]
+        },
+        {
+          "name": "default",
+          "parameters": {},
+          "constraints": [
+            {
+              "contextName": "org",
+              "operator": "IN",
+              "values": [
+                "-1234"
+              ],
+              "inverted": true,
+              "caseInsensitive": false
+            }
+          ]
+        }
+      ]
+    },
+    "Syllabus_GradeBook_BackOffice_View": {
+      "name": "Syllabus_GradeBook_BackOffice_View",
+      "description": "A feature flag to enable Grade Book (LT-25926), except AIC",
+      "type": "release",
+      "stale": false,
+      "variants": [],
+      "enabled": true,
+      "strategies": [
+        {
+          "name": "strategy_organization",
+          "parameters": {
+            "organizations": "-2147483639,-2147483640,-2147483634,-2147483642,-2147483643,-2147483644,-2147483645,-2147483648,-2147483638,-2147483637,-2147483635,-2147483633,-2147483631,-2147483630,-2147483629,-2147483646,-2147483628,-2147483627,-2147483626"
+          },
+          "constraints": []
+        }
+      ]
+    },
+    "Syllabus_GradeBook_BackOffice_PDFExport": {
+      "name": "Syllabus_GradeBook_BackOffice_PDFExport",
+      "description": "A feature flag to enable Grade Book PDF Export (LT-32862), except AIC",
+      "type": "release",
+      "stale": false,
+      "variants": [],
+      "enabled": true,
+      "strategies": [
+        {
+          "name": "strategy_organization",
+          "parameters": {
+            "organizations": "-2147483639,-2147483640,-2147483634,-2147483642,-2147483643,-2147483644,-2147483645,-2147483648,-2147483638,-2147483637,-2147483635,-2147483633,-2147483631,-2147483630,-2147483629,-2147483646,-2147483628,-2147483627,-2147483626"
+          },
+          "constraints": []
+        }
+      ]
+    },
+    "Syllabus_Quiz_GroupOfQuestions": {
+      "name": "Syllabus_Quiz_GroupOfQuestions",
+      "description": "A feature flag to enable group of questions feature (LT-22716, LT-23472,LT-37345). DO NOT enable for AIC(-2147483641) until Release Phrase 2 for AIC",
+      "type": "release",
+      "stale": false,
+      "variants": [],
+      "enabled": true,
+      "strategies": [
+        {
+          "name": "strategy_organization",
+          "parameters": {
+            "organizations": "-2147483639,-2147483640,-2147483634,-2147483642,-2147483643,-2147483644,-2147483645,-2147483648,-2147483638,-2147483637,-2147483635,-2147483633,-2147483631,-2147483630,-2147483629,-2147483646,-2147483627,-2147483626,-2147483625,-2147483624"
+          },
+          "constraints": []
+        },
+        {
+          "name": "strategy_environment",
+          "parameters": {
+            "environments": "stag,uat"
+          },
+          "constraints": []
+        }
+      ]
+    },
+    "Syllabus_StudyPlan_GradeBook_Learner_View": {
+      "name": "Syllabus_StudyPlan_GradeBook_Learner_View",
+      "description": "A feature flag to enable Grade Book on Mobile (LT-29106)",
+      "type": "release",
+      "stale": false,
+      "variants": [],
+      "enabled": true,
+      "strategies": [
+        {
+          "name": "strategy_organization",
+          "parameters": {
+            "organizations": "-2147483639,-2147483640,-2147483634,-2147483642,-2147483643,-2147483645,-2147483648,-2147483638,-2147483637,-2147483635,-2147483633,-2147483631,-2147483630,-2147483629,-2147483646,-2147483628,-2147483627,-2147483626"
+          },
+          "constraints": []
+        },
+        {
+          "name": "strategy_environment",
+          "parameters": {
+            "environments": "stag,uat"
+          },
+          "constraints": []
+        }
+      ]
+    },
+    "Syllabus_Quiz_Mobile_MetadataTagging_Phase1": {
+      "name": "Syllabus_Quiz_Mobile_MetadataTagging_Phase1",
+      "description": "A flag for apply metadata tagging phase 1(LT-30495)",
+      "type": "release",
+      "stale": false,
+      "variants": [],
+      "enabled": true,
+      "strategies": [
+        {
+          "name": "strategy_organization",
+          "parameters": {
+            "organizations": "-2147483639,-2147483640,-2147483634,-2147483642,-2147483643,-2147483644,-2147483645,-2147483648,-2147483638,-2147483637,-2147483635,-2147483633,-2147483631,-2147483630,-2147483629,-2147483646"
+          },
+          "constraints": []
+        },
+        {
+          "name": "strategy_environment",
+          "parameters": {
+            "environments": "stag,uat"
+          },
+          "constraints": []
+        }
+      ]
+    },
+    "User_Authentication_MultiTenantAuthentication": {
+      "name": "User_Authentication_MultiTenantAuthentication",
+      "description": "A feature flag to enable Multi-tenant Authentication (LT-3855)",
+      "type": "release",
+      "stale": false,
+      "variants": [],
+      "enabled": true,
+      "strategies": [
+        {
+          "name": "strategy_variant",
+          "parameters": {
+            "variants": "manabie,tokyo"
+          },
+          "constraints": []
+        },
+        {
+          "name": "strategy_organization",
+          "parameters": {
+            "organizations": "none"
+          },
+          "constraints": []
+        },
+        {
+          "name": "strategy_environment",
+          "parameters": {
+            "environments": "stag,uat"
+          },
+          "constraints": []
+        }
+      ]
+    },
+    "User_Authentication_MultiTenantRememberOrgId": {
+      "name": "User_Authentication_MultiTenantRememberOrgId",
+      "description": "A feature flag to enable Multi-tenant Authentication improvement (LT-14172)",
+      "type": "release",
+      "stale": false,
+      "variants": [],
+      "enabled": true,
+      "strategies": [
+        {
+          "name": "strategy_variant",
+          "parameters": {
+            "variants": "manabie,tokyo"
+          },
+          "constraints": []
+        },
+        {
+          "name": "strategy_organization",
+          "parameters": {
+            "organizations": "none"
+          },
+          "constraints": []
+        },
+        {
+          "name": "strategy_environment",
+          "parameters": {
+            "environments": "none"
+          },
+          "constraints": []
+        }
+      ]
+    },
+    "User_StudentManagement_BackOffice_StudentEnrollmentStatusHistory": {
+      "name": "User_StudentManagement_BackOffice_StudentEnrollmentStatusHistory",
+      "description": "A feature flag to enable student enrollment status history (LT-23581)",
+      "type": "release",
+      "stale": false,
+      "variants": [],
+      "enabled": true,
+      "strategies": [
+        {
+          "name": "strategy_organization",
+          "parameters": {
+            "organizations": "-2147483635,-2147483642,-2147483648,-2147483628"
+          },
+          "constraints": []
+        },
+        {
+          "name": "strategy_environment",
+          "parameters": {
+            "environments": "stag,uat,prod"
+          },
+          "constraints": []
+        }
+      ]
+    },
+    "User_StudentManagement_SortStudentList": {
+      "name": "User_StudentManagement_SortStudentList",
+      "description": "A feature flag to enable sorting on student list (LT-39044)",
+      "type": "release",
+      "stale": false,
+      "variants": [],
+      "enabled": true,
+      "strategies": [
+        {
+          "name": "strategy_organization",
+          "parameters": {
+            "organizations": "-2147483635,-2147483642,-2147483628,-2147483623"
+          },
+          "constraints": []
+        },
+        {
+          "name": "strategy_environment",
+          "parameters": {
+            "environments": "stag,uat"
+          },
+          "constraints": []
+        }
+      ]
+    },
+    "User_UserManagement_DecouplingUserAndAuthDB": {
+      "name": "User_UserManagement_DecouplingUserAndAuthDB",
+      "description": "A feature flag to enable switch database connection between bob and auth",
+      "type": "release",
+      "stale": false,
+      "variants": [],
+      "enabled": true,
+      "strategies": [
+        {
+          "name": "strategy_organization",
+          "parameters": {
+            "organizations": "100012"
+          },
+          "constraints": []
+        },
+        {
+          "name": "strategy_environment",
+          "parameters": {
+            "environments": "stag,uat"
+          },
+          "constraints": []
+        }
+      ]
+    },
+    "User_StudentManagement_DisableDeactivateStudent": {
+      "name": "User_StudentManagement_DisableDeactivateStudent",
+      "description": "A feature flag to disable auto update student activation (LT-44661)",
+      "type": "release",
+      "stale": false,
+      "variants": [],
+      "enabled": true,
+      "strategies": [
+        {
+          "name": "strategy_organization",
+          "parameters": {
+            "organizations": "none"
+          },
+          "constraints": []
+        }
+      ]
+    }
+  },
+  "jprep": {
+    "Platform_Unleash_EnableDemoUnleashWithEnvAndOrg": {
+      "name": "Platform_Unleash_EnableDemoUnleashWithEnvAndOrg",
+      "description": "A feature flag to demo Unleash Proxy SDK with both Environment and Organization Strategies",
+      "type": "release",
+      "stale": false,
+      "variants": [],
+      "enabled": true,
+      "strategies": [
+        {
+          "name": "strategy_organization",
+          "parameters": {
+            "organizations": "-2147483648"
+          },
+          "constraints": []
+        },
+        {
+          "name": "strategy_environment",
+          "parameters": {
+            "environments": "stag,uat"
+          },
+          "constraints": []
+        }
+      ]
+    },
+    "Platform_Unleash_EnableDemoUnleashWithOrg": {
+      "name": "Platform_Unleash_EnableDemoUnleashWithOrg",
+      "description": "A feature flag to demo Unleash Proxy SDK with Org Strategies",
+      "type": "release",
+      "stale": false,
+      "variants": [],
+      "enabled": true,
+      "strategies": [
+        {
+          "name": "strategy_organization",
+          "parameters": {
+            "organizations": "-2147483648"
+          },
+          "constraints": []
+        }
+      ]
+    }
+  }
+}

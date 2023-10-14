@@ -1,0 +1,84 @@
+table:
+  schema: public
+  name: media
+array_relationships:
+  - name: conversion_tasks
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: conversion_tasks
+        insertion_order: null
+        column_mapping:
+          resource: resource_url
+select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+        - comments
+        - converted_images
+        - created_at
+        - deleted_at
+        - media_id
+        - name
+        - resource
+        - resource_path
+        - type
+        - updated_at
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+        - comments
+        - converted_images
+        - created_at
+        - deleted_at
+        - media_id
+        - name
+        - resource
+        - resource_path
+        - type
+        - updated_at
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+        - media_id
+        - name
+        - resource
+        - comments
+        - updated_at
+        - created_at
+        - deleted_at
+        - type
+        - converted_images
+        - resource_path
+      filter:
+        deleted_at:
+          _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+        - comments
+        - converted_images
+        - media_id
+        - name
+        - resource
+        - resource_path
+        - type
+        - created_at
+        - deleted_at
+        - updated_at
+      filter:
+        deleted_at:
+          _is_null: true
+      allow_aggregations: true

@@ -1,0 +1,88 @@
+table:
+  schema: public
+  name: lesson_student_subscriptions
+object_relationships:
+  - name: course
+    using:
+      foreign_key_constraint_on: course_id
+  - name: student
+    using:
+      foreign_key_constraint_on: student_id
+array_relationships:
+  - name: lesson_student_subscription_access_paths
+    using:
+      foreign_key_constraint_on:
+        column: student_subscription_id
+        table:
+          schema: public
+          name: lesson_student_subscription_access_path
+select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+        - course_id
+        - created_at
+        - deleted_at
+        - end_at
+        - start_at
+        - student_id
+        - student_subscription_id
+        - subscription_id
+        - updated_at
+      filter:
+        deleted_at:
+          _is_null: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+        - course_id
+        - created_at
+        - deleted_at
+        - end_at
+        - start_at
+        - student_id
+        - student_subscription_id
+        - subscription_id
+        - updated_at
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+          - resource_path:
+              _eq: X-Hasura-Resource-Path
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+        - course_id
+        - created_at
+        - deleted_at
+        - end_at
+        - start_at
+        - student_id
+        - student_subscription_id
+        - subscription_id
+        - updated_at
+      filter:
+        _and:
+          - resource_path:
+              _eq: X-Hasura-Resource-Path
+          - deleted_at:
+              _is_null: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+        - course_id
+        - created_at
+        - deleted_at
+        - end_at
+        - start_at
+        - student_id
+        - student_subscription_id
+        - subscription_id
+        - updated_at
+      filter:
+        _and:
+          - resource_path:
+              _eq: X-Hasura-Resource-Path
+          - deleted_at:
+              _is_null: true

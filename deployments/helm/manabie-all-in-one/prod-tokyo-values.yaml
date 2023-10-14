@@ -1,0 +1,342 @@
+global:
+  dbPrefix: "tokyo_"
+  dbUserPrefix: "prod-"
+  serviceAccountEmailSuffix: "student-coach-e1e95"
+  replicaCount: 2
+  hasura:
+    replicaCount: 2
+    cronScheduledScaling:
+      - timezone: UTC
+        start: "0 17 * * *" # 0h00  ICT
+        end: "59 4 * * *"   # 11h59 ICT
+        desiredReplicas: "2"
+      - timezone: UTC
+        start: "0 5 * * *"  # 12h00 ICT
+        end: "59 16 * * *"  # 23h59 ICT
+        desiredReplicas: "3"
+  cloudSQLCommonInstance: "student-coach-e1e95:asia-northeast1:prod-tokyo"
+  cloudSQLLMSInstance: "student-coach-e1e95:asia-northeast1:prod-tokyo-lms-b2dc4508"
+  cloudSQLAuthInstance: "student-coach-e1e95:asia-northeast1:prod-tokyo-auth-42c5a298"
+  requirePodAntiAffinity: true
+
+  kedaScaledObjectMinReplicas: 2
+  kedaScaledObjectMaxReplicas: 3
+
+  onDemandNodeDeployment:
+    replicaCount: 1
+    cronScheduledScaling:
+      - timezone: UTC
+        start: "0 13 * * *" # 20h ICT
+        end: "0 20 * * *" # 3h  ICT
+        desiredReplicas: "0"
+      - timezone: UTC
+        start: "1 20 * * *" # 3h01  ICT
+        end: "59 12 * * *" # 19h59 ICT
+        desiredReplicas: "1"
+
+backoffice:
+  resources:
+    requests:
+      memory: 15Mi
+      cpu: 2m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "3m"
+    sidecar.istio.io/proxyMemory: "60Mi"
+  onDemandNodeDeployment:
+    enabled: true
+auth:
+  resources:
+    requests:
+      memory: 70Mi
+      cpu: 10m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "3m"
+    sidecar.istio.io/proxyMemory: "60Mi"
+  onDemandNodeDeployment:
+    enabled: true
+  hasura:
+    onDemandNodeDeployment:
+      enabled: true
+    resources:
+      requests:
+        memory: 180Mi
+        cpu: 10m
+  migrationEnabled: true
+  hasuraEnabled: true
+bob:
+  resources:
+    requests:
+      memory: 65Mi
+      cpu: 10m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "3m"
+    sidecar.istio.io/proxyMemory: "60Mi"
+  onDemandNodeDeployment:
+    enabled: true
+  hasura:
+    onDemandNodeDeployment:
+      enabled: true
+    resources:
+      requests:
+        memory: 360Mi
+        cpu: 15m
+calendar:
+  resources:
+    requests:
+      memory: 60Mi
+      cpu: 5m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "3m"
+    sidecar.istio.io/proxyMemory: "70Mi"
+  onDemandNodeDeployment:
+    enabled: true
+  hasura:
+    onDemandNodeDeployment:
+      enabled: true
+    resources:
+      requests:
+        memory: 110Mi
+        cpu: 10m
+enigma:
+  resources:
+    requests:
+      memory: 50Mi
+      cpu: 3m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "3m"
+    sidecar.istio.io/proxyMemory: "60Mi"
+  onDemandNodeDeployment:
+    enabled: true
+entryexitmgmt:
+  resources:
+    requests:
+      memory: 50Mi
+      cpu: 3m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "3m"
+    sidecar.istio.io/proxyMemory: "70Mi"
+  onDemandNodeDeployment:
+    enabled: true
+  hasura:
+    onDemandNodeDeployment:
+      enabled: true
+    resources:
+      requests:
+        memory: 130Mi
+        cpu: 3m
+eureka:
+  resources:
+    requests:
+      memory: 70Mi
+      cpu: 10m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "3m"
+    sidecar.istio.io/proxyMemory: "60Mi"
+  onDemandNodeDeployment:
+    enabled: true
+  hasura:
+    onDemandNodeDeployment:
+      enabled: true
+    resources:
+      requests:
+        memory: 180Mi
+        cpu: 10m
+fatima:
+  resources:
+    requests:
+      memory: 50Mi
+      cpu: 5m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "3m"
+    sidecar.istio.io/proxyMemory: "70Mi"
+  onDemandNodeDeployment:
+    enabled: true
+  hasura:
+    onDemandNodeDeployment:
+      enabled: true
+    resources:
+      requests:
+        memory: 170Mi
+        cpu: 5m
+hephaestus:
+  resources:
+    requests:
+      memory: 50Mi
+      cpu: 5m
+  enableAC: true
+  alloydbProxy:
+    enabled: true
+    alloydbConnName: "projects/student-coach-e1e95/locations/asia-northeast1/clusters/prod-alloydb/instances/prod-alloydb-primary-01?port=6432"
+    image:
+      repository: asia.gcr.io/alloydb-connectors/alloydb-auth-proxy
+      tag: 0.5.0
+    resources:
+      requests:
+        cpu: "5m"
+        memory: "16Mi"
+  onDemandNodeDeployment:
+    enabled: true
+invoicemgmt:
+  resources:
+    requests:
+      memory: 50Mi
+      cpu: 5m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "3m"
+    sidecar.istio.io/proxyMemory: "70Mi"
+  onDemandNodeDeployment:
+    enabled: true
+  hasura:
+    onDemandNodeDeployment:
+      enabled: true
+    resources:
+      requests:
+        memory: 160Mi
+        cpu: 5m
+learner-web:
+  resources:
+    requests:
+      memory: 15Mi
+      cpu: 3m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "5m"
+    sidecar.istio.io/proxyMemory: "60Mi"
+  onDemandNodeDeployment:
+    enabled: true
+lessonmgmt:
+  resources:
+    requests:
+      memory: 50Mi
+      cpu: 5m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "5m"
+    sidecar.istio.io/proxyMemory: "70Mi"
+  onDemandNodeDeployment:
+    enabled: true
+  hasura:
+    onDemandNodeDeployment:
+      enabled: true
+    resources:
+      requests:
+        memory: 160Mi
+        cpu: 5m
+mastermgmt:
+  resources:
+    requests:
+      memory: 45Mi
+      cpu: 5m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "5m"
+    sidecar.istio.io/proxyMemory: "70Mi"
+  onDemandNodeDeployment:
+    enabled: true
+  hasura:
+    onDemandNodeDeployment:
+      enabled: true
+    resources:
+      requests:
+        memory: 150Mi
+        cpu: 4m
+payment:
+  resources:
+    requests:
+      memory: 48Mi
+      cpu: 5m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "3m"
+    sidecar.istio.io/proxyMemory: "70Mi"
+  onDemandNodeDeployment:
+    enabled: true
+shamir:
+  resources:
+    requests:
+      memory: 50Mi
+      cpu: 3m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "3m"
+    sidecar.istio.io/proxyMemory: "60Mi"
+  onDemandNodeDeployment:
+    enabled: true
+teacher-web:
+  resources:
+    requests:
+      memory: 10Mi
+      cpu: 3m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "3m"
+    sidecar.istio.io/proxyMemory: "60Mi"
+  onDemandNodeDeployment:
+    enabled: true
+timesheet:
+  resources:
+    requests:
+      memory: 48Mi
+      cpu: 3m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "3m"
+    sidecar.istio.io/proxyMemory: "70Mi"
+  onDemandNodeDeployment:
+    enabled: true
+  hasura:
+    onDemandNodeDeployment:
+      enabled: true
+    resources:
+      requests:
+        memory: 145Mi
+        cpu: 5m
+tom:
+  resources:
+    requests:
+      memory: 128Mi
+      cpu: 30m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "20m"
+    sidecar.istio.io/proxyMemory: "60Mi"
+usermgmt:
+  resources:
+    requests:
+      memory: 50Mi
+      cpu: 5m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "3m"
+    sidecar.istio.io/proxyMemory: "70Mi"
+  onDemandNodeDeployment:
+    enabled: true
+yasuo:
+  resources:
+    requests:
+      memory: 64Mi
+      cpu: 5m
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "4m"
+    sidecar.istio.io/proxyMemory: "70Mi"
+  onDemandNodeDeployment:
+    enabled: true
+zeus:
+  resources:
+    requests:
+      memory: 48Mi
+      cpu: "7m"
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "3m"
+    sidecar.istio.io/proxyMemory: "60Mi"
+notificationmgmt:
+  resources:
+    requests:
+      memory: 100Mi
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "5m"
+    sidecar.istio.io/proxyMemory: "50Mi"
+  onDemandNodeDeployment:
+    enabled: true
+virtualclassroom:
+  resources:
+    requests:
+      cpu: 4m
+      memory: 80Mi
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "2m"
+    sidecar.istio.io/proxyMemory: "50Mi"
+    cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+  onDemandNodeDeployment:
+    enabled: true

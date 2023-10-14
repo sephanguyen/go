@@ -1,0 +1,164 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "cp-schema-registry.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "cp-schema-registry.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: cp-schema-registry
+    {{- include "cp-schema-registry.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ template "cp-schema-registry.name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "cp-schema-registry.name" . }}
+        release: {{ .Release.Name }}
+      annotations:
+        prometheus.io/port: "{{ .Values.prometheus.jmx.port }}"
+        prometheus.io/scrape: "true"
+      {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      securityContext:
+      {{- if .Values.securityContext }}
+{{ toYaml .Values.securityContext | indent 8 }}
+      {{- end}}
+      serviceAccountName: {{ include "util.serviceAccountName" . }}
+{{- if .Values.enableAC }}
+      initContainers:
+      - name: decrypt-secret
+        image: "{{ .Values.decryptorImage.repository }}:{{ .Values.decryptorImage.tag }}"
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+        - name: decrypted-secret
+          mountPath: /decrypted
+        - name: {{ include "cp-schema-registry.fullname" . }}
+          mountPath: /secrets/kafka_client_jaas.encrypted.conf
+          subPath: kafka_client_jaas.encrypted.conf
+        {{- if eq "local" .Values.environment }}
+        - name: service-credential
+          mountPath: /configs/service_credential.json
+          subPath: service_credential.json
+          readOnly: true
+        {{- end }}
+        env:
+        {{- if eq "local" .Values.environment }}
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: "/configs/service_credential.json"
+        {{- end }}
+        - name: HOSTNAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        command:
+          - /bin/bash
+          - -c
+          - |
+
+            set -e
+            echo "====="
+            sops -d --output /decrypted/kafka_client_jaas.conf /secrets/kafka_client_jaas.encrypted.conf
+{{- end }}
+      containers:
+        - name: {{ template "cp-schema-registry.name" . }}-server
+          image: "{{ .Values.image }}:{{ .Values.imageTag }}"
+          imagePullPolicy: "{{ .Values.imagePullPolicy }}"
+          ports:
+            - name: schema-registry
+              containerPort: {{ .Values.servicePort }}
+              protocol: TCP
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+          volumeMounts:
+          - name: jmx-config
+            mountPath: /monitoring
+          - name: decrypted-secret
+            mountPath: /decrypted
+{{- if .Values.enableAC }}
+          command:
+          - /bin/bash
+          - -c
+          - |
+            . /decrypted/kafka_client_jaas.conf
+            /etc/confluent/docker/run
+{{- end }}
+          env:
+          - name: SCHEMA_REGISTRY_HOST_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP
+          - name: SCHEMA_REGISTRY_LISTENERS
+            value: http://0.0.0.0:{{ .Values.servicePort }}
+          - name: SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS
+            value: {{ template "cp-schema-registry.kafka.bootstrapServers" . }}
+{{- if .Values.enableAC }}
+          - name: SCHEMA_REGISTRY_KAFKASTORE_SECURITY_PROTOCOL
+            value: "SASL_PLAINTEXT"
+          - name: SCHEMA_REGISTRY_KAFKASTORE_SASL_MECHANISM
+            value: "PLAIN"
+{{- end }}
+          - name: SCHEMA_REGISTRY_KAFKASTORE_GROUP_ID
+            value: {{ template "cp-schema-registry.groupId" . }}
+          - name: SCHEMA_REGISTRY_MASTER_ELIGIBILITY
+            value: "true"
+          - name: SCHEMA_REGISTRY_HEAP_OPTS
+            value: "{{ .Values.heapOptions }}"
+          - name: JMXHOST
+            value: "0.0.0.0"
+          - name: JMXPORT
+            value: "{{ .Values.jmx.port }}"
+          - name: EXTRA_ARGS
+            value: "-javaagent:/etc/monitoring/jmx_prometheus_javaagent.jar={{ .Values.prometheus.jmx.port }}:/monitoring/jmx-schema-registry-prometheus.yml"
+          {{ range $configName, $configValue := .Values.configurationOverrides }}
+          - name: SCHEMA_REGISTRY_{{ $configName | replace "." "_" | upper }}
+            value: {{ $configValue | quote }}
+          {{ end }}
+          {{- range $key, $value := .Values.customEnv }}
+          - name: {{ $key | quote }}
+            value: {{ $value | quote }}
+          {{- end }}
+          {{- if .Values.schemaRegistryOpts }}
+          - name: SCHEMA_REGISTRY_OPTS
+            value: "{{ .Values.schemaRegistryOpts }}"
+          {{- end }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+      {{- if .Values.prometheus.jmx.enabled }}
+      - name: jmx-config
+        configMap:
+          name: {{ template "cp-schema-registry.fullname" . }}-jmx-configmap
+      {{- end }}
+      - name: {{ include "cp-schema-registry.fullname" . }}
+        secret:
+          secretName: {{ include "cp-schema-registry.fullname" . }}
+          items:
+          - key: kafka_client_jaas.encrypted.conf
+            path: kafka_client_jaas.encrypted.conf
+      - name: decrypted-secret
+        emptyDir: {}
+{{- if eq "local" .Values.environment }}
+      - name: service-credential
+        secret:
+          secretName: {{ include "cp-schema-registry.fullname" . }}
+          items:
+          - key: service_credential.json
+            path: service_credential.json
+{{- end }}
+      {{- if .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+      {{- end }}
+      {{- with .Values }}
+      {{- $context := (mustMerge (deepCopy .) $) }}
+      affinity: {{- include "util.affinityNew" $context | nindent 8 }}
+      tolerations: {{- include "util.tolerations" $context | nindent 8 }}
+      {{- end }}

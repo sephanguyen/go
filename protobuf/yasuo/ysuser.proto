@@ -1,0 +1,95 @@
+syntax = "proto3";
+
+package manabie.yasuo;
+
+import "ysenum.proto";
+import "bob/enum.proto";
+import "google/protobuf/timestamp.proto";
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option (gogoproto.goproto_registration) = true;
+option go_package = "github.com/manabie-com/backend/pkg/genproto/yasuo;pb";
+
+message UserProfile {
+  message SchoolInfo {
+    int64 school_id = 1;
+    string school_name = 2;
+  }
+  message Role {
+    string role = 1;
+    google.protobuf.Timestamp created_at = 2;
+  }
+  message UserGroup {
+    string user_group = 1;
+    repeated Role roles = 2;
+  }
+  string id = 1;
+  string name = 2;
+  manabie.bob.Country country = 3;
+  string phone_number = 4;
+  string email = 5;
+  string avatar = 6;
+  string device_token = 7;
+  string user_group = 8;
+  google.protobuf.Timestamp created_at = 9;
+  google.protobuf.Timestamp updated_at = 10;
+  repeated int64 school_ids = 11;
+  repeated SchoolInfo schools = 12;
+  repeated UserGroup user_group_v2 = 13;
+}
+
+message GetBasicProfileRequest {}
+
+message GetBasicProfileResponse { UserProfile user = 1; }
+
+message UpdateUserProfileRequest {
+  string name = 1;
+  string phone_number = 2;
+  manabie.bob.Country country = 3;
+  string email = 4;
+  UserGroup user_group = 5;
+}
+
+message UpdateUserProfileResponse { UserProfile user = 1; }
+
+message CreateUserProfile {
+  string name = 1;
+  manabie.bob.Country country = 2;
+  string phone_number = 3;
+  string email = 4;
+  string avatar = 5;
+  string given_name = 6; // create student
+  int32 grade = 7;       // create student
+}
+
+message CreateUserRequest {
+  repeated CreateUserProfile users = 1;
+  UserGroup user_group = 2;
+  int64 school_id = 3;
+}
+
+message CreateUserResponse { repeated UserProfile users = 1; }
+
+/*
+message UpsertUserGroupRequest {
+  message UserGroupEntity {
+    string user_group = 1;
+    bool is_origin = 2;
+  }
+
+  string user_id = 1;
+  repeated UserGroupEntity user_groups = 2;
+}
+
+message UpsertUserGroupResponse {
+}
+*/
+
+service UserService {
+  rpc GetBasicProfile(GetBasicProfileRequest) returns (GetBasicProfileResponse);
+  rpc UpdateUserProfile(UpdateUserProfileRequest)
+      returns (UpdateUserProfileResponse);
+  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
+  //    rpc UpsertUserGroup(UpsertUserGroupRequest) returns
+  //    (UpsertUserGroupResponse);
+}

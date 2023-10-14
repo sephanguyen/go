@@ -1,0 +1,277 @@
+- name: allowed-queries
+  definition:
+    queries:
+      - name: E2EFeatureList
+        query: |
+          query E2EFeatureList ($limit: Int = 10, $offset: Int = 0, $instance_id: String = "", $name: String = "%%", $order_by: e2e_features_order_by! = {started_at:desc}, $status: String_comparison_exp = {}) {
+          	e2e_features(where: {instance_id:{_eq:$instance_id},_or:[{name:{_ilike:$name}},{keyword:{_ilike:$name}}],status:$status}, limit: $limit, offset: $offset, order_by: [$order_by]) {
+          		worker_id
+          		uri
+          		status
+          		tags
+          		started_at
+          		scenarios
+          		rules
+          		name
+          		media_type
+          		keyword
+          		instance_id
+          		feature_id
+          		elements
+          		ended_at
+          		duration
+          		description
+          		deleted_at
+          		data
+          		created_at
+          		children
+          		background
+          	}
+          	e2e_features_aggregate(where: {instance_id:{_eq:$instance_id},_or:[{name:{_ilike:$name}},{keyword:{_ilike:$name}}],status:$status}) {
+          		aggregate {
+          			count
+          		}
+          	}
+          }
+      - name: E2EInstanceList
+        query: |
+          query E2EInstanceList ($offset: Int = 0, $limit: Int = 10, $run_id: String = "", $feature_tags: _text = "{}", $squad_tags: _text = "{}") {
+          	get_instance_filter_by_tags(limit: $limit, offset: $offset, order_by: {created_at:desc}, args: {_feature_tag:$feature_tags,_run_id:$run_id,_squad_tags:$squad_tags}) {
+          		ended_at
+          		name
+          		instance_id
+          		started_at
+          		total_worker
+          		status
+          		duration
+          		flavor
+          		tags
+          		status_statistics
+          		flavor
+          		tags
+          		squad_tags
+          		message
+          	}
+          	get_instance_filter_by_tags_aggregate(args: {_feature_tag:$feature_tags,_run_id:$run_id,_squad_tags:$squad_tags}) {
+          		aggregate {
+          			count
+          		}
+          	}
+          }
+      - name: E2EStatisticsInstance
+        query: |
+          query E2EStatisticsInstance ($instance_id: String!) {
+          	e2e_instances_by_pk(instance_id: $instance_id) {
+          		instance_id
+          		flavor
+          		status_statistics
+          		tags
+          	}
+          }
+      - name: E2EMetadataInstance
+        query: |
+          query E2EMetadataInstance ($instance_id: String!) {
+          	e2e_instances_by_pk(instance_id: $instance_id) {
+          		instance_id
+          		metadata
+          	}
+          }
+      - name: DistinctTagsInstance
+        query: |
+          query DistinctTagsInstance {
+          	e2e_instances_aggregate(distinct_on: tags, where: {tags:{_is_null:false}}) {
+          		nodes {
+          			tags
+          		}
+          	}
+          }
+      - name: CountStatusInstance
+        query: |
+          query CountStatusInstance {
+          	e2e_instances_aggregate(where: {status:{_eq:"PASSED"}}) {
+          		aggregate {
+          			count(columns: instance_id)
+          		}
+          	}
+          }
+      - name: E2EInstanceSquadTagsList
+        query: |
+          query E2EInstanceSquadTagsList ($offset: Int = 0, $limit: Int = 50, $squad_tag: String = "%%") {
+          	e2e_instances_squad_tags(offset: $offset, limit: $limit, where: {squad_tag:{_ilike:$squad_tag}}) {
+          		squad_tag
+          	}
+          }
+      - name: E2EInstanceFeatureTagsList
+        query: |
+          query E2EInstanceFeatureTagsList ($offset: Int = 0, $limit: Int = 50, $feature_tag: String = "%%") {
+          	e2e_instances_feature_tags(offset: $offset, limit: $limit, where: {feature_tag:{_ilike:$feature_tag}}) {
+          		feature_tag
+          	}
+          }
+      - name: E2EScenarioList
+        query: |
+          query E2EScenarioList ($feature_id: String, $name: String = "%%") {
+          	e2e_scenarios(where: {feature_id:{_eq:$feature_id},_or:[{name:{_ilike:$name}},{keyword:{_ilike:$name}}]}, order_by: {started_at:asc}) {
+          		description
+          		ended_at
+          		feature_id
+          		keyword
+          		name
+          		scenario_id
+          		started_at
+          		status
+          		steps
+          		tags
+          		updated_at
+          	}
+          }
+      - name: FeatureAndScenarioTitle
+        query: |
+          query FeatureAndScenarioTitle ($feature_id: String!, $scenario_id: String!, $instance_id: String!) {
+          	e2e_instances_by_pk(instance_id: $instance_id) {
+          		instance_id
+          		name
+          	}
+          	e2e_features_by_pk(feature_id: $feature_id) {
+          		feature_id
+          		name
+          	}
+          	e2e_scenarios_by_pk(scenario_id: $scenario_id) {
+          		scenario_id
+          		name
+          	}
+          }
+      - name: E2EStepList
+        query: |
+          query E2EStepList ($scenario_id: String!, $name: String = "%%") {
+          	e2e_steps(order_by: [{index:asc},{created_at:asc}], where: {scenario_id:{_eq:$scenario_id},_or:[{name:{_ilike:$name}},{keyword:{_ilike:$name}}]}) {
+          		step_id
+          		duration
+          		embeddings
+          		ended_at
+          		index
+          		keyword
+          		message
+          		name
+          		scenario_id
+          		is_hook
+          		step_id
+          		status
+          		started_at
+          		type
+          		uri
+          		will_be_retried
+          	}
+          }
+      - name: E2EStepMessageErrors
+        query: |
+          query E2EStepMessageErrors ($instance_id: String!, $offset: Int = 0, $limit: Int = 10) {
+          	e2e_step_errors: e2e_steps(limit: $limit, offset: $offset, where: {message:{_is_null:false},e2e_scenario:{e2e_feature:{instance_id:{_eq:$instance_id}}}}) {
+          		step_id
+          		message
+          		uri
+          	}
+          }
+      - name: E2EConfigInstance
+        query: |
+          query E2EConfigInstance ($instance_id: String!) {
+          	e2e_instances_by_pk(instance_id: $instance_id) {
+          		instance_id
+          		flavor
+          		total_worker
+          	}
+          }
+      - name: FeatureIdsByScenarioIds
+        query: |
+          query FeatureIdsByScenarioIds ($scenario_id: [String!] = []) {
+          	e2e_scenarios(where: {scenario_id:{_in:$scenario_id}}) {
+          		feature_id
+          		scenario_id
+          	}
+          }
+      - name: E2EStepMessageErrorsV2
+        query: |
+          query E2EStepMessageErrorsV2 ($instance_id: String!, $offset: Int = 0, $limit: Int = 10) {
+          	e2e_step_errors: e2e_steps(limit: $limit, offset: $offset, where: {message:{_is_null:false},e2e_scenario:{e2e_feature:{instance_id:{_eq:$instance_id}}}}) {
+          		step_id
+          		message
+          		uri
+          		scenario_id
+          	}
+          }
+      - name: E2EInstancesStatusCount
+        query: |
+          query E2EInstancesStatusCount ($_squad_tags: _text, $_feature_tag: _text, $_environment: String, $_date_from: timestamptz, $_date_till: timestamptz) {
+          	count_instances_group_by_status(args: {_on_trunk:true,_feature_tag:$_feature_tag,_squad_tags:$_squad_tags,_environment:$_environment,_date_from:$_date_from,_date_till:$_date_till}) {
+          		status
+          		instances_count
+          	}
+          }
+      - name: E2EInstancesFilteredList
+        query: |
+          query E2EInstancesFilteredList ($limit: Int = 10, $offset: Int = 0, $_status: String, $_environment: String, $_squad_tags: _text, $_feature_tag: _text, $_date_from: timestamptz, $_date_till: timestamptz) {
+          	get_instances_with_filters_aggregate(args: {_on_trunk:true,_status:$_status,_environment:$_environment,_squad_tags:$_squad_tags,_feature_tag:$_feature_tag,_date_from:$_date_from,_date_till:$_date_till}) {
+          		aggregate {
+          			count(columns: instance_id)
+          		}
+          	}
+          	get_instances_with_filters(limit: $limit, offset: $offset, order_by: {created_at:desc}, args: {_on_trunk:true,_status:$_status,_environment:$_environment,_squad_tags:$_squad_tags,_feature_tag:$_feature_tag,_date_from:$_date_from,_date_till:$_date_till}) {
+          		instance_id
+          		name
+          		status
+          		status_statistics
+          		duration
+          		flavor
+          		squad_tags
+          		tags
+          		total_worker
+          		message
+          		created_at
+          		started_at
+          		ended_at
+          	}
+          }
+      - name: E2EInstancesGroupByDate
+        query: |
+          query E2EInstancesGroupByDate ($_squad_tags: _text, $_feature_tag: _text, $_environment: String, $_date_from: timestamptz, $_date_till: timestamptz, $_group_by: String) {
+          	count_instances_group_by_date(args: {_on_trunk:true,_squad_tags:$_squad_tags,_feature_tag:$_feature_tag,_environment:$_environment,_date_from:$_date_from,_date_till:$_date_till,_group_by:$_group_by}) {
+          		created_date
+          		status
+          		instances_count
+          	}
+          }
+      - name: GetE2EFeatureStatusInLastNDays
+        query: |
+          query GetE2EFeatureStatusInLastNDays ($nDay: Int, $tag: String, $onTrunk: Boolean) {
+          	get_e2e_feature_status_count_in_last_n_days(args: {_nday:$nDay,_on_trunk:$onTrunk,_tags:$tag}) {
+          		count
+          		feature_ids
+          		instance_ids
+          		name
+          		status
+          	}
+          }
+      - name: InsertMfeService
+        query: |
+          mutation InsertMfeService ($arg: mfe_services_versions_insert_input!) {
+          	insert_mfe_services_versions_one(object: $arg, on_conflict: {constraint:mfe_services_versions_pkey,update_columns:[deployed_at,rollback_at]}) {
+          		id
+          		created_at
+          		deployed_at
+          		environment
+          		link
+          		organization
+          		rollback_at
+          		service_name
+          		squad_name
+          		version
+          		type
+          	}
+          }
+      - name: InsertMfeImportmap
+        query: |
+          mutation InsertMfeImportmap ($arg: mfe_import_map_versions_insert_input!) {
+          	insert_mfe_import_map_versions_one(object: $arg, on_conflict: {constraint:mfe_import_map_versions_pkey,update_columns:[deployed_at]}) {
+          		id
+          	}
+          }

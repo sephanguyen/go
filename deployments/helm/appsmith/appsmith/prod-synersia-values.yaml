@@ -1,0 +1,4 @@
+sqlProxy:
+  enabled: false
+  dbConnName: ""
+serviceAccountEmailSuffix: synersia

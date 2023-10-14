@@ -1,0 +1,35 @@
+syntax = "proto3";
+package mastermgmt.v1;
+import "google/api/annotations.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/mastermgmt/v1;mpb";
+
+
+message GetPageInfoBySlugRequest {
+    string slug = 1;
+    string application_id = 2;
+    string branchName = 3;
+}
+
+message GetPageInfoBySlugResponse {
+    string id = 1;
+    string application_id = 2;
+}
+
+message GetSchemaNameByWorkspaceIDRequest {
+  string workspace_id = 1;
+}
+
+message GetSchemaNameByWorkspaceIDResponse {
+  string schema = 1;
+}
+
+service AppsmithService {
+  rpc GetPageInfoBySlug(GetPageInfoBySlugRequest) returns (GetPageInfoBySlugResponse);
+  rpc GetSchemaByWorkspaceID(GetSchemaNameByWorkspaceIDRequest) returns (GetSchemaNameByWorkspaceIDResponse) {
+    option (google.api.http) = {
+      get: "/mastermgmt/api/v1/proxy/schema/{workspace_id}"
+    };
+};
+}
+

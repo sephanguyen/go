@@ -1,0 +1,3 @@
+image: asia-southeast1-docker.pkg.dev/student-coach-e1e95/ci/asia.gcr.io/student-coach-e1e95/customized_cp_schema_registry
+imagePullSecrets:
+  - name: regcred

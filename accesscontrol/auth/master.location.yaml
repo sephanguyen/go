@@ -1,0 +1,41 @@
+- template: 1
+  tableName: locations
+  useCustomPolicy: true
+  postgresPolicy:
+    - name: rls_locations_location
+      for: all
+      using: |
+        location_id in (
+          select			
+            p.location_id
+          from
+                  granted_permissions p
+          where
+            p.user_id = current_setting('app.user_id')
+            and p.permission_id = (
+              select
+                p2.permission_id
+              from
+                "permission" p2
+              where
+                p2.permission_name = 'master.location.read'
+                and p2.resource_path = current_setting('permission.resource_path'))
+          )
+      withCheck: |
+        exists (
+          select			
+            true
+          from
+                  granted_permissions p
+          where
+            p.user_id = current_setting('app.user_id')
+            and p.permission_id = (
+              select
+                p2.permission_id
+              from
+                "permission" p2
+              where
+                p2.permission_name = 'master.location.write'
+                and p2.resource_path = current_setting('permission.resource_path'))
+          )
+  

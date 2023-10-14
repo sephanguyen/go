@@ -1,0 +1,9 @@
+onDemandNodeDeployment:
+    enabled: true
+podAnnotations:
+    sidecar.istio.io/proxyCPU: 3m
+    sidecar.istio.io/proxyMemory: 70Mi
+resources:
+    requests:
+        cpu: 5m
+        memory: 48Mi

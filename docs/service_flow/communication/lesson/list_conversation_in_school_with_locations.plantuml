@@ -1,0 +1,15 @@
+@startuml communication_simplified
+hide circle
+
+actor User as User order 10
+participant Postgres as Postgres order 30
+participant Tom as Tom order 20
+participant Elasticsearch as Elasticsearch order 40
+User -> Tom:  Call "ListConversationsInSchoolWithLocations"
+activate Tom
+Tom <-> Postgres: find access_paths of given location_ids in conversation_locations table
+Tom <-> Elasticsearch: use given access_paths to apply prefix search to find documents reachable using those access_paths (or operator)
+Tom <-> Postgres: build full conversation document given conversationIDs returned from Elasticsearch 
+Tom -> User: Response  "ListConversationsInSchoolWithLocations"
+deactivate Tom
+@enduml

@@ -1,0 +1,53 @@
+table:
+  schema: public
+  name: scheduler
+select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+        - end_date
+        - freq
+        - scheduler_id
+        - start_date
+      filter:
+        deleted_at:
+          _is_null: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+        - end_date
+        - freq
+        - scheduler_id
+        - start_date
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+          - resource_path:
+              _eq: X-Hasura-Resource-Path
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+        - end_date
+        - freq
+        - scheduler_id
+        - start_date
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+          - resource_path:
+              _eq: X-Hasura-Resource-Path
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+        - end_date
+        - freq
+        - scheduler_id
+        - start_date
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+          - resource_path:
+              _eq: X-Hasura-Resource-Path

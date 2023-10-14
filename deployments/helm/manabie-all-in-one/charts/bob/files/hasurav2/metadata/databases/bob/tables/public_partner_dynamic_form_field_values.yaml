@@ -1,0 +1,108 @@
+table:
+  schema: public
+  name: partner_dynamic_form_field_values
+object_relationships:
+  - name: lesson_report_detail
+    using:
+      foreign_key_constraint_on: lesson_report_detail_id
+select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+        - dynamic_form_field_value_id
+        - field_id
+        - lesson_report_detail_id
+        - created_at
+        - updated_at
+        - deleted_at
+        - value_type
+        - string_value
+        - bool_value
+        - string_array_value
+        - int_array_value
+        - string_set_value
+        - int_set_value
+        - field_render_guide
+        - resource_path
+        - int_value
+      filter:
+        _and:
+          - resource_path:
+              _eq: X-Hasura-Resource-Path
+          - deleted_at:
+              _is_null: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+        - bool_value
+        - int_array_value
+        - int_set_value
+        - int_value
+        - field_render_guide
+        - string_array_value
+        - string_set_value
+        - dynamic_form_field_value_id
+        - field_id
+        - lesson_report_detail_id
+        - resource_path
+        - string_value
+        - value_type
+        - created_at
+        - deleted_at
+        - updated_at
+      filter:
+        _and:
+          - resource_path:
+              _eq: X-Hasura-Resource-Path
+          - deleted_at:
+              _is_null: true
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+        - bool_value
+        - int_array_value
+        - int_set_value
+        - int_value
+        - field_render_guide
+        - string_array_value
+        - string_set_value
+        - dynamic_form_field_value_id
+        - field_id
+        - lesson_report_detail_id
+        - resource_path
+        - string_value
+        - value_type
+        - created_at
+        - deleted_at
+        - updated_at
+      filter:
+        _and:
+          - resource_path:
+              _eq: X-Hasura-Resource-Path
+          - deleted_at:
+              _is_null: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+        - dynamic_form_field_value_id
+        - field_id
+        - lesson_report_detail_id
+        - created_at
+        - updated_at
+        - deleted_at
+        - value_type
+        - string_value
+        - bool_value
+        - string_array_value
+        - int_array_value
+        - string_set_value
+        - int_set_value
+        - field_render_guide
+        - resource_path
+        - int_value
+      filter:
+        _and:
+          - resource_path:
+              _eq: X-Hasura-Resource-Path
+          - deleted_at:
+              _is_null: true

@@ -1,0 +1,16 @@
+{{- if or (.Capabilities.APIVersions.Has "policy/v1/PodDisruptionBudget") (.Capabilities.APIVersions.Has "policy/v1beta1/PodDisruptionBudget") }}
+{{- if .Capabilities.APIVersions.Has "policy/v1/PodDisruptionBudget" }}
+apiVersion: policy/v1
+{{- else }}
+apiVersion: policy/v1beta1
+{{- end }}
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "import-map-deployer.fullname" . }}
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "import-map-deployer.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}

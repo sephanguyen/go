@@ -1,0 +1,5 @@
+ALTER TABLE public.location_types
+DROP CONSTRAINT unique__location_type_name_resource_path;
+
+ALTER TABLE public.location_types
+DROP CONSTRAINT location_type_id_fk;

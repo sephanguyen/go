@@ -1,0 +1,32 @@
+table:
+  schema: public
+  name: hub_tours
+object_relationships:
+  - name: hub
+    using:
+      foreign_key_constraint_on: hub_id
+  - name: student
+    using:
+      foreign_key_constraint_on: student_id
+  - name: user
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: users
+        insertion_order: null
+        column_mapping:
+          student_id: user_id
+select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+        - hub_id
+        - student_id
+        - parent_phone_number
+        - status
+        - created_at
+        - updated_at
+      filter: {}
+      limit: 200
+      allow_aggregations: true

@@ -1,0 +1,88 @@
+syntax = "proto3";
+
+package tom.v1;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/tom/v1;tpb";
+import "google/protobuf/timestamp.proto";
+
+message GetStudentQuestionShouldExpiredSolvedRequest {
+  string duration = 1; // using golang time duration: 1m, 10m, 1h, 24h...
+}
+
+message GetStudentQuestionShouldExpiredSolvedResponse {
+  repeated string student_question_ids = 1;
+}
+
+service InternalService {
+  rpc GetStudentQuestionShouldExpiredSolved(
+      GetStudentQuestionShouldExpiredSolvedRequest)
+      returns (GetStudentQuestionShouldExpiredSolvedResponse) {
+    option deprecated = true;
+  };
+}
+
+message ConversationInternal {
+  message MessageSentToConversation { string conversation_id = 1; }
+
+  message ConversationCreated {
+    string conversation_id = 1;
+    string type = 2;
+  }
+
+  message ConversationUpdated {
+    string conversation_id = 1;
+  }
+
+  message MemberAddedToConversation {
+    string conversation_id = 1;
+    string member_id = 2;
+  }
+
+  message MemberRemovedFromConversation {
+    string conversation_id = 1;
+    string member_id = 2;
+  }
+
+  message ConversationsUpdated {
+    repeated string conversation_ids = 1;
+  }
+
+  oneof message {
+    MessageSentToConversation message_sent = 1;
+    ConversationCreated conversation_created = 2;
+    MemberAddedToConversation member_added = 3;
+    MemberRemovedFromConversation member_removed = 4;
+
+    // added later, so fieldnum is from 6..
+    ConversationUpdated conversation_updated = 6;
+
+    ConversationsUpdated conversations_updated = 7;
+  }
+
+  google.protobuf.Timestamp triggered_at = 5;
+}
+
+message BuildConversationDocumentRequest {
+  repeated string conversation_ids = 1;
+  repeated string user_ids = 2;
+}
+
+message BuildConversationDocumentResponse {
+  int32 total = 1;
+  int32 total_success = 2;
+}
+message ResourcePathMigration {
+  message Users {
+    string school_id = 1;
+    repeated string user_ids = 2;
+  };
+  message Lessons {
+    string school_id = 1;
+    repeated string lesson_ids = 2;
+  }
+
+  oneof message_type {
+    Lessons lessons = 1;
+    Users users = 2;
+  }
+}

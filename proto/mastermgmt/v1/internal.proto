@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package mastermgmt.v1;
+
+import "mastermgmt/v1/schedule_class.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/mastermgmt/v1;mpb";
+
+service MasterInternalService {
+    rpc GetReserveClassesByEffectiveDate(GetReserveClassesByEffectiveDateRequest) returns (GetReserveClassesByEffectiveDateResponse);
+    rpc DeleteReserveClassesByEffectiveDate(DeleteReserveClassByEffectiveDateRequest) returns (DeleteReserveClassByEffectiveDateResponse);
+}

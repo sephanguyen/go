@@ -1,0 +1,19 @@
+common:
+  grpc:
+  google_cloud_project: synersia
+  firebase_project: synersia
+  identity_platform_project: student-coach-e1e95
+jwt_applicant: prod-synersia
+issuers:
+  - issuer: manabie
+    audience: prod-synersia
+    jwks_endpoint: http://shamir:5680/.well-known/jwks.json
+  - issuer: https://securetoken.google.com/synersia
+    audience: synersia
+    jwks_endpoint: https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com
+agora:
+  app_id: e45ba4e954ae47929338c9ce89ba5cc7
+whiteboard:
+  app_id: V7mZoJt9Eeqxp_kxzbwYqQ/pKW8SEDalIkqxQ
+storage:
+  bucket: synersia-backend

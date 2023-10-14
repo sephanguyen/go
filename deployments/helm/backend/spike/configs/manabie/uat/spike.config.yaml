@@ -1,0 +1,6 @@
+common:
+  google_cloud_project: staging-manabie-online
+email_webhook:
+  receive_from_all_tenant: true
+  #receive_only_from_tenant:
+  #  - ""

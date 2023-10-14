@@ -1,0 +1,43 @@
+// this file use only for admin tool to upload csv data
+syntax = "proto3";
+
+package manabie.bob;
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option (gogoproto.goproto_registration) = true;
+option go_package = "github.com/manabie-com/backend/pkg/genproto/bob;pb";
+
+message ImportPresetStudyPlanRequest { bytes payload = 1; }
+
+message ImportPresetStudyPlanResponse {}
+
+message ImportLORequest {
+  string file_name = 1;
+  bytes payload = 2;
+}
+
+message ImportLOResponse {}
+
+message ImportTopicRequest { bytes payload = 1; }
+
+message ImportTopicResponse {}
+
+message GetClientVersionRequest {}
+
+message GetClientVersionResponse { map<string, string> versions = 1; }
+
+message LocationEntity {
+  int32 id = 1;
+  string name = 2;
+  map<int32, LocationEntity> sub = 3;
+}
+
+service MasterDataService {
+  rpc ImportPresetStudyPlan(stream ImportPresetStudyPlanRequest)
+      returns (ImportPresetStudyPlanResponse);
+  rpc ImportLO(stream ImportLORequest) returns (ImportLOResponse){option deprecated = true;};
+  rpc ImportTopic(stream ImportTopicRequest) returns (ImportTopicResponse){option deprecated = true;};
+
+  rpc GetClientVersion(GetClientVersionRequest)
+      returns (GetClientVersionResponse);
+}

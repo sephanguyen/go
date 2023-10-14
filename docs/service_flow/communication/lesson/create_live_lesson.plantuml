@@ -1,0 +1,21 @@
+@startuml communication_simplified
+hide circle
+
+actor User as User order 10
+participant NATS as NATS order 30
+participant Bob as Bob order 20
+participant Tom as Tom order 40
+User   -> Bob:  Call "LessonModifierServices.CreateLiveLesson"
+activate Bob
+Bob -> NATS: Publish "lesson_event"
+deactivate Bob
+NATS -> Tom: \
+Publish "lesson_event"\nwith "EvtLesson_CreateLessons_" \n
+activate Tom
+note right Tom
+1. Insert to table "conversations" with name is lesson name, conversation_type is CONVERSATION_LESSON
+2. Insert to table "conversation_lesson" with lesson_id
+3. Insert to table "conversation_members" with user_id in (learner_ids)
+end note
+deactivate Tom
+@enduml

@@ -1,0 +1,14 @@
+
+-- enable for 
+UPDATE internal_configuration_value 
+SET config_value = '["discount","fee","leavingReason","material","package","packageCourseMaterial","packageCourseFee","packageQuantityTypeMapping","productAccountingCategory","productCourse","productGrade","productLocation","productPrice","productDiscount","productSetting","accountingCategory","billingRatio","billingSchedule","billingSchedulePeriod","orderNotificationDate","discountTag","notificationTag","classDoOwner","courseBreakTime","courseLocationSchedule","classroomV2","zoomOwner","classroom","dayInfo","paperCountMapping","perspectiveMapping","invoice","payment","partnerConvenienceStore","partnerConvenienceStoreV2","bankMapping","invoiceSchedule","class","location","locationType","course","courseType","grades","bankBranch","bank","userTag","schoolLevel","school","schoolCourse","schoolLevelGrade","grade","subject","courseAccessPath"]'
+WHERE config_key = 'arch.master_management.enable_export' and resource_path in ('-2147483648', '-2147483635', '-2147483639', '-2147483628', '-2147483630', '-2147483629', '-2147483624', '-2147483623');
+
+UPDATE public.configuration_key 
+SET value_type = 'boolean' 
+WHERE config_key = 'architecture.course.bulk_class_allocation';
+
+
+UPDATE internal_configuration_value 
+SET config_value_type = 'boolean' 
+WHERE config_key = 'architecture.course.bulk_class_allocation';

@@ -1,0 +1,38 @@
+imagePullSecrets: []
+nameOverride: "shamir"
+fullnameOverride: "shamir"
+
+service:
+  type: ClusterIP
+  grpcPort: 5650
+  httpPort: 5680
+grpcPort: 5650
+httpPort: 5680
+
+resources:
+  requests:
+    memory: 72Mi
+
+nodeSelector: {}
+
+tolerations:
+
+affinity: {}
+affinityOverride: {}
+
+podAnnotations:
+  sidecar.istio.io/proxyCPU: "10m"
+  sidecar.istio.io/proxyMemory: "50Mi"
+  cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+
+metrics:
+  enabled: true
+  podAnnotations:
+    prometheus.io/scheme: "http"
+    prometheus.io/port: "8888"
+    prometheus.io/scrape: "true"
+
+clientVersion: "v0.30.0"
+
+pdb:
+  enabled: false

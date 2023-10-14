@@ -1,0 +1,798 @@
+# Reference: https://github.com/manabie-com/backend/blob/develop/deployments/decl/README.md
+- name: bob
+  postgresql:
+    createdb: true
+    grants:
+      - dbname: lessonmgmt
+      - dbname: eureka
+      - dbname: bob
+        grant_delete: true
+    statement_timeout:
+       enabled: true
+       timeout: 100s
+  hasura:
+    enabled: true
+  kafka:
+    enabled: true
+    grant_delete: true
+  j4:
+    allow_db_access: true # grant j4 read only access to db of this svc
+  identity_namespaces:
+    - services
+    - backend
+  iam_roles:
+    - roles/firebase.admin
+    - roles/iam.serviceAccountTokenCreator
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+  run_on_project_iam_roles:
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+    - roles/cloudprofiler.agent
+  bucket_roles:
+    manabie:
+      stag-manabie-backend:
+        - roles/storage.legacyBucketWriter
+    jprep:
+      stag-manabie-backend:
+        - roles/storage.legacyBucketWriter
+- name: calendar
+  postgresql:
+    createdb: true
+    grants:
+      - dbname: bob
+      - dbname: calendar
+      - dbname: lessonmgmt
+    statement_timeout:
+       enabled: true
+       timeout: 100s
+  kafka:
+    enabled: true
+    grant_delete: true
+  hasura:
+    enabled: true
+  identity_namespaces:
+    - services
+    - backend
+  iam_roles:
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+  run_on_project_iam_roles:
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+    - roles/cloudprofiler.agent
+- name: draft # draft is a special service for testing purposes. It is deployed only on Manabie Staging.
+  postgresql:
+    bypassrls: true
+    createdb: true
+    grants:
+      - dbname: draft
+      - dbname: bob
+        grant_delete: true
+      - dbname: calendar
+        grant_delete: true
+      - dbname: entryexitmgmt
+        grant_delete: true
+      - dbname: eureka
+        grant_delete: true
+      - dbname: fatima
+        grant_delete: true
+      - dbname: invoicemgmt
+        grant_delete: true
+      - dbname: mastermgmt
+        grant_delete: true
+      - dbname: timesheet
+        grant_delete: true
+      - dbname: tom
+        grant_delete: true
+      - dbname: lessonmgmt
+        grant_delete: true
+      - dbname: zeus
+        grant_delete: true
+    statement_timeout:
+       enabled: true
+       timeout: 600s
+  hasura:
+    v2_enabled: true
+  kafka:
+    enabled: true
+  identity_namespaces:
+    - services
+    - backend
+  iam_roles:
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+  run_on_project_iam_roles:
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+    - roles/cloudprofiler.agent
+- name: elasticsearch
+  # elasticsearch is a platform service, which does not require similar permissions
+  # compare to other normal business services.
+  # We need it here to create its service account and KMS key.
+  identity_namespaces:
+    - elastic
+  iam_roles: []
+  run_on_project_iam_roles: []
+- name: enigma
+  postgresql:
+    grants:
+      - dbname: bob
+    statement_timeout:
+       enabled: true
+       timeout: 100s
+  identity_namespaces:
+    - services
+    - backend
+  iam_roles:
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+  run_on_project_iam_roles:
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+    - roles/cloudprofiler.agent
+- name: entryexitmgmt
+  postgresql:
+    createdb: true
+    grants:
+      - dbname: bob
+        grant_delete: true
+      - dbname: entryexitmgmt
+  hasura:
+    enabled: true
+  kafka:
+    enabled: true
+    grant_delete: true
+  identity_namespaces:
+    - services
+    - backend
+  iam_roles:
+    - roles/iam.serviceAccountTokenCreator
+    - roles/storage.objectCreator
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+  run_on_project_iam_roles:
+    - roles/iam.serviceAccountTokenCreator
+    - roles/storage.objectCreator
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+    - roles/cloudprofiler.agent
+  bucket_roles:
+    manabie:
+      stag-manabie-backend:
+        - roles/storage.legacyBucketWriter
+    jprep:
+      stag-manabie-backend:
+        - roles/storage.legacyBucketWriter
+- name: eureka
+  postgresql:
+    createdb: true
+    grants:
+      - dbname: eureka
+        grant_delete: true
+    statement_timeout:
+       enabled: true
+       timeout: 300s
+  hasura:
+    enabled: true
+  kafka:
+    enabled: true
+    grant_delete: true
+  identity_namespaces:
+    - services
+    - backend
+  iam_roles:
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+  run_on_project_iam_roles:
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+    - roles/cloudprofiler.agent
+    - roles/iam.serviceAccountTokenCreator
+  bucket_roles:
+    manabie:
+      stag-manabie-backend:
+        - roles/storage.legacyBucketWriter
+    jprep:
+      stag-manabie-backend:
+        - roles/storage.legacyBucketWriter
+- name: conversationmgmt
+  postgresql:
+    grants:
+      - dbname: tom
+        grant_delete: true
+  identity_namespaces:
+    - services
+    - backend
+  iam_roles:
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+  run_on_project_iam_roles:
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+    - roles/cloudprofiler.agent
+- name: fatima
+  postgresql:
+    createdb: true
+    grants:
+      - dbname: fatima
+        grant_delete: true
+    statement_timeout:
+       enabled: true
+       timeout: 100s
+  hasura:
+    enabled: true
+  kafka:
+    enabled: true
+    grant_delete: true
+  identity_namespaces:
+    - services
+    - backend
+  iam_roles:
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+  run_on_project_iam_roles:
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+    - roles/cloudprofiler.agent
+- name: fink
+  identity_namespaces:
+    - services
+    - backend
+  iam_roles:
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+  run_on_project_iam_roles:
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+    - roles/cloudprofiler.agent
+- name: hephaestus
+  postgresql:
+    # it only access to table dbz_signals and alloydb_dbz_signals
+    grants:
+      - dbname: bob
+      - dbname: calendar
+      - dbname: entryexitmgmt
+      - dbname: eureka
+      - dbname: fatima
+      - dbname: invoicemgmt
+      - dbname: mastermgmt
+      - dbname: timesheet
+      - dbname: tom
+      - dbname: lessonmgmt
+    statement_timeout:
+       enabled: true
+       timeout: 100s
+  identity_namespaces:
+    - services
+    - backend
+  iam_roles:
+    - roles/alloydb.client
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+  run_on_project_iam_roles:
+    - roles/alloydb.client
+- name: invoicemgmt
+  postgresql:
+    createdb: true
+    grants:
+      - dbname: invoicemgmt
+        grant_delete: true
+    statement_timeout:
+       enabled: true
+       timeout: 100s
+  hasura:
+    enabled: true
+  kafka:
+    enabled: true
+    grant_delete: true
+  identity_namespaces:
+    - services
+    - backend
+  iam_roles:
+    - roles/iam.serviceAccountTokenCreator
+    - roles/storage.objectCreator
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+  run_on_project_iam_roles:
+    - roles/iam.serviceAccountTokenCreator
+    - roles/storage.objectCreator
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+    - roles/cloudprofiler.agent
+  bucket_roles:
+    manabie:
+      stag-manabie-backend:
+        - roles/storage.legacyBucketWriter
+    jprep:
+      stag-manabie-backend:
+        - roles/storage.legacyBucketWriter
+- name: j4
+  identity_namespaces:
+    - services
+    - backend
+  iam_roles:
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+  run_on_project_iam_roles:
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+- name: kafka-connect
+  # kafka-connect is a platform service, which does not require similar permissions
+  # compare to other normal business services.
+  # Its postgresql grants are instead specified by the `kafka` attributes of other services.
+  postgresql:
+    bypassrls: true
+  identity_namespaces:
+    - kafka
+    - data-warehouse
+    - services
+    - backend
+  iam_roles:
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+  run_on_project_iam_roles:
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+    - roles/bigquery.dataOwner
+- name: kafka-connect-dwh
+  # kafka-connect-dwh is a platform service, which does not require similar permissions
+  # compare to other normal business services.
+  # Its postgresql grants are instead specified by the `kafka` attributes of other services.
+  # use for only kafka of data warehouse namespace
+  postgresql:
+    bypassrls: true
+  identity_namespaces:
+    - kafka
+    - data-warehouse
+    - services
+  iam_roles:
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+  run_on_project_iam_roles:
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+    - roles/bigquery.dataOwner
+- name: lessonmgmt
+  postgresql:
+    createdb: true
+    grants:
+      - dbname: bob
+      - dbname: lessonmgmt
+    statement_timeout:
+       enabled: true
+       timeout: 100s
+  hasura:
+    enabled: true
+  kafka:
+    enabled: true
+    grant_delete: true
+  identity_namespaces:
+    - services
+    - backend
+  iam_roles:
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+  run_on_project_iam_roles:
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+    - roles/cloudprofiler.agent
+- name: mastermgmt
+  postgresql:
+    createdb: true
+    grants:
+      - dbname: bob
+      - dbname: mastermgmt
+        grant_delete: true
+    statement_timeout:
+       enabled: true
+       timeout: 100s
+  hasura:
+    enabled: true
+  kafka:
+    enabled: true
+    grant_delete: true
+  identity_namespaces:
+    - services
+    - backend
+  iam_roles:
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+  run_on_project_iam_roles:
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+    - roles/cloudprofiler.agent
+- name: nats
+  postgresql:
+    createdb: true
+  disable_iam: true
+- name: nats-jetstream
+  # nats-jetstream is a platform service, which does not require similar permissions
+  # compare to other normal business services.
+  # We need it here to create its service account and KMS key.
+  identity_namespaces:
+    - nats-jetstream
+  iam_roles: []
+  run_on_project_iam_roles: []
+- name: notificationmgmt
+  postgresql:
+    createdb: true
+    grants:
+      - dbname: bob
+      - dbname: notificationmgmt
+    statement_timeout:
+       enabled: true
+       timeout: 100s
+  kafka:
+    enabled: true
+    grant_delete: true
+  identity_namespaces:
+    - services
+    - backend
+  iam_roles:
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+    - roles/firebase.admin
+  run_on_project_iam_roles:
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+    - roles/cloudprofiler.agent
+    - roles/firebasenotifications.admin
+    - roles/firebasecloudmessaging.admin
+  bucket_roles:
+    manabie:
+      stag-manabie-backend:
+        - roles/storage.legacyBucketWriter
+    jprep:
+      stag-manabie-backend:
+        - roles/storage.legacyBucketWriter
+
+- name: spike
+  postgresql:
+    createdb: false
+    grants:
+      - dbname: notificationmgmt
+    statement_timeout:
+       enabled: true
+       timeout: 100s
+  identity_namespaces:
+    - services
+    - backend
+  iam_roles:
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+  run_on_project_iam_roles:
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+    - roles/cloudprofiler.agent
+
+- name: payment
+  postgresql:
+    grants:
+      - dbname: bob
+      - dbname: fatima
+        grant_delete: true
+    statement_timeout:
+       enabled: true
+       timeout: 100s
+  identity_namespaces:
+    - services
+    - backend
+  iam_roles:
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+  run_on_project_iam_roles:
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+    - roles/cloudprofiler.agent
+  bucket_roles:
+    manabie:
+      stag-manabie-backend:
+        - roles/storage.legacyBucketWriter
+    jprep:
+      stag-manabie-backend:
+        - roles/storage.legacyBucketWriter
+- name: shamir
+  # shamir requires access to only certain databases in `bob` service.
+  # Therefore, its postgresql grants are not specified using this service definition,
+  # but instead are specified in `postgresql_user_permissions` block in `stag-apps.hcl`.
+  postgresql:
+    createdb: true
+    bypassrls: true
+    grants:
+      - dbname: auth
+    statement_timeout:
+       enabled: true
+       timeout: 100s
+  identity_namespaces:
+    - services
+    - backend
+  iam_roles:
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+  run_on_project_iam_roles:
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+    - roles/cloudprofiler.agent
+- name: auth
+  # `shamir` will be renamed to `auth` later, so creating
+  # it here and use it for database migration first.
+  postgresql:
+    createdb: true
+    bypassrls: true
+    grants:
+      - dbname: auth
+    statement_timeout:
+       enabled: true
+       timeout: 100s
+  hasura:
+    enabled: true
+  kafka:
+    enabled: true
+    grant_delete: true
+  identity_namespaces:
+    - services
+    - backend
+  iam_roles:
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+  run_on_project_iam_roles:
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+    - roles/cloudprofiler.agent
+- name: timesheet
+  postgresql:
+    createdb: true
+    grants:
+      - dbname: timesheet
+    statement_timeout:
+       enabled: true
+       timeout: 100s
+  hasura:
+    enabled: true
+  kafka:
+    enabled: true
+    grant_delete: true
+  identity_namespaces:
+    - services
+    - backend
+  iam_roles:
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+  run_on_project_iam_roles:
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+    - roles/cloudprofiler.agent
+- name: tom
+  postgresql:
+    createdb: true
+    grants:
+      - dbname: tom
+        grant_delete: true
+    statement_timeout:
+       enabled: true
+       timeout: 100s
+  kafka:
+    enabled: true
+    grant_delete: true
+  j4:
+    allow_db_access: true
+  identity_namespaces:
+    - services
+    - backend
+  iam_roles:
+    - roles/firebase.admin
+    - roles/cloudsql.instanceUser
+    - roles/cloudsql.client
+  run_on_project_iam_roles:
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+    - roles/cloudprofiler.agent
+    - roles/firebasenotifications.admin
+    - roles/firebasecloudmessaging.admin
+- name: unleash
+  postgresql:
+    createdb: false
+    grants: [] # We customize unleash grants in <env>-apps.hcl files
+  identity_namespaces:
+    - unleash
+  iam_roles:
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+  run_on_project_iam_roles:
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+- name: usermgmt
+  postgresql:
+    grants:
+      - dbname: bob
+        grant_delete: true
+    statement_timeout:
+       enabled: true
+       timeout: 600s
+  identity_namespaces:
+    - services
+    - backend
+  iam_roles:
+    - roles/firebaseauth.admin
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+  run_on_project_iam_roles:
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+    - roles/cloudprofiler.agent
+    - projects/local.runs_on_project_id/roles/CustomRole447 # will be replaced by actual local.runs_on_project_id variable in stag-apps.hcl
+  bucket_roles:
+    manabie:
+      stag-manabie-backend:
+        - roles/storage.legacyObjectReader
+        - roles/storage.legacyBucketWriter
+- name: virtualclassroom
+  postgresql:
+    grants:
+      - dbname: bob
+      - dbname: lessonmgmt
+    statement_timeout:
+       enabled: true
+       timeout: 100s
+  identity_namespaces:
+    - services
+    - backend
+  iam_roles:
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+    - roles/storage.objectAdmin
+    - roles/iam.serviceAccountTokenCreator
+  run_on_project_iam_roles:
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+    - roles/cloudprofiler.agent
+    - roles/storage.objectAdmin
+    - roles/iam.serviceAccountTokenCreator
+  bucket_roles:
+    manabie:
+      staging-agora-2:
+        - roles/storage.legacyBucketWriter
+    jprep:
+      staging-agora-2:
+        - roles/storage.legacyBucketWriter
+- name: yasuo
+  postgresql:
+    grants:
+      - dbname: bob
+        grant_delete: true
+      - dbname: eureka
+      - dbname: lessonmgmt
+    statement_timeout:
+       enabled: true
+       timeout: 100s
+  identity_namespaces:
+    - services
+    - backend
+  iam_roles:
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+    - roles/firebase.admin
+  run_on_project_iam_roles:
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+    - roles/cloudprofiler.agent
+    - roles/firebasenotifications.admin
+    - roles/firebasecloudmessaging.admin
+    - projects/local.runs_on_project_id/roles/CustomRole447 # will be replaced by actual local.runs_on_project_id variable in stag-apps.hcl
+  bucket_roles:
+    manabie:
+      stag-manabie-backend:
+        - roles/storage.legacyBucketWriter
+    jprep:
+      stag-manabie-backend:
+        - roles/storage.legacyBucketWriter
+- name: zeus
+  postgresql:
+    createdb: true
+    grants:
+      - dbname: zeus
+        grant_delete: true
+    statement_timeout:
+       enabled: true
+       timeout: 100s
+  kafka:
+    enabled: true
+  hasura:
+    v2_enabled: true
+  identity_namespaces:
+    - services
+    - backend
+  iam_roles:
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+  run_on_project_iam_roles:
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+    - roles/cloudprofiler.agent
+- name: appsmith
+  # appsmith is a platform service, which does not require similar permissions
+  # compare to other normal business services.
+  # We need it here to create its service account and KMS key.
+  identity_namespaces:
+    - appsmith
+  iam_roles:
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+  run_on_project_iam_roles:
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+- name: mongodb
+  # mongodb is a platform service, which does not require similar permissions
+  # compare to other normal business services.
+  # We need it here to create its service account and KMS key.
+  identity_namespaces:
+    - appsmith
+  iam_roles: []
+  run_on_project_iam_roles: []
+- name: jerry
+  identity_namespaces:
+    - services
+    - backend
+  iam_roles: []
+  run_on_project_iam_roles:
+    - roles/cloudprofiler.agent
+- name: import-map-deployer
+  identity_namespaces:
+    - frontend
+  iam_roles:
+    - roles/storage.objectAdmin
+  run_on_project_iam_roles:
+    - roles/cloudkms.cryptoKeyDecrypter
+- name: graphql-mesh
+  identity_namespaces:
+    - frontend
+  iam_roles: []
+  run_on_project_iam_roles: []
+- name: discount
+  postgresql:
+    grants:
+      - dbname: fatima
+        grant_delete: true
+    statement_timeout:
+       enabled: true
+       timeout: 100s
+  identity_namespaces:
+    - services
+    - backend
+  iam_roles:
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+  run_on_project_iam_roles:
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+    - roles/cloudprofiler.agent
+  bucket_roles:
+    manabie:
+      stag-manabie-backend:
+        - roles/storage.legacyBucketWriter
+    jprep:
+      stag-manabie-backend:
+        - roles/storage.legacyBucketWriter
+- name: auto-scheduling
+  postgresql:
+    createdb: false
+    grants:
+      - dbname: calendar
+    statement_timeout:
+       enabled: true
+       timeout: 100s
+  identity_namespaces:
+    - services
+    - backend
+  iam_roles:
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+    - roles/iam.workloadIdentityUser
+    - roles/compute.instanceAdmin
+    - roles/iam.serviceAccountUser
+  run_on_project_iam_roles:
+    - roles/cloudsql.client
+    - roles/cloudsql.instanceUser
+    - roles/compute.instanceAdmin
+    - roles/iam.serviceAccountUser

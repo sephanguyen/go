@@ -1,0 +1,18 @@
+@startuml communication_simplified
+hide circle
+User   -> notificationmgmt:  Call "NotificationModifierService.UpsertNotification"
+activate notificationmgmt
+notificationmgmt -> Storage: generate renderedURL
+notificationmgmt -> DB: save notification to DB
+note right notificationmgmt
+1. validate request payload
+2. save to "info_notification_msgs" and "info_notifications" tables,
+    for scheduled notification, status = SCHEDULED and scheduledAt NOT NULL
+3. process **location** and save to tables **info_notifications_access_paths**
+4. process **target_group** filter and save to table **notification_class_filter, notification_course_filter, notification_location_filter**
+5. if request has **Questionnaire** data, process data and save to tables **questionnaires, questionnaire_questions**
+6. if request has **Tag** data, process data and save to tables **info_notification_tags**
+end note
+notificationmgmt -> User: OK or Error status in response
+deactivate notificationmgmt
+@enduml

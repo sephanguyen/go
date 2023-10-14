@@ -1,0 +1,99 @@
+{
+	"schema": [
+		{
+			"column_name": "academic_year_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "course_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "courses_academic_years",
+			"policyname": "rls_courses_academic_years",
+			"qual": "permission_check(resource_path, 'courses_academic_years'::text)",
+			"with_check": "permission_check(resource_path, 'courses_academic_years'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "courses_academic_years",
+			"policyname": "rls_courses_academic_years_restrictive",
+			"qual": "permission_check(resource_path, 'courses_academic_years'::text)",
+			"with_check": "permission_check(resource_path, 'courses_academic_years'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "pk__courses_academic_years",
+			"column_name": "academic_year_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "pk__courses_academic_years",
+			"column_name": "course_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "courses_academic_years",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

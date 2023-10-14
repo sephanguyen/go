@@ -1,0 +1,17 @@
+{{- if .Values.enabled -}}
+{{- if .Values.yugabyteDeployment.enabled }}
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: {{ include "util.fullname" . }}
+spec:
+  host: {{ include "util.fullname" . }}
+  subsets:
+    - name: postgres
+      labels:
+        db: postgres
+    - name: yugabyte
+      labels:
+        db: yugabyte
+{{- end }}
+{{- end -}}

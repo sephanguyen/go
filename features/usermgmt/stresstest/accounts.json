@@ -1,0 +1,8 @@
+{
+  "admins": [
+    {
+      "email": "example@manabie.com",
+      "password": "example_password"
+    }
+  ]
+}

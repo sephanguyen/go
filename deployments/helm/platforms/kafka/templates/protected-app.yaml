@@ -1,0 +1,20 @@
+{{- if and .Values.installProtectedApp (.Capabilities.APIVersions.Has "gkebackup.gke.io/v1alpha2") }}
+apiVersion: gkebackup.gke.io/v1alpha2
+kind: ProtectedApplication
+metadata:
+  name: kafka
+spec:
+  resourceSelection:
+    type: Selector
+    selector:
+      matchLabels:
+        app.kubernetes.io/name: {{ include "kafka.name" . }}
+  components:
+  - name: kafka
+    resourceKind: StatefulSet
+    resourceNames:
+      - {{ include "kafka.fullname" . }}
+    strategy:
+      type: BackupAllRestoreAll
+      backupAllRestoreAll: {}
+{{- end }}

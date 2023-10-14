@@ -1,0 +1,13 @@
+apiVersion: "serving.kserve.io/v1beta1"
+kind: "InferenceService"
+metadata:
+  name: "ocr"
+spec:
+  predictor:
+    serviceAccountName: stag-kserve 
+    containers:
+      - name: kserve-container
+        image: asia.gcr.io/student-coach-e1e95/ocr-model:2022102101
+        env:
+        - name: RAY_DISABLE_MEMORY_MONITOR
+          value: "1"

@@ -1,0 +1,99 @@
+grpcPort: 7050
+
+metrics:
+  enabled: true
+service:
+  type: ClusterIP
+  port: 7050
+
+affinity: {}
+affinityOverride: {}
+
+apiHttp:
+  - match:
+    - uri:
+        prefix: /calendar.v1
+    route:
+      - destination:
+          host: calendar
+          port:
+            number: 7050
+
+jobs:
+  fill-scheduler-to-lessons:
+    cmd: fill_scheduler_to_lessons
+  update-invalid-schedulers:
+    cmd: update_invalid_schedulers
+
+webHttp:
+  - match:
+    - uri:
+        prefix: /calendar.v1
+    route:
+    - destination:
+        host: calendar
+        port:
+          number: 7050
+    corsPolicy: &CORSPolicy
+      allowOrigins:
+        - regex: ".*"
+      allowMethods:
+        - POST
+        - GET
+        - OPTIONS
+        - PUT
+        - DELETE
+      allowHeaders:
+        - authorization
+        - grpc-timeout
+        - content-type
+        - keep-alive
+        - user-agent
+        - cache-control
+        - content-transfer-encoding
+        - token
+        - x-accept-content-transfer-encoding
+        - x-accept-response-streaming
+        - x-request-id
+        - x-user-agent
+        - x-graphql-mesh-authorization
+        - x-grpc-web
+        - if-none-match
+        - pkg
+        - version
+        - connect-timeout-ms
+        - connect-protocol-version
+        - connect-content-encoding
+        - connect-accept-encoding
+      maxAge: 100s
+      exposeHeaders:
+        - grpc-status
+        - grpc-message
+        - etag
+
+hasura:
+  enableConsole: true
+  enabledApis: "metadata,graphql"
+  service:
+    type: ClusterIP
+    port: 8080
+  resources:
+    requests:
+      memory: 110Mi
+  pgConnections: 8
+  pgTimeout: 10
+  anonymous:
+    enabled: false
+
+adminHttp:
+  - match:
+    - uri:
+        prefix: /calendar/ # accessing hasura by /calendar/console path
+    rewrite:
+      uri: /
+    route:
+    - destination:
+        host: calendar-hasura
+        port:
+          number: 8080
+    corsPolicy: *CORSPolicy

@@ -1,0 +1,127 @@
+{
+	"schema": [
+		{
+			"column_name": "answer",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "answer_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "questionnaire_question_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "submitted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "target_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "user_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "user_notification_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "questionnaire_user_answers",
+			"policyname": "rls_questionnaire_user_answers",
+			"qual": "permission_check(resource_path, 'questionnaire_user_answers'::text)",
+			"with_check": "permission_check(resource_path, 'questionnaire_user_answers'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "questionnaire_user_answers",
+			"policyname": "rls_questionnaire_user_answers_restrictive",
+			"qual": "permission_check(resource_path, 'questionnaire_user_answers'::text)",
+			"with_check": "permission_check(resource_path, 'questionnaire_user_answers'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "fk__questionnaire_user_answers__questionnaire_question_id",
+			"column_name": "questionnaire_question_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "fk__questionnaire_user_answers__user_notification_id",
+			"column_name": "user_notification_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "pk__questionnaire_user_answers",
+			"column_name": "answer_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "pk__questionnaire_user_answers",
+			"column_name": "user_notification_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "questionnaire_user_answers",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

@@ -1,0 +1,14 @@
+unleash:
+  featureFlags:
+    timesheet:
+      - name: Timesheet_TimesheetManagement_AppConfig
+        description: "A feature flag to enable timesheet app config (LT-40303)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []

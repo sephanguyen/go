@@ -1,0 +1,188 @@
+syntax = "proto3";
+
+package virtualclassroom.v1;
+
+import "google/protobuf/timestamp.proto";
+import "common/v1/profiles.proto";
+import "virtualclassroom/v1/enums.proto";
+import "virtualclassroom/v1/virtualclassroom.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/virtualclassroom/v1;vpb";
+
+service LiveRoomModifierService {
+    rpc JoinLiveRoom (JoinLiveRoomRequest) returns (JoinLiveRoomResponse);
+    rpc ModifyLiveRoomState (ModifyLiveRoomStateRequest) returns (ModifyLiveRoomStateResponse);
+    rpc LeaveLiveRoom (LeaveLiveRoomRequest) returns (LeaveLiveRoomResponse);
+    rpc EndLiveRoom (EndLiveRoomRequest) returns (EndLiveRoomResponse);
+    rpc PreparePublishLiveRoom (PreparePublishLiveRoomRequest) returns(PreparePublishLiveRoomResponse);
+    rpc UnpublishLiveRoom (UnpublishLiveRoomRequest) returns(UnpublishLiveRoomResponse);
+}
+
+message JoinLiveRoomRequest {
+    string channel_name = 1;
+    string rtm_user_id = 2;
+}
+
+message JoinLiveRoomResponse {
+    string channel_id = 1;
+    string room_id = 2;
+    string stream_token = 3;
+    string whiteboard_token = 4;
+    string stm_token = 5;
+    string video_token = 6;
+    string agora_app_id = 7;
+    string whiteboard_app_id = 8;
+    string screen_recording_token = 9;
+}
+
+message ModifyLiveRoomStateRequest {
+    string channel_id = 1;
+    message Learners {
+        repeated string learners = 1;
+    }
+    message PollingOption {
+        string answer = 1;
+        bool is_correct = 2;
+        string content = 3;
+    }
+    message PollingOptions {
+        repeated PollingOption options = 1;
+        string question = 2;
+    }
+    message PollingAnswer {
+        repeated string string_array_value = 1;
+    }
+    message Spotlight {
+        string user_id = 1;
+        bool is_spotlight = 2;
+    }
+    message WhiteboardZoomState {
+        double pdf_scale_ratio = 1;
+        double center_x = 2;
+        double center_y = 3;
+        double pdf_width = 4;
+        double pdf_height = 5;
+    }
+    message CurrentMaterialCommand {
+        string media_id = 1;
+        oneof state {
+          VirtualClassroomState.CurrentMaterial.VideoState video_state = 2;
+          VirtualClassroomState.CurrentMaterial.PDFState pdf_state = 3;
+          VirtualClassroomState.CurrentMaterial.AudioState audio_state = 4;
+        };
+    }
+    oneof command {
+        Learners annotation_enable = 2;                   // only for teacher
+        Learners annotation_disable = 3;                  // only for teacher
+        Learners chat_enable = 4;                         // only for teacher
+        Learners chat_disable = 5;                        // only for teacher
+        PollingOptions start_polling = 6;                 // only for teacher
+        bool stop_polling = 7;                            // only for teacher
+        bool end_polling = 8;                             // only for teacher
+        PollingAnswer submit_polling_answer = 9;          // only for learner
+        bool share_polling = 10;                          // only for teacher
+        bool fold_hand_all = 11;                          // only for teacher
+        string fold_user_hand = 12;                       // only for teacher
+        bool raise_hand = 13;                             // only for student
+        bool hand_off = 14;                               // only for student
+        Spotlight spotlight = 15;                         // only for teacher
+        WhiteboardZoomState whiteboard_zoom_state = 16;   // only for teacher
+        CurrentMaterialCommand share_a_material = 17;     // only for teacher
+        bool stop_sharing_material = 18;                  // only for teacher
+        bool annotation_disable_all = 19;                 // only for teacher
+        bool upsert_session_time = 20;                    // only for teacher
+    }
+}
+
+message ModifyLiveRoomStateResponse {}
+
+message LeaveLiveRoomRequest {
+    string user_id = 1;
+    string channel_id = 2;
+  }
+  
+message LeaveLiveRoomResponse {}
+
+message EndLiveRoomRequest {
+    string channel_id = 1;
+    string lesson_id = 2;
+}
+  
+message EndLiveRoomResponse {}
+
+message PreparePublishLiveRoomRequest {
+    string channel_id = 1;
+    string learner_id = 2;
+}
+  
+message PreparePublishLiveRoomResponse {
+    PrepareToPublishStatus status = 1;
+}
+
+message UnpublishLiveRoomRequest {
+    string channel_id = 1;
+    string learner_id = 2;
+}
+  
+message UnpublishLiveRoomResponse {
+    UnpublishStatus status = 1;
+}
+
+service LiveRoomReaderService {
+    rpc GetLiveRoomState (GetLiveRoomStateRequest) returns (GetLiveRoomStateResponse);
+    rpc GetWhiteboardToken (GetWhiteboardTokenRequest) returns (GetWhiteboardTokenResponse);
+}
+
+message GetLiveRoomStateRequest {
+    string channel_id = 1;
+}
+
+message GetLiveRoomStateResponse {
+    string channel_id = 1;
+    google.protobuf.Timestamp current_time = 2;
+    virtualclassroom.v1.VirtualClassroomState.CurrentMaterial current_material = 3;
+    virtualclassroom.v1.VirtualClassroomState.CurrentPolling current_polling = 4;
+    virtualclassroom.v1.VirtualClassroomState.Recording recording = 5;
+    virtualclassroom.v1.VirtualClassroomState.Spotlight spotlight = 6;
+    virtualclassroom.v1.VirtualClassroomState.WhiteboardZoomState whiteboard_zoom_state = 7;
+    virtualclassroom.v1.GetLiveLessonStateResponse.UsersState users_state = 8;
+    google.protobuf.Timestamp session_time = 9;
+}
+
+message LiveRoomEvent {
+    message JoinLiveRoom {
+        string channel_name = 1;
+        string channel_id = 2;
+        string user_id = 3;
+        common.v1.UserGroup user_group = 4;
+    }
+    
+    message LeaveLiveRoom {
+        string channel_name = 1;
+        string channel_id = 2;
+        string user_id = 3;
+    }
+  
+    message EndLiveRoom {
+        string channel_name = 1;
+        string channel_id = 2;
+        string user_id = 3;
+    }
+  
+    oneof message {
+        JoinLiveRoom join_live_room = 1;
+        LeaveLiveRoom leave_live_room = 2;
+        EndLiveRoom end_live_room = 3;
+    }
+}
+
+message GetWhiteboardTokenRequest {
+    string channel_name = 1;
+}
+
+message GetWhiteboardTokenResponse {
+    string channel_id = 1;
+    string room_id = 2;
+    string whiteboard_app_id = 3;
+    string whiteboard_token = 4;
+}

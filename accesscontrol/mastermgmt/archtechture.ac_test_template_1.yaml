@@ -1,0 +1,10 @@
+- template: 1
+  tableName: ac_test_template_1
+  locationCol: location_id
+  accessPathTable:
+    name: ac_test_template_1_access_paths
+    columnMapping:
+      ac_test_template_1_id: ac_test_template_1_id
+  permissionPrefix: accesscontrol.b
+  permissions:
+    postgres: []

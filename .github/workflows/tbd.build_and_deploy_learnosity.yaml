@@ -1,0 +1,96 @@
+name: tbd.build-and-deploy-learnosity
+
+run-name: tbd.build_and_deploy_learnosity ${{ inputs.env }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      auto_deploy:
+        type: boolean
+        description: "Auto deploy after build"
+        default: false
+
+      env:
+        type: choice
+        description: "Choose an environment to build"
+        options:
+          - staging
+          - uat
+          - production
+        required: true
+        default: staging
+
+      learnosity_release_tag:
+        type: string
+        description: "Learnosity web view release tag"
+        required: true
+        default: ""
+
+env:
+  RELEASE_TAG: ${{ github.event.inputs.learnosity_release_tag }}
+  AUTO_DEPLOY: ${{ github.event.inputs.auto_deploy }}
+  ENV: ${{ github.event.inputs.env }}
+  GITHUB_TOKEN: ${{ secrets.BUILD_GITHUB_TOKEN }}
+
+  LEARNOSITY_REPO: "learnosity-web-view"
+  DOCKER_REPOSITORY: "asia.gcr.io"
+  PREFIX_IMAGE: "asia.gcr.io/student-coach-e1e95"
+
+
+jobs:
+  build_and_deploy_learnosity:
+    runs-on: ["self-hosted", "custom-runner", "medium-runner"]
+    if: ${{ github.event.inputs.learnosity_release_tag != '' }}
+    permissions:
+      contents: "read"
+      id-token: "write"
+    steps:
+      - uses: actions/checkout@v3
+        timeout-minutes: 5
+
+      - name: Set organization for ${{ env.ENV }}
+        uses: actions/github-script@v6
+        id: prepare
+        with:
+          github-token: ${{ env.GITHUB_TOKEN }}
+          script: |
+            if (process.env.ENV == 'production') {
+              core.setOutput('organization', 'tokyo');
+            } else {
+              core.setOutput('organization', 'manabie');
+            }
+      - id: privileges-check
+        if: ${{ env.ENV != 'staging' && env.AUTO_DEPLOY == 'true' && github.actor != 'manaops' }}
+        uses: ./.github/actions/tbd.privileges-check
+        with:
+          actor: ${{ github.actor }}
+          github-token: ${{ secrets.BUILD_GITHUB_TOKEN }}
+
+      - name: Build learnosity-web-view
+        uses: ./.github/actions/tbd.build-web
+        env:
+          REPO: ${{ env.LEARNOSITY_REPO }}
+          ORGANIZATION: ${{ steps.prepare.outputs.organization }}
+          IMAGE_TAG: ${{env.PREFIX_IMAGE}}/${{ env.LEARNOSITY_REPO }}:${{ env.RELEASE_TAG }}
+
+      - name: Deploy learnosity-web-view
+        uses: ./.github/actions/tbd.deploy-k8s-web
+        if: ${{ env.AUTO_DEPLOY == 'true' }}
+        with:
+          environment: ${{ env.ENV }}
+          organization: ${{ steps.prepare.outputs.organization }}
+          release_tag: ${{ env.RELEASE_TAG }}
+          service: ${{ env.LEARNOSITY_REPO }}
+          token: ${{ secrets.BUILD_GITHUB_TOKEN }}
+
+      - name: Summary output
+        shell: bash
+        env:
+          ENV: ${{ env.ENV }}
+        run: |
+          set -e
+          cat <<EOF > $GITHUB_STEP_SUMMARY
+          | Type                 | Input tag                                                                                                                        |
+          | -------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+          | learnosity-web-view  | [${{ env.RELEASE_TAG }}](https://github.com/manabie-com/learnosity-web-view/releases/tag/${{ env.RELEASE_TAG }})                 |
+          EOF

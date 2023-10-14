@@ -1,0 +1,86 @@
+syntax = "proto3";
+
+package yasuo.v1;
+
+import "google/protobuf/duration.proto";
+import "google/api/annotations.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/yasuo/v1;ypb";
+
+message RetrieveBrightCoveProfileDataRequest {}
+
+message RetrieveBrightCoveProfileDataResponse {
+  string account_id = 1;
+  string policy_key = 2;
+}
+
+message CreateBrightCoveUploadUrlRequest { string name = 1; }
+
+message CreateBrightCoveUploadUrlResponse {
+  string signed_url = 1;
+  string api_request_url = 2;
+  string video_id = 3;
+}
+
+message FinishUploadBrightCoveRequest {
+  string api_request_url = 1;
+  string video_id = 2;
+}
+
+message FinishUploadBrightCoveResponse {}
+
+message GetBrightCoveVideoInfoRequest {
+  string account_id = 1;
+  string video_id = 2;
+}
+
+message GetBrightCoveVideoInfoResponse {
+  string id = 1;
+  string name = 2;
+  string thumbnail = 3;
+  google.protobuf.Duration duration = 4;
+  bool offline_enabled = 5;
+}
+
+message GetVideoBrightcoveResumePositionRequest {
+  string video_id = 1;
+}
+
+message GetVideoBrightcoveResumePositionResponse {
+  string video_id = 1;
+  int32 seconds = 2;
+}
+
+service BrightcoveService {
+  rpc RetrieveBrightCoveProfileData(RetrieveBrightCoveProfileDataRequest)
+      returns (RetrieveBrightCoveProfileDataResponse){
+        option (google.api.http) = {
+          get: "/yasuo/api/v1/proxy/brightcove/profiledata"
+        };
+      };
+
+  rpc CreateBrightCoveUploadUrl(CreateBrightCoveUploadUrlRequest)
+      returns (CreateBrightCoveUploadUrlResponse){
+        option (google.api.http) = {
+          post: "/yasuo/api/v1/proxy/brightcove/uploadurl",
+          body: "*"
+        };
+      };
+
+  rpc FinishUploadBrightCove(FinishUploadBrightCoveRequest)
+      returns (FinishUploadBrightCoveResponse){
+        option (google.api.http) = {
+          post: "/yasuo/api/v1/proxy/brightcove/finishupload",
+          body: "*"
+        };
+      };
+
+  rpc GetBrightcoveVideoInfo(GetBrightCoveVideoInfoRequest)
+      returns (GetBrightCoveVideoInfoResponse) {
+        option (google.api.http) = {
+          get: "/yasuo/api/v1/proxy/brightcove/videoinfo/{account_id}/{video_id}"
+        };
+      };
+
+  rpc GetVideoBrightcoveResumePosition (GetVideoBrightcoveResumePositionRequest) returns (GetVideoBrightcoveResumePositionResponse);
+}

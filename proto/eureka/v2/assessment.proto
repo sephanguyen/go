@@ -1,0 +1,195 @@
+syntax = "proto3";
+
+package eureka.v2;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/eureka/v2;epb";
+
+import "eureka/v2/enums.proto";
+import "google/protobuf/timestamp.proto";
+import "common/v1/requests.proto";
+
+message SessionIdentity {
+  string course_id = 1;
+  string learning_material_id = 2;
+  string user_id = 3;
+}
+
+message GetAssessmentSignedRequestRequest {
+  SessionIdentity session_identity = 1;
+  string domain = 2;
+  string config = 3;
+}
+
+message GetAssessmentSignedRequestResponse {
+  string signed_request = 1;
+}
+
+message GetLearningMaterialStatusesRequest {
+  string user_id = 1;
+  string course_id = 2;
+  repeated string learning_material_ids = 3;
+}
+
+message GetLearningMaterialStatusesResponse {
+  message LearningMaterialStatus{
+    string learning_material_id = 1;
+    bool is_completed = 2;
+  }
+  repeated LearningMaterialStatus statuses = 1;
+}
+
+message ListAssessmentSubmissionResultRequest {
+  SessionIdentity session_identity = 1;
+}
+
+message AssessmentSubmission {
+  string session_id = 1;
+  uint32 total_point = 2; // to be deleted since the next prod version
+  uint32 total_graded_point = 3; // to be deleted since the next prod version
+  AssessmentSessionStatus assessment_session_status = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp completed_at = 6;
+  GradingStatus grading_status = 7;
+  string feedback_session_id = 8;
+  string feedback_by = 9;
+  uint32 max_score = 10;
+  uint32 graded_score = 11;
+  string submission_id = 12;
+}
+
+message ListAssessmentSubmissionResultResponse {
+  repeated AssessmentSubmission assessment_submissions = 1;
+}
+
+message CompleteAssessmentSessionRequest {
+  string session_id = 1;
+}
+message CompleteAssessmentSessionResponse {}
+
+message GetAssessmentSubmissionDetailRequest {
+  string submission_id = 1;
+}
+
+message GetAssessmentSubmissionDetailResponse {
+  string submission_id = 1;
+  google.protobuf.Timestamp completed_at = 2;
+  google.protobuf.Timestamp marked_at = 3;
+  GradingStatus grading_status = 4;
+  string allocated_marker_id = 5;
+  uint32 max_score = 6;
+  uint32 graded_score = 7;
+  string student_session_id = 8;
+  string feedback_session_id = 9;
+  string feedback_by = 10;
+  string marked_by = 11;
+  string student_id = 12;
+}
+
+message AllocateMarkerSubmissionsRequest {
+  message AllocateMarkerSubmission {
+    string submission_id = 1;
+    string allocated_user_id = 2;
+  }
+
+  repeated AllocateMarkerSubmission allocate_marker_submissions = 1;
+}
+
+message AllocateMarkerSubmissionsResponse {}
+
+message UpdateManualGradingSubmissionRequest {
+  message Scores {
+    string reponse_id = 1;
+    uint32 score = 2;
+    uint32 max_score = 3;
+  }
+
+  string submission_id = 1;
+  GradingStatus to_status = 2;
+  repeated Scores scores = 3;
+}
+
+message UpdateManualGradingSubmissionResponse {}
+
+message ListSubmissionsRequest {
+  common.v1.Paging paging = 1;
+  string search_criteria = 2;
+  string course_id = 3;
+  repeated string class_ids = 4;
+  google.protobuf.Timestamp start_date = 5;
+  google.protobuf.Timestamp end_date = 6;
+  GradingStatusFilter grading_status_filter = 7;
+}
+
+message ListSubmissionItem {
+  string submission_id = 1;
+  string lo_id = 2;
+  string lo_name = 3;
+  string student_id = 4;
+  string course_id = 5;
+  GradingStatus grading_status = 6;
+  google.protobuf.Timestamp submission_date = 7;
+  google.protobuf.Timestamp marked_date = 8;
+}
+
+message SubmissionsCountByStatus {
+  uint32 all = 1;
+  uint32 not_marked = 2;
+  uint32 in_progress = 3;
+  uint32 marked = 4;
+  uint32 returned = 5;
+}
+
+message ListSubmissionsResponse {
+  common.v1.Paging previous_page = 1;
+  common.v1.Paging next_page = 2;
+  repeated ListSubmissionItem list_submissions = 3;
+  SubmissionsCountByStatus submissions_count_by_status = 4;
+}
+
+/// Study Plan Assessment
+
+message StudyPlanAssessmentSessionIdentity {
+  string study_plan_item_id = 1;
+  string learning_material_id = 2;
+  string user_id = 3;
+}
+
+message GetStudyPlanAssessmentSignedRequestRequest {
+  StudyPlanAssessmentSessionIdentity session_identity = 1;
+  string domain = 2;
+  string config = 3;
+}
+
+message GetStudyPlanAssessmentSignedRequestResponse {
+  string signed_request = 1;
+}
+
+message ListStudyPlanAssessmentSubmissionResultRequest {
+  StudyPlanAssessmentSessionIdentity session_identity = 1;
+}
+
+message ListStudyPlanAssessmentSubmissionResultResponse {
+  repeated AssessmentSubmission assessment_submissions = 1;
+}
+
+message CompleteStudyPlanAssessmentSessionRequest {
+  string session_id = 1;
+}
+
+message CompleteStudyPlanAssessmentSessionResponse {}
+
+
+service AssessmentService {
+  rpc GetAssessmentSignedRequest(GetAssessmentSignedRequestRequest) returns (GetAssessmentSignedRequestResponse);
+  rpc GetStudyPlanAssessmentSignedRequest(GetStudyPlanAssessmentSignedRequestRequest) returns (GetStudyPlanAssessmentSignedRequestResponse);
+  rpc GetLearningMaterialStatuses(GetLearningMaterialStatusesRequest) returns (GetLearningMaterialStatusesResponse);
+  rpc GetAssessmentSubmissionDetail(GetAssessmentSubmissionDetailRequest) returns (GetAssessmentSubmissionDetailResponse);
+  // actually AssessmentAttemptHistory
+  rpc ListAssessmentSubmissionResult(ListAssessmentSubmissionResultRequest) returns (ListAssessmentSubmissionResultResponse);
+  rpc ListStudyPlanAssessmentSubmissionResult(ListStudyPlanAssessmentSubmissionResultRequest) returns (ListStudyPlanAssessmentSubmissionResultResponse);
+  rpc CompleteAssessmentSession(CompleteAssessmentSessionRequest) returns (CompleteAssessmentSessionResponse);
+  rpc CompleteStudyPlanAssessmentSession(CompleteStudyPlanAssessmentSessionRequest) returns (CompleteStudyPlanAssessmentSessionResponse);
+  rpc AllocateMarkerSubmissions(AllocateMarkerSubmissionsRequest) returns (AllocateMarkerSubmissionsResponse);
+  rpc UpdateManualGradingSubmission(UpdateManualGradingSubmissionRequest) returns (UpdateManualGradingSubmissionResponse);
+  rpc ListSubmissions(ListSubmissionsRequest) returns (ListSubmissionsResponse);
+}

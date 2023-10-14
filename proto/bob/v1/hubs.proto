@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+package bob.v1;
+
+import "bob/v1/locations.proto";
+import "common/v1/enums.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/bob/v1;bpb";
+
+message HubEvent {
+  string title = 1;
+  string description = 2;
+  google.protobuf.Timestamp date = 3;
+  int32 price = 4;
+}
+
+message Hub {
+  int32 id = 1;
+  string name = 2;
+  string description = 3;
+  string phone_number = 4;
+  string address = 5;
+  common.v1.Country country = 6;
+  City city = 7;
+  District district = 8;
+  Point point = 9;
+  repeated string images = 10;
+  repeated string opening_hours = 11;
+  repeated HubEvent events = 12;
+}
+
+message RetrieveHubsRequest {
+  common.v1.Country country = 1;
+  int32 city_id = 2;
+  int32 district_id = 3;
+  Point point = 4;
+}
+
+message RetrieveHubsResponse {
+  repeated Hub hubs = 1;
+}
+
+message RequestATourRequest {
+  int32 hub_id = 1;
+  string parent_phone_number = 2;
+}
+
+message RequestATourResponse {}
+
+service HubReaderService {
+  rpc RetrieveHubs(RetrieveHubsRequest) returns (RetrieveHubsResponse);
+}
+
+service HubModifierService {
+  rpc RequestATour(RequestATourRequest) returns (RequestATourResponse);
+}

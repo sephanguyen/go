@@ -1,0 +1,50 @@
+name: 'tool-install'
+description: |
+  Checks and installs tools to run CI/CD in backend.
+
+  A checkout action needs to be run first before using this action.
+inputs:
+  tools:
+    description: |
+      A space-separated list tools to install.
+      Example: "kind skaffold jq"
+    required: true
+  install-dir:
+    description: |
+      Directory to install the binary. It will be automatically added to PATH.
+    default: ~/.manabie/bin
+  token:
+    description: Github Token used to download toolinstall
+    default: "${{ github.token }}"
+
+runs:
+  using: "composite"
+  steps:
+    - env:
+        GH_TOKEN: ${{ inputs.token }}
+      run: |
+        # Install tool that will install other tools
+        # go build -o toolinstall ./cmd/citools/toolinstall/
+        gh release download toolinstall-v0.2.0 \
+          --pattern 'toolinstall-linux-amd64' \
+          --clobber \
+          --output toolinstall
+        chmod +x ./toolinstall
+      shell: bash
+
+    # Reference: https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#adding-a-system-path
+    - name: Setup PATH
+      run: echo "${{ inputs.install-dir }}" >> $GITHUB_PATH
+      shell: bash
+
+    - id: process
+      run: |
+        # Process tool version
+        set -eu
+        toolVersions=$(.github/actions/tool-install/get_tool_version.bash ${{ inputs.tools }})
+        echo "tools=${toolVersions}" >> "$GITHUB_OUTPUT"
+      shell: bash
+
+    - name: Install tools
+      run: sudo ./toolinstall ${{ steps.process.outputs.tools }} --install-dir "${{ inputs.install-dir }}" -v debug
+      shell: bash

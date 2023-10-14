@@ -1,0 +1,44 @@
+name: tbd.create_release_with_changelog
+
+on:
+  workflow_dispatch:
+    inputs:
+      repo-name:
+        required: true
+        type: choice
+        description: Choose Repo to gen Changelog
+        options:
+          - backend
+          - school-portal-admin
+          - student-app
+      previous-release:
+        required: true
+        type: string
+        description: Previous release tag
+      current-release:
+        required: true
+        type: string
+        description: Current release tag
+
+env:
+  GITHUB_TOKEN: ${{ secrets.BUILD_GITHUB_TOKEN }}
+
+jobs:
+  update-changelog:
+    timeout-minutes: 5
+    runs-on: ["self-hosted", "100m-400mi", "spot", "persistent"]
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Gen changelog
+        id: changelog
+        uses: ./.github/actions/tbd.create-release
+        with:
+          github-token: ${{ env.GITHUB_TOKEN }}
+          repo-name: ${{ inputs.repo-name }}
+          previous-release: ${{ inputs.previous-release }}
+          current-release: ${{ inputs.current-release }}
+
+

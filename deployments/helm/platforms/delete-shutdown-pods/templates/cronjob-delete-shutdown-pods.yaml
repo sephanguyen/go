@@ -1,0 +1,81 @@
+{{- if ne "local" .Values.environment }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "delete-shutdown-pods.fullname" . }}
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "delete", "watch", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "delete-shutdown-pods.fullname" . }}
+subjects:
+- kind: ServiceAccount
+  name: shutdown-deleter
+  namespace: default
+roleRef:
+  kind: ClusterRole
+  name: {{ include "delete-shutdown-pods.fullname" . }}
+  apiGroup: ""
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: shutdown-deleter
+  namespace: default
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "delete-shutdown-pods.fullname" . }}
+  namespace: default
+spec:
+  schedule: "*/2 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          name: cron-delete-shutdown-pods
+          annotations:
+            sidecar.istio.io/inject: "false"
+        spec:
+          serviceAccountName: shutdown-deleter
+          restartPolicy: Never
+          containers:
+            - name: pods-shutdown-deleter
+              image: bitnami/kubectl:1.22.12
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  {{- range .Values.namespaces }}
+                    echo "deleting shutdown pods for namespace {{ . }}..."
+                    kubectl get pods --namespace {{ . }} -o json | \
+                      jq -r '
+                        .items |
+                        .[] |
+                        select(.status.message=="Pod was terminated in response to imminent node shutdown." or .status.message=="Pod Predicate NodeAffinity failed") |
+                        .metadata.name' | \
+                      xargs -I{} kubectl delete pod --namespace {{ . }} {}
+                  {{- end }}
+          affinity:
+            nodeAffinity:
+              preferredDuringSchedulingIgnoredDuringExecution:
+                - weight: 10
+                  preference:
+                    matchExpressions:
+                    - key: cloud.google.com/gke-spot
+                      operator: In
+                      values:
+                      - "true"
+          tolerations:
+            - effect: NoSchedule
+              key: "cloud.google.com/gke-spot"
+              operator: Exists
+{{- end }}

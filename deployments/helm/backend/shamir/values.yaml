@@ -1,0 +1,30 @@
+affinity: {}
+affinityOverride: {}
+clientVersion: v0.30.0
+enabled: true
+fullnameOverride: shamir
+grpcPort: 5650
+httpPort: 5680
+imagePullSecrets: []
+metrics:
+    enabled: true
+    podAnnotations:
+        prometheus.io/port: "8888"
+        prometheus.io/scheme: http
+        prometheus.io/scrape: "true"
+nameOverride: shamir
+nodeSelector: {}
+pdb:
+    enabled: false
+podAnnotations:
+    cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+    sidecar.istio.io/proxyCPU: 10m
+    sidecar.istio.io/proxyMemory: 50Mi
+resources:
+    requests:
+        memory: 72Mi
+service:
+    grpcPort: 5650
+    httpPort: 5680
+    type: ClusterIP
+tolerations: null

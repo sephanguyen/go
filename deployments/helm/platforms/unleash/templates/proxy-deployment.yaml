@@ -1,0 +1,123 @@
+{{- if .Values.unleashProxy.replicaCount }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "unleash.fullname" . }}-proxy
+  labels:
+    {{- include "unleashProxy.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.unleashProxy.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "unleashProxy.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/custom-strategies.js: {{ tpl ("configs/custom-strategies.js" | .Files.Get) . | sha256sum }}
+{{- if .Values.podAnnotations }}
+{{ toYaml .Values.podAnnotations | indent 8 }}
+{{- end }}
+      labels:
+        {{- include "unleashProxy.selectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "util.serviceAccountName" . }}
+      {{- with .Values.unleashProxy.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        - name: custom-strategies-deps-volume
+          emptyDir: {}
+        - name: custom-strategies
+          configMap:
+            name: {{ include "unleash.fullname" . }}
+            items:
+              - key: custom-strategies.js
+                path: custom-strategies.js
+      initContainers:
+      - name: wait-for-unleash-server
+        image: "{{ include "util.waitForImage" . }}"
+        imagePullPolicy: IfNotPresent
+        command:
+          - /bin/sh
+          - -c
+          - |
+            set -e
+            ./scripts/wait-for.sh unleash:4242 -t 100
+      - name: custom-strategies-deps
+        image: "{{ default "node" .Values.unleashProxy.nodeImage.repository }}:{{ .Values.unleashProxy.nodeImage.tag }}"
+        imagePullPolicy: IfNotPresent
+        command:
+          - /bin/sh
+          - -c
+          - |
+            mkdir -p /config/
+            cd /config/
+            npm init -y
+            npm install unleash-client
+        volumeMounts:
+        - name: custom-strategies-deps-volume
+          mountPath: /config/
+      containers:
+        - name: {{ .Chart.Name }}-proxy
+          image: "{{ default "unleashorg/unleash-proxy" .Values.unleashProxy.image.repository }}:{{ .Values.unleashProxy.image.tag }}"
+          imagePullPolicy: {{ .Values.unleashProxy.image.pullPolicy }}
+          ports:
+            - name: unleash-proxy
+              containerPort: {{ .Values.unleashProxy.service.port }}
+              protocol: TCP
+          volumeMounts:
+            - name: custom-strategies-deps-volume
+              mountPath: /config/
+            - name: custom-strategies
+              mountPath: /config/custom-strategies.js
+              subPath: custom-strategies.js
+          readinessProbe:
+            httpGet:
+              path: /proxy/health
+              port: {{ .Values.unleashProxy.service.port }}
+            initialDelaySeconds: 10
+            timeoutSeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /proxy/health
+              port: {{ .Values.unleashProxy.service.port }}
+            timeoutSeconds: 5
+          resources:
+            {{- toYaml .Values.resourcesProxy | nindent 12 }}
+          env:
+            - name: UNLEASH_PROXY_SECRETS
+              value: "{{ .Values.unleashProxy.secrets }}"
+            - name: UNLEASH_URL
+              value: "{{ .Values.unleashProxy.url }}"
+            - name: UNLEASH_API_TOKEN
+              value: "{{ .Values.unleashProxy.apiToken }}"
+            - name: PORT
+              value: "{{ .Values.unleashProxy.service.port }}"
+            - name: LOG_LEVEL
+              value: "debug"
+            - name: UNLEASH_IMPORT_FILE
+              value: "import.yaml"
+            - name: KEEP_EXISTING
+              value: "{{ .Values.unleash.keepExisting }}"
+            - name: DROP_BEFORE_IMPORT
+              value: "{{ .Values.unleash.dropBeforeImport }}"
+            - name: FORCE_IMPORT
+              value: "{{ .Values.unleash.forceImport }}"
+            - name: UNLEASH_INSTANCE_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: UNLEASH_CUSTOM_STRATEGIES_FILE
+              value: /config/custom-strategies.js
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.unleashProxy }}
+      {{- $context := (mustMerge (deepCopy .) $) }}
+      affinity: {{- include "util.affinityNew" $context | nindent 8 }}
+      tolerations: {{- include "util.tolerations" $context | nindent 8 }}
+      {{- end }}
+{{- end }}

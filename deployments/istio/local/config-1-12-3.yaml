@@ -1,0 +1,73 @@
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+metadata:
+  namespace: istio-system
+spec:
+  profile: default
+  revision: 1-12-3
+
+  meshConfig:
+    outboundTrafficPolicy:
+      mode: ALLOW_ANY
+    enableAutoMtls: false
+    accessLogFile: /dev/stdout
+    accessLogEncoding: JSON
+    defaultConfig:
+      holdApplicationUntilProxyStarts: true
+      tracing:
+        zipkin:
+          address: opentelemetry-collector.monitoring:9411
+        sampling: 100.0
+
+  components:
+    pilot:
+      k8s:
+        podAnnotations:
+          cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+    ingressGateways:
+      - name: istio-ingressgateway
+        enabled: true
+        k8s:
+          env:
+            - name: ISTIO_META_ROUTER_MODE
+              value: "sni-dnat"
+          service:
+            ports:
+              - port: 15021
+                targetPort: 15021
+                name: status-port
+              - port: 80
+                targetPort: 8080
+                name: http2
+              - port: 443
+                name: https
+                targetPort: 8443
+              - port: 15443
+                targetPort: 15443
+                name: tls
+              - port: 31400
+                targetPort: 31400
+                nodePort: 31400
+                name: grpc-web-api
+              - port: 31500
+                targetPort: 31500
+                nodePort: 31500
+                name: grpc-api
+              - port: 31600
+                targetPort: 31600
+                nodePort: 31600
+                name: admin-panel
+          podAnnotations:
+            cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+  values:
+    pilot:
+      resources:
+        requests:
+          cpu: 50m
+          memory: 128Mi
+    gateways:
+      istio-ingressgateway:
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi

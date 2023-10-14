@@ -1,0 +1,76 @@
+{
+  "manabie": {
+    "local": {
+      "dbhost": "postgres-infras.emulator.svc.cluster.local",
+      "dbuser": "postgres",
+      "dbprefix": ""
+    },
+    "stag": {
+      "dbhost": "localhost",
+      "dbuser": "stag-kafka-connect@staging-manabie-online.iam",
+      "dbprefix": ""
+    },
+    "uat": {
+      "dbhost": "localhost",
+      "dbuser": "uat-kafka-connect@uat-manabie.iam",
+      "dbprefix": "uat_"
+    },
+    "prod": {
+      "dbhost": "localhost",
+      "dbuser": "prod-kafka-connect@production-manabie-vn.iam",
+      "dbprefix": ""
+    }
+  },
+  "jprep": {
+    "stag": {
+      "dbhost": "localhost",
+      "dbuser": "stag-jprep-kafka-connect@staging-manabie-online.iam",
+      "dbprefix": "stag_"
+    },
+    "uat": {
+      "dbhost": "localhost",
+      "dbuser": "uat-kafka-connect@staging-manabie-online.iam",
+      "dbprefix": ""
+    },
+    "prod": {
+      "dbhost": "localhost",
+      "dbuser": "prod-kafka-connect@live-manabie.iam",
+      "dbprefix": ""
+    }
+  },
+  "aic": {
+    "prod": {
+      "dbhost": "localhost",
+      "dbuser": "prod-kafka-connect@production-aic.iam",
+      "dbprefix": "aic_"
+    }
+  },
+  "ga": {
+    "prod": {
+      "dbhost": "localhost",
+      "dbuser": "prod-kafka-connect@production-ga.iam",
+      "dbprefix": "ga_"
+    }
+  },
+  "renseikai": {
+    "prod": {
+      "dbhost": "localhost",
+      "dbuser": "prod-kafka-connect@production-renseikai.iam",
+      "dbprefix": ""
+    }
+  },
+  "synersia": {
+    "prod": {
+      "dbhost": "localhost",
+      "dbuser": "prod-kafka-connect@synersia.iam",
+      "dbprefix": ""
+    }
+  },
+  "tokyo": {
+    "prod": {
+      "dbhost": "localhost",
+      "dbuser": "prod-kafka-connect@student-coach-e1e95.iam",
+      "dbprefix": "tokyo_"
+    }
+  }
+}

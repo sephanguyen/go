@@ -1,0 +1,204 @@
+affinity: {}
+affinityOverride: {}
+apiHttp:
+    - fault:
+        abort:
+            httpStatus: 403
+            percentage:
+                value: 100
+      match:
+        - uri:
+            exact: /yasuo.v1.OpenSearchService/BuildConversationDocument
+        - uri:
+            prefix: /yasuo.v1.InternalService
+      route:
+        - destination:
+            host: yasuo
+            port:
+                number: 5250
+    - fault:
+        abort:
+            httpStatus: 403
+            percentage:
+                value: 100
+      match:
+        - uri:
+            exact: /yasuo.v1.NotificationModifierService/SendScheduledNotification
+      route:
+        - destination:
+            host: notificationmgmt
+            port:
+                number: 6950
+    - match:
+        - uri:
+            prefix: /yasuo.v1.NotificationModifierService
+      route:
+        - destination:
+            host: notificationmgmt
+            port:
+                number: 6950
+    - match:
+        - uri:
+            prefix: /yasuo/api/v1/proxy
+      route:
+        - destination:
+            host: yasuo
+            port:
+                number: 5280
+    - match:
+        - uri:
+            prefix: /yasuo
+        - uri:
+            prefix: /manabie.yasuo
+      route:
+        - destination:
+            host: yasuo
+            port:
+                number: 5250
+cronjob:
+    clearActivityLog:
+        schedule: '* */1 * * *'
+enabled: true
+grpcPort: 5250
+hasuraEnabled: false
+httpPort: 5280
+jobs:
+    sync-user-conversation:
+        cmd: yasuo_sync_user_conversations
+metrics:
+    enabled: true
+    podAnnotations:
+        prometheus.io/port: "8888"
+        prometheus.io/scheme: http
+        prometheus.io/scrape: "true"
+migrationEnabled: false
+readinessProbe:
+    enabled: true
+resources:
+    requests:
+        memory: 128Mi
+service:
+    port: 5250
+    type: ClusterIP
+tolerations: null
+webHttp:
+    - fault:
+        abort:
+            httpStatus: 403
+            percentage:
+                value: 100
+      match:
+        - uri:
+            exact: /yasuo.v1.OpenSearchService/BuildConversationDocument
+        - uri:
+            prefix: /yasuo.v1.InternalService
+      route:
+        - destination:
+            host: yasuo
+            port:
+                number: 5250
+    - fault:
+        abort:
+            httpStatus: 403
+            percentage:
+                value: 100
+      match:
+        - uri:
+            exact: /yasuo.v1.NotificationModifierService/SendScheduledNotification
+      route:
+        - destination:
+            host: notificationmgmt
+            port:
+                number: 6950
+    - match:
+        - uri:
+            prefix: /yasuo.v1.NotificationModifierService
+      route:
+        - destination:
+            host: notificationmgmt
+            port:
+                number: 6950
+    - corsPolicy:
+        allowHeaders:
+            - grpc-timeout
+            - content-type
+            - keep-alive
+            - user-agent
+            - cache-control
+            - content-type
+            - content-transfer-encoding
+            - token
+            - authorization
+            - x-accept-content-transfer-encoding
+            - x-accept-response-streaming
+            - x-user-agent
+            - x-grpc-web
+            - pkg
+            - version
+            - connect-timeout-ms
+            - connect-protocol-version
+            - connect-content-encoding
+            - connect-accept-encoding
+        allowMethods:
+            - POST
+            - GET
+            - OPTIONS
+            - PUT
+            - DELETE
+        allowOrigins:
+            - regex: .*
+        exposeHeaders:
+            - grpc-status
+            - grpc-message
+        maxAge: 100s
+      match:
+        - uri:
+            prefix: /yasuo/api/v1/proxy
+      route:
+        - destination:
+            host: yasuo
+            port:
+                number: 5280
+    - corsPolicy:
+        allowHeaders:
+            - grpc-timeout
+            - content-type
+            - keep-alive
+            - user-agent
+            - cache-control
+            - content-type
+            - content-transfer-encoding
+            - token
+            - authorization
+            - x-accept-content-transfer-encoding
+            - x-accept-response-streaming
+            - x-user-agent
+            - x-grpc-web
+            - pkg
+            - version
+            - connect-timeout-ms
+            - connect-protocol-version
+            - connect-content-encoding
+            - connect-accept-encoding
+        allowMethods:
+            - POST
+            - GET
+            - OPTIONS
+            - PUT
+            - DELETE
+        allowOrigins:
+            - regex: .*
+        exposeHeaders:
+            - grpc-status
+            - grpc-message
+        maxAge: 100s
+      match:
+        - uri:
+            prefix: /yasuo
+        - uri:
+            prefix: /manabie.yasuo
+      route:
+        - destination:
+            host: yasuo
+            port:
+                number: 5250

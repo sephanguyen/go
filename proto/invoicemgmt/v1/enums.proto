@@ -1,0 +1,112 @@
+syntax = "proto3";
+
+package invoicemgmt.v1;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/invoicemgmt/v1;invoice_pb";
+
+enum InvoiceStatus {
+  DRAFT = 0;
+  ISSUED = 1;
+  VOID = 2;
+  FAILED = 3;
+  PAID = 4;
+  REFUNDED = 5;
+  ALL_STATUS = 6;
+}
+
+enum PaymentMethod {
+  DIRECT_DEBIT = 0;
+  CONVENIENCE_STORE = 1;
+  CASH = 2;
+  BANK_TRANSFER = 3;
+  NO_DEFAULT_PAYMENT = 4;
+}
+
+enum RefundMethod {
+  REFUND_CASH = 0;
+  REFUND_BANK_TRANSFER = 1;
+}
+
+enum BulkIssuePaymentMethod {
+  BULK_ISSUE_CONVENIENCE_STORE = 0;
+  BULK_ISSUE_DEFAULT_PAYMENT = 1;
+}
+
+enum PaymentStatus {
+  PAYMENT_PENDING = 0;
+  PAYMENT_SUCCESSFUL = 1;
+  PAYMENT_FAILED = 2;
+  PAYMENT_REFUNDED = 3;
+  PAYMENT_NONE = 4;
+}
+
+enum InvoiceType {
+  SCHEDULED = 0;
+  MANUAL = 1;
+}
+
+enum InvoiceAction {
+  INVOICE_VOIDED = 0;
+  INVOICE_ISSUED = 1;
+  INVOICE_PAID = 2;
+  INVOICE_REFUNDED = 3;
+  INVOICE_FAILED = 4;
+  EDIT_CREDIT_NOTE = 5;
+  REMOVE_CREDIT_NOTE = 6;
+  NO_ACTION = 7;
+  PAYMENT_UPDATED = 8;
+  INVOICE_ADJUSTED = 9;
+  PAYMENT_ADDED = 10;
+  PAYMENT_APPROVED = 11;
+  PAYMENT_CANCELLED = 12;
+  INVOICE_BULK_ISSUED = 13;
+  PAYMENT_VALIDATE_SUCCESS = 14;
+  PAYMENT_VALIDATE_FAILED = 15;
+}
+
+enum InvoiceScheduleStatus {
+  INVOICE_SCHEDULE_SCHEDULED = 0;
+  INVOICE_SCHEDULE_CANCELLED = 1;
+  INVOICE_SCHEDULE_COMPLETED = 2;
+  INVOICE_SCHEDULE_INCOMPLETE = 3;
+}
+
+enum ImportMasterAction {
+  INVOICE_SCHEDULE = 0;
+  PARTNER_BANK = 1;
+}
+
+enum FileType {
+  TXT = 0;
+  CSV = 1;
+}
+
+enum BankAccountType {
+  SAVINGS_ACCOUNT = 0;
+  CHECKING_ACCOUNT = 1;
+}
+
+enum InvoiceAdjustmentAction {
+  CREATE_ADJUSTMENT = 0;
+  EDIT_ADJUSTMENT = 1;
+  DELETE_ADJUSTMENT = 2;
+} 
+
+enum BulkPaymentStatus {
+  BULK_PAYMENT_PENDING = 0;
+  BULK_PAYMENT_EXPORTED = 1;
+  BULK_PAYMENT_CANCELLED = 2;
+}
+
+enum DataMigrationEntityName {
+  INVOICE_ENTITY = 0;
+  PAYMENT_ENTITY = 1;
+  STUDENT_PAYMENT_DETAIL_ENTITY = 2;
+  BILLING_ADDRESS_ENTITY = 3;
+  BANK_ACCOUNT_ENTITY = 4;
+}
+
+enum BulkPaymentMethod {
+  BULK_PAYMENT_CONVENIENCE_STORE = 0;
+  BULK_PAYMENT_DEFAULT_PAYMENT = 1;
+}

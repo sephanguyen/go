@@ -1,0 +1,92 @@
+{
+	"schema": [
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "grade_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "product_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "product_grade",
+			"policyname": "rls_product_grade",
+			"qual": "permission_check(resource_path, 'product_grade'::text)",
+			"with_check": "permission_check(resource_path, 'product_grade'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "product_grade",
+			"policyname": "rls_product_grade_restrictive",
+			"qual": "permission_check(resource_path, 'product_grade'::text)",
+			"with_check": "permission_check(resource_path, 'product_grade'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "fk_product_grade_product_id",
+			"column_name": "product_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "product_grade_pk",
+			"column_name": "grade_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "product_grade_pk",
+			"column_name": "product_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "product_grade",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

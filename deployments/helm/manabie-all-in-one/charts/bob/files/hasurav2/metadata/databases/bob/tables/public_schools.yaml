@@ -1,0 +1,130 @@
+table:
+  schema: public
+  name: schools
+object_relationships:
+  - name: city
+    using:
+      foreign_key_constraint_on: city_id
+  - name: district
+    using:
+      foreign_key_constraint_on: district_id
+array_relationships:
+  - name: classes
+    using:
+      foreign_key_constraint_on:
+        column: school_id
+        table:
+          schema: public
+          name: classes
+  - name: courses
+    using:
+      foreign_key_constraint_on:
+        column: school_id
+        table:
+          schema: public
+          name: courses
+  - name: info_notifications
+    using:
+      foreign_key_constraint_on:
+        column: owner
+        table:
+          schema: public
+          name: info_notifications
+  - name: partner_form_configs
+    using:
+      foreign_key_constraint_on:
+        column: partner_id
+        table:
+          schema: public
+          name: partner_form_configs
+  - name: school_configs
+    using:
+      foreign_key_constraint_on:
+        column: school_id
+        table:
+          schema: public
+          name: school_configs
+  - name: students
+    using:
+      foreign_key_constraint_on:
+        column: school_id
+        table:
+          schema: public
+          name: students
+select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+        - is_merge
+        - is_system_school
+        - country
+        - city_id
+        - district_id
+        - school_id
+        - point
+        - name
+        - phone_number
+        - created_at
+        - updated_at
+      filter: {}
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+        - is_merge
+        - is_system_school
+        - country
+        - city_id
+        - district_id
+        - school_id
+        - point
+        - name
+        - phone_number
+        - created_at
+        - updated_at
+      filter:
+        _or:
+          - school_id:
+              _in: X-Hasura-School-Ids
+          - students:
+              class_members:
+                class:
+                  school_id:
+                    _in: X-Hasura-School-Ids
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+        - is_merge
+        - is_system_school
+        - city_id
+        - district_id
+        - school_id
+        - point
+        - country
+        - name
+        - phone_number
+        - created_at
+        - updated_at
+      filter:
+        school_id:
+          _in: X-Hasura-School-Ids
+      allow_aggregations: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+        - is_merge
+        - is_system_school
+        - country
+        - city_id
+        - district_id
+        - school_id
+        - point
+        - name
+        - phone_number
+        - created_at
+        - updated_at
+      filter:
+        school_id:
+          _in: X-Hasura-School-Ids
+      allow_aggregations: true

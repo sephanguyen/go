@@ -1,0 +1,139 @@
+syntax = "proto3";
+
+package eureka.v1;
+
+import "common/v1/contents.proto";
+import "eureka/v1/assignments.proto";
+import "eureka/v1/enums.proto";
+import "google/protobuf/wrappers.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/eureka/v1;epb";
+
+message DuplicateBookRequest {
+  string book_id = 1;
+  string book_name = 2;
+};
+
+message DuplicateBookResponse {
+  string newBookID = 1;
+  repeated string new_topic_id = 2;
+  repeated string org_topic_id = 3;
+};
+
+message UpsertLOsAndAssignmentsRequest {
+  repeated common.v1.LearningObjective learning_objectives = 1;
+  repeated Assignment assignments = 2;
+}
+
+message UpsertLOsAndAssignmentsResponse {
+  repeated string lo_ids = 1;
+  repeated string assignment_ids = 2;
+}
+
+message UpdateDisplayOrdersOfLOsAndAssignmentsRequest {
+  message LearningObjective {
+    string lo_id = 1;
+    int32 display_order = 2;
+    string topic_id = 3;
+  }
+  message Assignment {
+    string assignment_id = 1;
+    int32 display_order = 2;
+    string topic_id = 3;
+  }
+  repeated LearningObjective learning_objectives = 1;
+  repeated Assignment assignments = 2;
+}
+
+message UpdateDisplayOrdersOfLOsAndAssignmentsResponse {
+  message LearningObjective {
+    string lo_id = 1;
+    string topic_id = 2;
+  }
+  message Assignment {
+    string assignment_id = 1;
+    string topic_id = 2;
+  }
+  repeated LearningObjective learning_objectives = 1;
+  repeated Assignment assignments = 2;
+}
+
+message CompleteStudyPlanItemRequest {
+  string study_plan_item_id = 1;
+}
+
+message CompleteStudyPlanItemResponse {
+  bool is_success = 1;
+}
+
+message SubmitQuizAnswersRequest {
+  string set_id = 1;
+  repeated QuizAnswer quiz_answer = 2;
+}
+
+message SubmitQuizAnswersResponse {
+  repeated common.v1.AnswerLog logs = 1;
+  google.protobuf.UInt32Value total_graded_point = 2;
+  google.protobuf.UInt32Value total_point = 3;
+  int32 total_correct_answer = 4;
+  int32 total_question = 5;
+  ExamLOSubmissionResult submission_result = 6;
+}
+
+message Answer {
+  oneof format {
+    uint32 selected_index = 1;
+    string filled_text = 2;
+    string submitted_key = 3;
+  }
+}
+
+message QuizAnswer {
+  string quiz_id = 1;
+  repeated Answer answer = 2;
+}
+
+message FinishFlashCardStudyProgressRequest  {
+  string study_set_id = 1;
+  string student_id = 2;
+  string lo_id = 3;
+  string study_plan_item_id = 4;
+  bool is_restart = 5;
+}
+
+message FinishFlashCardStudyProgressResponse {
+  bool is_success = 1;
+}
+
+message UpdateFlashCardStudyProgressRequest  {
+  string study_set_id = 1;
+  string student_id = 2;
+  repeated string skipped_question_ids = 3;
+  repeated string remembered_question_ids = 4;
+  int32 studying_index = 5;  // (count from 0)
+}
+
+message UpdateFlashCardStudyProgressResponse {
+  bool is_success = 1;
+}
+
+message AddBooksRequest {
+  repeated string book_ids = 1;
+  string course_id = 2;
+}
+
+message AddBooksResponse {
+  bool successful = 1;
+}
+
+service CourseModifierService {
+  rpc DuplicateBook(DuplicateBookRequest) returns (DuplicateBookResponse) {};//TODO: LM team, review 1 API for new flow x
+  rpc UpsertLOsAndAssignments(UpsertLOsAndAssignmentsRequest) returns (UpsertLOsAndAssignmentsResponse); //TODO: remove it
+  rpc UpdateDisplayOrdersOfLOsAndAssignments(UpdateDisplayOrdersOfLOsAndAssignmentsRequest) // x
+      returns (UpdateDisplayOrdersOfLOsAndAssignmentsResponse);
+  rpc CompleteStudyPlanItem(CompleteStudyPlanItemRequest) returns (CompleteStudyPlanItemResponse);// seem we can remove it //https://manabie.slack.com/archives/C03MTKVUWCT/p1661402643270749?thread_ts=1661246423.780899&cid=C03MTKVUWCT TODO: remove it
+  rpc SubmitQuizAnswers(SubmitQuizAnswersRequest) returns (SubmitQuizAnswersResponse);
+  rpc FinishFlashCardStudyProgress(FinishFlashCardStudyProgressRequest) returns (FinishFlashCardStudyProgressResponse); // refactor, TODO: PHASE 3
+  rpc UpdateFlashCardStudyProgress(UpdateFlashCardStudyProgressRequest) returns (UpdateFlashCardStudyProgressResponse);
+  rpc AddBooks(AddBooksRequest) returns (AddBooksResponse);
+}

@@ -1,0 +1,157 @@
+{
+	"schema": [
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "learning_material_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "progression_answer_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "progression_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "quiz_external_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "shuffled_quiz_set_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "student_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "student_index_answer",
+			"data_type": "ARRAY",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "student_text_answer",
+			"data_type": "ARRAY",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "study_plan_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "submitted_keys_answer",
+			"data_type": "ARRAY",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "lo_progression_answer",
+			"policyname": "rls_lo_progression_answer",
+			"qual": "permission_check(resource_path, 'lo_progression_answer'::text)",
+			"with_check": "permission_check(resource_path, 'lo_progression_answer'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "lo_progression_answer",
+			"policyname": "rls_lo_progression_answer_restrictive",
+			"qual": "permission_check(resource_path, 'lo_progression_answer'::text)",
+			"with_check": "permission_check(resource_path, 'lo_progression_answer'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "lo_progression_answer_fk",
+			"column_name": "progression_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "lo_progression_answer_pk",
+			"column_name": "progression_answer_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "lo_progression_answer_un",
+			"column_name": "progression_id",
+			"constraint_type": "UNIQUE"
+		},
+		{
+			"constraint_name": "lo_progression_answer_un",
+			"column_name": "quiz_external_id",
+			"constraint_type": "UNIQUE"
+		}
+	],
+	"table_name": "lo_progression_answer",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

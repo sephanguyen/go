@@ -1,0 +1,6 @@
+- template: 1
+  tableName: user_access_paths
+  permissionPrefix: user.user
+  permissions:
+    postgres: []
+    hasura: []

@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package yasuo.v1;
+
+import "google/protobuf/empty.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/yasuo/v1;ypb";
+
+service UploadReaderService {
+    rpc RetrieveUploadInfo(google.protobuf.Empty) returns (RetrieveUploadInfoResponse);
+  }
+  
+message RetrieveUploadInfoResponse {
+    string endpoint = 1;
+    string bucket = 2;
+}
+  

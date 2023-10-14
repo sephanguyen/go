@@ -1,0 +1,43 @@
+name: tbd.create_release_tag
+
+on:
+  push:
+    branches:
+      - develop
+      - hotfix/202**
+      - hotfixes/202**
+    paths-ignore:
+      - ".githooks/**"
+      - ".github/**"
+      - ".vscode/**"
+      - "deployments/terraform/**"
+      - "docs/**"
+      - "examples/**"
+      - "features/**"
+      - "mock/**"
+      - "scripts/**"
+      - ".golangci.yml"
+      - ".sops.yaml"
+      - "atlantis.yaml"
+      - "Makefile"
+      - "README.md"
+  workflow_dispatch:
+
+env:
+  GITHUB_TOKEN: ${{ secrets.BUILD_GITHUB_TOKEN }}
+
+jobs:
+  create-release-tag:
+    permissions:
+      contents: "read"
+      id-token: "write"
+    runs-on: ["self-hosted", "100m-400mi", "spot", "persistent"]
+    steps:
+      - uses: actions/checkout@v3
+        timeout-minutes: 5
+        with:
+          ref: develop
+
+      - name: Create release tag
+        timeout-minutes: 5
+        uses: ./.github/actions/tbd.create-release-tag

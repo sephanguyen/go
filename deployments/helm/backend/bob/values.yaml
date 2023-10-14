@@ -1,0 +1,264 @@
+adminHttp:
+    - corsPolicy:
+        allowHeaders:
+            - authorization
+            - grpc-timeout
+            - content-type
+            - keep-alive
+            - user-agent
+            - cache-control
+            - content-transfer-encoding
+            - token
+            - x-accept-content-transfer-encoding
+            - x-accept-response-streaming
+            - x-request-id
+            - x-user-agent
+            - x-graphql-mesh-authorization
+            - x-grpc-web
+            - if-none-match
+            - pkg
+            - version
+            - connect-timeout-ms
+            - connect-protocol-version
+            - connect-content-encoding
+            - connect-accept-encoding
+        allowMethods:
+            - POST
+            - GET
+            - OPTIONS
+            - PUT
+            - DELETE
+        allowOrigins:
+            - regex: .*
+        exposeHeaders:
+            - grpc-status
+            - grpc-message
+            - etag
+        maxAge: 100s
+      match:
+        - uri:
+            exact: /healthz
+        - uri:
+            prefix: /v1
+        - uri:
+            prefix: /console
+        - uri:
+            prefix: //v1
+        - uri:
+            prefix: /v2
+      route:
+        - destination:
+            host: bob-hasura
+            port:
+                number: 8080
+adminHttpV2:
+    - match:
+        - uri:
+            prefix: /bobv2/
+      rewrite:
+        uri: /
+      route:
+        - destination:
+            host: bob-hasurav2
+            port:
+                number: 8080
+affinity: {}
+affinityOverride: {}
+alloydbProxy:
+    alloydbConnName: ""
+    enabled: false
+    image:
+        repository: gcr.io/alloydb-connectors/alloydb-auth-proxy
+        tag: 0.5.0
+    resources:
+        requests:
+            cpu: 5m
+            memory: 16Mi
+apiHttp:
+    - fault:
+        abort:
+            httpStatus: 403
+            percentage:
+                value: 100
+      match:
+        - uri:
+            prefix: /manabie.bob.Internal
+        - uri:
+            prefix: /bob.v1.InternalReaderService
+        - uri:
+            prefix: /bob.v1.InternalModifierService
+        - uri:
+            prefix: /bob.v1.InternalService
+      route:
+        - destination:
+            host: bob
+            port:
+                number: 5050
+    - match:
+        - uri:
+            prefix: /bob.v1.NotificationModifierService
+        - uri:
+            prefix: /bob.v1.NotificationReaderService
+        - uri:
+            exact: /manabie.bob.UserService/UpdateUserDeviceToken
+      route:
+        - destination:
+            host: notificationmgmt
+            port:
+                number: 6950
+    - match:
+        - uri:
+            prefix: /bob
+        - uri:
+            prefix: /manabie.bob
+      route:
+        - destination:
+            host: bob
+            port:
+                number: 5050
+caching:
+    enabled: false
+    resources:
+        requests:
+            memory: 32Mi
+clientVersion: v0.30.0
+enabled: true
+grpcPort: 5050
+hasura:
+    anonymous:
+        enabled: true
+    enableConsole: true
+    enabledApis: metadata,graphql
+    pgConnections: 8
+    pgTimeout: 10
+    resources:
+        requests:
+            cpu: 10m
+            memory: 256Mi
+    service:
+        port: 8080
+        type: ClusterIP
+hasuraEnabled: true
+hasurav2:
+    allowList: true
+    enableConsole: true
+    enableRemoteSchemaPermission: false
+    enabledApis: metadata,graphql
+    experimentFeatures: naming_convention
+    namingConvention: hasura-default
+    resources:
+        requests:
+            memory: 256Mi
+    service:
+        port: 8080
+        type: ClusterIP
+    unauthorized:
+        enable: true
+        role: anonymous
+httpPort: 5080
+jobs:
+    migrate-partner-form-configs:
+        cmd: bob_migrate_partner_form_configs
+    sync-lesson-conversation:
+        cmd: bob_sync_lesson_conversations
+metrics:
+    enabled: true
+    podAnnotations:
+        prometheus.io/port: "8888"
+        prometheus.io/scheme: http
+        prometheus.io/scrape: "true"
+migrationEnabled: true
+pdb:
+    enabled: false
+podAnnotations:
+    sidecar.istio.io/proxyCPU: 10m
+    sidecar.istio.io/proxyMemory: 64Mi
+readinessProbe:
+    enabled: true
+resources:
+    requests:
+        memory: 192Mi
+service:
+    port: 5050
+    type: ClusterIP
+web:
+    port: 5060
+    type: ClusterIP
+webHttp:
+    - fault:
+        abort:
+            httpStatus: 403
+            percentage:
+                value: 100
+      match:
+        - uri:
+            prefix: /manabie.bob.Internal
+        - uri:
+            prefix: /bob.v1.InternalReaderService
+        - uri:
+            prefix: /bob.v1.InternalModifierService
+        - uri:
+            prefix: /bob.v1.InternalService
+      route:
+        - destination:
+            host: bob
+            port:
+                number: 5050
+    - match:
+        - uri:
+            prefix: /bob.v1.NotificationModifierService
+        - uri:
+            prefix: /bob.v1.NotificationReaderService
+        - uri:
+            exact: /manabie.bob.UserService/UpdateUserDeviceToken
+      route:
+        - destination:
+            host: notificationmgmt
+            port:
+                number: 6950
+    - corsPolicy:
+        allowHeaders:
+            - authorization
+            - grpc-timeout
+            - content-type
+            - keep-alive
+            - user-agent
+            - cache-control
+            - content-transfer-encoding
+            - token
+            - x-accept-content-transfer-encoding
+            - x-accept-response-streaming
+            - x-request-id
+            - x-user-agent
+            - x-graphql-mesh-authorization
+            - x-grpc-web
+            - if-none-match
+            - pkg
+            - version
+            - connect-timeout-ms
+            - connect-protocol-version
+            - connect-content-encoding
+            - connect-accept-encoding
+        allowMethods:
+            - POST
+            - GET
+            - OPTIONS
+            - PUT
+            - DELETE
+        allowOrigins:
+            - regex: .*
+        exposeHeaders:
+            - grpc-status
+            - grpc-message
+            - etag
+        maxAge: 100s
+      match:
+        - uri:
+            prefix: /bob
+        - uri:
+            prefix: /manabie.bob
+      route:
+        - destination:
+            host: bob
+            port:
+                number: 5050

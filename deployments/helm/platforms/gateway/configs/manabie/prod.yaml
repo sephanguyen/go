@@ -1,0 +1,11 @@
+primary:
+  api: api.localhost
+  web-api: web-api.localhost
+  compass: compass.localhost
+  portal: portal.localhost
+
+secondary:
+  api: api-secondary.localhost
+  web-api: web-api-secondary.localhost
+  compass: compass-secondary.localhost
+  portal: portal-secondary.localhost

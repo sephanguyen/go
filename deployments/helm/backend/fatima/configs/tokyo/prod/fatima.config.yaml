@@ -1,0 +1,6 @@
+common:
+  google_cloud_project: student-coach-e1e95
+issuers:
+  - issuer: manabie
+    audience: prod-tokyo
+    jwks_endpoint: http://shamir:5680/.well-known/jwks.json

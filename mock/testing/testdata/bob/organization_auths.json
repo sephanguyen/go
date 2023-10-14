@@ -1,0 +1,58 @@
+{
+	"schema": [
+		{
+			"column_name": "auth_project_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "auth_tenant_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "organization_id",
+			"data_type": "integer",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "organization_auths",
+			"policyname": null,
+			"qual": null,
+			"with_check": null,
+			"relrowsecurity": null,
+			"relforcerowsecurity": null,
+			"permissive": null,
+			"roles": {
+				"Elements": null,
+				"Dimensions": null,
+				"Status": 1
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "organization_auths__pk",
+			"column_name": "auth_project_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "organization_auths__pk",
+			"column_name": "auth_tenant_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "organization_auths__pk",
+			"column_name": "organization_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "organization_auths",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

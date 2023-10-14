@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package lessonmgmt.v1;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/lessonmgmt/v1;lpb";
+
+message PortForwardClassDoRequest {
+  string class_do_id = 1;
+  string body = 2; // json stringify format
+}
+
+message PortForwardClassDoResponse {
+  string response = 1;
+}
+
+service PortForwardClassDoService {
+  rpc PortForwardClassDo(PortForwardClassDoRequest) returns (PortForwardClassDoResponse);
+}

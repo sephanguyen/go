@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package timesheet.v1;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/timesheet/v1;tpb";
+
+enum TimesheetStatus{
+  TIMESHEET_STATUS_NONE = 0;
+  TIMESHEET_STATUS_DRAFT = 1;
+  TIMESHEET_STATUS_SUBMITTED = 2;
+  TIMESHEET_STATUS_APPROVED = 3;
+  TIMESHEET_STATUS_REJECTED = 4;
+  TIMESHEET_STATUS_CONFIRMED = 5;
+}
+
+enum TimesheetConfigType {
+  OTHER_WORKING_HOURS = 0;
+}
+
+enum TransportationType {
+  TYPE_INVALID = 0;
+  TYPE_TRAIN = 1;
+  TYPE_BUS = 2;
+  TYPE_OTHERS = 3;
+}

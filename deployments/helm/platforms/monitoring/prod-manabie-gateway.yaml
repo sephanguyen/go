@@ -1,0 +1,197 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: thanos-query-frontend
+  namespace: istio-system
+spec:
+  commonName: thanos.manabie.io
+  dnsNames:
+    - thanos.manabie.io
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt
+  secretName: cert-thanos-query-frontend
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: thanos-store
+  namespace: istio-system
+spec:
+  commonName: thanos-store.manabie.io
+  dnsNames:
+    - thanos-store.manabie.io
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt
+  secretName: cert-thanos-store
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: grafana
+  namespace: istio-system
+spec:
+  commonName: grafana.manabie.io
+  dnsNames:
+    - grafana.manabie.io
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt
+  secretName: cert-grafana
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: grafana-oncall
+  namespace: istio-system
+spec:
+  commonName: oncall.manabie.io
+  dnsNames:
+    - oncall.manabie.io
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt
+  secretName: cert-grafana-oncall
+---
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: monitoring
+  namespace: istio-system
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - hosts:
+    - thanos.manabie.io
+    port:
+      name: https-thanos-query-frontend
+      number: 443
+      protocol: HTTPS
+    tls:
+      credentialName: cert-thanos-query-frontend
+      mode: SIMPLE
+      privateKey: sds
+      serverCertificate: sds
+  - hosts:
+    - thanos-store.manabie.io
+    port:
+      name: https-thanos-store
+      number: 443
+      protocol: HTTPS
+    tls:
+      credentialName: cert-thanos-store
+      mode: SIMPLE
+      privateKey: sds
+      serverCertificate: sds
+  - hosts:
+    - grafana.manabie.io
+    port:
+      name: https-grafana
+      number: 443
+      protocol: HTTPS
+    tls:
+      credentialName: cert-grafana
+      mode: SIMPLE
+      privateKey: sds
+      serverCertificate: sds
+  - hosts:
+    - oncall.manabie.io
+    port:
+      name: https-grafana-oncall
+      number: 443
+      protocol: HTTPS
+    tls:
+      credentialName: cert-grafana-oncall
+      mode: SIMPLE
+      privateKey: sds
+      serverCertificate: sds
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: thanos-query-frontend
+  namespace: monitoring
+spec:
+  exportTo:
+  - istio-system
+  gateways:
+  - istio-system/monitoring
+  hosts:
+  - thanos.manabie.io
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: thanos-query-frontend
+        port:
+          number: 9090
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: thanos-store
+  namespace: monitoring
+spec:
+  exportTo:
+  - istio-system
+  gateways:
+  - istio-system/monitoring
+  hosts:
+  - thanos-store.manabie.io
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: thanos-storegateway
+        port:
+          number: 10901
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: grafana
+  namespace: monitoring
+spec:
+  exportTo:
+  - istio-system
+  gateways:
+  - istio-system/monitoring
+  hosts:
+  - grafana.manabie.io
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: grafana
+        port:
+          number: 80
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: oncall
+  namespace: monitoring
+spec:
+  exportTo:
+  - istio-system
+  gateways:
+  - istio-system/monitoring
+  hosts:
+  - oncall.manabie.io
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: oncall-engine
+        port:
+          number: 8080

@@ -1,0 +1,24 @@
+{{- if (ne "jprep" .Values.global.vendor) }}
+{
+  "name": "{{ .Values.global.environment }}_{{ .Values.global.vendor }}_calendar_to_bob_day_info_sink_connector",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+    "tasks.max": "1",
+    "topics": "{{ .Values.global.environment }}.{{ .Values.global.vendor }}.calendar.public.day_info",
+    "connection.url": "${file:/config/kafka-connect-config.properties:bob_url}",
+    "transforms": "unwrap,route",
+    "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+    "transforms.unwrap.drop.tombstones": "true",
+    "transforms.unwrap.delete.handling.mode": "drop",
+    "transforms.route.type": "org.apache.kafka.connect.transforms.RegexRouter",
+    "transforms.route.regex": "([^.]+).([^.]+).([^.]+).([^.]+).([^.]+)",
+    "transforms.route.replacement": "$5",
+    "auto.create": "false",
+    "insert.mode": "upsert",
+    "delete.enabled": "false",
+    "pk.mode": "record_value",
+    "pk.fields": "date,location_id",
+    "fields.whitelist": "date,location_id,day_type_id,opening_time,status,created_at,updated_at,resource_path,time_zone,deleted_at"
+  }
+}
+{{- end }}

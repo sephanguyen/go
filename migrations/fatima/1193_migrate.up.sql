@@ -1,0 +1,1 @@
+ALTER TABLE student_package_order DROP CONSTRAINT IF EXISTS fk_student_package_order_upcoming_student_package_id;

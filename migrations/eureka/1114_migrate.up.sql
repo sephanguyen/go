@@ -1,0 +1,1 @@
+ALTER TABLE ONLY public.individual_study_plan ALTER COLUMN resource_path SET DEFAULT autoFillResourcePath();

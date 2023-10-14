@@ -1,0 +1,20 @@
+common:
+  google_cloud_project: student-coach-e1e95
+  firebase_project: live-manabie
+issuers:
+  - issuer: manabie
+    audience: b5e72419a81ca9e1a5
+    jwks_endpoint: http://shamir:5680/.well-known/jwks.json
+  - issuer: https://securetoken.google.com/student-coach-e1e95
+    audience: student-coach-e1e95
+    jwks_endpoint: https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com
+jwt_applicant: b5e72419a81ca9e1a5
+storage:
+  bucket: jprep-backend
+natsjs:
+  address: "nats://nats-jetstream.prod-jprep-nats-jetstream.svc.cluster.local:4223"
+elasticsearch:
+  addresses:
+    - https://elasticsearch-elastic.prod-jprep-elastic.svc.cluster.local:9200
+scheduled_notification:
+  is_running_for_all_tenants: true

@@ -1,0 +1,100 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "jaeger-all-in-one.fullname" . }}
+  labels:
+    {{- include "jaeger-all-in-one.labels" . | nindent 4 }}
+spec:
+{{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+{{- end }}
+{{- if .Values.persistence.enabled }}
+  strategy:
+    type: Recreate
+{{- end }}
+  selector:
+    matchLabels:
+      {{- include "jaeger-all-in-one.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+    {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      labels:
+        {{- include "jaeger-all-in-one.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "jaeger-all-in-one.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - --query.ui-config=/etc/jaeger/jaeger-ui.json
+          {{- if not .Values.persistence.enabled }}
+            - --memory.max-traces=1000
+          {{- end }}
+          env:
+            - name: COLLECTOR_ZIPKIN_HOST_PORT
+              value: ":9411"
+            - name: METRICS_STORAGE_TYPE
+              value: prometheus
+            - name: PROMETHEUS_SERVER_URL
+              value: http://admin:30e7d92a4a20c5cebe38124b@prometheus-server.monitoring.svc.cluster.local # username/password of Prometheus in staging cluster
+            {{- if .Values.persistence.enabled }}
+            - name: SPAN_STORAGE_TYPE
+              value: badger
+            - name: BADGER_EPHEMERAL
+              value: "false"
+            - name: BADGER_DIRECTORY_VALUE
+              value: /badger/data
+            - name: BADGER_DIRECTORY_KEY
+              value: /badger/key
+            {{- else }}
+            - name: SPAN_STORAGE_TYPE
+              value: memory
+            {{- end }}
+          volumeMounts:
+            - name: ui-config
+              mountPath: /etc/jaeger/jaeger-ui.json
+              subPath: jaeger-ui.json
+          {{- if .Values.persistence.enabled }}
+            - name: data
+              mountPath: /badger
+          {{- end }}
+          ports:
+            - name: http-ui
+              containerPort: 16686
+              protocol: TCP
+            - name: jaeger-thrift-h
+              containerPort: 14268
+              protocol: TCP
+            - name: jaeger-grpc
+              containerPort: 14250
+              protocol: TCP
+            - name: grpc-query
+              containerPort: 16685
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: ui-config
+          configMap:
+            name: {{ include "jaeger-all-in-one.fullname" . }}-ui
+      {{- if .Values.persistence.enabled }}
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ include "jaeger-all-in-one.fullname" . }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

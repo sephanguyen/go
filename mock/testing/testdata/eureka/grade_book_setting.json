@@ -1,0 +1,73 @@
+{
+	"schema": [
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "setting",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_by",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "grade_book_setting",
+			"policyname": "rls_grade_book_setting",
+			"qual": "permission_check(resource_path, 'grade_book_setting'::text)",
+			"with_check": "permission_check(resource_path, 'grade_book_setting'::text)",
+			"relrowsecurity": false,
+			"relforcerowsecurity": false,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "grade_book_setting_pk",
+			"column_name": "setting",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "grade_book_setting",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

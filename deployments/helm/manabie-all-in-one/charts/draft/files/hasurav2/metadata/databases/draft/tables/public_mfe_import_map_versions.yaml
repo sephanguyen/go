@@ -1,0 +1,15 @@
+table:
+  schema: public
+  name: mfe_import_map_versions
+select_permissions:
+  - role: user
+    permission:
+      columns:
+        - id
+        - environment
+        - organization
+        - deployed_at
+        - import_map
+        - type
+      filter: {}
+      allow_aggregations: true

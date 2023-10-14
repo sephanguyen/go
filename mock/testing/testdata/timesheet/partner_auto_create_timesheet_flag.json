@@ -1,0 +1,99 @@
+{
+	"schema": [
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "flag_on",
+			"data_type": "boolean",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "partner_auto_create_timesheet_flag",
+			"policyname": "rls_partner_auto_create_timesheet_flag",
+			"qual": "permission_check(resource_path, 'partner_auto_create_timesheet_flag'::text)",
+			"with_check": "permission_check(resource_path, 'partner_auto_create_timesheet_flag'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "partner_auto_create_timesheet_flag",
+			"policyname": "rls_partner_auto_create_timesheet_flag_restrictive",
+			"qual": "permission_check(resource_path, 'partner_auto_create_timesheet_flag'::text)",
+			"with_check": "permission_check(resource_path, 'partner_auto_create_timesheet_flag'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "partner_auto_create_timesheet_flag__id__pk",
+			"column_name": "id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "partner_auto_create_timesheet_flag_resource_unique",
+			"column_name": "resource_path",
+			"constraint_type": "UNIQUE"
+		}
+	],
+	"table_name": "partner_auto_create_timesheet_flag",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

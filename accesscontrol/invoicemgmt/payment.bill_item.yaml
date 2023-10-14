@@ -1,0 +1,6 @@
+- template: 1
+  tableName: bill_item
+  permissionPrefix: payment.bill_item
+  permissions:
+    postgres: []
+    hasura: []

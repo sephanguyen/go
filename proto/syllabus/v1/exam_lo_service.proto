@@ -1,0 +1,287 @@
+syntax = "proto3";
+
+package syllabus.v1;
+
+import "syllabus/v1/learning_material.proto";
+import "syllabus/v1/study_plan.proto";
+import "syllabus/v1/enums.proto";
+import "common/v1/requests.proto";
+import "common/v1/enums.proto";
+import "common/v1/contents.proto";
+import "common/v1/question_group.proto";
+import "syllabus/v1/statistics_service.proto";
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/syllabus/v1;sspb";
+
+
+//ExamLOBase is exam lo learning type metadata
+message ExamLOBase {
+    //Learning Material metadata
+    LearningMaterialBase base = 1;
+    string instruction = 2;
+    google.protobuf.Int32Value grade_to_pass = 3;
+    bool manual_grading = 4;
+    google.protobuf.Int32Value time_limit = 5;
+    int32 total_question = 6;
+    bool approve_grading = 7;
+    bool grade_capping = 8;
+    google.protobuf.Int32Value maximum_attempt = 9;
+    ExamLOReviewOption review_option = 10;
+}
+
+message InsertExamLORequest{
+    // We only need send some fields bellow
+    // 1. LearningMaterialBase
+        // 1. name
+        // 2. topic_id
+        // 3. No learning_material_id
+        // 4. No type
+        // 5. No display_order
+    // 2. Instruction
+    // 3. grade_to_pass
+    // 4. manual_grading
+    ExamLOBase exam_lo = 1;
+}
+
+message UpsertGradeBookSettingRequest {
+    GradeBookSetting setting = 1;
+}
+
+message UpsertGradeBookSettingResponse {}
+
+message InsertExamLOResponse {
+    // return generated Learning Material ULID
+    string learning_material_id = 1;
+}
+
+message UpdateExamLORequest{
+    // We only need send some fields bellow
+    // 1. LearningMaterialBase
+        // 1. learning_material_id
+        // 2. name
+        // 3. No topic_id
+        // 4. No type
+        // 5. No display_order
+    // 2. Instruction
+    // 3. grade_to_pass
+    // 4. manual_grading
+    ExamLOBase exam_lo = 1;
+}
+
+// UpdateExamLOResponse is empty message 
+message UpdateExamLOResponse{
+}
+
+message ListExamLORequest {
+    repeated string learning_material_ids = 1;
+}
+
+message ListExamLOResponse {
+    repeated ExamLOBase exam_los = 1;
+}
+
+message ListHighestResultExamLOSubmissionRequest {
+    repeated StudyPlanItemIdentity study_plan_item_identities = 1;
+}
+
+message ListHighestResultExamLOSubmissionResponse {
+    message StudyPlanItemResult {
+        StudyPlanItemIdentity study_plan_item_identity = 1;
+        ExamLOSubmissionResult latest_exam_lo_submission_result = 2;
+    }
+    repeated StudyPlanItemResult study_plan_item_results = 1;
+}
+
+message ListExamLOSubmissionRequest {
+    message SubmittedDate {
+        google.protobuf.Timestamp start = 1;
+        google.protobuf.Timestamp end = 2;
+    }
+    message LastUpdatedDate {
+        google.protobuf.Timestamp start = 1;
+        google.protobuf.Timestamp end = 2;
+    }
+    common.v1.Paging paging = 1;
+    google.protobuf.StringValue course_id = 2;
+    repeated string class_ids = 3;
+    repeated SubmissionStatus statuses = 4;
+    google.protobuf.Timestamp start = 5;
+    google.protobuf.Timestamp end = 6;
+    repeated string location_ids = 7;
+    google.protobuf.StringValue student_name = 8;
+    google.protobuf.StringValue exam_name = 9;
+    google.protobuf.StringValue corrector_id = 10;
+    SubmittedDate submitted_date = 11;
+    LastUpdatedDate last_updated_date = 12;
+    google.protobuf.StringValue submission_id = 13; 
+}
+
+message ListExamLOSubmissionResponse {
+    common.v1.Paging next_page = 1;
+    repeated ExamLOSubmission items = 2;
+}
+
+message ExamLOSubmission {
+    string submission_id = 1;
+    StudyPlanItemIdentity study_plan_item_identity = 2;
+    string shuffled_quiz_set_id = 3;
+    SubmissionStatus submission_status = 4;
+    ExamLOSubmissionResult submission_result = 5;
+    google.protobuf.Timestamp submitted_at = 6;
+    google.protobuf.Timestamp updated_at = 7;
+    string course_id = 8;
+    google.protobuf.Timestamp start_date = 9;
+    google.protobuf.Timestamp end_date = 10;
+    ApproveGradingAction last_action = 11;
+    google.protobuf.Timestamp last_action_at = 12;
+    google.protobuf.StringValue last_action_by = 13;
+    google.protobuf.StringValue corrector_id = 14;
+    google.protobuf.Timestamp mark_date = 15;
+}
+
+message ListExamLOSubmissionScoreRequest {
+    string submission_id = 1;
+    string shuffled_quiz_set_id = 2;
+}
+
+message ListExamLOSubmissionScoreResponse {
+    repeated ExamLOSubmissionScore submission_scores = 1;
+    string teacher_feedback = 2;
+    SubmissionStatus submission_status = 3;
+    ExamLOSubmissionResult submission_result = 4;
+    google.protobuf.UInt32Value total_graded_point = 5; // (sum from point fields union from 2 table answer & score)
+    google.protobuf.UInt32Value total_point = 6; // (total_point in exam_lo_submission table)
+    repeated common.v1.QuestionGroup question_groups = 7;
+}
+
+message ExamLOSubmissionScore {
+    string shuffle_quiz_set_id = 1;
+    common.v1.QuizType quiz_type = 2;
+    repeated uint32 selected_index = 3;
+    repeated uint32 correct_index = 4;
+    repeated string filled_text = 5;
+    repeated string correct_text = 6;
+    repeated bool correctness = 7;
+    bool is_accepted = 8;
+    common.v1.QuizCore core = 9;
+    string teacher_comment = 10; // (question level)
+    google.protobuf.UInt32Value graded_point = 11; // (point student gained for that question, if there is no record in score table -> get from answer table)
+    google.protobuf.UInt32Value point = 12; // (point from answer table)
+    oneof result {
+        common.v1.OrderingResult ordering_result = 13;
+    }
+}
+
+message ListExamLOSubmissionResultRequest {
+    repeated StudyPlanItemIdentity study_plan_item_identities = 1;
+}
+
+message ListExamLOSubmissionResultResponse {
+    message item {
+        StudyPlanItemIdentity study_plan_item_identity = 1;
+        ExamLOSubmissions exam_lo_submissions = 2;
+    }
+    repeated item items = 1;
+    common.v1.AchievementCrown highest_crown = 2;
+    int32 total_attempts = 3;
+    HighestQuestionScore highest_score = 4;
+}
+
+message ExamLOSubmissions {
+    repeated ExamLOSubmissionInfo items = 1;
+}
+
+message ExamLOSubmissionInfo {
+    string shuffled_quiz_set_id = 1;
+    google.protobuf.UInt32Value total_graded_point = 2;
+    google.protobuf.UInt32Value total_point = 3;
+    ExamLOSubmissionResult submission_result = 4;
+    SubmissionStatus submission_status = 5;
+    google.protobuf.Timestamp created_at = 6;
+    google.protobuf.Timestamp completed_at = 7;
+    int64 total_learning_time = 8;
+    string submission_id = 9;
+}
+
+message GradeAManualGradingExamSubmissionRequest {
+    string submission_id = 1;
+    string shuffled_quiz_set_id = 2;
+    string teacher_feedback = 3;
+    SubmissionStatus submission_status = 4;
+    repeated TeacherExamGrade teacher_exam_grades = 5;
+}
+
+message TeacherExamGrade {
+    string quiz_id = 1;
+    google.protobuf.UInt32Value teacher_point_given = 2;
+    string teacher_comment = 3;
+    repeated bool correctness = 4;
+    bool is_accepted = 5;
+}
+
+message GradeAManualGradingExamSubmissionResponse {
+    google.protobuf.UInt32Value total_graded_point = 1;
+}
+
+message DeleteExamLOSubmissionRequest{
+    string submission_id = 1;
+}
+
+message DeleteExamLOSubmissionResponse{
+}
+
+message BulkApproveRejectSubmissionRequest {
+    ApproveGradingAction approveGradingAction = 1;
+    repeated string submission_ids = 2;
+}
+
+message BulkApproveRejectSubmissionResponse {
+    repeated string invalid_submission_ids = 1;
+}
+
+message RetrieveMetadataTaggingResultRequest{
+    string submission_id = 1;
+}
+
+message RetrieveMetadataTaggingResultResponse {
+    repeated TaggingResult tagging_results = 1;
+}
+
+message TaggingResult {
+    string tag_id = 1;
+    string tag_name = 2;
+    uint32 graded_point = 3;
+    uint32 total_point = 4;
+}
+
+// ExamLO is a gRPC service used for ExamLO learning material type 
+service ExamLO {
+    // InsertExamLO insert an examlo
+    rpc InsertExamLO(InsertExamLORequest)
+        returns (InsertExamLOResponse);
+    // UpdateExamLO update metadata of an examlo
+    rpc UpdateExamLO(UpdateExamLORequest)
+        returns (UpdateExamLOResponse);
+    rpc ListExamLO (ListExamLORequest)
+        returns (ListExamLOResponse);
+    rpc ListHighestResultExamLOSubmission(ListHighestResultExamLOSubmissionRequest)
+        returns (ListHighestResultExamLOSubmissionResponse);
+    rpc ListExamLOSubmission(ListExamLOSubmissionRequest)
+        returns (ListExamLOSubmissionResponse);
+    rpc ListExamLOSubmissionScore(ListExamLOSubmissionScoreRequest)
+        returns (ListExamLOSubmissionScoreResponse);
+    rpc ListExamLOSubmissionResult(ListExamLOSubmissionResultRequest)
+        returns (ListExamLOSubmissionResultResponse);
+    rpc GradeAManualGradingExamSubmission(GradeAManualGradingExamSubmissionRequest)
+        returns (GradeAManualGradingExamSubmissionResponse);
+    rpc DeleteExamLOSubmission(DeleteExamLOSubmissionRequest)
+        returns (DeleteExamLOSubmissionResponse);
+    rpc UpsertGradeBookSetting(UpsertGradeBookSettingRequest)
+        returns (UpsertGradeBookSettingResponse);
+    rpc BulkApproveRejectSubmission(BulkApproveRejectSubmissionRequest)
+        returns (BulkApproveRejectSubmissionResponse);
+    rpc RetrieveMetadataTaggingResult(RetrieveMetadataTaggingResultRequest)
+        returns (RetrieveMetadataTaggingResultResponse);
+}

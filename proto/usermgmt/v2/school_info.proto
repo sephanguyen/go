@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package usermgmt.v2;
+
+import "common/v1/enums.proto";
+import "usermgmt/v2/location.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/usermgmt/v2;upb";
+
+service SchoolInfoService {
+  rpc ImportSchoolInfo(ImportSchoolInfoRequest) returns (ImportSchoolInfoResponse);
+}
+
+message School {
+  int32 id = 1;
+  string name = 2;
+  common.v1.Country country = 3;
+  City city = 4;
+  District district = 5;
+  Point point = 6;
+}
+  
+message ImportSchoolInfoRequest {
+  bytes payload = 1;
+}
+
+message ImportSchoolInfoResponse {
+  message ImportSchoolInfoError {
+    int32 row_number = 1;
+    string error = 2;
+  }
+  repeated ImportSchoolInfoError errors = 1;
+}

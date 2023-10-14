@@ -1,0 +1,14 @@
+- template: 1
+  tableName: timesheet
+  locationCol: location_id
+  permissionPrefix: timesheet.timesheet
+  permissions:
+    postgres: []
+    hasura: []
+  ownerCol: staff_id
+- template: 4
+  tableName: timesheet
+  ownerCol: staff_id
+  permissions:
+    postgres: []
+    hasura: []

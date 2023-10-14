@@ -1,0 +1,105 @@
+{
+	"schema": [
+		{
+			"column_name": "create_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "delete_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "email",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "import_id",
+			"data_type": "bigint",
+			"column_default": "usr_email__import_id__next()",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "now()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "usr_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "usr_email",
+			"policyname": "rls_usr_email",
+			"qual": "permission_check(resource_path, 'usr_email'::text)",
+			"with_check": "permission_check(resource_path, 'usr_email'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "usr_email",
+			"policyname": "rls_usr_email_restrictive",
+			"qual": "permission_check(resource_path, 'usr_email'::text)",
+			"with_check": "permission_check(resource_path, 'usr_email'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "usr_email__pkey",
+			"column_name": "email",
+			"constraint_type": "UNIQUE"
+		},
+		{
+			"constraint_name": "usr_email__pkey",
+			"column_name": "resource_path",
+			"constraint_type": "UNIQUE"
+		}
+	],
+	"table_name": "usr_email",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

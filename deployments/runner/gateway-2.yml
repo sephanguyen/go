@@ -1,0 +1,56 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: actions-controller-webhook
+  namespace: istio-system
+spec:
+  commonName: actions-controller-webhook.manabie.io
+  dnsNames:
+  - actions-controller-webhook.manabie.io
+  issuerRef:
+    kind: ClusterIssuer
+    name: stag-manabie-gateway
+  secretName: cert-actions-controller-webhook
+---
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: actions-controller-webhook
+  namespace: istio-system
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - hosts:
+    - actions-controller-webhook.manabie.io
+    port:
+      name: https-actions-controller-webhook
+      number: 443
+      protocol: HTTPS
+    tls:
+      credentialName: cert-actions-controller-webhook
+      mode: SIMPLE
+      privateKey: sds
+      serverCertificate: sds
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: actions-controller-webhook
+  namespace: actions-runner-system
+spec:
+  exportTo:
+  - istio-system
+  gateways:
+  - istio-system/actions-controller-webhook
+  hosts:
+  - actions-controller-webhook.manabie.io
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: actions-runner-controller-github-webhook-server
+        port:
+          number: 80

@@ -1,0 +1,1524 @@
+- table:
+    schema: public
+    name: auto_create_timesheet_flag
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - flag_on
+      - staff_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - flag_on
+      - staff_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+- table:
+    schema: public
+    name: lessons
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - break_time
+      - end_time
+      - lesson_id
+      - preparation_time
+      - scheduling_status
+      - start_time
+      - teaching_method
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - break_time
+      - end_time
+      - lesson_id
+      - preparation_time
+      - scheduling_status
+      - start_time
+      - teaching_method
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+      - break_time
+      - end_time
+      - lesson_id
+      - preparation_time
+      - scheduling_status
+      - start_time
+      - teaching_method
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - break_time
+      - end_time
+      - lesson_id
+      - preparation_time
+      - scheduling_status
+      - start_time
+      - teaching_method
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+- table:
+    schema: public
+    name: location_timesheet_count
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - count
+      - location_id
+      - name
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - count
+      - location_id
+      - name
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+      - count
+      - location_id
+      - name
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - count
+      - location_id
+      - name
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+- table:
+    schema: public
+    name: timesheet_count
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - all_count
+      - draft_count
+      - submitted_count
+      - approved_count
+      - confirmed_count
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - all_count
+      - draft_count
+      - submitted_count
+      - approved_count
+      - confirmed_count
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+      - all_count
+      - draft_count
+      - submitted_count
+      - approved_count
+      - confirmed_count
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - all_count
+      - draft_count
+      - submitted_count
+      - approved_count
+      - confirmed_count
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+- table:
+    schema: public
+    name: location_timesheets_non_confirmed_count
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - location_id
+      - count
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - count
+      - location_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+      - count
+      - location_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - count
+      - location_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+- table:
+    schema: public
+    name: locations
+  object_relationships:
+  - name: non_confirmed_timesheets
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: location_timesheets_non_confirmed_count
+        column_mapping:
+          location_id: location_id
+  array_relationships:
+  - name: timesheets
+    using:
+      foreign_key_constraint_on:
+        column: location_id
+        table:
+          schema: public
+          name: timesheet
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - created_at
+      - location_id
+      - name
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - created_at
+      - location_id
+      - name
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+      - created_at
+      - location_id
+      - name
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - created_at
+      - location_id
+      - name
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+- table:
+    schema: public
+    name: other_working_hours
+  object_relationships:
+  - name: timesheet_config
+    using:
+      foreign_key_constraint_on: timesheet_config_id
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - end_time
+      - other_working_hours_id
+      - remarks
+      - start_time
+      - timesheet_config_id
+      - timesheet_id
+      - total_hour
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - end_time
+      - other_working_hours_id
+      - remarks
+      - start_time
+      - timesheet_config_id
+      - timesheet_id
+      - total_hour
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+      - end_time
+      - other_working_hours_id
+      - remarks
+      - start_time
+      - timesheet_config_id
+      - timesheet_id
+      - total_hour
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - end_time
+      - other_working_hours_id
+      - remarks
+      - start_time
+      - timesheet_config_id
+      - timesheet_id
+      - total_hour
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+- table:
+    schema: public
+    name: staff
+  object_relationships:
+  - name: user
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: users
+        column_mapping:
+          staff_id: user_id
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - resource_path
+      - staff_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - staff_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+      - staff_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - staff_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+- table:
+    schema: public
+    name: timesheet
+  object_relationships:
+  - name: location
+    using:
+      foreign_key_constraint_on: location_id
+  - name: user_basic_info
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: user_basic_info
+        column_mapping:
+          staff_id: user_id
+  - name: users
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: users
+        column_mapping:
+          staff_id: user_id
+  - name: timesheet_location_permission
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: granted_permissions
+        column_mapping:
+          location_id: location_id
+  array_relationships:
+  - name: other_working_hours
+    using:
+      foreign_key_constraint_on:
+        column: timesheet_id
+        table:
+          schema: public
+          name: other_working_hours
+  - name: timesheet_lesson_hours
+    using:
+      foreign_key_constraint_on:
+        column: timesheet_id
+        table:
+          schema: public
+          name: timesheet_lesson_hours
+  - name: transportation_expenses
+    using:
+      foreign_key_constraint_on:
+        column: timesheet_id
+        table:
+          schema: public
+          name: transportation_expense
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - created_at
+      - deleted_at
+      - location_id
+      - remark
+      - staff_id
+      - timesheet_date
+      - timesheet_id
+      - timesheet_status
+      - updated_at
+      filter:
+        _and:
+        - _or:
+          - timesheet_location_permission:
+              _and:
+              - user_id:
+                  _eq: X-Hasura-User-Id
+              - permission_name:
+                  _eq: timesheet.timesheet.read
+          - staff_id:
+              _eq: X-Hasura-User-Id
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - created_at
+      - deleted_at
+      - location_id
+      - remark
+      - staff_id
+      - timesheet_status
+      - timesheet_date
+      - timesheet_id
+      - updated_at
+      filter:
+        _and:
+        - _or:
+          - timesheet_location_permission:
+              _and:
+              - user_id:
+                  _eq: X-Hasura-User-Id
+              - permission_name:
+                  _eq: timesheet.timesheet.read
+          - staff_id:
+              _eq: X-Hasura-User-Id
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+      - created_at
+      - deleted_at
+      - location_id
+      - remark
+      - staff_id
+      - timesheet_status
+      - timesheet_date
+      - timesheet_id
+      - updated_at
+      filter:
+        _and:
+        - _or:
+          - timesheet_location_permission:
+              _and:
+              - user_id:
+                  _eq: X-Hasura-User-Id
+              - permission_name:
+                  _eq: timesheet.timesheet.read
+          - staff_id:
+              _eq: X-Hasura-User-Id
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - created_at
+      - deleted_at
+      - location_id
+      - remark
+      - staff_id
+      - timesheet_status
+      - timesheet_date
+      - timesheet_id
+      - updated_at
+      filter:
+        _and:
+        - _or:
+          - timesheet_location_permission:
+              _and:
+              - user_id:
+                  _eq: X-Hasura-User-Id
+              - permission_name:
+                  _eq: timesheet.timesheet.read
+          - staff_id:
+              _eq: X-Hasura-User-Id
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+- table:
+    schema: public
+    name: timesheet_config
+  insert_permissions:
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      check:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      set:
+        resource_path: x-hasura-Resource-Path
+      columns:
+      - config_type
+      - config_value
+      - is_archived
+      - timesheet_config_id
+      backend_only: false
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - config_type
+      - config_value
+      - timesheet_config_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - config_type
+      - config_value
+      - timesheet_config_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+      - config_type
+      - config_value
+      - timesheet_config_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - config_type
+      - config_value
+      - timesheet_config_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  update_permissions:
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      check:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      columns:
+      - config_type
+      - config_value
+      - is_archived
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+- table:
+    schema: public
+    name: timesheet_lesson_hours
+  object_relationships:
+  - name: lessons
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: lessons
+        column_mapping:
+          lesson_id: lesson_id
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - lesson_id
+      - timesheet_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+        - flag_on:
+            _eq: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - lesson_id
+      - timesheet_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+        - flag_on:
+            _eq: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+      - lesson_id
+      - timesheet_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+        - flag_on:
+            _eq: true
+      allow_aggregations: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - lesson_id
+      - timesheet_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+        - flag_on:
+            _eq: true
+      allow_aggregations: true
+- table:
+    schema: public
+    name: transportation_expense
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - cost_amount
+      - remarks
+      - round_trip
+      - timesheet_id
+      - transportation_expense_id
+      - transportation_from
+      - transportation_to
+      - transportation_type
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - cost_amount
+      - remarks
+      - round_trip
+      - timesheet_id
+      - transportation_expense_id
+      - transportation_from
+      - transportation_to
+      - transportation_type
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+      - cost_amount
+      - remarks
+      - round_trip
+      - timesheet_id
+      - transportation_expense_id
+      - transportation_from
+      - transportation_to
+      - transportation_type
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - cost_amount
+      - remarks
+      - round_trip
+      - timesheet_id
+      - transportation_expense_id
+      - transportation_from
+      - transportation_to
+      - transportation_type
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+- table:
+    schema: public
+    name: user_access_paths
+  object_relationships:
+  - name: location
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: locations
+        column_mapping:
+          location_id: location_id
+  - name: user_access_paths_location_permission
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: granted_permissions
+        column_mapping:
+          location_id: location_id
+  - name: users_location_permission
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: granted_permissions
+        column_mapping:
+          location_id: location_id
+  - name: users
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: users
+        column_mapping:
+          user_id: user_id
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - access_path
+      - created_at
+      - location_id
+      - user_id
+      filter:
+        _and:
+        - user_access_paths_location_permission:
+            _and:
+            - user_id:
+                _eq: X-Hasura-User-Id
+            - permission_name:
+                _eq: user.user.read
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - access_path
+      - created_at
+      - location_id
+      - user_id
+      filter:
+        _and:
+        - user_access_paths_location_permission:
+            _and:
+            - user_id:
+                _eq: X-Hasura-User-Id
+            - permission_name:
+                _eq: user.user.read
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+- table:
+    schema: public
+    name: users
+  array_relationships:
+  - name: user_access_paths
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: user_access_paths
+        column_mapping:
+          user_id: user_id
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - email
+      - name
+      - user_id
+      filter:
+        _and:
+        - user_access_paths:
+            _and:
+            - users_location_permission:
+                _and:
+                - user_id:
+                    _eq: X-Hasura-User-Id
+                - permission_name:
+                    _eq: user.user.read
+            - deleted_at:
+                _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - email
+      - name
+      - user_id
+      filter:
+        _and:
+        - user_access_paths:
+            _and:
+            - users_location_permission:
+                _and:
+                - user_id:
+                    _eq: X-Hasura-User-Id
+                - permission_name:
+                    _eq: user.user.read
+            - deleted_at:
+                _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+      - email
+      - name
+      - user_id
+      filter:
+        _and:
+        - user_access_paths:
+            _and:
+            - users_location_permission:
+                _and:
+                - user_id:
+                    _eq: X-Hasura-User-Id
+                - permission_name:
+                    _eq: user.user.read
+            - deleted_at:
+                _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - email
+      - name
+      - user_id
+      filter:
+        _and:
+        - user_access_paths:
+            _and:
+            - users_location_permission:
+                _and:
+                - user_id:
+                    _eq: X-Hasura-User-Id
+                - permission_name:
+                    _eq: user.user.read
+            - deleted_at:
+                _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+- table:
+    schema: public
+    name: staff_transportation_expense
+  object_relationships:
+  - name: location
+    using:
+      foreign_key_constraint_on: location_id
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - cost_amount
+      - id
+      - location_id
+      - remarks
+      - round_trip
+      - staff_id
+      - transportation_from
+      - transportation_to
+      - transportation_type
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - cost_amount
+      - id
+      - location_id
+      - remarks
+      - round_trip
+      - staff_id
+      - transportation_from
+      - transportation_to
+      - transportation_type
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+- table:
+    schema: public
+    name: location_timesheet_count_v2
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - location_id
+      - name
+      - is_confirmed
+      - draft_count
+      - submitted_count
+      - approved_count
+      - confirmed_count
+      - unconfirmed_count
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - location_id
+      - name
+      - is_confirmed
+      - draft_count
+      - submitted_count
+      - approved_count
+      - confirmed_count
+      - unconfirmed_count
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+- table:
+    schema: public
+    name: non_confirmed_locations
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - location_id
+      - deleted_at
+      - resource_path
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - location_id
+      - deleted_at
+      - resource_path
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+- table:
+    schema: public
+    name: granted_permissions
+  object_relationships:
+  - name: timesheet_location_permission
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: timesheet
+        column_mapping:
+          location_id: location_id
+  - name: user_access_paths_location_permission
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: user_access_paths
+        column_mapping:
+          location_id: location_id
+  - name: users_location_permission
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: user_access_paths
+        column_mapping:
+          location_id: location_id
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - user_id
+      - permission_name
+      - location_id
+      - resource_path
+      filter:
+        _and:
+        - user_id:
+            _eq: X-Hasura-User-Id
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+- table:
+    schema: public
+    name: timesheet_confirmation_info
+  object_relationships:
+  - name: timesheet_confirmation_period
+    using:
+      foreign_key_constraint_on: period_id
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - id
+      - location_id
+      - period_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - id
+      - location_id
+      - period_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+      - id
+      - location_id
+      - period_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - id
+      - location_id
+      - period_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+- table:
+    schema: public
+    name: timesheet_confirmation_period
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - end_date
+      - id
+      - start_date
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - end_date
+      - id
+      - start_date
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+      - end_date
+      - id
+      - start_date
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - end_date
+      - id
+      - start_date
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+- table:
+    schema: public
+    name: partner_auto_create_timesheet_flag
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - flag_on
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - flag_on
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+- table:
+    schema: public
+    name: timesheet_action_log
+  object_relationships:
+  - name: user_basic_info
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: user_basic_info
+        column_mapping:
+          user_id: user_id
+  - name: users
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: users
+        column_mapping:
+          user_id: user_id
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - action
+      - action_log_id
+      - executed_at
+      - is_system
+      - timesheet_id
+      - user_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - action
+      - action_log_id
+      - executed_at
+      - is_system
+      - timesheet_id
+      - user_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+      - action
+      - action_log_id
+      - executed_at
+      - is_system
+      - timesheet_id
+      - user_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - action
+      - action_log_id
+      - executed_at
+      - is_system
+      - timesheet_id
+      - user_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+- table:
+    schema: public
+    name: user_basic_info
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - current_grade
+      - email
+      - first_name
+      - first_name_phonetic
+      - full_name_phonetic
+      - gender
+      - grade_id
+      - last_name
+      - last_name_phonetic
+      - name
+      - user_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - current_grade
+      - email
+      - first_name
+      - first_name_phonetic
+      - full_name_phonetic
+      - gender
+      - grade_id
+      - last_name
+      - last_name_phonetic
+      - name
+      - user_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+      - current_grade
+      - email
+      - first_name
+      - first_name_phonetic
+      - full_name_phonetic
+      - gender
+      - grade_id
+      - last_name
+      - last_name_phonetic
+      - name
+      - user_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - current_grade
+      - email
+      - first_name
+      - first_name_phonetic
+      - full_name_phonetic
+      - gender
+      - grade_id
+      - last_name
+      - last_name_phonetic
+      - name
+      - user_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true

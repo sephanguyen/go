@@ -1,0 +1,216 @@
+syntax = "proto3";
+
+package tom.v1;
+
+import "tom/v1/enums.proto";
+import "tom/v1/conversations.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/tom/v1;tpb";
+
+message SubscribeRequest {}
+
+message SubscribeResponse {
+  Event event = 1;
+}
+
+message PingSubscribeRequest {}
+
+message PingSubscribeResponse {}
+
+message GetConversationRequest {
+  string conversation_id = 1;  // optional, if nil will use 2 field below
+  string user_id = 2;
+  uint32 class_id = 3;
+}
+
+message GetConversationResponse {
+  Conversation conversation = 1;
+}
+
+message SendMessageRequest {
+  string conversation_id = 1;
+  string message = 2;
+  string url_media = 3;
+  MessageType type = 4;
+  string local_message_id = 5;
+  // use for message system
+  string target_user = 6;
+}
+
+message SendMessageResponse {
+  string message_id = 1;
+  string local_message_id = 2;
+}
+
+message SeenMessageRequest {
+  string conversation_id = 1;
+}
+
+message SeenMessageResponse {}
+
+message DeleteMessageRequest {
+  string message_id = 1;
+}
+
+message DeleteMessageResponse {}
+
+// Teacher action
+message TeacherProhibitAllStudentToChatRequest {
+  string conversation_id = 1;
+}
+
+message TeacherProhibitAllStudentToChatResponse {}
+
+message TeacherAllowAllStudentToChatRequest {
+  string conversation_id = 1;
+}
+
+message TeacherAllowAllStudentToChatResponse {}
+
+message TeacherAllowStudentToSpeakRequest {
+  string student_id = 1;
+  string conversation_id = 2;
+}
+
+message TeacherAllowStudentToSpeakResponse {}
+
+message TeacherProhibitStudentToSpeakRequest {
+  string student_id = 1;
+  string conversation_id = 2;
+}
+
+message TeacherProhibitStudentToSpeakResponse {}
+
+message TeacherAllowStudentToShowCameraRequest {
+  string student_id = 1;
+  string conversation_id = 2;
+}
+
+message TeacherAllowStudentToShowCameraResponse {}
+
+message TeacherProhibitStudentToShowCameraRequest {
+  string student_id = 1;
+  string conversation_id = 2;
+}
+
+message TeacherProhibitStudentToShowCameraResponse {}
+
+message TeacherAllowAllStudentToSpeakRequest {
+  string conversation_id = 1;
+}
+
+message TeacherAllowAllStudentToSpeakResponse {}
+
+message TeacherProhibitAllStudentToSpeakRequest {
+  string conversation_id = 1;
+}
+
+message TeacherProhibitAllStudentToSpeakResponse {}
+
+message TeacherHandOffAllStudentRequest {
+  string conversation_id = 1;
+}
+
+message TeacherHandOffAllStudentResponse{}
+
+message TeacherHandOffStudentRequest{
+  string student_id = 1;
+  string conversation_id = 2;
+}
+
+message TeacherHandOffStudentResponse{}
+
+// Student action
+message StudentAcceptToSpeakRequest {
+  string conversation_id = 1;
+}
+
+message StudentAcceptToSpeakResponse {}
+
+message StudentDeclineToSpeakRequest {
+  string conversation_id = 1;
+}
+
+message StudentDeclineToSpeakResponse {}
+
+message StudentRaiseHandRequest {
+  string conversation_id = 1;
+}
+
+message StudentRaiseHandResponse {}
+
+message StudentPutHandDownRequest {
+  string conversation_id = 1;
+}
+
+message StudentPutHandDownResponse {}
+
+
+message JoinConversationsRequest {
+  repeated string conversation_ids = 1;
+}
+
+message JoinConversationsResponse {
+}
+
+message LeaveConversationsRequest {
+  repeated string conversation_ids = 1;
+}
+
+message LeaveConversationsResponse{
+}
+
+message JoinAllConversationResponse {
+}
+
+message JoinAllConversationRequest {
+  repeated string location_ids = 1;
+}
+
+service ChatModifierService {
+  rpc Subscribe(SubscribeRequest) returns (stream SubscribeResponse);
+  rpc PingSubscribe(PingSubscribeRequest) returns (PingSubscribeResponse);
+
+  rpc GetConversation(GetConversationRequest) returns (GetConversationResponse);
+
+  rpc SendMessage(SendMessageRequest) returns (SendMessageResponse);
+  rpc SeenMessage(SeenMessageRequest) returns (SeenMessageResponse);
+  rpc DeleteMessage(DeleteMessageRequest) returns (DeleteMessageResponse);
+
+  rpc TeacherProhibitAllStudentToChat(TeacherProhibitAllStudentToChatRequest)
+      returns (TeacherProhibitAllStudentToChatResponse);
+  rpc TeacherAllowAllStudentToChat(TeacherAllowAllStudentToChatRequest)
+      returns (TeacherAllowAllStudentToChatResponse);
+  rpc TeacherAllowStudentToSpeak(TeacherAllowStudentToSpeakRequest)
+      returns (TeacherAllowStudentToSpeakResponse);
+  rpc TeacherProhibitStudentToSpeak(TeacherProhibitStudentToSpeakRequest)
+      returns (TeacherProhibitStudentToSpeakResponse);
+  rpc StudentAcceptToSpeak(StudentAcceptToSpeakRequest)
+      returns (StudentAcceptToSpeakResponse);
+  rpc StudentDeclineToSpeak(StudentDeclineToSpeakRequest)
+      returns (StudentDeclineToSpeakResponse);
+  rpc StudentRaiseHand(StudentRaiseHandRequest)
+      returns (StudentRaiseHandResponse);
+  rpc StudentPutHandDown(StudentPutHandDownRequest)
+      returns (StudentPutHandDownResponse);
+  rpc TeacherAllowStudentToShowCamera(TeacherAllowStudentToShowCameraRequest)
+      returns (TeacherAllowStudentToShowCameraResponse);
+  rpc TeacherProhibitStudentToShowCamera(TeacherProhibitStudentToShowCameraRequest)
+      returns (TeacherProhibitStudentToShowCameraResponse);
+  rpc TeacherAllowAllStudentToSpeak(TeacherAllowAllStudentToSpeakRequest)
+      returns (TeacherAllowAllStudentToSpeakResponse);
+  rpc TeacherProhibitAllStudentToSpeak(TeacherProhibitAllStudentToSpeakRequest)
+      returns (TeacherProhibitAllStudentToSpeakResponse);
+  rpc TeacherHandOffAllStudent(TeacherHandOffAllStudentRequest)
+      returns (TeacherHandOffAllStudentResponse);
+  rpc TeacherHandOffStudent(TeacherHandOffStudentRequest)
+      returns (TeacherHandOffStudentResponse);
+  rpc JoinConversations(JoinConversationsRequest) 
+    returns (JoinConversationsResponse);
+  rpc JoinAllConversations(JoinAllConversationRequest) 
+    returns (JoinAllConversationResponse);
+  rpc JoinAllConversationsWithLocations(JoinAllConversationRequest) 
+    returns (JoinAllConversationResponse);
+  rpc LeaveConversations(LeaveConversationsRequest)
+    returns (LeaveConversationsResponse);
+}

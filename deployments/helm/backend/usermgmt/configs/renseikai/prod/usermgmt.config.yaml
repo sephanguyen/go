@@ -1,0 +1,13 @@
+common:
+  google_cloud_project: production-renseikai
+  firebase_project: production-renseikai
+  identity_platform_project: student-coach-e1e95
+issuers:
+  - issuer: manabie
+    audience: prod-renseikai
+    jwks_endpoint: http://shamir:5680/.well-known/jwks.json
+postgres_v2:
+  bob:
+    shard_id: 4
+identity_platform:
+  token_signer_account_id: prod-renseikai-usermgmt@student-coach-e1e95.iam.gserviceaccount.com

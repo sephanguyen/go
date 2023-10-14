@@ -1,0 +1,11 @@
+ALTER TABLE ONLY public.student_enrollment_status_history DROP CONSTRAINT IF EXISTS students_enrollment_status_check;
+ALTER TABLE ONLY public.student_enrollment_status_history ADD CONSTRAINT students_enrollment_status_check
+    CHECK ((enrollment_status = ANY
+    ('{STUDENT_ENROLLMENT_STATUS_POTENTIAL,
+    STUDENT_ENROLLMENT_STATUS_ENROLLED,
+    STUDENT_ENROLLMENT_STATUS_TEMPORARY,
+    STUDENT_ENROLLMENT_STATUS_NON_POTENTIAL,
+    STUDENT_ENROLLMENT_STATUS_WITHDRAWN,
+    STUDENT_ENROLLMENT_STATUS_GRADUATED,
+    STUDENT_ENROLLMENT_STATUS_LOA}'::text[])
+    ));

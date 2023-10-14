@@ -1,0 +1,21 @@
+@startuml communication_simplified
+title Event NatsCreateNotificationRequest received
+(*) --> "handle message"
+if sendingMethods == "push_notification" then
+    --> [yes] process notification
+    --> if type == "Scheduled" then
+        -> [yes] UpsertNotification
+    else
+    [no] if type == "Immediate" then
+    --> [yes] if permanentStorage then
+        -> [yes] Upsert and SendNotification
+            else 
+            -->[no] SendNotificationToTargeWithOutSave
+            endif
+        endif
+    endif
+else 
+-> [no] log method is not support then return
+-> (*)
+endif
+@enduml

@@ -1,0 +1,778 @@
+name: tiered.pre_merge
+on:
+  pull_request:
+    types: [labeled]
+
+# uses source branch as concurrency group, only runs latest workflow for the source branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref }}
+  cancel-in-progress: true
+
+jobs:
+  requirements:
+    if: ${{ contains(github.event.label.name, 'Ok to test') }}
+    runs-on: ["self-hosted", "100m-400mi", "spot", "persistent"]
+    timeout-minutes: 5
+    outputs:
+      runners: ${{ steps.runners.outputs.runners }}
+      check-commit-messages: ${{ steps.requirements.outputs.check-commit-messages }}
+      integration-blocker-test: ${{ steps.requirements.outputs.integration-blocker-test }}
+      unit-test: ${{ steps.requirements.outputs.unit-test }}
+      proto-check: ${{ steps.requirements.outputs.proto-check }}
+      skaffold-test: ${{ steps.requirements.outputs.skaffold-test }}
+      repository-test: ${{ steps.requirements.outputs.repository-test }}
+      helm-test: ${{ steps.requirements.outputs.helm-test }}
+      dbschema-test: ${{ steps.requirements.outputs.dbschema-test }}
+      hasura-metadata-test: ${{ steps.requirements.outputs.hasura-metadata-test }}
+      triggered_svcs: ${{ steps.integration_requirements.outputs.triggered_svcs }}
+      lint: ${{ steps.requirements.outputs.lint }}
+      e2e-test: ${{ steps.requirements.outputs.e2e-test }}
+      unleash-flags-only: ${{ steps.requirements.outputs.unleash_flags_only }}
+      convert_hcl2sql: ${{ steps.requirements.outputs.convert_hcl2sql }}
+      convert_hcl2sops: ${{ steps.requirements.outputs.convert_hcl2sops }}
+      extra_integration_test_args: ${{ steps.requirements.outputs.extra_integration_test_args }}
+    steps:
+      - name: Collect Workflow Telemetry
+        continue-on-error: true
+        timeout-minutes: 5
+        uses: manabie-com/workflow-telemetry-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.BUILD_GITHUB_TOKEN }}
+        with:
+          comment_on_pr: false
+
+      - name: Remove label
+        uses: actions/github-script@v6
+        continue-on-error: true
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.rest.issues.removeLabel({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              name: 'Ok to test'
+            })
+
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+          ref: develop
+
+      - id: runners
+        uses: ./.github/actions/runners
+        with:
+          token: ${{ secrets.ORG_GITHUB_TOKEN }}
+
+      # Recheckout to get the branches for `git diff`
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+
+      - uses: tspascoal/get-user-teams-membership@v2
+        id: actorTeams
+        with:
+          username: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.READ_ORG }}
+
+      - name: Determine required integration tests
+        id: integration_requirements
+        env:
+          GITHUB_WORKSPACE: ${{ github.workspace }}
+          TEAMS: ${{ steps.actorTeams.outputs.teams }}
+        run: |
+          set -e
+          if [[ ${{ (contains(github.head_ref, 'force-test') || contains(github.event.pull_request.labels.*.name, 'force-test')) }} == true ]]; then
+            echo "triggered_svcs=""" >> $GITHUB_OUTPUT
+          else
+            .github/scripts/get_triggered_svcs.bash '${{ join(github.event.pull_request.labels.*.name,',') }}'
+          fi
+
+      - name: Determine required tests
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_DESC: |
+            ${{ github.event.pull_request.body }}
+        id: requirements
+        run: |
+          set -e
+
+          # go build -o diff cmd/citools/diff/main.go
+          gh release download diff-v0.0.8 \
+            --pattern 'diff-linux-amd64' \
+            --clobber \
+            --output diff
+          chmod +x ./diff
+          ./diff \
+            --force="${{ (contains(github.head_ref, 'force-test') || contains(github.event.pull_request.labels.*.name, 'force-test')) }}" \
+            --pr-desc="${PR_DESC}" \
+            --pr-desc-only="${{ (contains(github.head_ref, 'desc-test-only') || contains(github.event.pull_request.labels.*.name, 'desc-test-only')) }}" \
+            --base-ref="HEAD~1" \
+            --head-ref="HEAD" \
+            --squads="${{ join(fromJSON(steps.actorTeams.outputs.teams), ',') }}" \
+            -v=debug \
+            --output-path="$GITHUB_OUTPUT"
+
+          echo "output debug"
+          cat "$GITHUB_OUTPUT"
+
+  hasura-metadata-test:
+    needs: [requirements]
+    runs-on: ${{ fromJson(needs.requirements.outputs.runners)['hasura-metadata-test'] }}
+    if: needs.requirements.outputs.hasura-metadata-test == 1
+    steps:
+      - name: Collect Workflow Telemetry
+        continue-on-error: true
+        timeout-minutes: 5
+        uses: manabie-com/workflow-telemetry-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.BUILD_GITHUB_TOKEN }}
+        with:
+          comment_on_pr: false
+
+      - uses: actions/checkout@v3
+        timeout-minutes: 5
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Verify RLS for Hasura
+        env:
+          GITHUB_TOKEN: ${{ secrets.BUILD_GITHUB_TOKEN }}
+        run: |
+          set -e
+          ./.github/scripts/enable_rls_hasura.bash
+          ./.github/scripts/verify_rls.bash
+
+  unleash-flags-only:
+    needs: [requirements]
+    runs-on: ${{ fromJson(needs.requirements.outputs.runners)['unleash-flags-only'] }}
+    if: needs.requirements.outputs.unleash-flags-only == 1
+    steps:
+        - name: Collect Workflow Telemetry
+          continue-on-error: true
+          timeout-minutes: 5
+          uses: manabie-com/workflow-telemetry-action@v2
+          env:
+            GITHUB_TOKEN: ${{ secrets.BUILD_GITHUB_TOKEN }}
+          with:
+            comment_on_pr: false
+
+        - uses: actions/checkout@v3
+          timeout-minutes: 5
+
+        - name: Run Linter
+          working-directory: ./developments/unleash-import
+          run: |
+            npm install
+            node ./linter.js
+
+
+  unit-test:
+    needs: [requirements]
+    runs-on: ${{ fromJson(needs.requirements.outputs.runners)['unit-test'] }}
+    if: needs.requirements.outputs.unit-test == 1
+    env:
+      GOPRIVATE: "github.com/manabie-com"
+    permissions:
+      contents: "read"
+      id-token: "write"
+      actions: "read"
+      pull-requests: write
+    steps:
+      - name: Collect Workflow Telemetry
+        continue-on-error: true
+        timeout-minutes: 5
+        uses: manabie-com/workflow-telemetry-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.BUILD_GITHUB_TOKEN }}
+        with:
+          comment_on_pr: false
+
+      - uses: actions/checkout@v3
+        timeout-minutes: 5
+
+      - name: Go cache
+        if: ${{ !contains(runner.name, 'arc-runner-hcm') }}
+        uses: ./.github/actions/gcs-cache
+        with:
+          workload_identity_provider: "projects/456005132078/locations/global/workloadIdentityPools/eibanam-identity/providers/eibanam-identity"
+          service_account: "stag-identity-hook-runner@staging-manabie-online.iam.gserviceaccount.com"
+          bucket_name: stag-manabie-cache
+          key: ${{ runner.os }}-unittest-${{ hashFiles('go.sum', '*/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-unittest-
+          check-cache-exists: |
+            "/home/runner/go/pkg/mod"
+          paths: |
+            ~/go/pkg/mod
+
+      - name: Run unit tests
+        timeout-minutes: 30
+        run: |
+          go test -count=3 ./internal/... -cover -covermode=count -coverprofile=cover.out.tmp -coverpkg=./internal/... \
+            && cat cover.out.tmp | grep -v "_generated_impl.go" > cover.out && rm cover.out.tmp \
+            && go tool cover -func=cover.out -o cover.func \
+            && tail -n 1 cover.func
+
+          # make test-sqlclosecheck-lint
+
+      - name: Check coverage - Unit tests
+        env:
+          GH_TOKEN: ${{ github.token }}
+        timeout-minutes: 3
+        run: |
+          # go build -o coverage ./cmd/citools/coverage/
+          gh release download coverage-v0.0.3 \
+            --pattern 'coverage-linux-amd64' \
+            --clobber \
+            --output coverage
+          chmod +x ./coverage
+          ./coverage compare \
+            --coverfile=cover.func \
+            --base-ref=${{ github.base_ref }} \
+            --head-ref=${{ github.head_ref }} \
+            --repo=${{ github.repository }} \
+            --address=api.staging.manabie.io:443 \
+            --key=${{ secrets.DRAFT_SERVICE_SECRET_KEY }} \
+            --verbosity=debug
+
+  skaffold-test:
+    needs: [requirements]
+    runs-on: ${{ fromJson(needs.requirements.outputs.runners)['skaffold-test'] }}
+    if: needs.requirements.outputs.skaffold-test == 1
+    permissions:
+      contents: "read"
+      id-token: "write"
+      actions: "read"
+      pull-requests: write
+    steps:
+      - name: Collect Workflow Telemetry
+        continue-on-error: true
+        timeout-minutes: 5
+        uses: manabie-com/workflow-telemetry-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.BUILD_GITHUB_TOKEN }}
+        with:
+          comment_on_pr: false
+
+      - name: Checkout source
+        uses: actions/checkout@v3
+        timeout-minutes: 5
+
+      - name: Install tools
+        uses: ./.github/actions/tool-install
+        with:
+          tools: skaffold skaffoldv2
+          install-dir: /usr/local/bin
+
+      - name: Go cache
+        if: ${{ !contains(runner.name, 'arc-runner-hcm') }}
+        uses: ./.github/actions/gcs-cache
+        continue-on-error: true
+        with:
+          workload_identity_provider: "projects/456005132078/locations/global/workloadIdentityPools/eibanam-identity/providers/eibanam-identity"
+          service_account: "stag-identity-hook-runner@staging-manabie-online.iam.gserviceaccount.com"
+          bucket_name: stag-manabie-cache
+          key: ${{ runner.os }}-skaffold-test-${{ hashFiles('go.sum', '*/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-skaffold-test-
+          check-cache-exists: |
+            "/home/runner/go/pkg/mod"
+          paths: |
+            ~/go/pkg/mod
+
+      - name: Run unit tests for skaffold
+        timeout-minutes: 25
+        run: |
+          go test ./deployments/tests/...
+
+  lint:
+    needs: [requirements]
+    runs-on: ${{ fromJson(needs.requirements.outputs.runners)['lint'] }}
+    if: needs.requirements.outputs.lint == 1
+    timeout-minutes: 25
+    permissions:
+      contents: "read"
+      id-token: "write"
+      actions: "read"
+      pull-requests: write
+    steps:
+      - name: Collect Workflow Telemetry
+        continue-on-error: true
+        timeout-minutes: 5
+        uses: manabie-com/workflow-telemetry-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.BUILD_GITHUB_TOKEN }}
+        with:
+          comment_on_pr: false
+
+      - uses: actions/checkout@v3
+        timeout-minutes: 5
+
+      - name: Configure private repo access
+        timeout-minutes: 3
+        run: |
+          git config --global --add url."https://${{ secrets.BUILD_GITHUB_TOKEN }}:x-oauth-basic@github.com/manabie-com".insteadOf "https://github.com/manabie-com"
+
+      - name: Go cache
+        if: ${{ !contains(runner.name, 'arc-runner-hcm-8-32') }}
+        uses: ./.github/actions/gcs-cache
+        continue-on-error: true
+        with:
+          workload_identity_provider: "projects/456005132078/locations/global/workloadIdentityPools/eibanam-identity/providers/eibanam-identity"
+          service_account: "stag-identity-hook-runner@staging-manabie-online.iam.gserviceaccount.com"
+          bucket_name: stag-manabie-cache
+          key: ${{ runner.os }}-golangcilint-${{ steps.get.outputs.currentdate }}
+          restore-keys: |
+            ${{ runner.os }}-golangcilint-
+          check-cache-exists: |
+            "/home/runner/go/pkg/mod"
+          paths: |
+            ~/go/pkg/mod
+
+      - id: version
+        uses: ./.github/actions/tool-version
+
+      - name: Lint
+        uses: reviewdog/action-golangci-lint@v2
+        timeout-minutes: 15
+        env:
+          GOROOT: ""
+          GO111MODULE: "on"
+          GOPRIVATE: "github.com/manabie-com"
+        with:
+          go_version: "${{ steps.version.outputs.go }}"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          golangci_lint_flags: "--modules-download-mode readonly --timeout 30m -v --max-issues-per-linter 0 --max-same-issues 0"
+          reporter: github-pr-review
+          fail_on_error: true
+          cache: false
+
+      # - name: Run sqlclosecheck
+      #   run: |
+      #     go run ./cmd/custom_lint/main.go ./internal/... ./features/... ./cmd/server/...
+
+      - name: Unset git config
+        if: always()
+        timeout-minutes: 3
+        run: |
+          git config --global --remove-section url."https://${{ secrets.BUILD_GITHUB_TOKEN }}:x-oauth-basic@github.com/manabie-com"
+
+      # - name: Cancel workflow if job failed
+      #   if: failure()
+      #   env:
+      #     TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     REPO: ${{ github.repository }}
+      #     ID: ${{ github.run_id }}
+      #   run: |
+      #     curl \
+      #       -X POST \
+      #       -H "Accept: application/vnd.github+json" \
+      #       -H "Authorization: Bearer $TOKEN" \
+      #       https://api.github.com/repos/$REPO/actions/runs/$ID/cancel
+
+  dbschema-test:
+    needs: [requirements]
+    runs-on: ${{ fromJson(needs.requirements.outputs.runners)['dbschema-test'] }}
+    if: needs.requirements.outputs.dbschema-test == 1
+    steps:
+      - name: Collect Workflow Telemetry
+        continue-on-error: true
+        timeout-minutes: 5
+        uses: manabie-com/workflow-telemetry-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.BUILD_GITHUB_TOKEN }}
+        with:
+          comment_on_pr: false
+
+      - uses: actions/checkout@v3
+        timeout-minutes: 5
+
+      - name: Download go binary to gen-db-schema
+        env:
+          GH_TOKEN: "${{ github.token }}"
+          CI: true
+        run: |
+
+          # go build -o build/gendbschema ./cmd/citools/dbschema/
+          gh release download gendbschema-v0.2 \
+            --repo manabie-com/backend \
+            --clobber \
+            --output build/gendbschema
+
+      - name: Ensure make gen-db-schema has been run and committed
+        run: |
+          git reset --hard
+          .github/scripts/ensure-make-gen-db-schema.bash
+
+      # - name: Cancel workflow if job failed
+      #   if: failure()
+      #   env:
+      #     TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     REPO: ${{ github.repository }}
+      #     ID: ${{ github.run_id }}
+      #   run: |
+      #     curl \
+      #       -X POST \
+      #       -H "Accept: application/vnd.github+json" \
+      #       -H "Authorization: Bearer $TOKEN" \
+      #       https://api.github.com/repos/$REPO/actions/runs/$ID/cancel
+
+  proto-check:
+    needs: [requirements, unit-test]
+    runs-on: ${{ fromJson(needs.requirements.outputs.runners)['proto-check'] }}
+    if: needs.requirements.outputs.proto-check == 1
+    steps:
+      - name: Collect Workflow Telemetry
+        continue-on-error: true
+        timeout-minutes: 5
+        uses: manabie-com/workflow-telemetry-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.BUILD_GITHUB_TOKEN }}
+        with:
+          comment_on_pr: false
+
+      - uses: actions/checkout@v3
+        timeout-minutes: 5
+
+      - uses: bufbuild/buf-setup-action@v1
+        with:
+          github_token: ${{ github.token }}
+
+      - uses: bufbuild/buf-lint-action@v1
+        with:
+          input: "proto"
+
+      - uses: bufbuild/buf-breaking-action@v1
+        with:
+          input: "proto"
+          against: "https://github.com/${{ github.repository }}.git#branch=${{ github.base_ref }},subdir=proto"
+
+  check-commit-messages:
+    needs: [requirements]
+    runs-on: ${{ fromJson(needs.requirements.outputs.runners)['check-commit-messages'] }}
+    if: needs.requirements.outputs.check-commit-messages == 1
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v3
+        timeout-minutes: 5
+
+      - name: Check pull request title
+        env:
+          PULL_REQUEST_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          set -e
+          . .githooks/common.bash
+          check_pr_title "${PULL_REQUEST_TITLE}"
+
+      - name: Check commit messages
+        env:
+          GH_TOKEN: "${{ github.token }}"
+        run: |
+          set -e
+
+          # Use github api to get the commit related to this PR.
+          # Note that we can get max 250 commits at a time, a limit
+          # which we likely never reach in a PR.
+          # TODO: add --paginate here
+          readarray -t message_list <<< $(gh api graphql -f query='
+            query {
+              repository(owner: "manabie-com", name: "backend") {
+                pullRequest(number: ${{ github.event.pull_request.number }}) {
+                  commits (first: 250) {
+                    nodes {
+                      commit {
+                        message
+                      }
+                    }
+                  }
+                }
+              }
+            }' | jq '.data.repository.pullRequest.commits.nodes[].commit.message'
+          )
+          . .githooks/common.bash
+          for message in "${message_list[@]}"; do
+            trimmed=$(sed -e 's/^"//' -e 's/"$//' <<<"$message")
+            echo "Checking message: \"${trimmed}\""
+            check_message "${trimmed}"
+          done
+
+  helm-test:
+    needs: [requirements]
+    if: needs.requirements.outputs.helm-test == 1
+    runs-on: ${{ fromJson(needs.requirements.outputs.runners)['helm-test'] }}
+    steps:
+      - uses: actions/checkout@v3
+        timeout-minutes: 5
+      - run: |
+          set -eu
+          if helm plugin list | grep "unittest" >/dev/null 2>&1; then
+            echo "unittest plugin is already installed"
+            exit 0
+          fi
+
+          helm plugin install https://github.com/quintush/helm-unittest --version v0.2.8
+      - run: make test-helm
+
+  integration-blocker-test:
+    needs: [requirements]
+    runs-on: ${{ fromJson(needs.requirements.outputs.runners)['integration-blocker-test'] }}
+    if: needs.requirements.outputs.integration-blocker-test == 1
+    permissions:
+      actions: "read"
+      contents: "read"
+      id-token: "write"
+    env:
+      CI: true
+      NO_COLLECT: true
+      USE_SHARED_REGISTRY: true
+    steps:
+      - name: Collect Workflow Telemetry
+        continue-on-error: true
+        timeout-minutes: 5
+        uses: manabie-com/workflow-telemetry-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.BUILD_GITHUB_TOKEN }}
+        with:
+          comment_on_pr: false
+
+      - name: Checkout source
+        uses: actions/checkout@v3
+        timeout-minutes: 5
+
+      - name: Install tools
+        uses: ./.github/actions/tool-install
+        with:
+          tools: skaffold skaffoldv2 helm jq yq
+          install-dir: /usr/local/bin
+
+      - name: Get current date
+        id: get
+        run: echo "currentdate=$(date '+%Y%m%d')" >> $GITHUB_OUTPUT
+
+      - name: Go cache
+        if: ${{ !contains(runner.name, 'arc-runner-hcm-8-32') }}
+        uses: ./.github/actions/gcs-cache
+        continue-on-error: true
+        with:
+          workload_identity_provider: "projects/456005132078/locations/global/workloadIdentityPools/eibanam-identity/providers/eibanam-identity"
+          service_account: "stag-identity-hook-runner@staging-manabie-online.iam.gserviceaccount.com"
+          bucket_name: stag-manabie-cache
+          key: ${{ runner.os }}-go-integration-test-${{ steps.get.outputs.currentdate }}
+          restore-keys: |
+            ${{ runner.os }}-go-integration-test-
+          check-cache-exists: |
+            "/home/runner/go/pkg/mod"
+          paths: |
+            ~/go/pkg/mod
+
+      - name: Authenticate to Google Cloud using Workload Identity Federation
+        id: auth
+        uses: google-github-actions/auth@v1
+        with:
+          token_format: access_token
+          workload_identity_provider: "projects/418860883682/locations/global/workloadIdentityPools/gh-action-pool/providers/integration-test-bot-provider"
+          service_account: "integration-test-bot@student-coach-e1e95.iam.gserviceaccount.com"
+
+      - name: Login to GCR
+        uses: docker/login-action@v2
+        with:
+          registry: asia.gcr.io
+          username: oauth2accesstoken
+          password: ${{ steps.auth.outputs.access_token }}
+
+      - name: Login to AR
+        uses: docker/login-action@v2
+        with:
+          registry: asia-southeast1-docker.pkg.dev
+          username: oauth2accesstoken
+          password: ${{ steps.auth.outputs.access_token }}
+
+      - id: version
+        uses: ./.github/actions/tool-version
+
+      - name: Setup Go with private module
+        uses: actions/setup-go@v3
+        with:
+          go-version: "${{ steps.version.outputs.go }}"
+
+      - name: Install backend
+        id: install-backend
+        timeout-minutes: 25
+        env:
+          DISABLE_GATEWAY: true
+          GH_TOKEN: "${{ github.token }}"
+          DOCKER_SERVER: 'https://asia-southeast1-docker.pkg.dev'
+          DOCKER_USERNAME: 'oauth2accesstoken'
+          DOCKER_PASSWORD: '${{ steps.auth.outputs.access_token }}'
+          DOCKER_EMAIL: 'integration-test-bot@student-coach-e1e95.iam.gserviceaccount.com'
+        run: |
+          set -e
+
+          if [[ "${{ contains(github.event.pull_request.labels.*.name, 'use-custom-deployer') }}" == "true" ]]; then
+            export MANABIE_DEPLOYER_ENABLED=true
+            gh release download deployer-v0.0.0-rc2 \
+              --repo manabie-com/backend \
+              --pattern 'deployer-linux-amd64' \
+              --clobber \
+              --output deployer
+            chmod +x ./deployer
+          fi
+          ./deployments/sk.bash
+
+          # Wait for mastermgmt to come up first, since Skaffold currently fails
+          # to wait for pods to be ready before continuing
+          kubectl -n local-manabie-backend rollout status deployment mastermgmt
+          kubectl -n local-manabie-backend rollout status deployment lessonmgmt
+
+          # Wait for bob and eureka since these 2 crashes often (due to SQL migration)
+          kubectl -n local-manabie-backend rollout status deployment bob
+          kubectl -n local-manabie-backend rollout status deployment eureka
+
+      - name: action-diagnose
+        if: failure() && steps.install-backend.outcome != 'success' && steps.install-backend.outcome != 'skipped'
+        run: |
+          echo "Result of install-backend was '${{ steps.install-backend.outcome }}'"
+          ./scripts/diagnose.bash
+
+      - name: Check hasura metadata
+        if: needs.requirements.outputs.hasura-metadata-test == 1
+        run: ./.github/scripts/hasura-metadata-apply.bash
+
+      - name: Run integration test
+        timeout-minutes: 20
+        env:
+          TRACE_ENABLED: "false"
+          OTEL_ENDPOINT: opentelemetry-collector.manabie.io:443
+          PUSHGATEWAY_ENDPOINT: https://prometheus-pushgateway.staging.manabie.io
+          DRAFT_ENDPOINT: api.staging.manabie.io:443
+          COLLECT_BDD_TESTS_METRICS: "false"
+          CI_PULL_REQUEST_ID: ${{ github.event.pull_request.number }}
+          CI_ACTOR: ${{ github.actor }}
+          CI_RUN_ID: ${{ github.run_id }}
+        run: |
+          GODOG_TAGS="@blocker" ./deployments/k8s_bdd_test.bash
+
+      - name: Run extra integration test
+        timeout-minutes: 15
+        env:
+          TRACE_ENABLED: "false"
+          OTEL_ENDPOINT: opentelemetry-collector.manabie.io:443
+          PUSHGATEWAY_ENDPOINT: https://prometheus-pushgateway.staging.manabie.io
+          DRAFT_ENDPOINT: api.staging.manabie.io:443
+          COLLECT_BDD_TESTS_METRICS: "false"
+          CI_PULL_REQUEST_ID: ${{ github.event.pull_request.number }}
+          CI_ACTOR: ${{ github.actor }}
+          CI_RUN_ID: ${{ github.run_id }}
+        run: |
+          if [[ ! -z "${{ needs.requirements.outputs.extra_integration_test_args }}" ]]; then
+            echo "Running extra integration tests on demand"
+            read -a triggered_svc <<< "${{ needs.requirements.outputs.extra_integration_test_args }}"
+            for svc in "${triggered_svc[@]}"; do
+              integration_args+=("$svc")
+            done
+            ./deployments/k8s_bdd_test.bash "${integration_args[@]}"
+          fi
+
+      - name: Clean Up
+        if: always()
+        run: |
+          # Delete minikube or kind, depending on what was used
+          ./deployments/sk.bash -d
+
+  conclusion:
+    if: always()
+    needs:
+      - requirements
+      - skaffold-test
+      - hasura-metadata-test
+      - unit-test
+      - check-commit-messages
+      - integration-blocker-test
+      - dbschema-test
+      - lint
+      - helm-test
+      - unleash-flags-only
+    runs-on: ${{ fromJson(needs.requirements.outputs.runners)['conclusion'] }}
+    steps:
+      - name: Check if required steps passed
+        env:
+          GH_TOKEN: "${{ github.token }}"
+          STATUS_DATA: "${{ toJSON(needs) }}"
+        run: |
+
+          gh release download statuscheck-v0.0.2 \
+            --repo manabie-com/backend \
+            --pattern 'statuscheck-linux-amd64' \
+            --clobber \
+            --output statuscheck
+          chmod +x ./statuscheck
+          ./statuscheck \
+            -v=debug \
+            --data="$STATUS_DATA" \
+            --require=skaffold-test,hasura-metadata-test,unit-test \
+            --require=check-commit-messages,dbschema-test \
+            --require=lint,helm-test,integration-blocker-test,unleash-flags-only
+
+  # hcl2sql:
+  #   needs: [requirements]
+  #   runs-on: ubuntu-20.04
+  #   if: needs.requirements.outputs.convert_hcl2sql == 1
+  #   steps:
+  #     - name: Checkout source
+  #       uses: actions/checkout@v3
+
+  #     - name: Install python-hcl2 package
+  #       run: |
+  #         pip3 install typing_extensions python-hcl2 pyyaml
+
+  #     - name: Check commit messages
+  #       run: |
+  #         python3 deployments/services-directory/hcl2sql.py
+  #     - name: Git diff
+  #       run: |
+  #         git add .
+  #         git diff --staged
+
+# todo: this one will run when finished remove all secret-v2 files
+# hcl2sops:
+#   needs: [requirements]
+#   runs-on: ubuntu-20.04
+#   if: needs.requirements.outputs.convert_hcl2sops == 1
+#   steps:
+#     - name: Checkout source
+#       uses: actions/checkout@v3
+
+#     - name: Install python-hcl2 package
+#       run: |
+#         pip3 install python-hcl2 typing_extensions
+
+#     - name: Check commit messages
+#       run: |
+#         python3 deployments/services-directory/hcl2sops.py
+#     - name: Git diff
+#       run: |
+#         git add .
+#         git diff --staged
+
+# hcl2sql:
+#   needs: [requirements]
+#   runs-on: ubuntu-20.04
+#   if: needs.requirements.outputs.convert_hcl2sql == 1
+#   steps:
+#     - name: Checkout source
+#       uses: actions/checkout@v3
+
+#     - name: Install python-hcl2 package
+#       run: |
+#         pip3 install typing_extensions python-hcl2 pyyaml
+
+#     - name: Check commit messages
+#       run: |
+#         python3 deployments/services-directory/hcl2sql.py
+#     - name: Git diff
+#       run: |
+#         git add .
+#         git diff --staged

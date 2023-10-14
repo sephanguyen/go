@@ -1,0 +1,147 @@
+syntax = "proto3";
+
+package bob.v1;
+
+import "common/v1/requests.proto";
+import "common/v1/contents.proto";
+import "bob/v1/media.proto";
+import "google/protobuf/wrappers.proto";
+
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/bob/v1;bpb";
+
+message ListCoursesRequest {
+  common.v1.Paging paging = 1;
+  common.v1.CommonFilter filter = 2;
+  string keyword = 3;
+}
+
+message ListCoursesResponse {
+  common.v1.Paging next_page = 1;
+  repeated common.v1.Course items = 2;
+}
+
+message ListCoursesByLocationsRequest {
+  common.v1.Paging paging = 1;
+  common.v1.CommonFilter filter = 2;
+  repeated string location_ids = 3;
+  string keyword = 4;
+}
+
+message ListCoursesByLocationsResponse {
+  common.v1.Paging next_page = 1;
+  repeated common.v1.Course items = 2;
+}
+
+
+message ListLessonsRequest {
+  common.v1.Paging paging = 1;
+  common.v1.CommonFilter filter = 2;
+}
+
+message ListLessonsResponse {
+  common.v1.Paging next_page = 1;
+  repeated common.v1.Lesson items = 2;
+}
+
+message ListTopicsRequest {
+  common.v1.Paging paging = 1;
+  common.v1.CommonFilter filter = 2;
+}
+
+message ListTopicsResponse {
+  common.v1.Paging next_page = 1;
+  repeated common.v1.Topic items = 2;
+}
+
+
+message ListLessonMediasRequest {
+  common.v1.Paging paging = 1;
+  string lesson_id = 2;
+}
+
+message ListLessonMediasResponse{
+  common.v1.Paging next_page = 1;
+  repeated bob.v1.Media items = 2;
+}
+
+message RetrieveFlashCardStudyProgressRequest  {
+  string study_set_id = 1;
+  string student_id = 2;
+  common.v1.Paging paging = 3;
+}
+
+message RetrieveFlashCardStudyProgressResponse {
+  common.v1.Paging next_page = 1;
+  string study_set_id = 2;
+  repeated FlashcardQuizzes items = 3;
+  int32 studying_index = 4;
+}
+
+message RetrieveBookTreeByTopicIDsRequest {
+  repeated string topic_ids = 1; 
+}
+
+message RetrieveBookTreeByTopicIDsResponse {
+  message Info {
+    google.protobuf.StringValue lo_id = 1;
+    string topic_id = 2;
+    string chapter_id = 3;
+    int32 chapter_dispaly_order = 4;
+    int32 topic_display_order = 5;
+    int32 lo_display_order = 6;
+  }
+  repeated Info infos = 1;
+}
+
+service CourseReaderService {
+  rpc ListCourses(ListCoursesRequest) returns (ListCoursesResponse);
+  rpc ListCoursesByLocations(ListCoursesByLocationsRequest) returns (ListCoursesByLocationsResponse);
+  rpc ListLessons(ListLessonsRequest) returns (ListLessonsResponse);
+  rpc ListTopics(ListTopicsRequest) returns (ListTopicsResponse);
+  rpc ListLessonMedias(ListLessonMediasRequest) returns (ListLessonMediasResponse);
+  rpc RetrieveFlashCardStudyProgress(RetrieveFlashCardStudyProgressRequest) returns (RetrieveFlashCardStudyProgressResponse);
+  rpc RetrieveBookTreeByTopicIDs(RetrieveBookTreeByTopicIDsRequest) returns (RetrieveBookTreeByTopicIDsResponse);
+}
+
+message Answer {
+  oneof format {
+    uint32 selected_index = 1;
+    string filled_text = 2;
+  }
+}
+
+message DuplicateTopic {
+  string original_topic = 1;
+  string copied_topic = 2;
+}
+
+message RetrieveSubmissionHistoryRequest {
+  string set_id = 1;
+  common.v1.Paging paging = 2;
+}
+
+message RetrieveSubmissionHistoryResponse {
+  repeated common.v1.AnswerLog logs = 1;
+  common.v1.Paging next_page = 2;
+}
+
+message FlashcardQuizzes {
+  common.v1.Quiz item = 1;
+  FlashcardQuizStudyStatus status = 2;
+}
+
+enum FlashcardQuizStudyStatus {
+  FLASHCARD_QUIZ_STUDY_STATUS_NONE = 0;
+  FLASHCARD_QUIZ_STUDY_STATUS_SKIPPED = 1;
+  FLASHCARD_QUIZ_STUDY_STATUS_REMEMBERED = 2;
+}
+
+message EventSyncCourse {
+  string id = 1;
+  string name = 2;
+}
+
+service CourseModifierService {
+  rpc RetrieveSubmissionHistory(RetrieveSubmissionHistoryRequest) returns (RetrieveSubmissionHistoryResponse);
+}

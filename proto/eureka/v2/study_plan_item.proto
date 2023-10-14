@@ -1,0 +1,29 @@
+
+syntax = "proto3";
+
+package eureka.v2;
+
+import "eureka/v2/enums.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/eureka/v2;epb";
+
+
+message UpsertStudyPlanItemRequest{
+    string study_plan_item_id = 1;
+    string name = 2;
+    string study_plan_id = 3;
+    repeated string lm_ids = 4;
+    google.protobuf.Timestamp start_date = 5;
+    google.protobuf.Timestamp end_date = 6;
+    int32 display_order = 7;
+    StudyPlanStatus status = 8;
+}
+
+message UpsertStudyPlanItemResponse{
+    string study_plan_item_id = 1;
+}
+
+service StudyPlanItemService {
+    rpc UpsertStudyPlanItem(UpsertStudyPlanItemRequest) returns (UpsertStudyPlanItemResponse) {}
+}

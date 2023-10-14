@@ -1,0 +1,27 @@
+@startuml AddNewNotification
+hide circle
+
+actor User as User order 10
+participant Yasuo as Yasuo order 40
+User -> Yasuo:  Call "NotificationModifier.SubmitQuestionnaire"
+note right User
+    payload: user_info_notification
+end note
+
+activate Yasuo
+note right Yasuo
+1. get questionnaire,qn_question from db 
+2. check end_date > now()
+3. check all required_questions have answers
+4. Find qn_user_answer with deleted_at = null
+5. if found, check questionnaire.resubmit_allow
+6. run in tx: 
+    soft delete old qn_user_answers (if any)
+    insert new qn_user_answers with (
+        target_id=user_info_noti.student_id,
+        user_id=current_user,
+        ...
+    )
+end note
+deactivate Yasuo
+@enduml

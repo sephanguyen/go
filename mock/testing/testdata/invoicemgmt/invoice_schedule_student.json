@@ -1,0 +1,110 @@
+{
+	"schema": [
+		{
+			"column_name": "actual_error_details",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "error_details",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "invoice_schedule_history_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "invoice_schedule_student_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "student_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "invoice_schedule_student",
+			"policyname": "rls_invoice_schedule_student",
+			"qual": "permission_check(resource_path, 'invoice_schedule_student'::text)",
+			"with_check": "permission_check(resource_path, 'invoice_schedule_student'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "invoice_schedule_student",
+			"policyname": "rls_invoice_schedule_student_restrictive",
+			"qual": "permission_check(resource_path, 'invoice_schedule_student'::text)",
+			"with_check": "permission_check(resource_path, 'invoice_schedule_student'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "invoice_schedule_student_invoice_schedule_history_fk",
+			"column_name": "invoice_schedule_history_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "invoice_schedule_student_students_fk",
+			"column_name": "student_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "invoice_schedule_student_pk",
+			"column_name": "invoice_schedule_student_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "invoice_schedule_student",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

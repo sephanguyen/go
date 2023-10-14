@@ -1,0 +1,3 @@
+ALTER PUBLICATION debezium_publication ADD TABLE public.internal_configuration_value;
+ALTER PUBLICATION debezium_publication ADD TABLE public.external_configuration_value;
+ALTER PUBLICATION debezium_publication ADD TABLE public.configuration_key;

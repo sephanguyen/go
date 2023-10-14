@@ -1,0 +1,156 @@
+{{- $ca := genCA "kserve-webhook-server-service-ca" 365 }}
+{{- $cn := "kserve-webhook-server-service" }}
+{{- $dn1 := printf "%s" $cn }}
+{{- $dn2 := printf "%s.%s" $cn .Release.Namespace }}
+{{- $dn3 := printf "%s.%s.svc" $cn .Release.Namespace }}
+{{- $dn4 := printf "%s.%s.svc.cluster" $cn .Release.Namespace }}
+{{- $dn5 := printf "%s.%s.svc.cluster.local" $cn .Release.Namespace }}
+{{- $cert := genSignedCert $cn nil (list $dn1 $dn2 $dn3 $dn4 $dn5) 365 $ca }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: kserve-webhook-server-cert
+  namespace: {{ .Release.Namespace | quote }}
+type: kubernetes.io/tls
+data:
+  tls.crt: {{ $cert.Cert | b64enc | quote }}
+  tls.key: {{ $cert.Key | b64enc | quote }}
+  ca.crt: {{ $ca.Cert | b64enc | quote }}
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: inferenceservice.serving.kserve.io
+  annotations:
+    cert-manager.io/inject-ca-from-secret: {{ .Release.Namespace }}/kserve-webhook-server-cert
+webhooks:
+  - clientConfig:
+      caBundle: {{ $ca.Cert | b64enc | quote }}
+      service:
+        name: kserve-webhook-server-service
+        namespace: {{ .Release.Namespace }}
+        path: /mutate-serving-kserve-io-v1beta1-inferenceservice
+    failurePolicy: Fail
+    name: inferenceservice.kserve-webhook-server.defaulter
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
+    rules:
+      - apiGroups:
+          - serving.kserve.io
+        apiVersions:
+          - v1beta1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - inferenceservices
+  - clientConfig:
+      caBundle: {{ $ca.Cert | b64enc | quote }}
+      service:
+        name: kserve-webhook-server-service
+        namespace: {{ .Release.Namespace }}
+        path: /mutate-pods
+    failurePolicy: Fail
+    name: inferenceservice.kserve-webhook-server.pod-mutator
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
+    objectSelector:
+      matchExpressions:
+        - key: serving.kserve.io/inferenceservice
+          operator: Exists
+    rules:
+      - apiGroups:
+          - ""
+        apiVersions:
+          - v1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - pods
+
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: inferenceservice.serving.kserve.io
+  annotations:
+    cert-manager.io/inject-ca-from-secret: {{ .Release.Namespace }}/kserve-webhook-server-cert
+webhooks:
+  - clientConfig:
+      caBundle: {{ $ca.Cert | b64enc | quote }}
+      service:
+        name: kserve-webhook-server-service
+        namespace: {{ .Release.Namespace }}
+        path: /validate-serving-kserve-io-v1beta1-inferenceservice
+    failurePolicy: Fail
+    name: inferenceservice.kserve-webhook-server.validator
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
+    rules:
+      - apiGroups:
+          - serving.kserve.io
+        apiVersions:
+          - v1beta1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - inferenceservices
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: trainedmodel.serving.kserve.io
+  annotations:
+    cert-manager.io/inject-ca-from-secret: {{ .Release.Namespace }}/kserve-webhook-server-cert
+webhooks:
+  - clientConfig:
+      caBundle: {{ $ca.Cert | b64enc | quote }}
+      service:
+        name: kserve-webhook-server-service
+        namespace: {{ .Release.Namespace }}
+        path: /validate-serving-kserve-io-v1alpha1-trainedmodel
+    failurePolicy: Fail
+    name: trainedmodel.kserve-webhook-server.validator
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
+    rules:
+      - apiGroups:
+          - serving.kserve.io
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - trainedmodels
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  creationTimestamp: null
+  name: inferencegraph.serving.kserve.io
+  annotations:
+    cert-manager.io/inject-ca-from-secret: {{ .Release.Namespace }}/kserve-webhook-server-cert
+webhooks:
+  - clientConfig:
+      caBundle: {{ $ca.Cert | b64enc | quote }}
+      service:
+        name: kserve-webhook-server-service
+        namespace: {{ .Release.Namespace }}
+        path: /validate-serving-kserve-io-v1alpha1-inferencegraph
+    failurePolicy: Fail
+    name: inferencegraph.kserve-webhook-server.validator
+    sideEffects: None
+    admissionReviewVersions: ["v1beta1"]
+    rules:
+      - apiGroups:
+          - serving.kserve.io
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - inferencegraphs

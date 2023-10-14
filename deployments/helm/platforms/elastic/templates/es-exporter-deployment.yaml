@@ -1,0 +1,166 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: es-exporter-{{ include "elastic.fullname" . }}
+  labels:
+    app.kubernetes.io/name: es-exporter-{{ include "elastic.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: es-exporter
+    {{- include "elastic.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.elasticsearch_exporter.replicaCount }}
+  selector:
+    matchLabels:
+      app: es-exporter-{{ include "elastic.name" . }}
+      release: "{{ .Release.Name }}"
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: es-exporter-{{ include "elastic.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: es-exporter
+        app: es-exporter-{{ include "elastic.name" . }}
+        release: "{{ .Release.Name }}"
+      annotations:
+        checksum/es-exporter.encrypted.yaml: {{ printf "secrets/%s/%s/es-exporter.encrypted.yaml" .Values.vendor .Values.environment | .Files.Get | sha256sum }}
+        checksum/root-ca.pem.encrypted.yaml: {{ printf "secrets/%s/%s/root-ca.pem.encrypted.yaml" .Values.vendor .Values.environment | .Files.Get | sha256sum }}
+        checksum/es-exporter_v2.encrypted.yaml: {{ printf "secrets/%s/%s/es-exporter_v2.encrypted.yaml" .Values.vendor .Values.environment | .Files.Get | sha256sum }}
+        checksum/root-ca_v2.pem.encrypted.yaml: {{ printf "secrets/%s/%s/root-ca_v2.pem.encrypted.yaml" .Values.vendor .Values.environment | .Files.Get | sha256sum }}
+{{- if eq "local" .Values.environment }}
+        checksum/service_credential.json: {{ include "util.serviceCredential" . | sha256sum }}
+{{- end }}
+      {{- if .Values.elasticsearch_exporter.podAnnotations }}
+{{ toYaml .Values.elasticsearch_exporter.podAnnotations | indent 8 }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ include "elastic.serviceAccountName" . }}
+      {{- with .Values.elasticsearch_exporter.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- with .Values.elasticsearch_exporter.dnsConfig }}
+      dnsConfig:
+{{ toYaml . | indent 8 }}
+{{- end }}
+      volumes:
+      - name: config-volume
+        emptyDir: {}
+      - name: secrets-volume
+        secret:
+          secretName: es-exporter-{{ include "elastic.fullname" . }}
+          items:
+{{- if eq "local" .Values.environment }}
+          - key: service_credential.json
+            path: service_credential.json
+{{- end }}
+          - key: root-ca.pem.encrypted.yaml
+            path: root-ca.pem.encrypted.yaml
+          - key: es-exporter.encrypted.yaml
+            path: es-exporter.encrypted.yaml
+          - key: root-ca_v2.pem.encrypted.yaml
+            path: root-ca_v2.pem.encrypted.yaml
+          - key: es-exporter_v2.encrypted.yaml
+            path: es-exporter_v2.encrypted.yaml
+      initContainers:
+      - name: es-exporter-decrypt-secret
+        image: "{{ .Values.decryptorImage.repository }}:{{ .Values.decryptorImage.legacyTag }}"
+        imagePullPolicy: IfNotPresent
+        command:
+          - /bin/bash
+          - -c
+          - |
+
+            set -eu
+          {{- if eq "local" .Values.environment }}
+            gcloud auth activate-service-account --key-file /configs/service_credential.json
+          {{- end }}
+
+            code=0
+            sops --decrypt --output-type binary --output /configs/es-exporter/root-ca.pem /configs/es-exporter/root-ca_v2.pem.encrypted.yaml || code=$?
+            if [ "$code" -ne 0 ]; then
+              sops --decrypt --output-type binary /configs/es-exporter/root-ca.pem.encrypted.yaml > /configs/es-exporter/root-ca.pem
+              echo "============= decrypt old secret file: root-ca.pem.encrypted.yaml"
+            fi
+
+            code=0
+            sops --decrypt --output /configs/es-exporter/es-exporter.yaml /configs/es-exporter/es-exporter_v2.encrypted.yaml || code=$?
+            if [ "$code" -ne 0 ]; then
+              sops --decrypt /configs/es-exporter/es-exporter.encrypted.yaml > /configs/es-exporter/es-exporter.yaml
+              echo "============= decrypt old secret file: es-exporter.encrypted.yaml"
+            fi
+
+        volumeMounts:
+        - name: secrets-volume
+          mountPath: /configs/es-exporter/root-ca.pem.encrypted.yaml
+          subPath: root-ca.pem.encrypted.yaml
+        - name: secrets-volume
+          mountPath: /configs/es-exporter/es-exporter.encrypted.yaml
+          subPath: es-exporter.encrypted.yaml
+          readOnly: true
+        - name: secrets-volume
+          mountPath: /configs/es-exporter/root-ca_v2.pem.encrypted.yaml
+          subPath: root-ca_v2.pem.encrypted.yaml
+        - name: secrets-volume
+          mountPath: /configs/es-exporter/es-exporter_v2.encrypted.yaml
+          subPath: es-exporter_v2.encrypted.yaml
+          readOnly: true
+        - name: config-volume
+          mountPath: /configs/es-exporter/
+{{- if eq "local" .Values.environment }}
+        - name: secrets-volume
+          mountPath: /configs/service_credential.json
+          subPath: service_credential.json
+          readOnly: true
+        env:
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: "/configs/service_credential.json"
+{{- end }}
+      containers:
+      - name: exporter
+        image: "{{ .Values.elasticsearch_exporter.image.repository }}:{{ .Values.elasticsearch_exporter.image.tag }}"
+        imagePullPolicy: {{ .Values.elasticsearch_exporter.image.pullPolicy }}
+        command: ["/bin/sh","-c"]
+        args:
+          - |
+
+            set -e
+
+            configPath=/configs/es-exporter/es-exporter.yaml
+            user=$(grep elasticsearch.username ${configPath} | awk '{print$2}' | tr -d \")
+            pass=$(grep elasticsearch.password ${configPath} | awk '{print$2}' | tr -d \")
+            rm ${configPath}
+            ES_URI=https://${user}:${pass}@elasticsearch-{{ include "elastic.fullname" . }}:{{ .Values.elasticsearch.service.port }};
+            elasticsearch_exporter --es.uri=$ES_URI \
+          {{- with .Values.elasticsearch_exporter.log.format }}
+              --log.format={{ . }} \
+          {{- end }}
+          {{- if .Values.elasticsearch_exporter.es.all }}
+              --es.all \
+          {{- end }}
+          {{- with .Values.elasticsearch_exporter.log.level }}
+              --log.level={{ . }} \
+          {{- end }}
+          {{- with .Values.elasticsearch_exporter.es.ssl_skip_verify }}
+              --es.ssl-skip-verify \
+          {{- end }}
+              --es.timeout={{ .Values.elasticsearch_exporter.es.timeout }} \
+              --es.ca=/configs/es-exporter/root-ca.pem \
+              --web.listen-address=:{{ .Values.elasticsearch_exporter.service.httpPort }} \
+              --web.telemetry-path={{ .Values.elasticsearch_exporter.web.path }}
+        volumeMounts:
+        - name: secrets-volume
+          mountPath: /configs/service_credential.json
+          subPath: service_credential.json
+          readOnly: true
+        - name: config-volume
+          mountPath: /configs/es-exporter/
+        resources:
+{{ toYaml .Values.elasticsearch_exporter.resources | indent 10 }}
+        ports:
+          - containerPort: {{ .Values.elasticsearch_exporter.service.httpPort }}
+            name: http
+      {{- with .Values.elasticsearch_exporter }}
+      {{- $context := (mustMerge (deepCopy .) $) }}
+      affinity: {{- include "util.affinityNew" $context | nindent 8 }}
+      tolerations: {{- include "util.tolerations" $context | nindent 8 }}
+      {{- end }}

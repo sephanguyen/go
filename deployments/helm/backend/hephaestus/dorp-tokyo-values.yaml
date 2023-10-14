@@ -1,0 +1,13 @@
+enableAC: true
+kecResourcePath: "-2147483623"
+migrationEnabled: false
+postHookMigrateDataLake: true
+postHookMigrateDatawarehouses: true
+postHookSyncDataLake: true
+postHookSyncDataWarehouse: true
+postHookUpsertKsqlMigration: true
+resources:
+    requests:
+        cpu: 5m
+        memory: 50Mi
+topicPrefix: output-dorp-kec-

@@ -1,0 +1,137 @@
+{
+	"schema": [
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "lesson_report_detail_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "lesson_report_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "report_version",
+			"data_type": "integer",
+			"column_default": "0",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "report_versions",
+			"data_type": "integer",
+			"column_default": "0",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "student_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "lesson_report_details",
+			"policyname": "rls_lesson_report_details",
+			"qual": "permission_check(resource_path, 'lesson_report_details'::text)",
+			"with_check": "permission_check(resource_path, 'lesson_report_details'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "lesson_report_details",
+			"policyname": "rls_lesson_report_details_restrictive",
+			"qual": "permission_check(resource_path, 'lesson_report_details'::text)",
+			"with_check": "permission_check(resource_path, 'lesson_report_details'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "lesson_reports_fk",
+			"column_name": "lesson_report_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "lesson_reports_fk",
+			"column_name": "lesson_report_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "students_fk",
+			"column_name": "student_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "lesson_report_details_pk",
+			"column_name": "lesson_report_detail_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "unique__lesson_report_id__student_id",
+			"column_name": "lesson_report_id",
+			"constraint_type": "UNIQUE"
+		},
+		{
+			"constraint_name": "unique__lesson_report_id__student_id",
+			"column_name": "student_id",
+			"constraint_type": "UNIQUE"
+		}
+	],
+	"table_name": "lesson_report_details",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

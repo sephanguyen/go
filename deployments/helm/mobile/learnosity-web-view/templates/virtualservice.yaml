@@ -1,0 +1,15 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: {{ .Chart.Name }}-learnosity-web-view
+spec:
+  hosts:
+{{ toYaml .Values.global.dnsNames.learnosityWebView | indent 4 }}
+  gateways:
+    - istio-system/{{ .Values.global.environment }}-{{ .Values.global.vendor }}-gateway
+  exportTo:
+    - istio-system
+{{- with .Values.httpRoute }}
+  http:
+{{ toYaml . | indent 4 }}
+{{- end }}

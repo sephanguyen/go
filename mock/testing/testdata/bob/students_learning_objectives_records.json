@@ -1,0 +1,140 @@
+{
+	"schema": [
+		{
+			"column_name": "accuracy",
+			"data_type": "numeric",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "completed_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "is_offline",
+			"data_type": "boolean",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "learning_time",
+			"data_type": "integer",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "lo_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "record_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "student_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "study_plan_item_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "students_learning_objectives_records",
+			"policyname": "rls_students_learning_objectives_records",
+			"qual": "permission_check(resource_path, 'students_learning_objectives_records'::text)",
+			"with_check": "permission_check(resource_path, 'students_learning_objectives_records'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "students_learning_objectives_records",
+			"policyname": "rls_students_learning_objectives_records_restrictive",
+			"qual": "permission_check(resource_path, 'students_learning_objectives_records'::text)",
+			"with_check": "permission_check(resource_path, 'students_learning_objectives_records'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "students_learning_objectives_records_lo_id_fk",
+			"column_name": "lo_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "students_learning_objectives_records_student_id_fk",
+			"column_name": "student_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "students_learning_objectives_records_pk",
+			"column_name": "record_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "students_learning_objectives_records",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

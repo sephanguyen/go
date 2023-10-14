@@ -1,0 +1,134 @@
+name: 'get-deployment-config'
+description: |
+  Returns the deployment configuration based on input env/org.
+  Requires the checkout action "actions/checkout" to run first.
+  Example:
+    - name: Checkout backend source
+      uses: actions/checkout@v3
+    - name: Get deployment config
+      uses: ./.github/actions/get-deployment-configs
+      with:
+        environment: staging
+        organization: manabie
+inputs:
+  environment:
+    description: 'Environment (stag/staging, uat, prod/production ...)'
+    required: true
+  organization:
+    description: 'Organization (manabie, jprep, synersia, ...)'
+    required: true
+outputs:
+  cluster:
+    description: k8s cluster ID
+    value: ${{ steps.config.outputs.cluster }}
+  region:
+    description: k8s cluster region (mutually exclusive with zone)
+    value: ${{ steps.config.outputs.region }}
+  zone:
+    description: k8s cluster zone (mutually exclusive with region)
+    value: ${{ steps.config.outputs.zone }}
+  environment:
+    description: Environment to deploy, abbreviated
+    value: ${{ steps.config.outputs.environment }}
+  env:
+    description: Environment to deploy, abbreviated
+    value: ${{ steps.config.outputs.environment }}
+  organization:
+    description: Organization to deploy
+    value: ${{ steps.config.outputs.organization }}
+  org:
+    description: Organization to deploy
+    value: ${{ steps.config.outputs.organization }}
+  projectId:
+    description: Google Cloud Project ID
+    value: ${{ steps.config.outputs.projectId }}
+  serviceAccountEmailSuffix:
+    description: Output
+    value: ${{ steps.config.outputs.serviceAccountEmailSuffix }}
+  namespace:
+    description: 'Service namespace to deploy (format: [env]-[org]-services)'
+    value: ${{ steps.config.outputs.namespace }}
+  sqlProxyConnectionName:
+    description: Output
+    value: ${{ steps.config.outputs.sqlProxyConnectionName }}
+  sqlProxySourceConnectionName:
+    description: Output. Used in preproduction deployment only.
+    value: ${{ steps.config.outputs.sqlProxySourceConnectionName }}
+  elasticNamespace:
+    description: Output
+    value: ${{ steps.config.outputs.elasticNamespace }}
+  elasticReleaseName:
+    description: Output
+    value: ${{ steps.config.outputs.elasticReleaseName }}
+  elasticNameOverride:
+    description: Output
+    value: ${{ steps.config.outputs.elasticNameOverride }}
+  elasticReplicas:
+    description: Output
+    value: ${{ steps.config.outputs.elasticReplicas }}
+  elasticStorageClass:
+    description: Output
+    value: ${{ steps.config.outputs.elasticStorageClass }}
+  elasticStorageSize:
+    description: Output
+    value: ${{ steps.config.outputs.elasticStorageSize }}
+  elasticSnapshotEnabled:
+    description: Output
+    value: ${{ steps.config.outputs.elasticSnapshotEnabled }}
+  elasticSnapshotStorageClass:
+    description: Output
+    value: ${{ steps.config.outputs.elasticSnapshotStorageClass }}
+  elasticSnapshotStorageSize:
+    description: Output
+    value: ${{ steps.config.outputs.elasticSnapshotStorageSize }}
+  elasticCreateServiceAccount:
+    description: Output
+    value: ${{ steps.config.outputs.elasticCreateServiceAccount }}
+  elasticInitIndices:
+    description: Output
+    value: ${{ steps.config.outputs.elasticInitIndices }}
+runs:
+  using: composite
+  steps:
+    - name: 'Get deployment configuration'
+      id: config
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const { normalizeEnvironmentString } = require('./.github/scripts/utils.js');
+          const getDeploymentConfiguration = require('./.github/scripts/get-deployment-configuration.js');
+
+          const organization = '${{ inputs.organization }}';
+          const environment = normalizeEnvironmentString('${{ inputs.environment }}');
+          const c = await getDeploymentConfiguration({
+            organization: organization,
+            environment: environment,
+          })
+          if (!c) {
+            throw new Error(`No configuration found for ${environment}.${organization}`)
+          }
+
+          console.log('Configuration found:', c);
+
+          // Set object fields to step's outputs
+          core.setOutput('cluster', c.cluster)
+          core.setOutput('region', c.region)
+          core.setOutput('zone', c.zone)
+          core.setOutput('environment', c.environment)
+          core.setOutput('organization', c.organization)
+          core.setOutput('projectId', c.projectId)
+          core.setOutput('serviceAccountEmailSuffix', c.serviceAccountEmailSuffix)
+          core.setOutput('namespace', c.namespace)
+          core.setOutput('sqlProxyConnectionName', c.sqlProxyConnectionName)
+          core.setOutput('sqlProxySourceConnectionName', c.sqlProxySourceConnectionName)
+          core.setOutput('elasticNamespace', c.elasticNamespace)
+          core.setOutput('elasticReleaseName', c.elasticReleaseName)
+          core.setOutput('elasticNameOverride', c.elasticNameOverride)
+          core.setOutput('elasticReplicas', c.elasticReplicas)
+          core.setOutput('elasticStorageClass', c.elasticStorageClass)
+          core.setOutput('elasticStorageSize', c.elasticStorageSize)
+          core.setOutput('elasticSnapshotEnabled', c.elasticSnapshotEnabled)
+          core.setOutput('elasticSnapshotStorageClass', c.elasticSnapshotStorageClass)
+          core.setOutput('elasticSnapshotStorageSize', c.elasticSnapshotStorageSize)
+          core.setOutput('elasticCreateServiceAccount', c.elasticCreateServiceAccount)
+          core.setOutput('elasticInitIndices', c.elasticInitIndices)

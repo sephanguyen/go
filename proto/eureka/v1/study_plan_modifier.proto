@@ -1,0 +1,75 @@
+syntax = "proto3";
+
+package eureka.v1;
+import "eureka/v1/assignments.proto";
+import "eureka/v1/enums.proto";
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/eureka/v1;epb";
+
+
+message DeleteStudyPlanBelongsToACourseRequest{
+  string course_id = 1;
+  string study_plan_id = 2;
+}
+
+message DeleteStudyPlanBelongsToACourseResponse{
+}
+
+message UpsertStudyPlanItemV2Request {
+  repeated StudyPlanItem study_plan_items = 1;
+}
+
+message UpsertStudyPlanItemV2Response {
+  repeated string study_plan_item_ids = 1;
+}
+
+message UpdateStudyPlanItemsSchoolDateRequest {
+  repeated string study_plan_item_ids = 1;
+  string student_id = 2;
+  google.protobuf.Timestamp school_date = 3;
+}
+
+message UpdateStudyPlanItemsSchoolDateResponse {
+  bool is_success = 1;  
+}
+
+message UpdateStudyPlanItemsStatusRequest {
+  repeated string study_plan_item_ids = 1;
+  string student_id = 2;
+  StudyPlanItemStatus study_plan_item_status = 3;
+}
+
+message UpdateStudyPlanItemsStatusResponse {
+  bool is_success = 1;  
+}
+
+message UpsertStudyPlanRequest {
+  google.protobuf.StringValue study_plan_id = 1;
+  int32 school_id = 2;
+  string name = 3;
+  string course_id = 4;
+  // New fields
+  string book_id = 5;
+  StudyPlanStatus status = 6;
+  bool track_school_progress = 7;
+  repeated int32 grades = 8;
+}
+
+message UpsertStudyPlanResponse {
+  string study_plan_id = 1;
+}
+
+
+service StudyPlanModifierService {
+  rpc DeleteStudyPlanBelongsToACourse(DeleteStudyPlanBelongsToACourseRequest) //TODO: x - verify is using or not
+    returns (DeleteStudyPlanBelongsToACourseResponse);   
+  rpc UpsertStudyPlanItemV2(UpsertStudyPlanItemV2Request) //TODO: deprecated soon
+    returns (UpsertStudyPlanItemV2Response);
+  rpc UpdateStudyPlanItemsSchoolDate(UpdateStudyPlanItemsSchoolDateRequest)//TODO:  x SP team
+    returns (UpdateStudyPlanItemsSchoolDateResponse);
+  rpc UpdateStudyPlanItemsStatus(UpdateStudyPlanItemsStatusRequest) //TODO: x- SP team
+    returns (UpdateStudyPlanItemsStatusResponse);
+  rpc UpsertStudyPlan(UpsertStudyPlanRequest) returns (UpsertStudyPlanResponse); //TODO: x- SP team
+}

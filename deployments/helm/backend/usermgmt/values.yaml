@@ -1,0 +1,153 @@
+affinity: {}
+affinityOverride: {}
+apiHttp:
+    - fault:
+        abort:
+            httpStatus: 403
+            percentage:
+                value: 100
+      match:
+        - uri:
+            prefix: /usermgmt.v1.InternalService
+      route:
+        - destination:
+            host: usermgmt
+            port:
+                number: 6150
+    - match:
+        - uri:
+            prefix: /usermgmt.v2
+      route:
+        - destination:
+            host: usermgmt
+            port:
+                number: 6150
+    - match:
+        - uri:
+            prefix: /api/user
+      route:
+        - destination:
+            host: usermgmt
+            port:
+                number: 6180
+cronjobs:
+    check-enrollment-status-date:
+        cmd: usermgmt_cronjob_check_enrollment_status_date
+        schedule: 0 0 * * *
+    cronjob-itee-download-data-file:
+        cmd: usermgmt_itee_download_data_file
+        schedule: 13 19 * * *
+    cronjob-withus-download-data-file:
+        cmd: usermgmt_withus_download_data_file
+        schedule: 13 19 * * *
+enabled: true
+grpcPort: 6150
+hasuraEnabled: false
+httpPort: 6180
+jobs:
+    check-enrollment-status-date:
+        cmd: usermgmt_cronjob_check_enrollment_status_date
+    cronjob-itee-download-data-file:
+        cmd: usermgmt_itee_download_data_file
+    cronjob-withus-download-data-file:
+        cmd: usermgmt_withus_download_data_file
+    generate-api-keypair:
+        cmd: usermgmt_generate_api_keypair
+    itee-download-data-file:
+        cmd: usermgmt_itee_download_data_file
+    kec-create-staffs-from-bucket:
+        cmd: usermgmt_kec_create_staffs_from_bucket
+    migrate-bulk-insert-students:
+        cmd: usermgmt_migrate_bulk_insert_students
+    migrate-kec-enrollment-status:
+        cmd: usermgmt_migrate_kec_enrollment_status
+    withus-download-data-file:
+        cmd: usermgmt_withus_download_data_file
+metrics:
+    enabled: true
+    podAnnotations:
+        prometheus.io/port: "8888"
+        prometheus.io/scheme: http
+        prometheus.io/scrape: "true"
+migrationEnabled: false
+pdb:
+    enabled: false
+readinessProbe:
+    enabled: true
+service:
+    port: 6150
+    type: ClusterIP
+webHttp:
+    - corsPolicy:
+        allowHeaders:
+            - grpc-timeout
+            - content-type
+            - keep-alive
+            - user-agent
+            - cache-control
+            - content-type
+            - content-transfer-encoding
+            - token
+            - x-accept-content-transfer-encoding
+            - x-accept-response-streaming
+            - x-user-agent
+            - x-grpc-web
+            - pkg
+            - version
+        allowMethods:
+            - POST
+            - GET
+            - OPTIONS
+            - PUT
+            - DELETE
+        allowOrigins:
+            - regex: .*
+        exposeHeaders:
+            - grpc-status
+            - grpc-message
+            - grpc-status-details-bin
+        maxAge: 100s
+      match:
+        - uri:
+            prefix: /usermgmt.v2
+      route:
+        - destination:
+            host: usermgmt
+            port:
+                number: 6150
+    - corsPolicy:
+        allowCredentials: true
+        allowHeaders:
+            - grpc-timeout
+            - content-type
+            - keep-alive
+            - user-agent
+            - cache-control
+            - content-type
+            - content-transfer-encoding
+            - token
+            - x-accept-content-transfer-encoding
+            - x-accept-response-streaming
+            - x-user-agent
+            - x-grpc-web
+            - pkg
+            - version
+            - JPREP-Signature
+            - CloudConvert-Signature
+        allowMethods:
+            - POST
+            - GET
+            - OPTIONS
+            - PUT
+            - DELETE
+        allowOrigins:
+            - regex: .*
+        maxAge: 100s
+      match:
+        - uri:
+            prefix: /api/user
+      route:
+        - destination:
+            host: usermgmt
+            port:
+                number: 6180

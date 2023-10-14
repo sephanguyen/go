@@ -1,0 +1,104 @@
+syntax = "proto3";
+
+package calendar.v1;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/calendar/v1";
+
+import "common/v1/enums.proto";
+import "google/protobuf/timestamp.proto";
+import "calendar/v1/enums.proto";
+import "lessonmgmt/v1/lessons.proto";
+
+service LessonReaderService {
+    rpc GetLessonDetailOnCalendar (GetLessonDetailOnCalendarRequest) returns (GetLessonDetailOnCalendarResponse);
+    rpc GetLessonIDsForBulkStatusUpdate (GetLessonIDsForBulkStatusUpdateRequest) returns (GetLessonIDsForBulkStatusUpdateResponse);
+}
+
+message GetLessonDetailOnCalendarRequest {
+    string lesson_id = 1;
+}
+
+message GetLessonDetailOnCalendarResponse {
+    bool is_locked = 1;
+    string lesson_id = 2;
+    string lesson_name = 3;
+    google.protobuf.Timestamp start_time = 4;
+    google.protobuf.Timestamp end_time = 5;
+    common.v1.LessonTeachingMedium teaching_medium = 6;
+    common.v1.LessonTeachingMethod teaching_method = 7;
+    common.v1.LessonSchedulingStatus scheduling_status = 8;
+    message Location {
+        string location_id = 1;
+        string location_name = 2;
+    }
+    Location location = 9;
+    message Class {
+        string class_id = 1;
+        string class_name = 2;
+    }
+    Class class = 10;
+    message Scheduler {
+        string scheduler_id = 1;
+        google.protobuf.Timestamp start_date = 2;
+        google.protobuf.Timestamp end_date = 3;
+        calendar.v1.Frequency frequency = 4;
+    }
+    Scheduler scheduler = 11;
+    message LessonTeacher {
+        string teacher_id = 1;
+        string teacher_name = 2;
+    }
+    repeated LessonTeacher lesson_teachers = 12;
+    message LessonMember {
+        string student_id = 1;
+        string student_name = 2;
+        string grade = 3;
+        message Course {
+        string course_id = 1;
+        string course_name = 2;
+        }
+        Course course = 4;
+        common.v1.StudentAttendStatus attendance_status = 5;
+        common.v1.StudentAttendanceNotice attendance_notice = 6;
+        common.v1.StudentAttendanceReason attendance_reason = 7;
+        string attendance_note = 8;
+    }
+    repeated LessonMember lesson_members = 13;
+    message LessonClassroom {
+        string classroom_id = 1;
+        string classroom_name = 2;
+        string room_area = 3;
+        uint32 seat_capacity = 4;
+    }
+    repeated LessonClassroom lesson_classrooms = 14;
+    repeated string media_ids = 15;
+    string course_id = 16;
+    string course_name = 17;
+    string zoom_id = 18;
+    string zoom_link = 19;
+    string zoom_owner_id = 20;
+    uint32 lesson_capacity = 21;
+    string class_do_id = 22;
+    string class_do_link = 23;
+    string class_do_owner_id = 24;
+}
+
+message GetLessonIDsForBulkStatusUpdateRequest {
+    lessonmgmt.v1.LessonBulkAction action = 1;
+    google.protobuf.Timestamp start_date = 2;
+    google.protobuf.Timestamp end_date = 3;
+    google.protobuf.Timestamp start_time = 4;
+    google.protobuf.Timestamp end_time = 5;
+    string location_id = 6;
+    string timezone = 7;
+}
+
+message GetLessonIDsForBulkStatusUpdateResponse {
+    message LessonIDsDetail {
+        common.v1.LessonSchedulingStatus scheduling_status = 1;
+        uint32 modifiable_lessons_count = 2;
+        uint32 lessons_count = 3;
+        repeated string lesson_ids = 4;
+    }
+    repeated LessonIDsDetail lesson_ids_details = 1;
+}

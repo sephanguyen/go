@@ -1,0 +1,159 @@
+common:
+  name: gandalf
+  organization: {{ .Values.global.vendor }}
+  environment: '{{ include "util.runtimeEnvironment" . }}'
+  actual_environment: '{{ include "util.environment" . }}'
+postgres_v2:
+  fatima:
+    user: postgres
+    host: postgres-infras.emulator.svc.cluster.local
+    port: '5432'
+    dbname: fatima
+    max_conns: 8
+    retry_attempts: 10
+    retry_wait_internal: 5s
+  bob:
+    user: bob
+    host: postgres-infras.emulator.svc.cluster.local
+    port: '5432'
+    dbname: bob
+    max_conns: 8
+    retry_attempts: 10
+    retry_wait_internal: 5s
+    shard_id: 1
+  tom:
+    user: tom
+    host: postgres-infras.emulator.svc.cluster.local
+    port: '5432'
+    dbname: tom
+    max_conns: 8
+    retry_attempts: 10
+    retry_wait_internal: 5s
+  eureka:
+    user: postgres
+    host: postgres-infras.emulator.svc.cluster.local
+    port: '5432'
+    dbname: eureka
+    max_conns: 8
+    retry_attempts: 10
+    retry_wait_internal: 5s
+  invoicemgmt:
+    user: postgres
+    host: postgres-infras.emulator.svc.cluster.local
+    port: '5432'
+    dbname: invoicemgmt
+    max_conns: 8
+    retry_attempts: 10
+    retry_wait_internal: 5s
+  entryexitmgmt:
+    user: postgres
+    host: postgres-infras.emulator.svc.cluster.local
+    port: '5432'
+    dbname: entryexitmgmt
+    max_conns: 8
+    retry_attempts: 10
+    retry_wait_internal: 5s
+  mastermgmt:
+    user: mastermgmt
+    host: postgres-infras.emulator.svc.cluster.local
+    port: '5432'
+    dbname: mastermgmt
+    max_conns: 8
+    retry_attempts: 10
+    retry_wait_internal: 5s
+  zeus:
+    user: postgres
+    host: postgres-infras.emulator.svc.cluster.local
+    port: '5432'
+    dbname: zeus
+    max_conns: 8
+    retry_attempts: 10
+    retry_wait_internal: 5s
+  timesheet:
+    user: postgres
+    host: postgres-infras.emulator.svc.cluster.local
+    port: '5432'
+    dbname: timesheet
+    max_conns: 8
+    retry_attempts: 10
+    retry_wait_internal: 5s
+  draft:
+    user: postgres
+    host: postgres-infras.emulator.svc.cluster.local
+    port: '5432'
+    dbname: draft
+    max_conns: 8
+    retry_attempts: 10
+    retry_wait_internal: 5s
+  calendar:
+    user: postgres
+    host: postgres-infras.emulator.svc.cluster.local
+    port: '5432'
+    dbname: calendar
+    max_conns: 8
+    retry_attempts: 10
+    retry_wait_internal: 5s
+  lessonmgmt:
+    user: postgres
+    host: postgres-infras.emulator.svc.cluster.local
+    port: '5432'
+    dbname: lessonmgmt
+    max_conns: 8
+    retry_attempts: 10
+    retry_wait_internal: 5s
+  notificationmgmt:
+    user: postgres
+    host: postgres-infras.emulator.svc.cluster.local
+    port: '5432'
+    dbname: notificationmgmt
+    max_conns: 8
+    retry_attempts: 10
+    retry_wait_internal: 5s
+  auth:
+    user: postgres
+    host: postgres-infras.emulator.svc.cluster.local
+    port: '5432'
+    dbname: auth
+    max_conns: 8
+    retry_attempts: 10
+    retry_wait_internal: 5s
+enigma_srv_addr: enigma.local-manabie-backend.svc.cluster.local:5380
+usermgmt_rest_addr: usermgmt.local-manabie-backend.svc.cluster.local:6180
+mastermgmt_http_srv_addr: mastermgmt.local-manabie-backend.svc.cluster.local:6480
+virtualclassroom_http_srv_addr: virtualclassroom.local-manabie-backend.svc.cluster.local:6760
+jwt_applicant: b5e72419a81ca9e1a5
+natsjs:
+  address: "nats://nats-jetstream.{{ .Values.global.environment }}-{{ .Values.global.vendor }}-nats-jetstream.svc.cluster.local:4223"
+  user: "Gandalf"
+  max_redelivery: 10
+  default_ack_wait: 30s
+  reconnect_wait: 10s
+  max_reconnect: -1
+  is_local: {{ include "util.natsIsLocal" . }}
+kafka:
+  address:
+    - "kafka-svc.{{ .Values.global.environment }}-{{ .Values.global.vendor }}-kafka.svc.cluster.local:9092"
+  connect:
+    addr: "http://kafka-connect.{{ .Values.global.environment }}-{{ .Values.global.vendor }}-kafka.svc.cluster.local:8083"
+unleash_srv_addr: unleash.{{ .Values.global.environment }}-{{ .Values.global.vendor }}-unleash.svc.cluster.local:4242
+unleash_client:
+  url: '{{ include "util.unleashURL" . }}'
+  app_name: "manabie-backend-gandalf-unleash-client"
+  api_token: ce4ed2eba3a72d6b5be23c7aa9b71178753f5908cf2dcbbca29442b5b81d397f
+issuers:
+  - issuer: http://firebase.emulator.svc.cluster.local:40401/fake_aud
+    audience: fake_aud
+    jwks_endpoint: http://firebase.emulator.svc.cluster.local:40401/jwkset
+  - issuer: manabie
+    audience: manabie-local
+    jwks_endpoint: http://shamir:5680/.well-known/jwks.json
+whiteboard:
+  app_id: fake_id
+  endpoint: http://gandalf:5889
+  token_life_span: 5m
+kafka_cluster:
+  address: "kafka-svc.{{ .Values.global.environment }}-{{ .Values.global.vendor }}-kafka.svc.cluster.local:9092"
+  object_name_prefix: {{ include "util.kafkaObjectNamePrefix" . }}
+  is_local: {{ include "util.kafkaIsLocal" . }}
+
+

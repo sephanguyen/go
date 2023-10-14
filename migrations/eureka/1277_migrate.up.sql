@@ -1,0 +1,1 @@
+CREATE INDEX CONCURRENTLY IF NOT EXISTS lo_submission_answer_study_plan_item_identity_idx ON public.lo_submission_answer(student_id, study_plan_id, learning_material_id);

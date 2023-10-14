@@ -1,0 +1,134 @@
+common:
+  name: bob
+  organization: {{ .Values.global.vendor }}
+  environment: '{{ include "util.runtimeEnvironment" . }}'
+  actual_environment: '{{ include "util.environment" . }}'
+  sa_email: {{ include "util.serviceAccountEmail" . }}
+  log:
+    app_level: debug
+    log_payload: true
+  stats_enabled: true
+  remote_trace:
+    enabled: true
+    otel_collector_receiver: http://opentelemetry-collector.monitoring.svc.cluster.local:14268/api/traces
+  grpc:
+    trace_enabled: true
+    handler_timeout: -1s
+    client_name: com.manabie.bob
+    client_version: v0.30.0
+  image_tag: {{ include "util.imageTag" . }}
+jwt_applicant: b5e72419a81ca9e1a5
+postgres_migrate:
+  source: file:///migrations/bob
+  database:
+    cloudsql_instance: '{{ .Values.global.cloudSQLCommonInstance }}'
+    cloudsql_use_public_ip: {{ .Values.global.cloudSQLUsePublicIP }}
+    cloudsql_auto_iam_authn: true
+    cloudsql_impersonate_service_account_email: '{{ include "util.databaseMigrationServiceAccountEmail" .}}'
+    user: '{{ include "util.databaseMigrationUser" . }}'
+    host: '{{ include "util.databaseHost" . }}'
+    port: '5432'
+    dbname: '{{ .Values.global.dbPrefix }}bob'
+    max_conns: 2
+    retry_attempts: 10
+    retry_wait_internal: 5s
+postgres_v2:
+  bob:
+    cloudsql_instance: '{{ .Values.global.cloudSQLCommonInstance }}'
+    cloudsql_use_public_ip: {{ .Values.global.cloudSQLUsePublicIP }}
+    cloudsql_auto_iam_authn: true
+    user: '{{ include "util.databaseUser" . }}'
+    host: '{{ include "util.databaseHost" . }}'
+    port: '5432'
+    dbname: '{{ .Values.global.dbPrefix }}bob'
+    max_conns: 8
+    retry_attempts: 10
+    retry_wait_interval: '5s'
+  eureka:
+    cloudsql_instance: '{{ .Values.global.cloudSQLLMSInstance }}'
+    cloudsql_use_public_ip: {{ .Values.global.cloudSQLUsePublicIP }}
+    cloudsql_auto_iam_authn: true
+    user: '{{ include "util.databaseUser" . }}'
+    host: '{{ include "util.databaseHost" . }}'
+    port: '5432'
+    dbname: '{{ .Values.global.dbPrefix }}eureka'
+    max_conns: 8
+    retry_attempts: 10
+    retry_wait_interval: '5s'
+  lessonmgmt:
+    cloudsql_instance: '{{ .Values.global.cloudSQLCommonInstance }}'
+    cloudsql_use_public_ip: {{ .Values.global.cloudSQLUsePublicIP }}
+    cloudsql_auto_iam_authn: true
+    user: '{{ include "util.databaseUser" . }}'
+    host: '{{ include "util.databaseHost" . }}'
+    port: '5432'
+    dbname: '{{ .Values.global.dbPrefix }}lessonmgmt'
+    max_conns: 8
+    retry_attempts: 10
+    retry_wait_interval: '5s'
+upload:
+  max_chunk_size: 1048576
+  max_file_size: 10485760
+storage:
+  endpoint: https://storage.googleapis.com
+  region: asia
+  maximum_url_expiry_duration: 1800s
+  minimum_url_expiry_duration: 1s
+  default_url_expiry_duration: 60s
+  secure: true
+  file_upload_folder_path: user-upload
+brightcove:
+  profile: multi-platform-standard-static
+whiteboard:
+  endpoint: https://api.netless.link
+  token_life_span: 24h
+  http_tracing_enabled: false
+agora:
+  app_id: fake_id
+  video_token_suffix: videostream
+  maximum_learner_streamings: 28
+asiapay:
+  merchant_id: --
+  secret: --
+  currency: --
+  endpoint: --
+class_code_length: 9
+check_client_versions:
+  - com.manabie.student_manabie_app:1.5.0
+  - com.manabie.studentManabieApp:1.5.0
+  - com.manabie.liz:1.0.0
+  - com.manabie.lms_manabie_app:1.0.0
+  - com.manabie.lmsManabieApp:1.0.0
+  - com.manabie.enigma:1.0.0
+  - com.synersia.learner:1.0.0
+  - com.manabie.learner:2.0.20230509020728
+  - com.manabie.teacher:2.0.20230509020728
+  - jp.jprep.learner:2.0.20230509020728
+  - jp.jprep.teacher:2.0.20230509020728
+not_answered_question_limit: 5
+promo_code_len: 6
+promo_code_prefix:
+  - VN-TA-HCM
+  - VN-LD
+  - VN-KOL
+  - VN-SC-HCM
+  - VN-ST-HCM
+payment_processing_duration: 24h
+cloud_convert:
+  host: https://api.cloudconvert.com
+natsjs:
+  address: "nats://nats-jetstream.{{ .Values.global.environment }}-{{ .Values.global.vendor }}-nats-jetstream.svc.cluster.local:4223"
+  user: "Bob"
+  max_redelivery: 10
+  default_ack_wait: 30s
+  reconnect_wait: 10s
+  max_reconnect: -1
+  is_local: {{ include "util.natsIsLocal" . }}
+unleash_client:
+  url: '{{ include "util.unleashURL" . }}'
+  app_name: "manabie-backend-bob-unleash-client"
+  api_token: ce4ed2eba3a72d6b5be23c7aa9b71178753f5908cf2dcbbca29442b5b81d397f
+hasura_cache_config:
+  hasura_host: '{{ include "util.cache.hasuraHost" . }}'
+  redis_addr: '{{ include "util.cache.redisAddress" . }}'
+  ttl_in_seconds: 600

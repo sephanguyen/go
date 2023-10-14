@@ -1,0 +1,73 @@
+syntax = "proto3";
+
+package mastermgmt.v1;
+import "google/protobuf/timestamp.proto";
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/mastermgmt/v1;mpb";
+
+message EvtOrganization {
+  message CreateOrganization {
+    string organization_id = 1;
+    string tenant_id = 2;
+    string organization_name = 3;
+    string domain_name = 4;
+  }
+
+  oneof message {
+    CreateOrganization create_organization = 1;
+  }
+}
+
+message EvtClass {
+  message CreateClass {
+    string class_id = 1;
+    string name = 2;
+    string course_id = 3;
+    string location_id = 4;
+  }
+  message UpdateClass {
+    string class_id = 1;
+    string name = 2;
+  }
+  message DeleteClass {
+    string class_id = 1;
+  }
+  message JoinClass {
+    string class_id = 1;
+    string user_id = 2;
+    string old_class_id = 3;
+  }
+  message LeaveClass {
+    string class_id = 1;
+    string user_id = 2;
+  }
+  oneof message {
+    CreateClass create_class = 1;
+    UpdateClass update_class = 2;
+    DeleteClass delete_class = 3;
+    JoinClass join_class = 4;
+    LeaveClass leave_class = 5;
+  }
+}
+
+message EvtScheduleClass {
+  message ScheduleClass {
+    string user_id = 1;
+    string schedule_class_id = 2;
+    google.protobuf.Timestamp effective_date = 3;
+    string current_class_id = 4;
+    string old_scheduled_class_id = 5;
+    google.protobuf.Timestamp old_scheduled_effective_date = 6;
+  }
+
+  message CancelScheduledClass {
+    string user_id = 1;
+    string scheduled_class_id = 2;
+    google.protobuf.Timestamp effective_date = 3;
+    string current_class_id = 4;
+  }
+
+  oneof message {
+    ScheduleClass schedule_class = 1;
+    CancelScheduledClass cancel_scheduled_class = 2;
+  }
+}

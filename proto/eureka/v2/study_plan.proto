@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package eureka.v2;
+
+import "eureka/v2/enums.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/eureka/v2;epb";
+
+message UpsertStudyPlanRequest {
+  string name = 1;
+  string course_id = 2;
+  string academic_year = 3;
+  StudyPlanStatus status = 4;
+}
+
+message UpsertStudyPlanResponse {
+  string study_plan_id = 1;
+}
+
+service StudyPlanService {
+  rpc UpsertStudyPlan(UpsertStudyPlanRequest) returns (UpsertStudyPlanResponse);
+}

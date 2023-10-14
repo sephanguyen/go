@@ -1,0 +1,21 @@
+kafka:
+  heapOptions: "-Xms768M -Xmx768M"
+
+  resources:
+    requests:
+      cpu: 200m
+      memory: 1Gi
+    limits:
+      memory: 1536Mi
+
+  readinessProbe:
+    tcpSocket:
+      port: client
+    initialDelaySeconds: 120
+    periodSeconds: 10
+    timeoutSeconds: 5
+    successThreshold: 1
+    failureThreshold: 6
+
+  fileStorage:
+    size: 15Gi

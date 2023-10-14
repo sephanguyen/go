@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package usermgmt.v2;
+
+import "usermgmt/v2/users.proto";
+import "usermgmt/v2/student.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/usermgmt/v2;upb";
+
+service DomainParentService {
+  rpc UpsertParent(UpsertParentRequest) returns (UpsertParentResponse);
+}
+
+message ParentProfile {
+  string id = 1;
+  string email = 2;
+  repeated ParentPhoneNumber parent_phone_numbers = 3;
+  repeated string tag_ids = 4;
+  string remarks = 5;
+  UserNameFields user_name_fields = 6;
+  string parent_external_id = 7;
+  string username = 8;
+}
+
+message ParentsWithStudent {
+  string student_id = 1;
+  repeated ParentProfile parent_profiles = 2;
+}
+
+message UpsertParentRequest {
+  repeated ParentsWithStudent parents = 1;
+}
+
+message UpsertParentResponse {
+  repeated ParentsWithStudent parents = 1;
+  repeated ErrorMessages messages = 2;
+}

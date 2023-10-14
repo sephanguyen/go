@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package eureka.v1;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/eureka/v1;epb";
+
+message DetectFormulaRequest {
+    string src = 1;
+}
+
+message DetectFormulaResponse {
+    message Formula {
+        string type = 1;
+        string value = 2;
+    }
+    repeated Formula Formulas = 1;
+}
+
+service ImageToText {
+    rpc DetectFormula(DetectFormulaRequest) returns (DetectFormulaResponse);
+}

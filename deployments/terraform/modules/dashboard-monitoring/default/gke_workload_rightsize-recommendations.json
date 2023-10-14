@@ -1,0 +1,340 @@
+{
+    "dashboardFilters": [
+        {
+            "filterType": "RESOURCE_LABEL",
+            "labelKey": "project_id",
+            "templateVariable": "project_id"
+        },
+        {
+            "filterType": "RESOURCE_LABEL",
+            "labelKey": "location",
+            "templateVariable": "location"
+        },
+        {
+            "filterType": "RESOURCE_LABEL",
+            "labelKey": "cluster_name",
+            "templateVariable": "cluster"
+        },
+        {
+            "filterType": "RESOURCE_LABEL",
+            "labelKey": "namespace_name",
+            "stringValue": "istio-system",
+            "templateVariable": "namespace"
+        },
+        {
+            "filterType": "SYSTEM_METADATA_LABEL",
+            "labelKey": "top_level_controller_name",
+            "stringValue": "istio-ingressgateway",
+            "templateVariable": "workload_name"
+        },
+        {
+            "filterType": "RESOURCE_LABEL",
+            "labelKey": "controller_name",
+            "stringValue": "istio-ingressgateway",
+            "templateVariable": "choose_suggest_workload"
+        }
+    ],
+    "displayName": "GKE Workload right-sizing recommendations",
+    "labels": {},
+    "mosaicLayout": {
+        "columns": 12,
+        "tiles": [
+            {
+                "height": 4,
+                "widget": {
+                    "title": "CPU",
+                    "xyChart": {
+                        "chartOptions": {
+                            "mode": "COLOR"
+                        },
+                        "dataSets": [
+                            {
+                                "legendTemplate": "Used: ${resource.labels.container_name}",
+                                "minAlignmentPeriod": "60s",
+                                "plotType": "LINE",
+                                "targetAxis": "Y1",
+                                "timeSeriesQuery": {
+                                    "timeSeriesFilter": {
+                                        "aggregation": {
+                                            "alignmentPeriod": "60s",
+                                            "crossSeriesReducer": "REDUCE_SUM",
+                                            "groupByFields": [
+                                                "resource.label.\"container_name\""
+                                            ],
+                                            "perSeriesAligner": "ALIGN_RATE"
+                                        },
+                                        "filter": "metric.type=\"kubernetes.io/container/cpu/core_usage_time\" resource.type=\"k8s_container\" ${project_id} ${location} ${cluster} ${namespace} ${workload_name}",
+                                        "secondaryAggregation": {
+                                            "alignmentPeriod": "60s",
+                                            "crossSeriesReducer": "REDUCE_MEAN",
+                                            "groupByFields": [
+                                                "resource.label.\"container_name\""
+                                            ],
+                                            "perSeriesAligner": "ALIGN_NONE"
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                "legendTemplate": "Suggested Request: ${metric.labels.container_name}",
+                                "minAlignmentPeriod": "60s",
+                                "plotType": "LINE",
+                                "targetAxis": "Y1",
+                                "timeSeriesQuery": {
+                                    "timeSeriesFilter": {
+                                        "aggregation": {
+                                            "alignmentPeriod": "60s",
+                                            "crossSeriesReducer": "REDUCE_MEAN",
+                                            "groupByFields": [
+                                                "metric.label.\"container_name\""
+                                            ],
+                                            "perSeriesAligner": "ALIGN_MEAN"
+                                        },
+                                        "filter": "metric.type=\"kubernetes.io/autoscaler/container/cpu/per_replica_recommended_request_cores\" resource.type=\"k8s_scale\" ${project_id} ${location} ${cluster} ${namespace} ${choose_suggest_workload}",
+                                        "secondaryAggregation": {
+                                            "alignmentPeriod": "60s",
+                                            "perSeriesAligner": "ALIGN_NONE"
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                "legendTemplate": "Requested: ${resource.labels.container_name}",
+                                "minAlignmentPeriod": "60s",
+                                "plotType": "LINE",
+                                "targetAxis": "Y1",
+                                "timeSeriesQuery": {
+                                    "timeSeriesFilter": {
+                                        "aggregation": {
+                                            "alignmentPeriod": "60s",
+                                            "crossSeriesReducer": "REDUCE_MEAN",
+                                            "groupByFields": [
+                                                "resource.label.\"container_name\""
+                                            ],
+                                            "perSeriesAligner": "ALIGN_MEAN"
+                                        },
+                                        "filter": "metric.type=\"kubernetes.io/container/cpu/request_cores\" resource.type=\"k8s_container\" ${project_id} ${location} ${cluster} ${namespace} ${workload_name}",
+                                        "secondaryAggregation": {
+                                            "alignmentPeriod": "60s",
+                                            "perSeriesAligner": "ALIGN_NONE"
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                "legendTemplate": "Limit: ${resource.labels.container_name}",
+                                "minAlignmentPeriod": "60s",
+                                "plotType": "LINE",
+                                "targetAxis": "Y1",
+                                "timeSeriesQuery": {
+                                    "timeSeriesFilter": {
+                                        "aggregation": {
+                                            "alignmentPeriod": "60s",
+                                            "crossSeriesReducer": "REDUCE_MEAN",
+                                            "groupByFields": [
+                                                "resource.label.\"container_name\""
+                                            ],
+                                            "perSeriesAligner": "ALIGN_MEAN"
+                                        },
+                                        "filter": "metric.type=\"kubernetes.io/container/cpu/limit_cores\" resource.type=\"k8s_container\" ${project_id} ${location} ${cluster} ${namespace} ${workload_name}",
+                                        "secondaryAggregation": {
+                                            "alignmentPeriod": "60s",
+                                            "perSeriesAligner": "ALIGN_NONE"
+                                        }
+                                    }
+                                }
+                            }
+                        ],
+                        "thresholds": [],
+                        "timeshiftDuration": "0s",
+                        "yAxis": {
+                            "label": "",
+                            "scale": "LINEAR"
+                        }
+                    }
+                },
+                "width": 6
+            },
+            {
+                "height": 4,
+                "widget": {
+                    "title": "Memory",
+                    "xyChart": {
+                        "chartOptions": {
+                            "mode": "COLOR"
+                        },
+                        "dataSets": [
+                            {
+                                "legendTemplate": "Used: ${resource.labels.container_name}",
+                                "minAlignmentPeriod": "60s",
+                                "plotType": "LINE",
+                                "targetAxis": "Y1",
+                                "timeSeriesQuery": {
+                                    "timeSeriesFilter": {
+                                        "aggregation": {
+                                            "alignmentPeriod": "60s",
+                                            "crossSeriesReducer": "REDUCE_MEAN",
+                                            "groupByFields": [
+                                                "resource.label.\"container_name\""
+                                            ],
+                                            "perSeriesAligner": "ALIGN_MEAN"
+                                        },
+                                        "filter": "metric.type=\"kubernetes.io/container/memory/used_bytes\" resource.type=\"k8s_container\" metric.label.\"memory_type\"=\"non-evictable\" ${project_id} ${location} ${cluster} ${namespace} ${workload_name}",
+                                        "secondaryAggregation": {
+                                            "alignmentPeriod": "60s",
+                                            "perSeriesAligner": "ALIGN_NONE"
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                "legendTemplate": "Suggested Request: ${metric.labels.container_name}",
+                                "minAlignmentPeriod": "60s",
+                                "plotType": "LINE",
+                                "targetAxis": "Y1",
+                                "timeSeriesQuery": {
+                                    "timeSeriesFilter": {
+                                        "aggregation": {
+                                            "alignmentPeriod": "60s",
+                                            "crossSeriesReducer": "REDUCE_MEAN",
+                                            "groupByFields": [
+                                                "metric.label.\"container_name\""
+                                            ],
+                                            "perSeriesAligner": "ALIGN_MEAN"
+                                        },
+                                        "filter": "metric.type=\"kubernetes.io/autoscaler/container/memory/per_replica_recommended_request_bytes\" resource.type=\"k8s_scale\" ${project_id} ${location} ${cluster} ${namespace} ${choose_suggest_workload}",
+                                        "secondaryAggregation": {
+                                            "alignmentPeriod": "60s",
+                                            "perSeriesAligner": "ALIGN_NONE"
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                "legendTemplate": "Requested: ${resource.labels.container_name}",
+                                "minAlignmentPeriod": "60s",
+                                "plotType": "LINE",
+                                "targetAxis": "Y1",
+                                "timeSeriesQuery": {
+                                    "timeSeriesFilter": {
+                                        "aggregation": {
+                                            "alignmentPeriod": "60s",
+                                            "crossSeriesReducer": "REDUCE_MEAN",
+                                            "groupByFields": [
+                                                "resource.label.\"container_name\""
+                                            ],
+                                            "perSeriesAligner": "ALIGN_MEAN"
+                                        },
+                                        "filter": "metric.type=\"kubernetes.io/container/memory/request_bytes\" resource.type=\"k8s_container\" ${project_id} ${location} ${cluster} ${namespace} ${workload_name}",
+                                        "secondaryAggregation": {
+                                            "alignmentPeriod": "60s",
+                                            "perSeriesAligner": "ALIGN_NONE"
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                "legendTemplate": "Limit: ${resource.labels.container_name}",
+                                "minAlignmentPeriod": "60s",
+                                "plotType": "LINE",
+                                "targetAxis": "Y1",
+                                "timeSeriesQuery": {
+                                    "timeSeriesFilter": {
+                                        "aggregation": {
+                                            "alignmentPeriod": "60s",
+                                            "crossSeriesReducer": "REDUCE_MEAN",
+                                            "groupByFields": [
+                                                "resource.label.\"container_name\""
+                                            ],
+                                            "perSeriesAligner": "ALIGN_MEAN"
+                                        },
+                                        "filter": "metric.type=\"kubernetes.io/container/memory/limit_bytes\" resource.type=\"k8s_container\" ${project_id} ${location} ${cluster} ${namespace} ${workload_name}",
+                                        "secondaryAggregation": {
+                                            "alignmentPeriod": "60s",
+                                            "perSeriesAligner": "ALIGN_NONE"
+                                        }
+                                    }
+                                }
+                            }
+                        ],
+                        "thresholds": [],
+                        "timeshiftDuration": "0s",
+                        "yAxis": {
+                            "label": "",
+                            "scale": "LINEAR"
+                        }
+                    }
+                },
+                "width": 6,
+                "xPos": 6
+            },
+            {
+                "height": 4,
+                "widget": {
+                    "timeSeriesTable": {
+                        "dataSets": [
+                            {
+                                "timeSeriesQuery": {
+                                    "timeSeriesQueryLanguage": "fetch k8s_scale\n| metric\n    'kubernetes.io/autoscaler/container/cpu/per_replica_recommended_request_cores'\n    | ${project_id}\n    | ${location}\n    | ${cluster}\n    | ${namespace}\n    | ${choose_suggest_workload}\n| group_by 14d,\n    [value_per_replica_recommended_request_cores_mean:\n       max(value.per_replica_recommended_request_cores)]\n| every 5m"
+                                }
+                            }
+                        ],
+                        "metricVisualization": "NUMBER"
+                    },
+                    "title": "CPU request cores recommended per replica"
+                },
+                "width": 6,
+                "yPos": 6
+            },
+            {
+                "height": 4,
+                "widget": {
+                    "timeSeriesTable": {
+                        "dataSets": [
+                            {
+                                "timeSeriesQuery": {
+                                    "timeSeriesQueryLanguage": "fetch k8s_scale\n| metric\n    'kubernetes.io/autoscaler/container/memory/per_replica_recommended_request_bytes'\n    | ${project_id}\n    | ${location}\n    | ${cluster}\n\t| ${namespace}\n    | ${choose_suggest_workload}\n| group_by 14d,\n    [value_per_replica_recommended_request_bytes_mean:\n       max(value.per_replica_recommended_request_bytes)]\n| every 5m"
+                                }
+                            }
+                        ],
+                        "metricVisualization": "NUMBER"
+                    },
+                    "title": "Memory request bytes recommended per replica"
+                },
+                "width": 6,
+                "xPos": 6,
+                "yPos": 6
+            },
+            {
+                "height": 6,
+                "widget": {
+                    "collapsibleGroup": {
+                        "collapsed": false
+                    },
+                    "title": "Workload right-sizing recommendations"
+                },
+                "width": 12,
+                "yPos": 4
+            },
+            {
+                "height": 2,
+                "widget": {
+                    "text": {
+                        "content": "Refer to the following recommended resource requests for CPU and memory requirements that ensuring efficient resource allocation. They are calculated as 14 day peak recommendations.",
+                        "format": "MARKDOWN",
+                        "style": {
+                            "backgroundColor": "",
+                            "fontSize": "FS_LARGE",
+                            "horizontalAlignment": "H_LEFT",
+                            "padding": "P_EXTRA_SMALL",
+                            "textColor": "#000000",
+                            "verticalAlignment": "V_TOP"
+                        }
+                    }
+                },
+                "width": 12,
+                "yPos": 4
+            }
+        ]
+    }
+}

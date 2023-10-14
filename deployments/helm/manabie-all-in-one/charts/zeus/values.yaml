@@ -1,0 +1,13 @@
+metrics:
+  enabled: false
+grpcPort: 5950
+resources:
+  requests:
+    memory: 64Mi
+waitForServices: []
+affinity: {}
+affinityOverride: {}
+
+jobs:
+  get-postgres-privileges:
+    cmd: get_postgres_privileges

@@ -1,0 +1,162 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "yugabyte.fullname" . }}-master
+  labels:
+    {{- include "yugabyte.labels" . | nindent 4 }}
+spec:
+{{- $svcName := printf "%s-master-headless" (include "yugabyte.fullname" .) }}
+  serviceName: {{ $svcName }}
+  replicas: {{ .Values.replicas.master }}
+  selector:
+    matchLabels:
+      {{- include "yugabyte.selectorLabels" . | nindent 6 }}
+      role: master
+  template:
+    metadata:
+    {{- with .Values.podAnnotations.master }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      labels:
+        {{- include "yugabyte.selectorLabels" . | nindent 8 }}
+        role: master
+    spec:
+      serviceAccountName: {{ include "yugabyte.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      initContainers:
+      - name: decrypt-secret
+        image: google/cloud-sdk:323.0.0-alpine
+        imagePullPolicy: IfNotPresent
+        command:
+          - /bin/sh
+          - -c
+          - |
+          {{- if eq "local" .Values.environment }}
+            gcloud auth activate-service-account --key-file /configs/service_credential.json
+          {{- end }}
+
+            kmsPath={{ .Values.configs.kmsPath }}
+            project=$(echo $kmsPath | cut -d'/' -f 2)
+            location=$(echo $kmsPath | cut -d'/' -f 4)
+            keyring=$(echo $kmsPath | cut -d'/' -f 6)
+            key=$(echo $kmsPath | cut -d'/' -f 8)
+
+            gcloud kms decrypt \
+              --project=$project \
+              --keyring=$keyring \
+              --key=$key \
+              --location=$location \
+              --ciphertext-file /configs/yugabyte_universe_key.encrypted \
+              --plaintext-file /yugabyte/universe_key
+        volumeMounts:
+          - name: encrypted-universe-key
+            mountPath: /configs/yugabyte_universe_key.encrypted
+            subPath: yugabyte_universe_key.encrypted
+            readOnly: true
+          - name: decrypted-universe-key
+            mountPath: /yugabyte
+{{- if eq "local" .Values.environment }}
+          - name: service-credential
+            mountPath: /configs/service_credential.json
+            subPath: service_credential.json
+            readOnly: true
+{{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          workingDir: /data
+          command:
+            - "/home/yugabyte/bin/yb-master"
+            - "--fs_data_dirs=/data"
+            - "--rpc_bind_addresses={{ printf "$(HOSTNAME).%s.%s.svc.cluster.local" $svcName .Release.Namespace }}"
+            - "--server_broadcast_addresses={{ printf "$(HOSTNAME).%s.%s.svc.cluster.local" $svcName .Release.Namespace }}:7100"
+            - "--master_addresses={{ template "yugabyte.masterAddresses" . }}"
+            - "--replication_factor={{ .Values.replicas.master }}"
+            - "--memory_limit_hard_bytes={{ template "yugabyte.memoryHardLimit" .Values.resource.master }}"
+            - "--stderrthreshold=0"
+            - "--num_cpus={{ ceil .Values.resource.master.limits.cpu }}"
+            - "--webserver_interface=0.0.0.0"
+            - "--enable_ysql=true"
+            - "--metric_node_name=$(HOSTNAME)"
+            - "--logtostderr"
+          env:
+            - name: HOSTNAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          ports:
+            - name: rpc
+              containerPort: 7100
+              protocol: TCP
+            - name: http-ui
+              containerPort: 7000
+              protocol: TCP
+          resources:
+            requests:
+              {{- toYaml .Values.resource.master.requests | nindent 14 }}
+            limits:
+              {{- toYaml .Values.resource.master.limits | nindent 14 }}
+          volumeMounts:
+            - name: data
+              mountPath: /data
+              # subPath: master
+            - name: decrypted-universe-key
+              mountPath: /yugabyte
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                  - /bin/bash
+                  - -c
+                  - |
+                    if [[ -f /data/yb-data/master/universe_key ]]; then
+                      exit 0
+                    fi
+
+                    until [ -d /data/yb-data/master ]; do
+                      sleep 5
+                    done
+
+                    cp /yugabyte/universe_key /data/yb-data/master/universe_key
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        - name: encrypted-universe-key
+          secret:
+            secretName: {{ include "yugabyte.fullname" . }}
+            items:
+              - key: yugabyte_universe_key.encrypted
+                path: yugabyte_universe_key.encrypted
+        - name: decrypted-universe-key
+          emptyDir: {}
+        # - name: data
+        #   hostPath:
+        #     path: "/mnt/disks/ssd0"
+{{- if eq "local" .Values.environment }}
+        - name: service-credential
+          secret:
+            secretName: {{ include "yugabyte.fullname" . }}
+            items:
+            - key: service_credential.json
+              path: service_credential.json
+{{- end }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        storageClassName: {{ .Values.storage.master.storageClass }}
+        resources:
+          requests:
+            storage: {{ .Values.storage.master.size }}

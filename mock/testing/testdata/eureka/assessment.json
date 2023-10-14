@@ -1,0 +1,121 @@
+{
+	"schema": [
+		{
+			"column_name": "course_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "learning_material_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "ref_table",
+			"data_type": "character varying",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "assessment",
+			"policyname": "rls_assessment",
+			"qual": "permission_check(resource_path, 'assessment'::text)",
+			"with_check": "permission_check(resource_path, 'assessment'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "assessment",
+			"policyname": "rls_assessment_restrictive",
+			"qual": "permission_check(resource_path, 'assessment'::text)",
+			"with_check": "permission_check(resource_path, 'assessment'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "fk__course_id",
+			"column_name": "course_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "pk__assessment_id",
+			"column_name": "id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "un_lm_course",
+			"column_name": "course_id",
+			"constraint_type": "UNIQUE"
+		},
+		{
+			"constraint_name": "un_lm_course",
+			"column_name": "learning_material_id",
+			"constraint_type": "UNIQUE"
+		}
+	],
+	"table_name": "assessment",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

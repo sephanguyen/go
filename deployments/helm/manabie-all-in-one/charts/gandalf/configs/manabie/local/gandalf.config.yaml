@@ -1,0 +1,37 @@
+common:
+  log:
+    app_level: {{ default "debug" .Values.global.localLogLevel }}
+  google_cloud_project: dev-manabie-online
+  identity_platform_project: dev-manabie-online
+  firebase_project: dev-manabie-online
+postgres:
+  shard_id: 1024
+brightcove:
+  account_id: account-id
+  client_id: client-id
+  profile: multi-platform-standard-static
+storage:
+  endpoint: "http://minio-infras.emulator.svc.cluster.local:9000"
+  region: "us-east-1"
+  bucket: "manabie"
+upload:
+  max_chunk_size: 1048576
+  max_file_size: 10485760
+elasticsearch:
+  addresses:
+    - https://elasticsearch-elastic.local-manabie-elastic.svc.cluster.local:9200
+bob_hasura_admin_url: "http://bob-hasura:8080"
+draft_hasura_admin_url: "http://draft-hasura:8080"
+eureka_hasura_admin_url: "http://eureka-hasura:8080"
+fatima_hasura_admin_url: "http://fatima-hasura:8080"
+invoicemgmt_hasura_admin_url: "http://invoicemgmt-hasura:8080"
+entryexitmgmt_hasura_admin_url: "http://entryexitmgmt-hasura:8080"
+timesheet_hasura_admin_url: "http://timesheet-hasura:8080"
+mastermgmt_hasura_admin_url: "http://mastermgmt-hasura:8080"
+jwt_applicant: manabie-local
+agora:
+  maximum_learner_streamings: 13
+kafka_connect:
+  addr: "http://kafka-connect.local-manabie-kafka.svc.cluster.local:8083"
+with_us:
+  bucket_name: local-etl

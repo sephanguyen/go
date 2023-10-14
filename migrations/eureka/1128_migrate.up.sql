@@ -1,0 +1,1 @@
+ALTER TABLE IF EXISTS public.master_study_plan ALTER COLUMN resource_path SET DEFAULT autoFillResourcePath();

@@ -1,0 +1,6 @@
+dependencies:
+- name: util
+  repository: file://../../../../libs/util
+  version: 0.1.0
+digest: sha256:e7668aa9247f31d2ad6dbfada9415ba2dd192a6183056aef14d5c75165275b7a
+generated: "2022-12-20T15:31:59.640874359+07:00"

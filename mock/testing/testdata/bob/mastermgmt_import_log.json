@@ -1,0 +1,100 @@
+{
+	"schema": [
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "import_type",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "mastermgmt_import_log_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "payload",
+			"data_type": "jsonb",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "user_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "mastermgmt_import_log",
+			"policyname": "rls_mastermgmt_import_log",
+			"qual": "permission_check(resource_path, 'mastermgmt_import_log'::text)",
+			"with_check": "permission_check(resource_path, 'mastermgmt_import_log'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "mastermgmt_import_log",
+			"policyname": "rls_mastermgmt_import_log_restrictive",
+			"qual": "permission_check(resource_path, 'mastermgmt_import_log'::text)",
+			"with_check": "permission_check(resource_path, 'mastermgmt_import_log'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "mastermgmt_import_log_pkey",
+			"column_name": "mastermgmt_import_log_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "mastermgmt_import_log",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

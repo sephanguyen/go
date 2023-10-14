@@ -1,0 +1,113 @@
+name: Add label of squad to each PR
+
+on:
+  pull_request:
+    types: [opened, reopened]
+
+jobs:
+  add-label-of-squad:
+    runs-on: ["self-hosted", "100m-400mi", "spot", "persistent"]
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v3
+        timeout-minutes: 5
+
+      - uses: actions/github-script@v6
+        id: joined_squads
+        env:
+          USERNAME: ${{ github.actor }}
+        with:
+          github-token: ${{ secrets.BUILD_GITHUB_TOKEN }}
+          script: |
+            const arrs = ["squad-communication", "squad-adobo", "squad-lesson", "squad-calendar", "squad-payment", "squad-syllabus", "squad-auth", "squad-user-management", "squad-timesheet", "squad-architecture", "squad-platform"];
+            let teams = "";
+            for (const teamSlug of arrs) {
+              const { data } = await github.rest.teams.listMembersInOrg({
+                org: "manabie-com",
+                team_slug: teamSlug,
+              });
+              console.log(data);
+              data.forEach(user => {
+                if(user.login === "${{ env.USERNAME }}") {
+                  teams = teams + " " + teamSlug;
+                }
+              });
+            };
+            return teams;
+
+      - if: ${{ contains(steps.joined_squads.outputs.result, 'auth') }}
+        name: Squad Auth Labeling
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          labels: |
+            squad-auth
+            
+      - if: ${{ contains(steps.joined_squads.outputs.result, 'calendar') }}
+        name: Squad Calendar Labeling
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          labels: |
+            squad-calendar
+
+      - if: ${{ contains(steps.joined_squads.outputs.result, 'communication') }}
+        name: Squad Communication Labeling
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          labels: |
+            squad-communication
+
+      - if: ${{ contains(steps.joined_squads.outputs.result, 'adobo') }}
+        name: Squad Adobo Labeling
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          labels: |
+            squad-adobo
+
+      - if: ${{ contains(steps.joined_squads.outputs.result, 'lesson') }}
+        name: Squad Lesson Labeling
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          labels: |
+            squad-lesson
+
+      - if: ${{ contains(steps.joined_squads.outputs.result, 'payment') }}
+        name: Squad Payment Labeling
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          labels: |
+            squad-payment
+
+      - if: ${{ contains(steps.joined_squads.outputs.result, 'syllabus') }}
+        name: Squad Syllabus Labeling
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          labels: |
+            squad-syllabus
+
+      - if: ${{ contains(steps.joined_squads.outputs.result, 'user') }}
+        name: Squad User Management Labeling
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          labels: |
+            squad-user-management
+
+      - if: ${{ contains(steps.joined_squads.outputs.result, 'timesheet') }}
+        name: Squad Timesheet Labeling
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          labels: |
+            squad-timesheet
+
+      - if: ${{ contains(steps.joined_squads.outputs.result, 'architecture') }}
+        name: Squad Architecture Labeling
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          labels: |
+            squad-architecture
+
+      - if: ${{ contains(steps.joined_squads.outputs.result, 'platform') }}
+        name: Squad Platform Labeling
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          labels: |
+            squad-platform

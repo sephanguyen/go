@@ -1,0 +1,2 @@
+ALTER TABLE IF EXISTS public.topics
+ADD COLUMN IF NOT EXISTS lo_display_order_counter INTEGER DEFAULT 0;

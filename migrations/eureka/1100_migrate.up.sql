@@ -1,0 +1,1 @@
+CREATE INDEX CONCURRENTLY IF NOT EXISTS task_assignment_topic_id_idx ON public.task_assignment USING btree (topic_id);

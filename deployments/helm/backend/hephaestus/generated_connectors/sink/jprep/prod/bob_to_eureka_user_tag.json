@@ -1,0 +1,23 @@
+{
+  "name": "prod_jprep_bob_to_eureka_user_tag_sink_connector",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+    "tasks.max": "1",
+    "topics": "prod.jprep.bob.public.user_tag",
+    "connection.url": "${file:/config/kafka-connect-config.properties:eureka_url}",
+    "auto.create": "false",
+    "insert.mode": "upsert",
+    "table.name.format": "user_tag",
+    "fields.whitelist": "created_at,deleted_at,is_archived,resource_path,updated_at,user_tag_id,user_tag_name,user_tag_partner_id,user_tag_type",
+    "transforms": "unwrap,route",
+    "transforms.route.type": "org.apache.kafka.connect.transforms.RegexRouter",
+    "transforms.route.regex": "([^.]+).([^.]+).([^.]+).([^.]+).([^.]+)",
+    "transforms.route.replacement": "$5",
+    "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+    "delete.enabled": "false",
+    "pk.mode": "record_value",
+    "pk.fields": "user_tag_id",
+    "transforms.unwrap.drop.tombstones": "true",
+    "transforms.unwrap.delete.handling.mode": "drop"
+  }
+}

@@ -1,0 +1,20 @@
+---
+{{- if eq "local" .Values.environment }}
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: kiali
+spec:
+  hosts:
+    - kiali.local.manabie.io
+  gateways:
+    - istio-system/{{ .Values.environment }}-{{ .Values.vendor }}-gateway
+  exportTo:
+    - istio-system
+  http:
+    - route:
+        - destination:
+            host: kiali.istio-system.svc.cluster.local
+            port:
+              number: 20001
+{{ end }}

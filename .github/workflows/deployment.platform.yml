@@ -1,0 +1,267 @@
+name: deployment.platform.yml
+on:
+  workflow_dispatch:
+    inputs:
+      organizations:
+        type: choice
+        description: "Choose an organization to deploy"
+        required: true
+        options:
+          - manabie
+          - jprep
+          - synersia
+          - renseikai
+          - ga
+          - aic
+          - tokyo
+      environment:
+        type: choice
+        description: "Choose an environment to deploy"
+        required: true
+        options:
+          - stag
+          - uat
+          - prod
+          - dorp
+      services:
+        type: choice
+        description: "Choose a service to deploy"
+        required: true
+        options:
+          - backbone
+          - kafka
+          - connect
+          - ksql
+          - monitoring
+          - import-map-deployer
+          - redash
+          - kiali
+          - aphelios
+          - scheduling
+          - runner-controller
+          - mlflow
+          - kserve
+          - mlmodel
+          - unistall_model
+          - appsmith
+          - gateway
+          - unleash
+          - nats
+          - elastic
+          - data-warehouse
+          - cp-schema-registry
+          - learnosity-web-view
+          - dwh-with-auth
+          - replication
+      dry-run:
+        type: boolean
+        default: true
+        description: Only dry-run (Checked is only show diff, Unchecked is show diff and deploy)
+        required: true
+      branch:
+        description: "Choose a branch to deploy from"
+        required: true
+        default: "develop"
+
+jobs:
+  deploy-platform:
+    permissions:
+      contents: "read"
+      id-token: "write"
+    runs-on: ["self-hosted", "100m-400mi", "spot", "persistent"]
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v3
+        timeout-minutes: 5
+        with:
+          ref: ${{ github.event.inputs.branch }}
+
+      - name: Setup Kubernetes for ${{ inputs.environment }}.${{ inputs.organizations }}
+        uses: ./.github/actions/setup-k8s
+        with:
+          organization: ${{ inputs.organizations }}
+          environment: ${{ inputs.environment }}
+          platform: ${{ inputs.services }}
+
+      - name: ${{ env.ORG }} ${{ env.ENV }} - Helm deploy NATS Jetstream
+        if: contains(github.event.inputs.services, 'nats')
+        run: |
+          if [[ "${{ github.event.inputs.dry-run }}" == "false" ]]; then
+            skaffold deploy -f skaffold.backbone.yaml -p nats-only
+          fi
+
+      - name: ${{ env.ORG }} ${{ env.ENV }} - Helm deploy auto scheduling
+        if: contains(github.event.inputs.services, 'scheduling')
+        env:
+          SCHEDULING: true
+        run: |
+          if [[ "${{ github.event.inputs.dry-run }}" == "false" ]]; then
+            skaffold deploy -f skaffold.ml-service.yaml
+          fi
+
+      - name: ${{ env.ORG }} ${{ env.ENV }} - Helm deploy aphelios
+        if: contains(github.event.inputs.services, 'aphelios')
+        env:
+          APHELIOS: true
+        run: |
+          if [[ "${{ github.event.inputs.dry-run }}" == "false" ]]; then
+            skaffold deploy -f skaffold.machinelearning.yaml --tag="20221022085021.ce89b91685"
+          fi
+
+      - name: ${{ env.ORG }} ${{ env.ENV }} - Helm deploy mlflow
+        if: contains(github.event.inputs.services, 'mlflow')
+        env:
+          MLFLOW: true
+        run: |
+          if [[ "${{ github.event.inputs.dry-run }}" == "false" ]]; then
+            skaffold deploy -f skaffold.machinelearning.yaml
+          fi
+
+      - name: ${{ env.ORG }} ${{ env.ENV }} - Helm deploy kserve
+        if: contains(github.event.inputs.services, 'kserve')
+        env:
+          KSERVE: true
+        run: |
+          if [[ "${{ github.event.inputs.dry-run }}" == "false" ]]; then
+            skaffold deploy -f skaffold.machinelearning.yaml
+          fi
+
+      - name: ${{ env.ORG }} ${{ env.ENV }} - Helm deploy mlmodel
+        if: contains(github.event.inputs.services, 'mlmodel')
+        env:
+          MLMODEL: ${{ env.ENV }}
+        run: |
+          if [[ "${{ github.event.inputs.dry-run }}" == "false" ]]; then
+            skaffold deploy -f skaffold.model.yaml -p ci-staging
+          fi
+
+      - name: ${{ env.ORG }} ${{ env.ENV }} - Helm deploy uninstall model
+        if: contains(github.event.inputs.services, 'unistall_model')
+        run: |
+          . ./deployments/setup_platform.bash
+          uninstall_ml_model
+
+      - name: ${{ env.ORG }} ${{ env.ENV }} - Helm deploy monitoring
+        if: contains(github.event.inputs.services, 'monitoring')
+        run: |
+          ./.github/scripts/diff_manifest.bash monitoring
+          if [[ "${{ github.event.inputs.dry-run }}" == "false" ]]; then
+            skaffold deploy -f skaffold.monitoring.yaml
+          fi
+
+      - name: ${{ env.ORG }} ${{ env.ENV }} - Helm deploy Kiali
+        if: contains(github.event.inputs.services, 'kiali')
+        run: |
+          . ./deployments/setup_platform.bash
+          install_kiali
+
+      - name: ${{ env.ORG }} ${{ env.ENV }} - Helm deploy import-map-deployer
+        if: contains(github.event.inputs.services, 'import-map-deployer')
+        run: |
+          if [[ "${{ github.event.inputs.dry-run }}" == "false" ]]; then
+            skaffold deploy -f skaffold.frontend.yaml -p imd
+          fi
+
+      - name: ${{ env.ORG }} ${{ env.ENV }} - Helm deploy backbone
+        if: contains(github.event.inputs.services, 'backbone')
+        run: |
+          ./.github/scripts/diff_manifest.bash backbone
+          if [[ "${{ github.event.inputs.dry-run }}" == "false" ]]; then
+            skaffold deploy -f skaffold.backbone.yaml -p no-kafka
+          fi
+
+      - name: ${{ env.ORG }} ${{ env.ENV }} - Helm deploy unleash
+        if: contains(github.event.inputs.services, 'unleash')
+        run: |
+          if [[ "${{ github.event.inputs.dry-run }}" == "false" ]]; then
+            skaffold deploy -f skaffold.backbone.yaml -p unleash-only
+          fi
+
+      - name: ${{ env.ORG }} ${{ env.ENV }} - Helm deploy elastic
+        if: contains(github.event.inputs.services, 'elastic')
+        run: |
+          ./.github/scripts/diff_manifest.bash elastic
+          if [[ "${{ github.event.inputs.dry-run }}" == "false" ]]; then
+            skaffold deploy -f skaffold.backbone.yaml -p elastic-only
+          fi
+
+      - name: ${{ env.ORG }} ${{ env.ENV }} - Helm deploy cp-ksql-server
+        if: contains(github.event.inputs.services, 'ksql')
+        run: |
+          if [[ "${{ github.event.inputs.dry-run }}" == "false" ]]; then
+            skaffold deploy -f skaffold.cp-ksql-server.yaml
+          fi
+
+      - name: ${{ env.ORG }} ${{ env.ENV }} - Helm deploy data-warehouse
+        if: contains(github.event.inputs.services, 'data-warehouse')
+        run: |
+          if [[ "${{ github.event.inputs.dry-run }}" == "false" ]]; then
+            DATA_WH=true skaffold deploy -f skaffold.data-warehouse.yaml
+          fi
+
+      - name: ${{ env.ORG }} ${{ env.ENV }} - Helm deploy data-warehouse-with-auth
+        if: contains(github.event.inputs.services, 'dwh-with-auth')
+        run: |
+          if [[ "${{ github.event.inputs.dry-run }}" == "false" ]]; then
+            DATA_WH=true DATA_WH_AC=true skaffold deploy -f skaffold.data-warehouse.yaml
+          fi
+
+      - name: ${{ env.ORG }} ${{ env.ENV }} - Helm deploy redash
+        if: contains(github.event.inputs.services, 'redash')
+        run: |
+          . ./deployments/setup_platform.bash
+          install_redash
+
+      - name: ${{ env.ORG }} ${{ env.ENV }} - Helm deploy appsmith
+        if: contains(github.event.inputs.services, 'appsmith')
+        run: |
+          if [[ "${{ github.event.inputs.dry-run }}" == "false" ]]; then
+            skaffold deploy -f skaffold.appsmith.yaml -p appsmith
+          fi
+
+      - name: ${{ env.ORG }} ${{ env.ENV }} - Helm deploy gateway
+        if: contains(github.event.inputs.services, 'gateway')
+        run: |
+          if [[ "${{ github.event.inputs.dry-run }}" == "false" ]]; then
+            skaffold deploy -f skaffold.gateway.yaml
+          fi
+
+      - name: ${{ env.ORG }} ${{ env.ENV }} - Helm deploy actions runner controller
+        if: contains(github.event.inputs.services, 'runner-controller')
+        run: |
+          . ./deployments/setup_platform.bash
+          install_runner_controller
+
+      - name: ${{ env.ORG }} ${{ env.ENV }} - New replication namespace
+        if: contains(github.event.inputs.services, 'replication')
+        run: |
+          if [[ "${{ github.event.inputs.dry-run }}" == "false" ]]; then
+            skaffold deploy -f skaffold.backbone.yaml -p new-replication-namespace
+            skaffold deploy -f skaffold.cp-ksql-server.yaml
+          fi
+
+      - name: ${{ env.ORG }} ${{ env.ENV }} - Kafka
+        if: contains(github.event.inputs.services, 'kafka')
+        run: DRY_RUN=${{ github.event.inputs.dry-run }} ./deployments/helm/platforms/kafka/upgrade_kafka.bash
+
+      - name: ${{ env.ORG }} ${{ env.ENV }} - Kafka Connect
+        if: contains(github.event.inputs.services, 'connect')
+        run: |
+          ./.github/scripts/diff_manifest.bash kafka-connect
+          if [[ "${{ github.event.inputs.dry-run }}" == "false" ]]; then
+            skaffold deploy -f skaffold.backbone.yaml -p kafka-connect-only
+          fi
+
+      - name: ${{ env.ORG }} ${{ env.ENV }} - CP Schema Registry
+        if: contains(github.event.inputs.services, 'cp-schema-registry')
+        run: |
+          if [[ "${{ github.event.inputs.dry-run }}" == "false" ]]; then
+            skaffold deploy -f skaffold.backbone.yaml -p cp-schema-registry-only
+          fi
+
+      - name: ${{ env.ORG }} ${{ env.ENV }} - Helm deploy learnosity-web-view
+        if: contains(github.event.inputs.services, 'learnosity-web-view')
+        run: |
+          if [[ "${{ github.event.inputs.dry-run }}" == "false" ]]; then
+            skaffold deploy -f skaffold.mobile.yaml -p learnosity-web-view
+          fi

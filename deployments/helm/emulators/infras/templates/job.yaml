@@ -1,0 +1,34 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "infras.fullname" . }}
+spec:
+  template:
+    spec:
+        volumes:
+        - name: minio-init
+          configMap:
+            name: {{ include "infras.fullname" . }}
+            defaultMode: 0655
+            items:
+            - key: minio.sh
+              path: minio.sh
+        restartPolicy: Never
+        containers:
+        - name: setup-minio
+          image: {{ .Values.minio.clientImage }}
+          command: ["sh", "-c", "'/configs/minio.sh'"]
+          volumeMounts:
+            - name: minio-init
+              mountPath: /configs/minio.sh
+              subPath: minio.sh
+          env:
+          - name: MINIO_ACCESS_KEY
+            value: {{ .Values.minio.config.accessKey }}
+          - name: MINIO_SECRET_KEY
+            value: {{ .Values.minio.config.secretKey }}
+          - name: MINIO_REGION
+            value: {{ .Values.minio.config.region }}
+          - name: INIT_BUCKET_NAME
+            value: manabie
+  backoffLimit: 1

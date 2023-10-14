@@ -1,0 +1,115 @@
+{
+	"schema": [
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "qr_id",
+			"data_type": "integer",
+			"column_default": "nextval('student_qr_id_seq'::regclass)",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "qr_url",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "student_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "version",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "student_qr",
+			"policyname": "rls_student_qr",
+			"qual": "permission_check(resource_path, 'student_qr'::text)",
+			"with_check": "permission_check(resource_path, 'student_qr'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "student_qr",
+			"policyname": "rls_student_qr_restrictive",
+			"qual": "permission_check(resource_path, 'student_qr'::text)",
+			"with_check": "permission_check(resource_path, 'student_qr'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "student_qr_students_fk",
+			"column_name": "student_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "student_qr_pk",
+			"column_name": "qr_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "student_qr_qr_url_key",
+			"column_name": "qr_url",
+			"constraint_type": "UNIQUE"
+		},
+		{
+			"constraint_name": "student_qr_student_id_key",
+			"column_name": "student_id",
+			"constraint_type": "UNIQUE"
+		}
+	],
+	"table_name": "student_qr",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

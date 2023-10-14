@@ -1,0 +1,26 @@
+suite: elastic roles mapping config file
+templates:
+  - configmap.yaml
+values:
+  - ../configs/roles_mapping.yml
+tests:
+  - it: DLS role config must be exists
+    set:
+      environment: local
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - matchRegex:
+          path: data.[roles_mapping.yml]
+          pattern: '(.*)dls-role:\n  (.*)'
+  - it: DLS user roles must be correct
+    set:
+      environment: local
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - matchRegex:
+          path: data.[roles_mapping.yml]
+          # check role: "/^(?!admin.*$).*/"
+          pattern: '(.*)dls-role:\n(.*\n)*  users:\n  - "\/\^\(\?\!admin\.\*\$\)\.\*\/"(.*)'
+  

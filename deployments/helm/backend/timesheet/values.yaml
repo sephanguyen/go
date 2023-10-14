@@ -1,0 +1,206 @@
+adminHttp:
+    - corsPolicy:
+        allowHeaders:
+            - authorization
+            - grpc-timeout
+            - content-type
+            - keep-alive
+            - user-agent
+            - cache-control
+            - content-transfer-encoding
+            - token
+            - x-accept-content-transfer-encoding
+            - x-accept-response-streaming
+            - x-request-id
+            - x-user-agent
+            - x-graphql-mesh-authorization
+            - x-grpc-web
+            - if-none-match
+            - pkg
+            - version
+            - connect-timeout-ms
+            - connect-protocol-version
+            - connect-content-encoding
+            - connect-accept-encoding
+        allowMethods:
+            - POST
+            - GET
+            - OPTIONS
+            - PUT
+            - DELETE
+        allowOrigins:
+            - regex: .*
+        exposeHeaders:
+            - grpc-status
+            - grpc-message
+            - etag
+        maxAge: 100s
+      match:
+        - uri:
+            prefix: /timesheet/
+      rewrite:
+        uri: /
+      route:
+        - destination:
+            host: timesheet-hasura
+            port:
+                number: 8080
+affinity: {}
+affinityOverride: {}
+apiHttp:
+    - fault:
+        abort:
+            httpStatus: 403
+            percentage:
+                value: 100
+      match:
+        - uri:
+            prefix: /timesheet.v1.InternalService
+      route:
+        - destination:
+            host: timesheet
+            port:
+                number: 6850
+    - match:
+        - uri:
+            prefix: /timesheet.v1
+        - uri:
+            prefix: /manabie.timesheet
+      route:
+        - destination:
+            host: timesheet
+            port:
+                number: 6850
+    - match:
+        - uri:
+            prefix: /timesheet/api
+      route:
+        - destination:
+            host: timesheet
+            port:
+                number: 6880
+clientVersion: v0.30.0
+enabled: true
+fullnameOverride: timesheet
+grpcPort: 6850
+hasura:
+    anonymous:
+        enabled: false
+    enableConsole: true
+    enabledApis: metadata,graphql
+    pgConnections: 8
+    pgTimeout: 10
+    resources:
+        requests:
+            memory: 150Mi
+    service:
+        port: 8080
+        type: ClusterIP
+hasuraEnabled: true
+httpPort: 6880
+imagePullSecrets: []
+metrics:
+    enabled: true
+migrationEnabled: true
+nameOverride: timesheet
+nodeSelector: {}
+pdb:
+    enabled: false
+readinessProbe:
+    enabled: true
+resources:
+    requests:
+        memory: 120Mi
+service:
+    port: 6850
+    type: ClusterIP
+tolerations: null
+webHttp:
+    - corsPolicy:
+        allowHeaders:
+            - authorization
+            - grpc-timeout
+            - content-type
+            - keep-alive
+            - user-agent
+            - cache-control
+            - content-transfer-encoding
+            - token
+            - x-accept-content-transfer-encoding
+            - x-accept-response-streaming
+            - x-request-id
+            - x-user-agent
+            - x-graphql-mesh-authorization
+            - x-grpc-web
+            - if-none-match
+            - pkg
+            - version
+            - connect-timeout-ms
+            - connect-protocol-version
+            - connect-content-encoding
+            - connect-accept-encoding
+        allowMethods:
+            - POST
+            - GET
+            - OPTIONS
+            - PUT
+            - DELETE
+        allowOrigins:
+            - regex: .*
+        exposeHeaders:
+            - grpc-status
+            - grpc-message
+            - etag
+        maxAge: 100s
+      match:
+        - uri:
+            prefix: /timesheet.v1
+      route:
+        - destination:
+            host: timesheet
+            port:
+                number: 6850
+    - corsPolicy:
+        allowHeaders:
+            - authorization
+            - grpc-timeout
+            - content-type
+            - keep-alive
+            - user-agent
+            - cache-control
+            - content-transfer-encoding
+            - token
+            - x-accept-content-transfer-encoding
+            - x-accept-response-streaming
+            - x-request-id
+            - x-user-agent
+            - x-graphql-mesh-authorization
+            - x-grpc-web
+            - if-none-match
+            - pkg
+            - version
+            - connect-timeout-ms
+            - connect-protocol-version
+            - connect-content-encoding
+            - connect-accept-encoding
+        allowMethods:
+            - POST
+            - GET
+            - OPTIONS
+            - PUT
+            - DELETE
+        allowOrigins:
+            - regex: .*
+        exposeHeaders:
+            - grpc-status
+            - grpc-message
+            - etag
+        maxAge: 100s
+      match:
+        - uri:
+            prefix: /timesheet/api
+      route:
+        - destination:
+            host: timesheet
+            port:
+                number: 6880

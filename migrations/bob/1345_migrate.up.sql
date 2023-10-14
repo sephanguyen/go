@@ -1,0 +1,5 @@
+ALTER TABLE IF EXISTS public.role
+    ALTER COLUMN is_system DROP NOT NULL;
+
+ALTER TABLE IF EXISTS public.user_group
+    ALTER COLUMN is_system DROP NOT NULL;

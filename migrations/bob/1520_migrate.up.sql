@@ -1,0 +1,3 @@
+ALTER TABLE ONLY public.classroom
+    ADD COLUMN IF NOT EXISTS "room_area" TEXT,
+    ADD COLUMN IF NOT EXISTS "seat_capacity" INTEGER DEFAULT 0;

@@ -1,0 +1,58 @@
+- table:
+    schema: public
+    name: class
+  object_relationships:
+  - name: course
+    using:
+      foreign_key_constraint_on: course_id
+  - name: location
+    using:
+      foreign_key_constraint_on: location_id
+  insert_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      check:
+        _and:
+        - owners:
+            _eq: X-Hasura-User-Id
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      columns:
+      - class_id
+      - course_id
+      - location_id
+      - name
+  select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - class_id
+      - course_id
+      - location_id
+      - name
+      filter:
+        _and:
+        - owners:
+            _eq: X-Hasura-User-Id
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+- table:
+    schema: public
+    name: granted_permissions
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - user_id
+      - permission_name
+      - location_id
+      - resource_path
+      filter:
+        _and:
+        - user_id:
+            _eq: X-Hasura-User-Id
+        - resource_path:
+            _eq: X-Hasura-Resource-Path

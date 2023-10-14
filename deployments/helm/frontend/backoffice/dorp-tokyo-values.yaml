@@ -1,0 +1,34 @@
+replicaCount: 2
+
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: cloud.google.com/gke-spot
+              operator: In
+              values: ["true"]
+            - key: environment
+              operator: In
+              values: ["preproduction"]
+  podAntiAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution: []
+    preferredDuringSchedulingIgnoredDuringExecution: []
+tolerations:
+  - effect: NoSchedule
+    key: cloud.google.com/gke-spot
+    operator: Exists
+  - effect: NoSchedule
+    key: environment
+    operator: Equal
+    value: preproduction
+
+httpRoute:
+  - match:
+      - uri:
+          prefix: /
+    route:
+      - destination:
+          host: backoffice.dorp-tokyo-backoffice-mfe.svc.cluster.local
+          port:
+            number: 80

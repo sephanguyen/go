@@ -1,0 +1,105 @@
+{
+	"schema": [
+		{
+			"column_name": "break_time",
+			"data_type": "integer",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "course_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "preparation_time",
+			"data_type": "integer",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "course_teaching_time",
+			"policyname": "rls_course_teaching_time",
+			"qual": "permission_check(resource_path, 'course_teaching_time'::text)",
+			"with_check": "permission_check(resource_path, 'course_teaching_time'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "course_teaching_time",
+			"policyname": "rls_course_teaching_time_restrictive",
+			"qual": "permission_check(resource_path, 'course_teaching_time'::text)",
+			"with_check": "permission_check(resource_path, 'course_teaching_time'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "course_id_fk",
+			"column_name": "course_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "course_id_pk",
+			"column_name": "course_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "course_teaching_time",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

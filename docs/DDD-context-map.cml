@@ -1,0 +1,77 @@
+ContextMap DDDSampleMap {
+	contains UserManagementContext
+	contains LessonManagementContext
+	contains ChatContext
+	contains NotificationContext
+	contains SyllabusContext
+	contains OrderContext
+	contains InvoiceContext
+	contains MasterAccessControlContext
+	contains EntryAndExitContext
+	
+
+	LessonManagementContext [C]<-[S] UserManagementContext
+
+	// UserManagementContext [C]<-[S] MasterAccessControlContext
+	
+	// LessonManagementContext [C]<-[S] MasterAccessControlContext
+	
+	LessonManagementContext [D]<-[U,OHS,PL] ChatContext
+
+	ChatContext [C]<-[S] UserManagementContext
+
+	LessonManagementContext [ACL]<-[U,OHS,PL] NotificationContext
+
+	UserManagementContext [ACL]<-[U,OHS,PL] NotificationContext
+
+	EntryAndExitContext [ACL]<-[U,OHS,PL] NotificationContext
+
+	SyllabusContext [ACL]<-[U,OHS,PL] NotificationContext
+
+	InvoiceContext [C]<-[S] UserManagementContext
+
+	ChatContext [ACL]<-[U,OHS,PL] NotificationContext
+
+	// NotificationContext [D]<-[U,OHS,PL] OrderContext
+
+	SyllabusContext [C]<-[S] UserManagementContext
+
+	EntryAndExitContext [C]<-[S] UserManagementContext
+	
+	// SyllabusContext [C]<-[S] LessonManagementContext
+
+	OrderContext [P]<->[P] InvoiceContext
+	
+	// OrderContext [C]<-[S] UserManagementContext
+
+	// LessonManagementContext [D]<-[U,OHS,PL] OrderContext
+	
+}
+
+
+BoundedContext UserManagementContext {
+}
+
+BoundedContext LessonManagementContext {
+}
+
+BoundedContext MasterAccessControlContext {
+}
+
+BoundedContext ChatContext {
+}
+
+BoundedContext NotificationContext {
+}
+
+BoundedContext SyllabusContext {
+}
+
+BoundedContext OrderContext {
+}
+
+BoundedContext InvoiceContext {
+}
+
+BoundedContext EntryAndExitContext {
+}

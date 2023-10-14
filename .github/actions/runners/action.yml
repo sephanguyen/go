@@ -1,0 +1,47 @@
+name: "runners"
+description: "Get runners for jobs"
+inputs:
+  repo:
+    description: "Repository"
+    required: false
+  workflow:
+    description: "Workflow"
+    required: false
+  option:
+    description: "More key"
+    required: false
+  token:
+    description: "Github token"
+    required: false
+outputs:
+  runners:
+    description: "Runners json object"
+    value: ${{ steps.handle.outputs.runners }}
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/github-script@v6
+      id: handle
+      env:
+        REPO: "${{ inputs.repo }}"
+        WORKFLOW: "${{ inputs.workflow }}"
+        OPTION: "${{ inputs.option }}"
+        GITHUB_TOKEN: "${{ inputs.token }}"
+      with:
+        github-token: "${{ inputs.token || 'mock-github-token-to-fully-compatible' }}"
+        script: |
+          const repo = process.env.REPO || context.repo.repo;
+          const workflow = process.env.WORKFLOW || context.workflow;
+
+          console.log(`repo: ${repo}`);
+          console.log(`workflow: ${workflow}`);
+
+          const { getRunners } = require("${{github.workspace}}/.github/actions/runners/runners")
+          const runners = await getRunners({
+            repo, 
+            workflow,
+            option: process.env.OPTION,
+            github
+          })
+          console.log(runners);
+          core.setOutput('runners', runners);

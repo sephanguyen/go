@@ -1,0 +1,18 @@
+
+vendor: "manabie"
+environment: "stag"
+
+secrets:
+  serviceCredential: ""
+
+kserve: 
+  controller:
+    deploymentMode: "RawDeployment"
+  
+machinelearning:
+  namespace: stag-manabie-machine-learning
+
+serviceAccountEmailSuffix: "staging-manabie-online"
+
+artifact:
+  gcs_path: "gs://stag-manabie-backend"

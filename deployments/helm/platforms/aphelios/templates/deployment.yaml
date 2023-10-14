@@ -1,0 +1,159 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "aphelios.fullname" . }}
+  labels:
+    {{- include "aphelios.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "aphelios.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "aphelios.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "util.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+
+      volumes: # define volumes
+        {{- if eq "local" .Values.environment }}
+        - name: service-credential # name of the volumes
+          secret:
+            secretName: {{ include "aphelios.fullname" . }} # secret for mount
+            items:
+              - key: service_credential.json.base64
+                path: service_credential.json.base64
+        {{- end }}
+
+        - name: aphelios-secrets
+          secret:
+            secretName: aphelios
+            items:
+              - key: aphelios.secrets.encrypted.yaml
+                path: aphelios.secrets.encrypted.yaml
+
+        - name: config-volumns
+          configMap:
+            name: {{include "aphelios.fullname" .}}-configmap
+
+        - name: decrypt
+          emptyDir: {}
+
+      initContainers:
+        - name: init-decrypt
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+          {{- if eq "local" .Values.environment }}
+          - name: service-credential
+            mountPath: /configs/service_credential.json.base64
+            subPath: service_credential.json.base64
+          {{- end }}
+          - name: aphelios-secrets
+            mountPath: /configs/aphelios.secrets.encrypted.yaml
+            subPath: aphelios.secrets.encrypted.yaml
+          - name: decrypt
+            mountPath: /decrypt
+          - name: config-volumns
+            mountPath: /config
+          command:
+            - /bin/sh
+            - -c
+            - |
+              {{- if eq "local" .Values.environment }}
+              base64 -d /configs/service_credential.json.base64 > /decrypt/service_credential.json
+              {{- end }}
+              sops -d /configs/aphelios.secrets.encrypted.yaml > /decrypt/aphelios.secrets.yaml
+              base64 -d /config/config.yaml > /decrypt/config.yaml
+          {{- if eq "local" .Values.environment }}
+          env:
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: "/decrypt/service_credential.json"
+          {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+
+          args:
+          - --secret_config
+          - $(SECRET_CONFIG)
+          - --config
+          - $(CONFIG_PATH)
+          ports:
+            - name: grpc
+              containerPort: {{ .Values.image.containerPort }}
+              protocol: TCP
+
+          readinessProbe:
+            tcpSocket:
+              port: {{ .Values.image.containerPort }}
+            initialDelaySeconds: 5
+            periodSeconds: 10
+
+          livenessProbe:
+            tcpSocket:
+              port: {{ .Values.image.containerPort }}
+            initialDelaySeconds: 15
+            periodSeconds: 20
+
+          volumeMounts:
+          {{- if eq "local" .Values.environment }}
+          - name: service-credential
+            mountPath: /configs/service_credential.json.base64
+            subPath: service_credential.json.base64
+            readOnly: true
+          {{- end }}
+
+          - name: aphelios-secrets
+            mountPath: /configs/aphelios.secrets.encrypted.yaml
+            subPath: aphelios.secrets.encrypted.yaml
+            readOnly: true
+
+          - name: decrypt
+            mountPath: /decrypt
+            readOnly: true
+
+          - name: config-volumns
+            mountPath: /config
+
+          env:
+            - name: ENV
+              value: {{ .Values.environment }}
+            - name: ORG
+              value: {{ .Values.vendor }}
+            - name: SECRET_CONFIG
+              value: "/decrypt/aphelios.secrets.yaml"
+            - name: CONFIG_PATH
+              value: "/decrypt/config.yaml"
+          {{- if eq "local" .Values.environment }}
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: "/configs/service_credential.json"
+          {{- end }}
+
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

@@ -1,0 +1,1746 @@
+- name: allowed-queries
+  definition:
+    queries:
+      - name: LessonGroupById
+        query: |-
+          query LessonGroupById($lesson_group_id: String!) {
+            lesson_groups(where: {lesson_group_id: {_eq: $lesson_group_id}}) {
+              ...LessonGroupAttrs
+            }
+          }
+
+          fragment LessonGroupAttrs on lesson_groups {
+            media_ids
+            lesson_group_id
+          }
+      - name: MediasList
+        query: >-
+          query MediasList($limit: Int = 10, $offset: Int = 0, $media_id:
+          [String!], $resource: String, $type: String, $converted_images:
+          Boolean, $comments: jsonb) {
+            media(limit: $limit, offset: $offset, order_by: {created_at: desc}, where: {resource: {_eq: $resource}, type: {_eq: $type}, media_id: {_in: $media_id}, converted_images: {_is_null: $converted_images}, comments: {_contains: $comments}}) {
+              ...MediaAttrs
+            }
+            media_aggregate(where: {resource: {_eq: $resource}, type: {_eq: $type}, media_id: {_in: $media_id}, converted_images: {_is_null: $converted_images}, comments: {_contains: $comments}}) {
+              aggregate {
+                count
+              }
+            }
+          }
+
+
+          fragment MediaAttrs on media {
+            media_id
+            resource
+            type
+            name
+          }
+      - name: TeacherMany
+        query: |-
+          query TeacherMany($user_id: [String!] = [], $school_id: Int = 0) {
+            find_teacher_by_school_id(args: {school_id: $school_id}, where: {user_id: {_in: $user_id}}) {
+              name
+              email
+              user_id
+            }
+          }
+      - name: MediasMany
+        query: |-
+          query MediasMany($media_id: [String!] = []) {
+            media(where: {media_id: {_in: $media_id}}) {
+              ...MediaAttrs
+              conversion_tasks(order_by: {created_at: desc}, limit: 1) {
+                status
+              }
+            }
+          }
+
+          fragment MediaAttrs on media {
+            media_id
+            resource
+            type
+            name
+          }
+      - name: GradesOfStudentsList
+        query: |-
+          query GradesOfStudentsList($student_ids: [String!] = []) {
+              students(where: { student_id: { _in: $student_ids } }) {
+                  student_id
+                  current_grade
+                  enrollment_status
+              }
+          }
+      - name: StudentsMany
+        query: |
+          query StudentsMany($user_ids: [String!] = []) {
+            users(
+              where: {user_group: {_eq: "USER_GROUP_STUDENT"}, user_id: {_in: $user_ids}}
+            ) {
+              ...StudentUserAttrs
+            }
+          }
+
+          fragment StudentUserAttrs on users {
+            user_id
+            name
+            email
+            avatar
+          }
+      - name: TeacherManyReference
+        query: >-
+          query TeacherManyReference($limit: Int = 10, $offset: Int = 0, $email:
+          String, $name: String, $school_id: Int! = 0) {
+            find_teacher_by_school_id(limit: $limit, offset: $offset, order_by: {created_at: desc}, args: {school_id: $school_id}, where: {_or: [{name: {_ilike: $name}}, {email: {_ilike: $email}}]}) {
+              name
+              email
+              user_id
+              avatar
+            }
+          }
+      - name: CoursesMany
+        query: |-
+          query CoursesMany($course_id: [String!] = []) {
+            courses(where: {course_id: {_in: $course_id}}) {
+              ...CourseAttrs
+            }
+          }
+
+          fragment CourseAttrs on courses {
+              course_id
+              name
+              icon
+              grade
+              subject
+              country
+              school_id
+              display_order
+          }
+      - name: CoursesManyReference
+        query: >
+          query CoursesManyReference($name: String, $limit: Int = 10, $offset:
+          Int = 0) {
+            courses(
+              limit: $limit
+              offset: $offset
+              order_by: {created_at: desc, display_order: asc, name: asc, course_id: asc}
+              where: {name: {_ilike: $name}}
+            ) {
+              ...CourseAttrs
+            }
+            courses_aggregate(where: {name: {_ilike: $name}}) {
+              aggregate {
+                count
+              }
+            }
+          }
+
+
+          fragment CourseAttrs on courses {
+            course_id
+            name
+            icon
+            grade
+            subject
+            country
+            school_id
+            display_order
+          }
+      - name: CountStudentWithFilter
+        query: >
+          query CountStudentWithFilter($name: String, $email: String, $grades:
+          [smallint!], $student_ids: [String!], $enrollment_status: String,
+          $last_login_date: Boolean) {
+            users_aggregate(
+              where: {name: {_ilike: $name}, email: {_ilike: $email}, user_id: {_in: $student_ids}, user_group: {_eq: "USER_GROUP_STUDENT"}, last_login_date: {_is_null: $last_login_date}, student: {current_grade: {_in: $grades}, enrollment_status: {_eq: $enrollment_status}}}
+            ) {
+              aggregate {
+                count(columns: user_id)
+              }
+            }
+          }
+      - name: PartnerFormConfigsOne
+        query: |-
+          query PartnerFormConfigsOne($feature_name: String, $school_id: Int) {
+              partner_form_configs(
+                  where: {
+                      _and: [{ feature_name: { _eq: $feature_name }, partner_id: { _eq: $school_id } }]
+                  }
+                  order_by: { created_at: desc }
+                  limit: 1
+              ) {
+                  form_config_id
+                  form_config_data
+              }
+          }
+      - name: LessonReportByLessonId
+        query: |-
+          query LessonReportByLessonId($lesson_id: String!) {
+              lesson_reports(where: { lesson_id: { _eq: $lesson_id } }) {
+                  lesson_id
+                  lesson_report_id
+                  report_submitting_status
+                  partner_form_config {
+                      form_config_id
+                      feature_name
+                      form_config_data
+                  }
+                  lesson_report_details {
+                      lesson_report_detail_id
+                      student {
+                          student_id
+                      }
+                      partner_dynamic_form_field_values {
+                          dynamic_form_field_value_id
+                          value_type
+                          int_value
+                          int_set_value
+                          int_array_value
+                          string_value
+                          string_set_value
+                          string_array_value
+                          bool_value
+                          field_render_guide
+                          field_id
+                      }
+                  }
+              }
+          }
+      - name: PartnerFormConfigById
+        query: |-
+          query PartnerFormConfigById($form_config_id: String!) {
+              partner_form_configs(where: { form_config_id: { _eq: $form_config_id } }) {
+                  form_config_data
+              }
+          }
+      - name: PartnerDynamicFormFieldValuesByLessonReportDetailsIdAndStudentId
+        query: >-
+          query
+          PartnerDynamicFormFieldValuesByLessonReportDetailsIdAndStudentId($user_id:
+          String!, $report_id: String!) {
+            get_partner_dynamic_form_field_values_by_student(args: {report_id: $report_id, user_id: $user_id}) {
+              value_type
+              string_value
+              string_set_value
+              string_array_value
+              int_set_value
+              int_array_value
+              field_id
+              bool_value
+              int_value
+            }
+          }
+      - name: LessonMemberByUserIdAndCourseIdAndLessonIdV2
+        query: |-
+          query LessonMemberByUserIdAndCourseIdAndLessonIdV2(
+                  $user_id: String!
+                  $course_id: String!
+                  $lesson_id: String!
+              ) {
+                  lesson_members(
+                      where: {
+                          user_id: { _eq: $user_id }
+                          course_id: { _eq: $course_id }
+                          lesson_id: { _eq: $lesson_id }
+                      }
+                  ) {
+                      attendance_remark
+                      attendance_status
+                  }
+              }
+      - name: LocationListByIds
+        query: |
+          query LocationListByIds($location_ids: [String!] = []) {
+            locations(where: {location_id: {_in: $location_ids}}) {
+              name
+              location_id
+            }
+          }
+      - name: LocationByLocationId
+        query: |
+          query LocationByLocationId($location_id: String!) {
+            locations(where: { location_id: { _eq: $location_id}}) {
+              location_id
+              name
+            }
+          }
+      - name: StudentsManyReferenceByNameAndEmail
+        query: >
+          query StudentsManyReferenceByNameAndEmail($keyword: String, $limit:
+          Int = 30, $offset: Int = 0) {
+            users(where: {user_group: {_eq: "USER_GROUP_STUDENT"}, _or: [{email: {_ilike: $keyword}}, {name: {_ilike: $keyword}}]}, limit: $limit, offset: $offset, order_by: {created_at: desc}) {
+              ...StudentUserAttrs
+            }
+          }
+
+
+          fragment StudentUserAttrs on users {
+            user_id
+            name
+            email
+            avatar
+          }
+      - name: PreviousLessonReportByCourseIdAndStudentIdAndReportIdAndLessonIdV2
+        query: >
+          query
+          PreviousLessonReportByCourseIdAndStudentIdAndReportIdAndLessonIdV2($report_user_id:
+          String!, $report_course_id: String!, $report_id: String,
+          $report_lesson_id: String) {
+            get_previous_report_of_student_v3(args: {report_course_id: $report_course_id, report_user_id: $report_user_id, report_id: $report_id, report_lesson_id: $report_lesson_id}) {
+              form_config_id
+              lesson_report_id
+              lesson_id
+            }
+          }
+      - name: Lesson_LessonGroupsListByLessonGroupIdsAndCourseId
+        query: >
+          query
+          Lesson_LessonGroupsListByLessonGroupIdsAndCourseId($lesson_group_ids:
+          [String!]!, $course_id: String, $limit: Int = 10, $offset: Int = 0) {
+            lesson_groups(limit: $limit, offset: $offset, order_by: {lesson_group_id: asc}, where: {lesson_group_id: {_in: $lesson_group_ids}, course_id: {_eq: $course_id}}) {
+              ...LessonGroupAttrs
+            }
+          }
+
+
+          fragment LessonGroupAttrs on lesson_groups {
+            media_ids
+            lesson_group_id
+          }
+      - name: Lesson_CoursesList
+        query: |
+          query Lesson_CoursesList($name: String, $course_id: [String!],
+          $course_type: String, $limit: Int = 10, $offset: Int = 0) {
+            courses(
+              limit: $limit
+              offset: $offset
+              order_by: {created_at: desc, display_order: asc, name: asc, course_id: asc}
+              where: {name: {_ilike: $name}, course_id: {_in: $course_id}, course_type: {_eq: $course_type}}
+            ) {
+              ...Lesson_CoursesAttrs
+            }
+            courses_aggregate(
+              where: {name: {_ilike: $name}, course_id: {_in: $course_id}, course_type: {_eq: $course_type}}
+            ) {
+              aggregate {
+                count
+              }
+            }
+          }
+
+
+          fragment Lesson_CoursesAttrs on courses {
+            course_id
+            name
+            icon
+            grade
+            subject
+            country
+            school_id
+            display_order
+            teaching_method
+          }
+      - name: Lesson_CoursesOne
+        query: |
+          query Lesson_CoursesOne($course_id: String!) {
+            courses(where: {course_id: {_eq: $course_id}}) {
+              ...Lesson_CourseAttrs
+              course_books {
+                book_id
+                books {
+                  book_chapters {
+                    chapter_id
+                  }
+                }
+              }
+            }
+          }
+
+          fragment Lesson_CourseAttrs on courses {
+            course_id
+            name
+            icon
+            grade
+            subject
+            country
+            school_id
+            display_order
+            teaching_method
+          }
+      - name: Lesson_ClassAssociationByClassId
+        query: |
+          query Lesson_ClassAssociationByClassId($class_id: String!) {
+            class_member_aggregate(where: {class_id: {_eq: $class_id}}, limit: 1) {
+              aggregate {
+                count
+              }
+            }
+            lessons_aggregate(where: {class_id: {_eq: $class_id}}, limit: 1) {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: Lesson_ClassListByCourseIdV3
+        query: >
+          query Lesson_ClassListByCourseIdV3($course_id: String!, $limit: Int =
+          5, $offset: Int = 0, $order_by: [class_order_by!] = {name: asc}) {
+            class(
+              where: {course_id: {_eq: $course_id}}
+              limit: $limit
+              offset: $offset
+              order_by: $order_by
+            ) {
+              class_id
+              name
+              location {
+                location_id
+                name
+              }
+            }
+            class_aggregate(where: {course_id: {_eq: $course_id}}) {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: Lesson_ClassByClassIdForLessonManagement
+        query: |-
+          query Lesson_ClassByClassIdForLessonManagement($class_id: String!) {
+            class(where: {class_id: {_eq: $class_id}}) {
+              class_id
+              name
+            }
+          }
+      - name: Lesson_ClassManyForLessonManagement
+        query: >-
+          query Lesson_ClassManyForLessonManagement($class_ids: [String!] = [])
+          {
+            class(where: {class_id: {_in: $class_ids}}) {
+              class_id
+              name
+            }
+          }
+      - name: Lesson_CourseManyReferenceByNameAndLocationId
+        query: >
+          query Lesson_CourseManyReferenceByNameAndLocationId($location_id:
+          String!, $name: String, $limit: Int = 30, $order_by:
+          [course_access_paths_order_by!] = {created_at: desc}) {
+            course_access_paths(
+              where: {_and: [{location_id: {_eq: $location_id}}, {course: {name: {_ilike: $name}}}]}
+              limit: $limit
+              order_by: $order_by
+            ) {
+              course {
+                course_id
+                name
+              }
+            }
+          }
+      - name: Lesson_ClassManyReferenceByNameAndCourseId
+        query: >
+          query Lesson_ClassManyReferenceByNameAndCourseId($location_id:
+          String!, $course_id: String!, $name: String, $limit: Int = 30,
+          $order_by: [class_order_by!] = {name: asc}) {
+            class(
+              where: {_and: [{course_id: {_eq: $course_id}}, {location_id: {_eq: $location_id}}, {name: {_ilike: $name}}]}
+              limit: $limit
+              order_by: $order_by
+            ) {
+              class_id
+              name
+            }
+          }
+      - name: Lesson_ClassManyByLocationIdAndCourseIdAndName
+        query: >
+          query Lesson_ClassManyByLocationIdAndCourseIdAndName($location_id:
+          String!, $course_id: String!, $name: String, $limit: Int = 30,
+          $order_by: [class_order_by!] = {name: asc}) {
+            class(
+              where: {_and: [{location_id: {_eq: $location_id}}, {course_id: {_eq: $course_id}}, {name: {_ilike: $name}}]}
+              limit: $limit
+              order_by: $order_by
+            ) {
+              class_id
+              name
+            }
+          }
+      - name: Lesson_ClassManyByNullableCourseIdsAndName
+        query: >
+          query Lesson_ClassManyByNullableCourseIdsAndName($course_ids:
+          [String!], $name: String, $limit: Int = 30, $order_by:
+          [class_order_by!] = {name: asc}) {
+            class(
+              where: {_and: [{course_id: {_in: $course_ids}}, {name: {_ilike: $name}}]}
+              limit: $limit
+              order_by: $order_by
+            ) {
+              class_id
+              name
+            }
+          }
+      - name: Lesson_SchedulerBySchedulerId
+        query: |
+          query Lesson_SchedulerBySchedulerId($scheduler_id: String!) {
+            scheduler(where: {scheduler_id: {_eq: $scheduler_id}}) {
+              scheduler_id
+              start_date
+              end_date
+              freq
+            }
+          }
+      - name: StudentsListByFiltersWithoutGradeAndAggregate
+        query: >
+          query StudentsListByFiltersWithoutGradeAndAggregate($name: String,
+          $email: String, $limit: Int = 10, $offset: Int = 0, $order_by:
+          users_order_by! = {created_at: desc}, $student_ids: [String!],
+          $grades: [smallint!], $enrollment_status: String, $last_login_date:
+          Boolean) {
+            users(
+              where: {name: {_ilike: $name}, email: {_ilike: $email}, user_id: {_in: $student_ids}, user_group: {_eq: "USER_GROUP_STUDENT"}, last_login_date: {_is_null: $last_login_date}, student: {current_grade: {_in: $grades}, enrollment_status: {_eq: $enrollment_status}}}
+              limit: $limit
+              offset: $offset
+              order_by: [$order_by]
+            ) {
+              ...StudentWithoutGradeFrg
+            }
+          }
+
+
+          fragment StudentWithoutGradeFrg on users {
+            user_id
+            name
+            email
+            phone_number
+            country
+            last_login_date
+            resource_path
+          }
+      - name: Lesson_ClassListByCourseID
+        query: >
+          query Lesson_ClassListByCourseID($course_id: String!, $limit: Int = 5,
+          $offset: Int = 0) {
+            class(
+              where: {course: {course_id: {_eq: $course_id}}}
+              limit: $limit
+              offset: $offset
+            ) {
+              class_id
+              name
+              location {
+                location_id
+                name
+              }
+            }
+            class_aggregate(where: {course: {course_id: {_eq: $course_id}}}) {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: Lesson_ClassListByCourseIdV2
+        query: >
+          query Lesson_ClassListByCourseIdV2($course_id: String!, $limit: Int =
+          5, $offset: Int = 0) {
+            class(where: {course_id: {_eq: $course_id}}, limit: $limit, offset: $offset) {
+              class_id
+              name
+              location {
+                location_id
+                name
+              }
+            }
+            class_aggregate(where: {course_id: {_eq: $course_id}}) {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: Lesson_LessonReportListByLessonIds
+        query: >
+          query Lesson_LessonReportListByLessonIds($lesson_ids: [String!] = [])
+          {
+            lesson_reports(where: {lesson_id: {_in: $lesson_ids}}) {
+              report_submitting_status
+              lesson_report_id
+              lesson_id
+            }
+          }
+      - name: >-
+          Lesson_PreviousLessonReportByCourseIdAndStudentIdAndReportIdAndLessonIdV3
+        query: >-
+          query
+          Lesson_PreviousLessonReportByCourseIdAndStudentIdAndReportIdAndLessonIdV3($report_user_id:
+          String!, $report_course_id: String!, $report_id: String,
+          $report_lesson_id: String) {
+            get_previous_report_of_student_v3(args: {report_course_id: $report_course_id, report_user_id: $report_user_id, report_id: $report_id, report_lesson_id: $report_lesson_id}) {
+              form_config_id
+              lesson_report_id
+              lesson {
+                lesson_id
+                start_time
+                end_time
+              }
+            }
+          }
+      - name: Lesson_GetPreviousLessonReportGroupByLessonId
+        query: >
+          query Lesson_GetPreviousLessonReportGroupByLessonId($lesson_id:
+          String!) {
+            get_previous_lesson_report_group(args: {lesson_id_query: $lesson_id}) {
+              lesson_id
+              lesson {
+                class_id
+                start_time
+                end_time
+                lesson_members {
+                  user {
+                    user_id
+                    name
+                    email
+                  }
+                }
+              }
+              lesson_report_id
+              report_submitting_status
+              partner_form_config {
+                form_config_id
+                feature_name
+                form_config_data
+              }
+              lesson_report_details {
+                lesson_report_detail_id
+                partner_dynamic_form_field_values {
+                  dynamic_form_field_value_id
+                  value_type
+                  int_value
+                  int_set_value
+                  int_array_value
+                  string_value
+                  string_set_value
+                  string_array_value
+                  bool_value
+                  field_render_guide
+                  field_id
+                }
+                student {
+                  student_id
+                }
+              }
+            }
+          }
+      - name: Lesson_GetClassMemberByClassId
+        query: |-
+          query Lesson_GetClassMemberByClassId($class_id: String!) {
+            class_member(where: {class_id: {_eq: $class_id}}) {
+              user_id
+            }
+          }
+      - name: Lesson_CountClosedDaysByDateAndLocationV2
+        query: >
+          query Lesson_CountClosedDaysByDateAndLocationV2($date: date!,
+          $location_id: String!) {
+            day_info_aggregate(
+              where: {date: {_eq: $date}, day_type_id: {_eq: "closed"}, location_id: {_eq: $location_id}}
+            ) {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: Lesson_LessonByLessonIdForLessonManagementV5
+        query: >
+          query Lesson_LessonByLessonIdForLessonManagementV5($lesson_id:
+          String!) {
+            lessons(where: {lesson_id: {_eq: $lesson_id}}) {
+              is_locked
+              lesson_id
+              center_id
+              course {
+                course_id
+                name
+              }
+              class_id
+              lesson_group_id
+              teaching_medium
+              teaching_method
+              lesson_type
+              scheduling_status
+              scheduler_id
+              start_time
+              end_time
+              lessons_teachers {
+                teacher {
+                  users {
+                    user_id
+                    name
+                    email
+                  }
+                }
+              }
+              lesson_members {
+                attendance_remark
+                attendance_status
+                attendance_notice
+                attendance_reason
+                attendance_note
+                course {
+                  course_id
+                  name
+                  subject
+                }
+                user {
+                  user_id
+                  name
+                  email
+                  student {
+                    current_grade
+                  }
+                }
+              }
+            }
+          }
+      - name: Lesson_LessonMemberByUserIdAndCourseIdAndLessonId
+        query: >
+          query Lesson_LessonMemberByUserIdAndCourseIdAndLessonId($user_id:
+          String!, $course_id: String!, $lesson_id: String!) {
+            lesson_members(where: {user_id: {_eq: $user_id}, course_id: {_eq: $course_id}, lesson_id: {_eq: $lesson_id}}) {
+              attendance_status
+              attendance_notice
+              attendance_reason
+              attendance_note
+              attendance_remark
+            }
+          }
+      - name: Lesson_GetPreviousLessonReportIndividual
+        query: >
+          query Lesson_GetPreviousLessonReportIndividual($report_user_id:
+          String!, $report_course_id: String!, $report_id: String,
+          $report_lesson_id: String) {
+            get_previous_report_of_student_v4(
+              args: {report_course_id: $report_course_id, report_user_id: $report_user_id, report_id: $report_id, report_lesson_id: $report_lesson_id}
+            ) {
+              form_config_id
+              lesson_report_id
+              lesson {
+                lesson_id
+                start_time
+                end_time
+              }
+            }
+          }
+      - name: Lesson_GetAllGradesMaster
+        query: |
+          query Lesson_GetAllGradesMaster {
+            grade(where: {is_archived: {_eq: false}}, order_by: {sequence: asc}) {
+              grade_id
+              name
+              sequence
+              partner_internal_id
+            }
+          }
+      - name: Lesson_GradesByIds
+        query: |
+          query Lesson_GradesByIds($grade_ids: [String!]!) {
+            grade(where: {grade_id: {_in: $grade_ids}}) {
+              grade_id
+              name
+            }
+          }
+      - name: Lesson_StaffList
+        query: >
+          query Lesson_StaffList($limit: Int = 10, $offset: Int = 0, $email:
+          String, $name: String) {
+            staff(
+              limit: $limit
+              offset: $offset
+              order_by: {created_at: desc}
+              where: {user: {_or: [{name: {_ilike: $name}}, {email: {_ilike: $email}}]}}
+            ) {
+              staff_id
+              user {
+                name
+                email
+              }
+            }
+          }
+      - name: Lesson_ClassesByNameAndCourseIds
+        query: >
+          query Lesson_ClassesByNameAndCourseIds($course_ids: [String!], $name:
+          String, $limit: Int = 30, $order_by: [class_order_by!] = {name: asc})
+          {
+            class(
+              where: {_and: [{course_id: {_in: $course_ids}}, {name: {_ilike: $name}}]}
+              limit: $limit
+              order_by: $order_by
+            ) {
+              class_id
+              name
+              course_id
+            }
+          }
+      - name: Lesson_LessonDetailByLessonId
+        query: |
+          query Lesson_LessonDetailByLessonId($lesson_id: String!) {
+            lessons(where: {lesson_id: {_eq: $lesson_id}}) {
+              is_locked
+              lesson_id
+              center_id
+              course {
+                course_id
+                name
+              }
+              class_id
+              lesson_group_id
+              teaching_medium
+              teaching_method
+              lesson_type
+              scheduling_status
+              scheduler_id
+              start_time
+              end_time
+              lessons_teachers {
+                teacher_id
+              }
+              lesson_members {
+                attendance_remark
+                attendance_status
+                attendance_notice
+                attendance_reason
+                attendance_note
+                course {
+                  course_id
+                  name
+                  subject
+                }
+                user {
+                  user_id
+                  name
+                  email
+                  student {
+                    current_grade
+                  }
+                }
+              }
+            }
+          }
+      - name: Lesson_StaffsByIds
+        query: |
+          query Lesson_StaffsByIds($staff_ids: [String!]!) {
+            staff(where: {staff_id: {_in: $staff_ids}}) {
+              staff_id
+              user {
+                name
+                email
+              }
+            }
+          }
+      - name: Lesson_ImportClassroom
+        query: |-
+          mutation Lesson_ImportClassroom($data: [classroom_insert_input!]!) {
+            insert_classroom(
+              objects: $data
+              on_conflict: {
+                  constraint: classroom_pk
+                  update_columns: [updated_at, location_id, classroom_id, name, remarks, is_archived]
+                }
+            ) {
+                affected_rows
+            }
+          }
+      - name: Lesson_ClassroomsListByClassroomIds
+        query: >
+          query Lesson_ClassroomsListByClassroomIds($classroom_ids: [String!]!)
+          {
+            classroom(where: {classroom_id: {_in: $classroom_ids}}) {
+              classroom_id
+              name
+              is_archived
+              location_id
+              remarks
+            }
+          }
+      - name: Lesson_GetAllCourseTypes
+        query: |-
+          query Lesson_GetAllCourseTypes {
+                  course_type {
+                      course_type_id
+                      name
+                  }
+              }
+      - name: Lesson_CourseTypeByCourseId
+        query: |
+          query Lesson_CourseTypeByCourseId($course_id: String!) {
+            course_type(where: {courses: {course_id: {_eq: $course_id}}}) {
+              course_type_id
+              name
+            }
+          }
+      - name: Lesson_ClassroomsListByLocationId
+        query: |-
+          query Lesson_ClassroomsListByLocationId($location_id: String!) {
+            classroom(where: {location_id: {_eq: $location_id}}) {
+              classroom_id
+              name
+              is_archived
+              location_id
+              remarks
+            }
+          }
+      - name: Lesson_GetLessonTimeListByLessonIds
+        query: |
+          query Lesson_GetLessonTimeListByLessonIds($lesson_ids: [String!]!) {
+            lessons(where: {lesson_id: {_in: $lesson_ids}}) {
+              lesson_id
+              start_time
+              end_time
+            }
+          }
+      - name: Lesson_ClassroomListByLocationIdAndName
+        query: >-
+          query Lesson_ClassroomListByLocationIdAndName($location_id: String!,
+          $name: String, $limit: Int = 30, $order_by: [classroom_order_by!] =
+          {name: asc}) {
+            classroom(where: {_and: [{location_id: {_eq: $location_id}}, {name: {_ilike: $name}}, {is_archived: {_eq: false}}]}, limit: $limit, order_by: $order_by) {
+              classroom_id
+              location_id
+              is_archived
+              remarks
+              name
+            }
+          }
+      - name: Lesson_GetManyClassroomsByLessonId
+        query: |-
+          query Lesson_GetManyClassroomsByLessonId($lesson_id: String!) {
+            lesson_classrooms(where: {lesson_id: {_eq: $lesson_id}}) {
+              lesson_id
+              classroom {
+                classroom_id
+                name
+                is_archived
+                location_id
+                remarks
+              }
+            }
+          }
+      - name: Lesson_GetManyClassroomsByLessonIdV2
+        query: |
+          query Lesson_GetManyClassroomsByLessonIdV2($lesson_id: String!) {
+            lesson_classrooms(where: {lesson_id: {_eq: $lesson_id}}) {
+              classroom {
+                classroom_id
+                name
+                seat_capacity
+                room_area
+                location_id
+                remarks
+                is_archived
+              }
+            }
+          }
+      - name: Lesson_ReallocationsByLessonIdAndStudentIds
+        query: >
+          query Lesson_ReallocationsByLessonIdAndStudentIds($student_ids:
+          [String!]!, $new_lesson_id: String!) {
+            reallocation(
+              where: {student_id: {_in: $student_ids}, new_lesson_id: {_eq: $new_lesson_id}}
+            ) {
+              student_id
+              original_lesson_id
+            }
+          }
+      - name: Lesson_StaffListV2
+        query: >
+          query Lesson_StaffListV2($limit: Int = 30, $offset: Int = 0,
+          $search_text: String) {
+            staff(limit: $limit, offset: $offset, order_by: {created_at: desc}, where: {user: {_or: [{name: {_ilike: $search_text}}, {full_name_phonetic: {_ilike: $search_text}}, {email: {_ilike: $search_text}}]}}) {
+              staff_id
+              user {
+                name
+                email
+                full_name_phonetic
+              }
+            }
+          }
+      - name: Lesson_StaffsByIdsV2
+        query: |
+          query Lesson_StaffsByIdsV2($staff_ids: [String!]!) {
+            staff(where: {staff_id: {_in: $staff_ids}}) {
+              staff_id
+              user {
+                name
+                email
+                full_name_phonetic
+              }
+            }
+          }
+      - name: Lesson_CoursesUnderLocations
+        query: >
+          query Lesson_CoursesUnderLocations($location_ids: [String!]!, $name:
+          String, $limit: Int = 30, $offset: Int = 0) {
+            courses(
+              where: {_and: [{course_access_paths: {location_id: {_in: $location_ids}}}, {name: {_ilike: $name}}]}
+              limit: $limit
+              offset: $offset
+              order_by: {created_at: desc}
+            ) {
+              ...CourseAttrs
+            }
+          }
+
+
+          fragment CourseAttrs on courses {
+            course_id
+            name
+            icon
+            grade
+            subject
+            country
+            school_id
+            display_order
+          }
+      - name: Lesson_LessonDetailByLessonIdV2
+        query: |
+          query Lesson_LessonDetailByLessonIdV2($lesson_id: String!) {
+            lessons(where: {lesson_id: {_eq: $lesson_id}}) {
+              is_locked
+              lesson_id
+              center_id
+              course {
+                course_id
+                name
+              }
+              class_id
+              lesson_group_id
+              teaching_medium
+              teaching_method
+              lesson_type
+              scheduling_status
+              scheduler_id
+              start_time
+              end_time
+              zoom_link
+              zoom_owner_id
+              zoom_id
+              lessons_teachers {
+                teacher_id
+              }
+              lesson_members {
+                attendance_remark
+                attendance_status
+                attendance_notice
+                attendance_reason
+                attendance_note
+                course {
+                  course_id
+                  name
+                  subject
+                }
+                user {
+                  user_id
+                  name
+                  email
+                  student {
+                    current_grade
+                  }
+                }
+              }
+            }
+          }
+      - name: Lesson_ClassManyByNameAndCoursesUnderLocations
+        query: >
+          query Lesson_ClassManyByNameAndCoursesUnderLocations($name: String,
+          $location_ids: [String!]!, $course_ids: [String!], $limit: Int = 30,
+          $order_by: [class_order_by!] = {name: asc}) {
+            class(
+              where: {_and: [{course: {course_access_paths: {location_id: {_in: $location_ids}}, course_id: {_in: $course_ids}}}, {name: {_ilike: $name}}]}
+              limit: $limit
+              order_by: $order_by
+            ) {
+              class_id
+              name
+              course_id
+            }
+          }
+      - name: Lesson_GetZoomOwnerList
+        query: >
+          query Lesson_GetZoomOwnerList($limit: Int = 10, $offset: Int = 0,
+          $email: String) {
+            zoom_account(
+              limit: $limit
+              offset: $offset
+              order_by: {created_at: desc}
+              where: {email: {_ilike: $email}}
+            ) {
+              zoom_id
+              email
+            }
+          }
+      - name: Lesson_EnrollmentStudentStatusesUnderLocation
+        query: >-
+          query Lesson_EnrollmentStudentStatusesUnderLocation($where:
+          [student_enrollment_status_history_bool_exp]) {
+            student_enrollment_status_history(where: {_or: $where}) {
+              student_id
+              start_date
+              enrollment_status
+              location_id
+            }
+          }
+      - name: Lesson_GetZoomOwnerById
+        query: |-
+          query Lesson_GetZoomOwnerById($zoom_id: String!) {
+                  zoom_account(where: { zoom_id: { _eq: $zoom_id } }) {
+                      zoom_id
+                      email
+                  }
+              }
+      - name: Lesson_GetManyGrantedPermissions
+        query: >
+          query Lesson_GetManyGrantedPermissions($permissions: [String!]!,
+          $location_ids: [String!]) {
+            granted_permissions(
+              where: {permission_name: {_in: $permissions}, location_id: {_in: $location_ids}}
+            ) {
+              permission_name
+              location_id
+              permission_id
+              user_id
+            }
+          }
+      - name: Lesson_ClassManyByNameAndCoursesUnderLocationsV2
+        query: >
+          query Lesson_ClassManyByNameAndCoursesUnderLocationsV2($name: String,
+          $location_ids: [String!], $course_ids: [String!], $limit: Int = 30,
+          $order_by: [class_order_by!] = {name: asc}) {
+            class(
+              where: {_and: [{course: {course_access_paths: {location_id: {_in: $location_ids}}, course_id: {_in: $course_ids}}}, {name: {_ilike: $name}}]}
+              limit: $limit
+              order_by: $order_by
+            ) {
+              class_id
+              name
+              course_id
+            }
+          }
+      - name: Lesson_CoursesUnderLocationsV2
+        query: >
+          query Lesson_CoursesUnderLocationsV2($location_ids: [String!], $name:
+          String, $limit: Int = 30, $offset: Int = 0) {
+            courses(
+              where: {_and: [{course_access_paths: {location_id: {_in: $location_ids}}}, {name: {_ilike: $name}}]}
+              limit: $limit
+              offset: $offset
+              order_by: {created_at: desc}
+            ) {
+              ...CourseAttrs
+            }
+          }
+
+          fragment CourseAttrs on courses {
+            course_id
+            name
+            icon
+            grade
+            subject
+            country
+            school_id
+            display_order
+          }
+      - name: Lesson_GetPreviousLessonReportGroupByLessonIdV2
+        query: >
+          query Lesson_GetPreviousLessonReportGroupByLessonIdV2($lesson_id:
+          String!) {
+            get_previous_lesson_report_group(args: {lesson_id_query: $lesson_id}) {
+              lesson_id
+              lesson {
+                class_id
+                start_time
+                end_time
+                lesson_members {
+                  user {
+                    user_id
+                    name
+                    email
+                  }
+                  attendance_note
+                  attendance_notice
+                  attendance_reason
+                  attendance_status
+                  attendance_remark
+                }
+              }
+              lesson_report_id
+              report_submitting_status
+              partner_form_config {
+                form_config_id
+                feature_name
+                form_config_data
+              }
+              lesson_report_details {
+                lesson_report_detail_id
+                partner_dynamic_form_field_values {
+                  dynamic_form_field_value_id
+                  value_type
+                  int_value
+                  int_set_value
+                  int_array_value
+                  string_value
+                  string_set_value
+                  string_array_value
+                  bool_value
+                  field_render_guide
+                  field_id
+                }
+                student {
+                  student_id
+                }
+              }
+            }
+          }
+      - name: Lesson_LessonDetailByLessonIdV3
+        query: |
+          query Lesson_LessonDetailByLessonIdV3($lesson_id: String!) {
+            lessons(where: {lesson_id: {_eq: $lesson_id}}) {
+              is_locked
+              lesson_id
+              center_id
+              course {
+                course_id
+                name
+              }
+              class_id
+              lesson_group_id
+              teaching_medium
+              teaching_method
+              lesson_type
+              scheduling_status
+              scheduler_id
+              start_time
+              end_time
+              zoom_link
+              zoom_owner_id
+              zoom_id
+              lessons_teachers {
+                teacher_id
+              }
+              lesson_members {
+                attendance_remark
+                attendance_status
+                attendance_notice
+                attendance_reason
+                attendance_note
+                course {
+                  course_id
+                  name
+                  subject
+                }
+                user_id
+              }
+            }
+          }
+      - name: Lesson_StudentsByNameAndEmail
+        query: >
+          query Lesson_StudentsByNameAndEmail($keyword: String, $limit: Int =
+          30, $offset: Int = 0) {
+            users(
+              where: {user_group: {_eq: "USER_GROUP_STUDENT"}, _or: [{email: {_ilike: $keyword}}, {name: {_ilike: $keyword}}, {given_name: {_ilike: $keyword}}]}
+              limit: $limit
+              offset: $offset
+              order_by: {created_at: desc}
+            ) {
+              ...StudentUserAttrsV2
+            }
+          }
+
+
+          fragment StudentUserAttrsV2 on users {
+            user_id
+            name
+            email
+            avatar
+            given_name
+          }
+      - name: Lesson_ClassMembersByClassIdAndStudentIds
+        query: >
+          query Lesson_ClassMembersByStudentList($class_id: String!,
+          $student_ids: [String!]!) {
+            class_member(where: {class_id: {_eq: $class_id}, user_id: {_in: $student_ids}}) {
+              user_id
+            }
+          }
+      - name: Lesson_GetIndividualReportHistory
+        query: >
+          query Lesson_GetIndividualReportHistory($report_course_id: String!,
+          $report_user_id: String!) {
+            get_all_individual_report_of_student(
+              args: {report_course_id: $report_course_id, report_user_id: $report_user_id}
+            ) {
+              lesson_report_id
+              partner_form_config {
+                form_config_id
+                form_config_data
+              }
+              lesson {
+                lesson_id
+                start_time
+                end_time
+              }
+            }
+          }
+      - name: Lesson_GetGroupReportHistory
+        query: |
+          query Lesson_GetGroupReportHistory($lesson_id: String!) {
+            get_all_group_report_by_lesson_id(args: {lesson_id_query: $lesson_id}) {
+              lesson_report_id
+              lesson {
+                lesson_id
+                class_id
+                start_time
+                end_time
+                lesson_members {
+                  user {
+                    user_id
+                    name
+                  }
+                  attendance_note
+                  attendance_notice
+                  attendance_reason
+                  attendance_status
+                  attendance_remark
+                }
+              }
+              partner_form_config {
+                form_config_id
+                form_config_data
+              }
+            }
+          }
+      - name: Lesson_LessonReportDetailByReportIdAndStudentIds
+        query: >
+          query
+          Lesson_LessonReportDetailByReportIdAndStudentIds($lesson_report_id:
+          String!, $student_ids: [String!]!) {
+            lesson_report_details(
+              where: {lesson_report_id: {_eq: $lesson_report_id}, student_id: {_in: $student_ids}}
+            ) {
+              student_id
+              lesson_report_detail_id
+              partner_dynamic_form_field_values {
+                dynamic_form_field_value_id
+                value_type
+                int_value
+                int_set_value
+                int_array_value
+                string_value
+                string_set_value
+                string_array_value
+                bool_value
+                field_id
+              }
+            }
+          }
+      - name: Lesson_ReallocationByLessonListWithMultiStudents
+        query: >
+          query Lesson_ReallocationByLessonListWithMultiStudents($where:
+          reallocation_bool_exp!) {
+            reallocation(where: $where) {
+              original_lesson_id
+              new_lesson_id
+              student_id
+            }
+          }
+      - name: Lesson_GetIndividualReportHistoryV2
+        query: >
+          query Lesson_GetIndividualReportHistoryV2($report_course_id: String!,
+          $report_user_id: String!, $report_lesson_id: String!) {
+            get_all_individual_report_of_student_v2(
+              args: {report_course_id: $report_course_id, report_user_id: $report_user_id, report_lesson_id: $report_lesson_id}
+            ) {
+              lesson_report_id
+              partner_form_config {
+                form_config_id
+                form_config_data
+              }
+              lesson {
+                lesson_id
+                start_time
+                end_time
+              }
+            }
+          }
+      - name: LessonReportByLessonIdV2
+        query: |
+          query LessonReportByLessonIdV2($lesson_id: String!) {
+            lesson_reports(where: {lesson_id: {_eq: $lesson_id}}) {
+              lesson_id
+              lesson_report_id
+              report_submitting_status
+              partner_form_config {
+                form_config_id
+                feature_name
+                form_config_data
+              }
+              lesson_report_details {
+                lesson_report_detail_id
+                report_version
+                student_id
+                partner_dynamic_form_field_values {
+                  dynamic_form_field_value_id
+                  value_type
+                  int_value
+                  int_set_value
+                  int_array_value
+                  string_value
+                  string_set_value
+                  string_array_value
+                  bool_value
+                  field_render_guide
+                  field_id
+                }
+              }
+            }
+          }
+      - name: Lesson_CoursesUnderLocationsAndCourseTypes
+        query: >
+          query Lesson_CoursesUnderLocationsAndCourseTypes($location_ids:
+          [String!], $course_type_ids: [String!], $name: String, $limit: Int =
+          30, $offset: Int = 0) {
+            courses(
+              where: {_and: [{course_access_paths: {location_id: {_in: $location_ids}}}, {name: {_ilike: $name}}, {course_type_id: {_in: $course_type_ids}}]}
+              limit: $limit
+              offset: $offset
+              order_by: {created_at: desc}
+            ) {
+              course_id
+              name
+            }
+          }
+      - name: Lesson_UserInfoManyByUserIds
+        query: |-
+          query Lesson_UserInfoManyByUserIds($user_ids: [String!]!) {
+            user_basic_info(where: {user_id: {_in: $user_ids}}) {
+              user_id
+              name
+              email
+              full_name_phonetic
+              gender
+            }
+          }
+      - name: Lesson_GetAcademicWeeksByLocationAndDateRange
+        query: >
+          query Lesson_GetAcademicWeeksByLocationAndDateRange($location_id:
+          String!, $start_date: date!, $end_date: date!) {
+            academic_week(
+              where: {_and: [{location_id: {_eq: $location_id}}, {start_date: { _lte: $end_date }}, {end_date: { _gte: $start_date }}]}
+              order_by: {week_order: asc}
+            ) {
+              academic_week_id
+              start_date
+              end_date
+              name
+              period
+              week_order
+            }
+          }
+      - name: Lesson_GetAcademicWeeksByManyLocationAndDateRange
+        query: >
+          query Lesson_GetAcademicWeeksByManyLocationAndDateRange($location_ids:
+          [String!]!, $start_date: date!, $end_date: date!) {
+            academic_week(
+              where: {_and: [{location_id: {_in: $location_ids}}, {start_date: { _lte: $end_date }}, {end_date: { _gte: $start_date }}]}
+              order_by: {week_order: asc}
+            ) {
+              academic_week_id
+              location_id
+              start_date
+              end_date
+              name
+              period
+              week_order
+            }
+          }
+      - name: Lesson_GetLessonTimeListWithLocationByLessonIds
+        query: >
+          query Lesson_GetLessonTimeListWithLocationByLessonIds($lesson_ids:
+          [String!]!) {
+            lessons(where: {lesson_id: {_in: $lesson_ids}}) {
+              lesson_id
+              center_id
+              start_time
+              end_time
+            }
+          }
+      - name: Lesson_GetOccupiedClassrooms
+        query: >
+          query Lesson_GetOccupiedClassrooms($start_time: timestamptz!,
+          $end_time: timestamptz!, $classroom_ids: [String!]!) {
+            lesson_classrooms(
+              where: {_and: [{lesson: {_and: [{start_time: {_lt: $end_time}, end_time: {_gt: $start_time}}]}}, {classroom_id: {_in: $classroom_ids}}]}
+            ) {
+              lesson_id
+              classroom_id
+            }
+          }
+      - name: Lesson_GetLessonCapacity
+        query: |
+          query Lesson_GetLessonCapacity($lesson_id: String!) {
+            lessons(where: {lesson_id: {_eq: $lesson_id}}) {
+              lesson_capacity
+            }
+          }
+      - name: Lesson_GetStudentName
+        query: |
+          query Lesson_GetStudentName($student_id: String!) {
+            user_basic_info(where: {user_id: {_eq: $student_id}}) {
+              name
+              full_name_phonetic
+            }
+          }
+      - name: Lesson_GetGroupReportHistoryLessonMgmt
+        query: |
+          query Lesson_GetGroupReportHistoryLessonMgmt($lesson_id: String!) {
+            get_all_group_report_by_lesson_id(args: {lesson_id_query: $lesson_id}) {
+              lesson_report_id
+              lesson {
+                lesson_id
+                class_id
+                start_time
+                end_time
+                lesson_members {
+                  user_id
+                  user_last_name
+                  user_first_name
+                  attendance_note
+                  attendance_notice
+                  attendance_reason
+                  attendance_status
+                  attendance_remark
+                }
+              }
+              partner_form_config {
+                form_config_id
+                form_config_data
+              }
+            }
+          }
+      - name: Lesson_ReallocationFlagByStudentIds
+        query: |
+          query Lesson_ReallocationFlagByStudentIds($student_ids: [String!]!) {
+            reallocation(
+              where: {student_id: {_in: $student_ids}, new_lesson_id: {_is_null: true}}
+            ) {
+              student_id
+              original_lesson_id
+              course_id
+            }
+          }
+      - name: Lesson_GetReallocationByStudentIdAndLessonIds
+        query: >
+          query Lesson_GetReallocationByStudentIdAndLessonIds($student_id:
+          String!, $origin_lesson_ids: [String!]!) {
+            reallocation(
+              where: {_and: [{student_id: {_eq: $student_id}, original_lesson_id: {_in: $origin_lesson_ids}}]}
+            ) {
+              new_lesson_id
+              original_lesson_id
+            }
+          }
+      - name: Calendar_LessonsTeachersByTeacherIdsList
+        query: >
+          query Calendar_LessonsTeachersByTeacherIdsList($teacher_ids: [String!]
+          = [], $from_date: timestamptz!, $to_date: timestamptz!) {
+            lessons_teachers(
+              where: {teacher_id: {_in: $teacher_ids}, lesson: {start_time: {_gte: $from_date}, end_time: {_lt: $to_date}}}
+            ) {
+              teacher_id
+              lesson {
+                lesson_id
+                center_id
+                end_time
+                start_time
+              }
+            }
+          }
+      - name: Lesson_GetLessonStudentSubscriptionV2
+        query: >
+          query Lesson_GetLessonStudentSubscriptionV2($student_subscription_id:
+          String!) {
+            lesson_student_subscriptions(
+              where: {student_subscription_id: {_eq: $student_subscription_id}}
+            ) {
+              student_id
+              course_id
+              lesson_student_subscription_access_paths {
+                location_id
+              }
+              start_at
+              end_at
+              subscription_id
+            }
+          }
+      - name: Calendar_ClassroomListByLocationIdV2
+        query: |
+          query Calendar_ClassroomListByLocationIdV2($location_id: String!) {
+            classroom(where: {location_id: {_eq: $location_id}, is_archived: {_eq: false}}) {
+              classroom_id
+              name
+              room_area
+              seat_capacity
+            }
+          }
+      - name: Calendar_ReallocationsByLessonIdAndStudentIds
+        query: >
+          query Calendar_ReallocationsByLessonIdAndStudentIds($student_ids:
+          [String!]!, $new_lesson_id: String!) {
+            reallocation(
+              where: {student_id: {_in: $student_ids}, new_lesson_id: {_eq: $new_lesson_id}}
+            ) {
+              student_id
+              original_lesson_id
+            }
+          }
+      - name: Calendar_GetZoomOwnerById
+        query: |
+          query Calendar_GetZoomOwnerById($zoom_id: String!) {
+            zoom_account(where: {zoom_id: {_eq: $zoom_id}}) {
+              zoom_id
+              email
+            }
+          }
+      - name: VirtualClassroom_LessonDetailByLessonId
+        query: |
+          query VirtualClassroom_LessonDetailByLessonId($lesson_id: String!) {
+            lessons(where: {lesson_id: {_eq: $lesson_id}}) {
+              is_locked
+              lesson_id
+              center_id
+              course_id
+              teaching_medium
+              teaching_method
+              lesson_type
+              scheduling_status
+              start_time
+              end_time
+              end_at
+              zoom_link
+              lessons_teachers {
+                teacher_id
+              }
+              lesson_members {
+                course_id
+                user_id
+              }
+            }
+          }
+      - name: Lesson_GetClassDoAccounts
+        query: >
+          query Lesson_GetClassDoAccounts($limit: Int = 30, $search_text:
+          String) {
+            classdo_account(limit: $limit, order_by: {created_at: desc}, where: {classdo_email: {_ilike: $search_text}}) {
+              classdo_id
+              classdo_email
+            }
+          }
+      - name: Lesson_GetOneClassDoAccount
+        query: |
+          query Lesson_GetOneClassDoAccount($class_do_id: String!) {
+            classdo_account(where: {classdo_id: {_eq: $class_do_id}}) {
+              classdo_id
+              classdo_email
+            }
+          }
+      - name: Lesson_LessonDetailByLessonIdV4
+        query: |
+          query Lesson_LessonDetailByLessonIdV4($lesson_id: String!) {
+            lessons(where: {lesson_id: {_eq: $lesson_id}}) {
+              is_locked
+              lesson_id
+              center_id
+              course {
+                course_id
+                name
+              }
+              class_id
+              lesson_group_id
+              teaching_medium
+              teaching_method
+              lesson_type
+              scheduling_status
+              scheduler_id
+              start_time
+              end_time
+              zoom_link
+              zoom_owner_id
+              zoom_id
+              lessons_teachers {
+                teacher_id
+              }
+              lesson_members {
+                attendance_remark
+                attendance_status
+                attendance_notice
+                attendance_reason
+                attendance_note
+                course {
+                  course_id
+                  name
+                  subject
+                }
+                user_id
+              }
+              classdo_owner_id
+              classdo_room_id
+              classdo_link
+            }
+          }
+      - name: Calendar_GetOneClassDoAccount
+        query: |
+          query Calendar_GetOneClassDoAccount($class_do_id: String!) {
+            classdo_account(where: {classdo_id: {_eq: $class_do_id}}) {
+              classdo_id
+              classdo_email
+            }
+          }
+      - name: Lesson_GetLessonGroupsByLessonGroupIdsAndCourseId
+        query: >
+          query
+          Lesson_GetLessonGroupsByLessonGroupIdsAndCourseId($lesson_group_ids:
+          [String!]!, $course_id: String, $limit: Int = 10, $offset: Int = 0) {
+            lesson_groups(
+              limit: $limit
+              offset: $offset
+              order_by: {lesson_group_id: asc}
+              where: {lesson_group_id: {_in: $lesson_group_ids}, course_id: {_eq: $course_id}}
+            ) {
+              media_ids
+              lesson_group_id
+            }
+          }
+      - name: Lesson_GetLessonAssociationCountByClassId
+        query: |
+          query Lesson_GetLessonAssociationCountByClassId($class_id: String!) {
+            lessons_aggregate(where: {class_id: {_eq: $class_id}}, limit: 1) {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: Lesson_GetLessonByCourseId
+        query: |
+          query Lesson_GetLessonByCourseId($course_id: String!) {
+            lessons(where: {course_id: {_eq: $course_id}}) {
+              name
+              lesson_group_id
+            }
+          }
+      - name: Lesson_GetReallocationByStudentIdAndLessonIdsV2
+        query: >
+          query Lesson_GetReallocationByStudentIdAndLessonIdsV2($student_id:
+          String!, $lesson_ids: [String!]!) {
+            reallocation(
+              where: {_or: [{original_lesson_id: {_in: $lesson_ids}}, {new_lesson_id: {_in: $lesson_ids}}], student_id: {_eq: $student_id}}
+            ) {
+              new_lesson_id
+              original_lesson_id
+            }
+          }

@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package timesheet.v1;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/timesheet/v1;tpb";
+
+service ImportMasterDataService {
+  rpc ImportTimesheetConfig(ImportTimesheetConfigRequest) returns (ImportTimesheetConfigResponse);
+}
+
+message ImportTimesheetConfigRequest {
+  bytes payload = 1;
+}
+
+message ImportTimesheetConfigError {
+  int32 row_number = 1;
+  string error = 2;
+}
+
+message ImportTimesheetConfigResponse {
+  repeated ImportTimesheetConfigError errors = 1;
+}
+

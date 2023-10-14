@@ -1,0 +1,196 @@
+syntax = "proto3";
+
+package common.v1;
+
+import "common/v1/contents.proto";
+import "common/v1/profiles.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/common/v1;cpb";
+
+
+message NotificationTargetGroup {
+  message CourseFilter{
+    message Course{
+      string course_id = 1;
+      string course_name = 2;
+    }
+    NotificationTargetGroupSelect type = 1;
+    repeated string course_ids = 2;
+    // This field only need when upserting a notification from Backoffice
+    repeated Course courses = 3;
+  }
+
+  message GradeFilter{
+    NotificationTargetGroupSelect type = 1;
+    // Dereplicate: no longer support, please using Grade Master (switch to GradeIDs)
+    repeated int32 grades = 2;
+    repeated string grade_ids = 3;
+  }
+
+  message LocationFilter{
+    message Location{
+      string location_id = 1;
+      string location_name = 2;
+    }
+    NotificationTargetGroupSelect type = 1;
+    repeated string location_ids = 2;
+    // This field only need when upserting a notification from Backoffice
+    repeated Location locations = 3;
+  }
+  
+  message ClassFilter{
+    message Class{
+      string class_id = 1;
+      string class_name = 2;
+    }
+    NotificationTargetGroupSelect type = 1;
+    repeated string class_ids = 2;
+    // This field only need when upserting a notification from Backoffice
+    repeated Class classes = 3;
+  }
+
+  message UserGroupFilter{
+    repeated UserGroup user_groups = 1;
+  }
+
+  message SchoolFilter{
+    message School{
+      string school_id = 1;
+      string school_name = 2;
+    }
+    NotificationTargetGroupSelect type = 1;
+    repeated string school_ids = 2;
+    repeated School schools = 3;
+  }
+
+  CourseFilter course_filter = 1;
+  GradeFilter grade_filter = 2; 
+  UserGroupFilter user_group_filter = 3;
+  LocationFilter location_filter = 4;
+  ClassFilter class_filter = 5;
+  SchoolFilter school_filter = 6;
+}
+
+message NotificationMessage {
+  string notification_msg_id = 1;
+  string title = 2;
+  RichText content = 3;
+  repeated string media_ids = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
+  string description = 7;
+}
+
+message Notification {
+  string notification_id = 1;
+  string data = 2;
+  string editor_id = 3;
+  repeated string receiver_ids = 4; // note: this is in fact student_id only
+  NotificationMessage message = 5;
+  NotificationType type = 6;
+  NotificationEvent event = 7;
+  NotificationStatus status = 8;
+  NotificationTargetGroup target_group = 9;
+  google.protobuf.Timestamp scheduled_at = 10;
+  google.protobuf.Timestamp created_at = 11;
+  google.protobuf.Timestamp updated_at = 12;
+  int32 school_id = 13;
+  google.protobuf.Timestamp sent_at = 14;
+  bool is_important = 15;
+  repeated string generic_receiver_ids = 16; // note: currently, for FCM send message and permanent storage notification
+  repeated string excluded_generic_receiver_ids = 17;
+  string created_user_id = 18;
+}
+
+message UserNotification {
+  string user_id = 1;
+  repeated string course_id = 2;
+  int32 grade = 3;
+  string notification_id = 4;
+  UserNotificationStatus status = 5;
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp updated_at = 7;
+  NotificationType type = 8;
+  string data = 9;
+  string user_notification_id = 10;
+}
+
+message Question {
+    string questionnaire_question_id = 1;
+    string title = 2;
+    QuestionType type = 3;
+    repeated string choices = 4;
+    int64 order_index = 5;
+    bool required = 6;
+}
+
+message Questionnaire {
+    string questionnaire_id = 1;
+    bool resubmit_allowed = 2;
+    repeated Question questions = 3;
+    google.protobuf.Timestamp expiration_date = 4; 
+    string questionnaire_template_id = 5;
+}
+
+message Answer {
+    string questionnaire_question_id = 1;
+    string answer = 2;
+}
+
+message UserQuestionnaire {
+    Questionnaire questionnaire = 1;
+    repeated Answer answers = 2;
+    bool is_submitted = 3;
+}
+
+enum NotificationType {
+  NOTIFICATION_TYPE_NONE = 0;
+  NOTIFICATION_TYPE_TEXT = 1;
+  NOTIFICATION_TYPE_PROMO_CODE = 2;
+  NOTIFICATION_TYPE_ASSIGNMENT = 3;
+  NOTIFICATION_TYPE_COMPOSED = 4;
+  NOTIFICATION_TYPE_NATS_ASYNC = 5;
+}
+
+enum NotificationStatus {
+  NOTIFICATION_STATUS_NONE = 0;
+  NOTIFICATION_STATUS_DRAFT = 1;
+  NOTIFICATION_STATUS_SCHEDULED = 2;
+  NOTIFICATION_STATUS_SENT = 3; 
+  NOTIFICATION_STATUS_DISCARD = 4; 
+}
+
+enum NotificationEvent {
+  NOTIFICATION_EVENT_NONE = 0;
+  NOTIFICATION_EVENT_X_LO_COMPLETED = 1;
+  NOTIFICATION_EVENT_TEACHER_GIVE_ASSIGNMENT = 2;
+  NOTIFICATION_EVENT_TEACHER_RETURN_ASSIGNMENT = 3;
+  NOTIFICATION_EVENT_STUDENT_SUBMIT_ASSIGNMENT = 4;
+  NOTIFICATION_EVENT_ASSIGNMENT_UPDATED = 5;
+}
+
+enum UserNotificationStatus {
+  USER_NOTIFICATION_STATUS_NONE = 0;
+  USER_NOTIFICATION_STATUS_NEW = 1;
+  USER_NOTIFICATION_STATUS_SEEN = 2;
+  USER_NOTIFICATION_STATUS_READ = 3;
+  USER_NOTIFICATION_STATUS_FAILED = 4;
+}
+
+enum NotificationTargetGroupSelect {
+  NOTIFICATION_TARGET_GROUP_SELECT_NONE = 0;
+  NOTIFICATION_TARGET_GROUP_SELECT_ALL = 1;
+  NOTIFICATION_TARGET_GROUP_SELECT_LIST = 2;
+}
+
+enum QuestionType {
+    QUESTION_TYPE_MULTIPLE_CHOICE = 0;
+    QUESTION_TYPE_CHECK_BOX = 1;
+    QUESTION_TYPE_FREE_TEXT = 2;
+}
+
+enum UserNotificationQuestionnaireStatus {
+    USER_NOTIFICATION_QUESTIONNAIRE_STATUS_ANSWERED = 0;
+    USER_NOTIFICATION_QUESTIONNAIRE_STATUS_UNANSWERED = 1;
+}

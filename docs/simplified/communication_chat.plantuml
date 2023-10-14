@@ -1,0 +1,200 @@
+@startuml communication_simplified
+hide circle
+
+
+namespace Syllabus {
+    class Course <<entity>> {
+    }
+}
+
+
+
+namespace Lesson {
+    class EvtLesson <<event>>{
+    }
+    EvtLesson --> Chat.ConversationLesson
+}
+namespace UserManagement {
+    class School <<entity>> {
+    }
+   
+    class Student <<entity>> {
+
+    }
+    class Parent <<entity>> {
+
+    }
+    class User <<entity>> {
+
+    }
+
+    class  EvtUser <<event>> {
+    }
+    EvtUser --> Chat.ConversationStudent
+
+
+
+    EvtUserInfo --> Chat.UserDeviceToken
+}
+
+namespace SearchEngine {
+    class Conversations {
+        conversation_id: string
+        conversation_name: string
+        course_ids: []string
+        user_ids: []string
+        last_message.updated_at: date
+        owner: string
+        conversation_type
+        is_replied: bool
+    }
+    Conversations ..> Syllabus.Course
+    Conversations ..> UserManagement.User
+    Conversations ..> UserManagement.School
+    Conversations ..> Chat.Conversation
+}
+namespace Chat{
+    EventConversation --> SearchEngine.Conversations
+    class EventConversation <<event>>{
+
+    }
+
+    class ConversationMember <<entity>>{
+        conversation_statuses_id: string
+        user_id: string
+        conversation_id: string
+        seen_at: timestamp
+        last_notify_at: timestamp
+        role: string
+        status: string
+    }
+
+    note left of ConversationMember::role
+    one of
+    USER_GROUP_STUDENT
+    USER_GROUP_PARENT
+    USER_GROUP_TEACHER
+    <color:#red>USER_GROUP_COACH
+    <color:#red>USER_GROUP_TUTOR
+    end note
+    note left of ConversationMember::status
+    one of
+    CONVERSATION_STATUS_ACTIVE
+    CONVERSATION_STATUS_INACTIVE
+    end note
+    class ConversationClass <<entity>> #red{
+    }
+    class ConversationStudent <<entity>> {
+        conversation_id: string
+        student_id: string
+        conversation_type: string
+    }
+    note left of ConversationStudent::conversation_type
+    CONVERSATION_STUDENT
+    CONVERSATION_PARENT
+    end note
+    ConversationStudent  ..  Conversation : "1-1"
+
+    class ConversationCoach <<entity>> #red{
+    }
+
+    class ConversationLesson <<entity>>{
+        conversation_id: string
+        lesson_id: string
+        latest_call_id: string
+        latest_start_time: timestamp
+        created_at: timestamp
+        updated_at: timestamp
+        deleted_at: timestamp
+    }
+    ConversationLesson  ..  Conversation : "1-1"
+
+
+
+
+
+
+    class ConversationQuestion<<entity>> #red{
+    }
+
+    class Conversation <<entity>> {
+        conversation_id: string
+        guest_ids: []string
+        conversation_type: string
+        name: string
+        status: string
+        last_message_id: string
+        owner: string
+    }
+
+    note right of Conversation::conversation_type
+    one of
+    CONVERSATION_CLASS
+    CONVERSATION_QUESTION
+    <color:#red>CONVERSATION_COACH
+    CONVERSATION_LESSON
+    CONVERSATION_STUDENT
+    CONVERSATION_PARENT
+    end note
+    note right of Conversation::status
+    one of
+    CONVERSATION_STATUS_NONE
+    CONVERSATION_STATUS_CLOSE
+    end note
+
+
+    class Message <<entity>> {
+        id: string
+        conversation_id: string
+        user_id: string
+        message: string
+        url_media: string
+        type: string
+        deleted_by: string
+        target_user: string
+        deleted_at: string
+        created_at: string
+        updated_at: string
+    }
+    note right of Message::message
+    either
+    "user input message"
+    or
+    <color:#red>CODES_MESSAGE_TYPE_COACH_CHANGE
+    CODES_MESSAGE_TYPE_CREATED_SP
+    CODES_MESSAGE_TYPE_EDITED_SP
+    ...
+    more in genproto/tom.CodesMessageType_value
+    end note
+    note right of Message::type
+    one of
+    MESSAGE_TYPE_TEXT
+    MESSAGE_TYPE_IMAGE
+    MESSAGE_TYPE_VIDEO
+    MESSAGE_TYPE_SYSTEM
+    MESSAGE_TYPE_BUTTON
+    <color:#red>MESSAGE_TYPE_COACH_AUTO
+    MESSAGE_TYPE_FILE
+    end note
+    class OnlineUser <<entity>> {
+        online_user_id: string
+        user_id: string
+        node_name: string
+        last_active_at: timestamp
+    }
+    class UserDeviceToken <<entity>> {
+        user_device_token_id: int
+        user_id: string
+        user_name: string
+        token: string
+        allow_notification: bool
+    }
+
+    ConversationMember  "many" .up.>  "one" Conversation  
+    Message "many" ..> "one" Conversation 
+}
+
+
+
+
+@enduml

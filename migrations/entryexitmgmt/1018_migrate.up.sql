@@ -1,0 +1,2 @@
+ALTER TABLE public.user_access_paths ADD CONSTRAINT user_access_paths_users_fk FOREIGN KEY (user_id) REFERENCES "users"(user_id);
+ALTER TABLE public.user_access_paths ADD CONSTRAINT user_access_paths_locations_fk FOREIGN KEY (location_id) REFERENCES "locations"(location_id);

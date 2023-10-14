@@ -1,0 +1,142 @@
+hostname: "localhost"  # Can be overriden by commandline argument, usually the name of the pod
+
+# Config for j4 runner
+runner:
+  port: "4080"
+
+# Config for discovery server
+discovery:
+  port: "12345"
+
+# Config for RQLite. Most fields' values are copied from default rqlited code.
+rqlite:
+  connection-host: j4-0.j4-headless
+  data-path: "./dataPath"   # Can be overriden by commandline argument
+  http-port: "4001"
+  http-addr: "" # If empty, default to "hostname:rqlite.http-port" instead in run-time
+  http-adv-addr: ""
+  join-source-ip: ""
+  tls1011: false
+  auth: ""
+  http-ca-cert: ""
+  http-cert: ""
+  http-key: ""
+  node-encrypt: false
+  node-ca-cert: ""
+  node-cert: ""
+  node-key: ""
+  node-id: ""
+  raft-port: "4002"
+  raft-addr: "" # If empty, default to "hostname:rqlite.raft-port" instead in run-time
+  raft-adv-addr: ""
+  join: ""
+  join-attempts: 5
+  join-interval: "5s"
+  http-no-verify: false
+  node-no-verify: false
+  disco-url: "http://j4-base-discovery:12345"
+  expvar: true
+  pprof: true
+  dsn: ""
+  on-disk: false
+  raft-log-level: "INFO"
+  raft-non-voter: false
+  raft-snap: 8192
+  raft-snap-int: "30s"
+  raft-leader-lease-timeout: "0s"
+  raft-timeout: "1s"
+  raft-election-timeout: "1s"
+  raft-apply-timeout: "10s"
+  raft-open-timeout: "120s"
+  raft-leader-wait: true
+  raft-remove-shutdown: false
+  compression-size: 150
+  compression-batch: 5
+  cpu-profile: ""
+  mem-profile: ""
+
+env: preproduction
+cluster_grpc_addr: api.prep.tokyo.manabie.io:443
+postgres_v2:
+  bob:
+    cloudsql_instance: '{{ .Values.global.cloudSQLCommonInstance }}'
+    cloudsql_use_public_ip: {{ .Values.global.cloudSQLUsePublicIP }}
+    cloudsql_auto_iam_authn: true
+    user: '{{ include "util.databaseUser" . }}'
+    host: '{{ include "util.databaseHost" . }}'
+    port: '5432'
+    dbname: '{{ .Values.global.dbPrefix }}bob'
+    max_conns: 8
+    retry_attempts: 10
+    retry_wait_interval: '5s'
+  tom:
+    cloudsql_instance: '{{ .Values.global.cloudSQLCommonInstance }}'
+    cloudsql_use_public_ip: {{ .Values.global.cloudSQLUsePublicIP }}
+    cloudsql_auto_iam_authn: true
+    user: '{{ include "util.databaseUser" . }}'
+    host: '{{ include "util.databaseHost" . }}'
+    port: '5432'
+    dbname: '{{ .Values.global.dbPrefix }}tom'
+    max_conns: 8
+    retry_attempts: 10
+    retry_wait_interval: '5s'
+  mastermgmt:
+    cloudsql_instance: '{{ .Values.global.cloudSQLCommonInstance }}'
+    cloudsql_use_public_ip: {{ .Values.global.cloudSQLUsePublicIP }}
+    cloudsql_auto_iam_authn: true
+    user: '{{ include "util.databaseUser" . }}'
+    host: '{{ include "util.databaseHost" . }}'
+    port: '5432'
+    dbname: '{{ .Values.global.dbPrefix }}tom'
+    max_conns: 8
+    retry_attempts: 10
+    retry_wait_interval: '5s'
+
+#you need to generate a school admin somehow yourself
+school_id: -2147483648
+admin_id: 01FGZKKK4EE2DWDQ0QMJG5TXE8
+primary_key_file: private_key_03.pem.encrypted.yaml
+keys_glob: /configs/*.pem.encrypted.yaml
+shamir_addr: shamir:5650
+fake_issuer:
+  issuer: manabie
+  audience: manabie-stag
+
+hasura_configs:
+- name: bob
+  admin_addr: https://admin.prep.tokyo.manabie.io:443
+- name: eureka
+  admin_addr: https://admin.prep.tokyo.manabie.io:443/eureka
+- name: invoicemgmt
+  admin_addr: https://admin.prep.tokyo.manabie.io:443/invoicemgmt
+- name: timesheet
+  admin_addr: https://admin.prep.tokyo.manabie.io:443/timesheet
+
+scenario_configs:
+- name: Syllabus_RetrieveCourseStatistic
+  interval: 3
+  target_count: 10
+  ramp_up_cycles: 10
+  hold_cycles: 100
+  ramp_down_cycles: 10
+  interval_between_execution: 5
+- name: Syllabus_RetrieveCourseStatisticV2
+  interval: 3
+  target_count: 10
+  ramp_up_cycles: 10
+  hold_cycles: 100
+  ramp_down_cycles: 10
+  interval_between_execution: 5
+
+virtualclassroom_config:
+  lesson_info:
+    course_id: 01GBPS6YPZ800YDZPBZKXJZ7W9
+    location_id: 01G95T5A1AH4ESHENGTZVHV0SK
+  school_id: -2147483644
+  admin_id: thu.vo+e2eschool@manabie.com
+
+syllabus_config:
+  course_id: 01G5BJDFPY45R0S3WQ507H2J6Z
+  study_plan_id: 01GR01ERTXA4SPKD9JDCVMPJZZ
+  user_id: 01G5TZH2F0K5VWHNZPYSV41AHB
+  resource_path: -2147483641

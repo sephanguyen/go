@@ -1,0 +1,57 @@
+global:
+  bob:
+    enabled: false
+  calendar:
+    enabled: false
+  draft:
+    enabled: false
+  enigma:
+    enabled: false
+  entryexitmgmt:
+    enabled: false
+  eureka:
+    enabled: false
+  fatima:
+    enabled: false
+  gandalf:
+    enabled: false
+  hephaestus:
+    enabled: false
+  invoicemgmt:
+    enabled: false
+  lessonmgmt:
+    enabled: false
+  mastermgmt:
+    enabled: false
+  notificationmgmt:
+    enabled: false
+  payment:
+    enabled: false
+  shamir:
+    enabled: false
+  timesheet:
+    enabled: false
+  tom:
+    enabled: false
+  usermgmt:
+    enabled: false
+  virtualclassroom:
+    enabled: false
+  yasuo:
+    enabled: false
+  zeus:
+    enabled: false
+  fink:
+    enabled: false
+  jerry:
+    enabled: false
+  scheduling:
+    enabled: false
+  conversationmgmt:
+    enabled: false
+  spike:
+    enabled: false
+  discount:
+    enabled: false
+  auth:
+    enabled: false

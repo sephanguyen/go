@@ -1,0 +1,80 @@
+table:
+  schema: public
+  name: lesson_schedules
+select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+        - formatted_date
+        - formatted_year
+        - formatted_month
+        - formatted_day
+        - start_date
+        - lesson_id
+        - teacher_id
+        - course_id
+        - created_at
+        - updated_at
+        - deleted_at
+        - lesson_type
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+        - formatted_date
+        - formatted_year
+        - formatted_month
+        - formatted_day
+        - start_date
+        - lesson_id
+        - teacher_id
+        - course_id
+        - created_at
+        - updated_at
+        - deleted_at
+        - lesson_type
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+        - formatted_date
+        - formatted_year
+        - formatted_month
+        - formatted_day
+        - start_date
+        - lesson_id
+        - teacher_id
+        - course_id
+        - created_at
+        - updated_at
+        - deleted_at
+        - lesson_type
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+        - formatted_date
+        - formatted_year
+        - formatted_month
+        - formatted_day
+        - start_date
+        - lesson_id
+        - teacher_id
+        - course_id
+        - created_at
+        - updated_at
+        - deleted_at
+        - lesson_type
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true

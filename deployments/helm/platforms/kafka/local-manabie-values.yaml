@@ -1,0 +1,31 @@
+kafka:
+  image:
+    repository: asia-southeast1-docker.pkg.dev/student-coach-e1e95/ci/asia.gcr.io/student-coach-e1e95/customized_debezium_kafka
+
+  heapOptions: "-Xms768M -Xmx768M"
+  cluster:
+    enabled: false
+    replicas: 1
+  resources:
+    requests:
+      cpu: 1000m
+      memory: 1024Mi
+    limits:
+      cpu: 2000m
+      memory: 2048Mi
+  imagePullSecrets:
+    - name: regcred
+
+  readinessProbe:
+    tcpSocket:
+      port: client
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+    successThreshold: 1
+    failureThreshold: 6
+kafkaExporter:
+  image:
+    repository: kind-reg.actions-runner-system.svc/danielqsj/kafka-exporter
+  imagePullSecrets:
+    - name: regcred

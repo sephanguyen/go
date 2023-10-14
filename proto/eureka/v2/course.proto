@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package eureka.v2;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/eureka/v2;epb";
+
+enum CourseTeachingMethod{
+  COURSE_TEACHING_METHOD_INDIVIDUAL = 0;
+  COURSE_TEACHING_METHOD_GROUP = 1;
+  COURSE_TEACHING_METHOD_NONE = 2;
+}
+
+message UpsertCoursesRequest {
+  message Course {
+    string course_id = 1;
+    string name = 2;
+    string icon = 3;
+    repeated string location_ids = 4;
+    string course_type_id = 5;
+    string book_id =6;
+    CourseTeachingMethod teaching_method=7;
+    repeated string  subject_ids = 8;
+  }
+  repeated Course courses = 1;
+}
+
+message UpsertCoursesResponse {
+  repeated string course_ids = 1;
+}
+
+message ListCoursesByIdsRequest {
+  repeated string ids = 1;
+}
+
+message ListCoursesByIdsResponse {
+  message Course{
+    string id = 1;
+    string name = 2;
+    string icon_url = 3;
+    string book_id = 4;
+  }
+  repeated Course courses = 1;
+}
+
+service CourseService {
+  rpc UpsertCourses(UpsertCoursesRequest) returns (UpsertCoursesResponse);
+  rpc ListCoursesByIds(ListCoursesByIdsRequest) returns (ListCoursesByIdsResponse);
+}

@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS locations_access_path_text_pattern_ops_idx ON locations(access_path text_pattern_ops);

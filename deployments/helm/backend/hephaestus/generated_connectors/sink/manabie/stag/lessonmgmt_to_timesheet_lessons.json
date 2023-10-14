@@ -1,0 +1,22 @@
+{
+  "name": "stag_manabie_lessonmgmt_to_timesheet_lessons_sink_connector",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+    "tasks.max": "1",
+    "topics": "stag.manabie.lessonmgmt.public.lessons",
+    "connection.url": "${file:/config/kafka-connect-config.properties:timesheet_url}",
+    "auto.create": "false",
+    "insert.mode": "upsert",
+    "table.name.format": "lessons",
+    "fields.whitelist": "break_time,center_id,class_id,control_settings,course_id,created_at,deleted_at,end_at,end_time,is_locked,learner_ids,lesson_group_id,lesson_id,lesson_type,name,preparation_time,resource_path,room_id,room_state,scheduler_id,scheduling_status,start_time,status,stream_learner_counter,teacher_id,teaching_medium,teaching_method,teaching_model,updated_at",
+    "transforms": "unwrap,route",
+    "transforms.route.type": "org.apache.kafka.connect.transforms.RegexRouter",
+    "transforms.route.regex": "([^.]+).([^.]+).([^.]+).([^.]+).([^.]+)",
+    "transforms.route.replacement": "$5",
+    "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+    "delete.enabled": "true",
+    "pk.mode": "record_key",
+    "transforms.unwrap.drop.tombstones": "false",
+    "transforms.unwrap.delete.handling.mode": "none"
+  }
+}

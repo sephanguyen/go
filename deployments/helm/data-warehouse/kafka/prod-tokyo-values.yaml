@@ -1,0 +1,20 @@
+kafka:
+  heapOptions: "-Xms768M -Xmx768M"
+
+  resources:
+    requests:
+      cpu: 400m
+      memory: 1Gi
+    limits:
+      memory: 2536Mi
+
+  fileStorage:
+    accessModes:
+      - ReadWriteOnce
+    storageDirectory: /kafka/data
+    size: 10Gi
+    storageClassName: premium-rwo
+
+  cluster:
+    enabled: true
+    replicas: 3

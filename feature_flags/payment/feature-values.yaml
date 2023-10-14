@@ -1,0 +1,412 @@
+unleash:
+  featureFlags:
+    payment:
+      - name: Payment_MasterManagement_BackOffice_MasterData
+        description: "A feature flag to show master management menu item (LT-14055),(LT-18080)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+          - name: strategy_organization
+            parameters:
+              organizations: "-2147483635,-2147483639,-2147483628,-2147483623"
+            constraints: []
+      - name: Payment_MasterManagement_BackOffice_MasterDataImportsSelections
+        description: "A feature flag to show master management imports selections for Order Management Entities (LT-20372)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+          - name: strategy_organization
+            parameters:
+              organizations: "-2147483635,-2147483639,-2147483628,-2147483623"
+            constraints: []
+      - name: Payment_OrderManagement_BackOffice_BillingTab
+        description: "A feature flag to show Billing Tab in Student Detail"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+          - name: strategy_organization
+            parameters:
+              organizations: "-2147483635,-2147483639,-2147483628,-2147483623"
+            constraints: []
+      - name: Payment_OrderManagement_BackOffice_BulkOrder
+        description: "A feature flag to enable Bulk Order feature (LT-16358)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+          - name: strategy_organization
+            parameters:
+              organizations: "-2147483635,-2147483639,-2147483628,-2147483623"
+            constraints: []
+      - name: Payment_OrderManagement_BackOffice_CreateCustomBilling
+        description: "A feature flag to enable dropdown option to open Create Custom Billing dialog in Student details (LT-17027)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+          - name: strategy_organization
+            parameters:
+              organizations: "-2147483635,-2147483639,-2147483628,-2147483623"
+            constraints: []
+      - name: Payment_OrderManagement_BackOffice_CreateEnrollment
+        description: "A feature flag to enable dropdown option to open Create Enrollment dialog in Student details (LT-14745)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+          - name: strategy_organization
+            parameters:
+              organizations: "-2147483635,-2147483639,-2147483628,-2147483623"
+            constraints: []
+      - name: Payment_OrderManagement_BackOffice_CreateOrder
+        description: "A feature flag to enable dropdown option to open Create Order dialog in Student details (LT-10595)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+          - name: strategy_organization
+            parameters:
+              organizations: "-2147483635,-2147483639,-2147483628,-2147483623"
+            constraints: []
+      - name: Payment_OrderManagement_BackOffice_OrderList
+        description: "A feature flag to show order management order list (LT-10204)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+          - name: strategy_organization
+            parameters:
+              organizations: "-2147483635,-2147483639,-2147483628,-2147483623"
+            constraints: []
+      - name: Payment_OrderManagement_BackOffice_UpdateOrder
+        description: "A feature flag to enable action option to open Update Order dialog in Student Billing Page (LT-15543)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+          - name: strategy_organization
+            parameters:
+              organizations: "-2147483635,-2147483639,-2147483628,-2147483623"
+            constraints: []
+      - name: Payment_OrderManagement_BackOffice_VoidOrder
+        description: "A feature flag to show Menu Item Panel in Order details to void an order (LT-17291)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+          - name: strategy_organization
+            parameters:
+              organizations: "-2147483635,-2147483639,-2147483628,-2147483623"
+            constraints: []
+      - name: Payment_OrderManagement_BackOffice_Overview_UI_Mode
+        description: "A feature flag to show overview UI mode (LT-26157)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+          - name: strategy_organization
+            parameters:
+              organizations: "-2147483635,-2147483639,-2147483628,-2147483623"
+            constraints: []
+      - name: Payment_OrderManagement_BackOffice_Reviewed_Flag
+        description: "A feature flag to show reviewed flag (LT-17899)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+          - name: strategy_organization
+            parameters:
+              organizations: "-2147483635,-2147483639,-2147483628,-2147483623"
+            constraints: []
+      - name: Payment_OrderManagement_BackOffice_MasterData_InternalImportSelections
+        description: "A feature flag to show internal import selections in Master Management(LT-28426)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: Payment_OrderManagement_BackOffice_ExportStudentBilling
+        description: "A feature flag to enable Export Student Billing in Order Management Page(LT-11738)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+      - name: Payment_OrderManagement_BackOffice_FeatureSettingConfiguration
+        description: "A feature flag to enable feature setting configuration in Order Management Page(LT-26056)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "prod,uat"
+            constraints: []
+      - name: Payment_MicroFrontend_TaskRunner
+        description: "A feature flag to enable task runner in Order Management Page(LT-23760)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Payment_OrderManagement_BackOffice_SecurityFilter
+        description: "A feature flag to apply security filter in Order Management(LT-31708)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+          - name: strategy_organization
+            parameters:
+              organizations: "-2147483635,-2147483639,-2147483628,-2147483623"
+            constraints: []
+      - name: Payment_OrderManagement_BackOffice_LinkClassManagement
+        description: "A feature flag to enable link from order details to register class management in Order Management(LT-33361)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+          - name: strategy_organization
+            parameters:
+              organizations: "-2147483635,-2147483639,-2147483628,-2147483623"
+            constraints: []
+      - name: Payment_OrderManagement_BackOffice_AssociatedProductsTableStudentBilling
+        description: "A feature flag to enable associated products table student billing in Order Management(LT-26357)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Payment_ProductManagement_BackOffice_ProductList
+        description: "A feature flag to enable product management item menu in left menu (LT-7959)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: Payment_ProductManagement_BackOffice_AccountingCategoryCustomBilling
+        description: "A feature flag to enable associate accounting category for custom billing(LT-12132)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Payment_OrderManagement_BackOffice_StudentPaymentMethod
+        description: "A feature flag that prevents creating order if the student doesn't have a default payment method(LT-10514)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Payment_OrderManagement_BackOffice_Logo_In_Preview_Enrollment_Form
+        description: "A feature flag to enable to show company logo in preview enrollment form (LT-38074)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+          - name: strategy_organization
+            parameters:
+              organizations: "-2147483635"
+            constraints: []
+      - name: Payment_OrderManagement_BackOffice_UpdateStudentStatus
+        description: "A feature flag to enable Menu Item Panel option to update student status request (LT-34881)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Payment_OrderManagement_BackOffice_ProductPricePerEnrollmentStatus
+        description: "A feature flag to enable apply product Price per Enrollment status (LT-35111)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Payment_OrderManagement_BackOffice_OrderAppConfig
+        description: "A feature flag to enable decoupled app configs (LT-40302)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Payment_StudentCourse_BackOffice_ClassManagementByArch
+        description: "A feature flag to enable Class Management to support Arch team in student course page (LT-42161)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+          - name: strategy_organization
+            parameters:
+              organizations: "-2147483623,-2147483635,-2147483642"
+            constraints: []
+      - name: Payment_OrderManagement_BackOffice_StudentDiscountTab
+        description: "A feature flag to show Discount Tab in Student Detail (LT-41517)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+      - name: Payment_OrderManagement_BackOffice_LinkCalendarManagement
+        description: "A feature flag to enable link from order details to calendar management in Order Management(LT-42931)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+          - name: strategy_organization
+            parameters:
+              organizations: "-2147483635,-2147483639,-2147483628,-2147483623"
+            constraints: []
+      - name: Payment_OrderManagement_BackOffice_UpdateStudentStatusOrderTypeOptions
+        description: "A feature flag to hide orderType option in Update Student Status at pre-prod kec-test tenant (LT-44774)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: default
+            parameters: {}
+            constraints:
+              - contextName: env
+                operator: IN
+                values:
+                  - "prod"
+                inverted: false
+                caseInsensitive: false
+              - contextName: org
+                operator: IN
+                values:
+                  - "-2147483623"
+                inverted: false
+                caseInsensitive: false

@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package eureka.v2;
+
+import "common/v1/requests.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/eureka/v2;epb";
+
+message GetTotalItemsByLMRequest {
+  string learning_material_id = 1;
+}
+
+message GetTotalItemsByLMResponse {
+  uint32 total_items = 1;
+}
+
+message GetItemsByLMRequest {
+  repeated string learning_material_id = 1;
+  common.v1.Paging paging = 2;
+}
+
+message GetItemsByLMResponse {
+  message Items{
+    string reference = 1;
+    string title = 2;
+  }
+  repeated Items items = 1;
+  common.v1.Paging next_page = 2;
+}
+
+service ItemBankService {
+  rpc GetTotalItemsByLM(GetTotalItemsByLMRequest) returns (GetTotalItemsByLMResponse);
+  rpc GetItemsByLM(GetItemsByLMRequest) returns (GetItemsByLMResponse);
+}

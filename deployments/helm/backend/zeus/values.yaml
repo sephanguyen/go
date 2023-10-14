@@ -1,0 +1,19 @@
+affinity: {}
+affinityOverride: {}
+enabled: true
+grpcPort: 5950
+jobs:
+    get-postgres-privileges:
+        cmd: get_postgres_privileges
+metrics:
+    enabled: false
+migrationEnabled: true
+podAnnotations:
+    sidecar.istio.io/inject: "false"
+readinessProbe:
+    enabled: true
+replicaCount: 1
+resources:
+    requests:
+        memory: 64Mi
+waitForServices: []

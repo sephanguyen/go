@@ -1,0 +1,185 @@
+{{ if eq .Values.environment "prod" }}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: prod-{{ .Values.org }}-back-office-front-end
+  namespace: istio-system
+  labels:
+    {{- include "gateway.labels" . | nindent 4 }}
+spec:
+{{ if eq .Values.org "tokyo" }}
+  commonName: "administration.manabie.net"
+  dnsNames:
+  - "administration.manabie.net"
+{{ else }}
+  commonName: "{{ .Values.org }}.backoffice.manabie.net"
+  dnsNames:
+  - "{{ .Values.org }}.backoffice.manabie.net"
+{{ end }}
+  issuerRef:
+    kind: ClusterIssuer
+    name: global-prod-gateway-cloudflare-dns01
+  secretName: prod-{{ .Values.org }}-back-office-front-end
+---
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: prod-{{ .Values.org }}-back-office-front-end
+  namespace: istio-system
+  labels:
+    {{- include "gateway.labels" . | nindent 4 }}
+spec:
+  selector:
+    istio: ingressgateway # use istio default controller
+  servers:
+  - port:
+      number: 80
+      name: front-end-https-redirect
+      protocol: HTTP
+    hosts:
+{{ if eq .Values.org "tokyo" }}
+    - "administration.manabie.net"
+{{ else }}
+    - "{{ .Values.org }}.backoffice.manabie.net"
+{{ end }}
+    tls:
+      httpsRedirect: true
+  - port:
+      number: 443
+      name: front-end
+      protocol: HTTPS
+    hosts:
+{{ if eq .Values.org "tokyo" }}
+    - "administration.manabie.net"
+{{ else }}
+    - "{{ .Values.org }}.backoffice.manabie.net"
+{{ end }}
+    tls:
+      credentialName: prod-{{ .Values.org }}-back-office-front-end
+      mode: SIMPLE
+      privateKey: sds
+      serverCertificate: sds
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: prod-{{ .Values.org }}-teacher-front-end
+  namespace: istio-system
+  labels:
+    {{- include "gateway.labels" . | nindent 4 }}
+spec:
+{{ if eq .Values.org "tokyo" }}
+  commonName: "classroom.manabie.net"
+  dnsNames:
+  - "classroom.manabie.net"
+{{ else }}
+  commonName: "{{ .Values.org }}.teacher.manabie.net"
+  dnsNames:
+  - "{{ .Values.org }}.teacher.manabie.net"
+{{ end }}
+  issuerRef:
+    kind: ClusterIssuer
+    name: global-prod-gateway-cloudflare-dns01
+  secretName: prod-{{ .Values.org }}-teacher-front-end
+---
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: prod-{{ .Values.org }}-teacher-front-end
+  namespace: istio-system
+  labels:
+    {{- include "gateway.labels" . | nindent 4 }}
+spec:
+  selector:
+    istio: ingressgateway # use istio default controller
+  servers:
+  - port:
+      number: 80
+      name: front-end-https-redirect
+      protocol: HTTP
+    hosts:
+{{ if eq .Values.org "tokyo" }}
+    - "classroom.manabie.net"
+{{ else }}
+    - "{{ .Values.org }}.teacher.manabie.net"
+{{ end }}
+    tls:
+      httpsRedirect: true
+  - port:
+      number: 443
+      name: front-end
+      protocol: HTTPS
+    hosts:
+{{ if eq .Values.org "tokyo" }}
+    - "classroom.manabie.net"
+{{ else }}
+    - "{{ .Values.org }}.teacher.manabie.net"
+{{ end }}
+    tls:
+      credentialName: prod-{{ .Values.org }}-teacher-front-end
+      mode: SIMPLE
+      privateKey: sds
+      serverCertificate: sds
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: prod-{{ .Values.org }}-learner-front-end
+  namespace: istio-system
+  labels:
+    {{- include "gateway.labels" . | nindent 4 }}
+spec:
+{{ if eq .Values.org "tokyo" }}
+  commonName: "learner.manabie.net"
+  dnsNames:
+  - "learner.manabie.net"
+{{ else }}
+  commonName: "{{ .Values.org }}.learner.manabie.net"
+  dnsNames:
+  - "{{ .Values.org }}.learner.manabie.net"
+{{ end }}
+  issuerRef:
+    kind: ClusterIssuer
+    name: global-prod-gateway-cloudflare-dns01
+  secretName: prod-{{ .Values.org }}-learner-front-end
+
+---
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: prod-{{ .Values.org }}-learner-front-end
+  namespace: istio-system
+  labels:
+    {{- include "gateway.labels" . | nindent 4 }}
+spec:
+  selector:
+    istio: ingressgateway # use istio default controller
+  servers:
+  - port:
+      number: 80
+      name: front-end-https-redirect
+      protocol: HTTP
+    hosts:
+{{ if eq .Values.org "tokyo" }}
+    - "learner.manabie.net"
+{{ else }}
+    - "{{ .Values.org }}.learner.manabie.net"
+{{ end }}
+    tls:
+      httpsRedirect: true
+  - port:
+      number: 443
+      name: front-end
+      protocol: HTTPS
+    hosts:
+{{ if eq .Values.org "tokyo" }}
+    - "learner.manabie.net"
+{{ else }}
+    - "{{ .Values.org }}.learner.manabie.net"
+{{ end }}
+    tls:
+      credentialName: prod-{{ .Values.org }}-learner-front-end
+      mode: SIMPLE
+      privateKey: sds
+      serverCertificate: sds
+{{ end }}

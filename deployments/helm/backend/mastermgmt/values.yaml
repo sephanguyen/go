@@ -1,0 +1,223 @@
+adminHttp:
+    - corsPolicy:
+        allowHeaders:
+            - authorization
+            - grpc-timeout
+            - content-type
+            - keep-alive
+            - user-agent
+            - cache-control
+            - content-transfer-encoding
+            - token
+            - x-accept-content-transfer-encoding
+            - x-accept-response-streaming
+            - x-request-id
+            - x-user-agent
+            - x-graphql-mesh-authorization
+            - x-grpc-web
+            - if-none-match
+            - pkg
+            - version
+            - connect-timeout-ms
+            - connect-protocol-version
+            - connect-content-encoding
+            - connect-accept-encoding
+        allowMethods:
+            - POST
+            - GET
+            - OPTIONS
+            - PUT
+            - DELETE
+        allowOrigins:
+            - regex: .*
+        exposeHeaders:
+            - grpc-status
+            - grpc-message
+            - etag
+            - grpc-status-details-bin
+        maxAge: 100s
+      match:
+        - uri:
+            prefix: /mastermgmt/
+      rewrite:
+        uri: /
+      route:
+        - destination:
+            host: mastermgmt-hasura
+            port:
+                number: 8080
+affinity: {}
+affinityOverride: {}
+apiHttp:
+    - fault:
+        abort:
+            httpStatus: 403
+            percentage:
+                value: 100
+      match:
+        - uri:
+            prefix: /mastermgmt.v1.InternalService
+        - uri:
+            prefix: /mastermgmt.v1.MasterInternalService
+      route:
+        - destination:
+            host: mastermgmt
+            port:
+                number: 6450
+    - match:
+        - uri:
+            prefix: /mastermgmt.v1
+      route:
+        - destination:
+            host: mastermgmt
+            port:
+                number: 6450
+    - match:
+        - uri:
+            prefix: /mastermgmt/api
+      route:
+        - destination:
+            host: mastermgmt
+            port:
+                number: 6480
+clientVersion: v0.30.0
+cronjobs:
+    scan-es-rp:
+        cmd: scan_es_resource_path
+        schedule: '* 1 * * *'
+enabled: true
+grpcPort: 6450
+hasura:
+    anonymous:
+        enabled: false
+    enableConsole: true
+    enabledApis: metadata,graphql
+    pgConnections: 8
+    pgTimeout: 10
+    resources:
+        requests:
+            cpu: 10m
+            memory: 256Mi
+    service:
+        port: 8080
+        type: ClusterIP
+hasuraEnabled: true
+httpPort: 6480
+jobs:
+    create-config-zoom-for-partner:
+        cmd: create_config_key_of_zoom_for_partner
+    create-organization:
+        cmd: mastermgmt_create_organization
+metrics:
+    enabled: true
+    podAnnotations:
+        prometheus.io/port: "8888"
+        prometheus.io/scheme: http
+        prometheus.io/scrape: "true"
+migrationEnabled: true
+nodeSelector: {}
+pdb:
+    enabled: false
+podAnnotations:
+    sidecar.istio.io/proxyCPU: 10m
+    sidecar.istio.io/proxyMemory: 50Mi
+readinessProbe:
+    enabled: true
+resources:
+    requests:
+        memory: 120Mi
+service:
+    port: 6450
+    type: ClusterIP
+tolerations: null
+webHttp:
+    - corsPolicy:
+        allowHeaders:
+            - authorization
+            - grpc-timeout
+            - content-type
+            - keep-alive
+            - user-agent
+            - cache-control
+            - content-transfer-encoding
+            - token
+            - x-accept-content-transfer-encoding
+            - x-accept-response-streaming
+            - x-request-id
+            - x-user-agent
+            - x-graphql-mesh-authorization
+            - x-grpc-web
+            - if-none-match
+            - pkg
+            - version
+            - connect-timeout-ms
+            - connect-protocol-version
+            - connect-content-encoding
+            - connect-accept-encoding
+        allowMethods:
+            - POST
+            - GET
+            - OPTIONS
+            - PUT
+            - DELETE
+        allowOrigins:
+            - regex: .*
+        exposeHeaders:
+            - grpc-status
+            - grpc-message
+            - etag
+            - grpc-status-details-bin
+        maxAge: 100s
+      match:
+        - uri:
+            prefix: /mastermgmt.v1
+      route:
+        - destination:
+            host: mastermgmt
+            port:
+                number: 6450
+    - corsPolicy:
+        allowHeaders:
+            - authorization
+            - grpc-timeout
+            - content-type
+            - keep-alive
+            - user-agent
+            - cache-control
+            - content-transfer-encoding
+            - token
+            - x-accept-content-transfer-encoding
+            - x-accept-response-streaming
+            - x-request-id
+            - x-user-agent
+            - x-graphql-mesh-authorization
+            - x-grpc-web
+            - if-none-match
+            - pkg
+            - version
+            - connect-timeout-ms
+            - connect-protocol-version
+            - connect-content-encoding
+            - connect-accept-encoding
+        allowMethods:
+            - POST
+            - GET
+            - OPTIONS
+            - PUT
+            - DELETE
+        allowOrigins:
+            - regex: .*
+        exposeHeaders:
+            - grpc-status
+            - grpc-message
+            - etag
+            - grpc-status-details-bin
+        maxAge: 100s
+      match:
+        - uri:
+            prefix: /mastermgmt/api
+      route:
+        - destination:
+            host: mastermgmt
+            port:
+                number: 6480

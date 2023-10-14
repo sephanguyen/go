@@ -1,0 +1,1 @@
+ALTER TABLE public.info_notifications DROP CONSTRAINT IF EXISTS fk__info_notification__school_id;

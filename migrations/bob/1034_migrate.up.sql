@@ -1,0 +1,2 @@
+ALTER TABLE quizzes
+ALTER COLUMN tagged_los DROP NOT NULL;

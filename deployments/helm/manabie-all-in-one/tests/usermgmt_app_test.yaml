@@ -1,0 +1,191 @@
+suite: usermgmt app yaml file
+templates:
+  - charts/usermgmt/templates/app.yaml
+values:
+  - ../charts/usermgmt/values.yaml
+  - ../values.yaml
+  - ../../platforms/gateway/local-manabie-values.yaml
+tests:
+  - it: first template should be ConfigMap
+    set:
+      global.usermgmt.enabled: true
+      global.usermgmt.sops.enabled: true
+      global.configs.kmsPath: ""
+      global.environment: local
+      global.vendor: manabie
+      global.image.repository: local
+      usermgmt.image.tag: v1
+      usermgmt.service.port: 1234
+      global.sqlProxy.enabled: true
+    documentIndex: 0
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - isNotNull:
+          path: data.[usermgmt.common.config.yaml]
+      - isNotNull:
+          path: data.[usermgmt.config.yaml]
+
+  - it: second template should be Secret
+    set:
+      global.usermgmt.enabled: true
+      global.usermgmt.sops.enabled: true
+      global.configs.kmsPath: ""
+      global.environment: local
+      global.vendor: manabie
+      global.image.repository: local
+      usermgmt.image.tag: v1
+      usermgmt.service.port: 1234
+      global.sqlProxy.enabled: true
+    documentIndex: 1
+    asserts:
+      - isKind:
+          of: Secret
+      - isNotNull:
+          path: data.[usermgmt.secrets.encrypted.yaml]
+      - isNull:
+          path: data.[usermgmt_migrate.secrets.encrypted.yaml]
+      - isNull:
+          path: data.[hasura.secrets.encrypted.yaml]
+
+  - it: third template should be PodDisruptionBudget
+    set:
+      global.usermgmt.enabled: true
+      global.usermgmt.sops.enabled: true
+      global.configs.kmsPath: ""
+      global.environment: local
+      global.vendor: manabie
+      global.image.repository: local
+      usermgmt.image.tag: v1
+      usermgmt.service.port: 1234
+      global.sqlProxy.enabled: true
+    documentIndex: 2
+    asserts:
+      - isKind:
+          of: PodDisruptionBudget
+      - equal:
+          path: spec.maxUnavailable
+          value: 1
+
+  - it: fourth template should be ServiceAccount
+    set:
+      global.usermgmt.enabled: true
+      global.usermgmt.sops.enabled: true
+      global.configs.kmsPath: ""
+      global.environment: local
+      global.vendor: manabie
+      global.image.repository: local
+      usermgmt.image.tag: v1
+      usermgmt.service.port: 1234
+      global.sqlProxy.enabled: true
+    documentIndex: 3
+    asserts:
+      - isKind:
+          of: ServiceAccount
+      - equal:
+          path: metadata.name
+          value: local-usermgmt
+
+  - it: fifth template should be Deployment
+    set:
+      global.usermgmt.enabled: true
+      global.usermgmt.sops.enabled: true
+      global.configs.kmsPath: ""
+      global.environment: local
+      global.vendor: manabie
+      global.image.repository: local
+      usermgmt.image.tag: v1
+      global.sqlProxy.enabled: true
+    documentIndex: 4
+    asserts:
+      - isKind:
+          of: Deployment
+
+      # init containers
+      - equal:
+          path: spec.template.spec.initContainers[0].name
+          value: wait-for-shamir
+      - equal:
+          path: spec.template.spec.containers[0].name
+          value: usermgmt
+      - equal:
+          path: spec.template.spec.containers[0].volumeMounts[0].mountPath
+          value: /configs/usermgmt.common.config.yaml
+      - equal:
+          path: spec.template.spec.containers[0].volumeMounts[1].mountPath
+          value: /configs/usermgmt.config.yaml
+      - equal:
+          path: spec.template.spec.containers[0].volumeMounts[3].mountPath
+          value: /configs/service_credential.json
+
+      # metadata
+      - equal:
+          path: spec.template.metadata.labels.[app.kubernetes.io/name]
+          value: "usermgmt"
+      - equal:
+          path: spec.template.metadata.annotations.[sidecar.istio.io/proxyCPU]
+          value: "10m"
+      - isNotEmpty:
+          path: spec.template.metadata.annotations.[checksum/usermgmt.config.yaml]
+      - isNotEmpty:
+          path: spec.template.metadata.annotations.[checksum/usermgmt.secrets.encrypted.yaml]
+
+      # containers
+      - equal:
+          path: spec.template.spec.containers[0].name
+          value: usermgmt
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: local:v1
+      - equal:
+          path: spec.template.spec.containers[0].args[1]
+          value: usermgmt
+      - equal:
+          path: spec.template.spec.containers[0].args[4]
+          value: --secretsPath=/configs/usermgmt.secrets.encrypted.yaml
+      - contains:
+          path: spec.template.spec.containers[0].ports
+          content:
+            name: grpc
+            containerPort: 6150
+            protocol: TCP
+      - matchRegex:
+          path: spec.template.spec.containers[0].readinessProbe.exec.command[2]
+          pattern: .*localhost:6150.*
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.periodSeconds
+          value: 10
+
+      # volumes
+      - equal:
+          path: spec.template.spec.volumes[0].secret.secretName
+          value: usermgmt
+      - equal:
+          path: spec.template.spec.volumes[1].name
+          value: service-credential
+      - equal:
+          path: spec.template.spec.volumes[2].configMap.name
+          value: usermgmt
+
+  - it: sixth template should be Service
+    set:
+      global.usermgmt.enabled: true
+      global.usermgmt.sops.enabled: true
+      global.configs.kmsPath: ""
+      global.environment: local
+      global.vendor: manabie
+      global.image.repository: local
+      usermgmt.image.tag: v1
+      usermgmt.service.port: 1234
+      global.sqlProxy.enabled: true
+    documentIndex: 5
+    asserts:
+      - isKind:
+          of: Service
+      - contains:
+          path: spec.ports
+          content:
+            name: grpc-web-port
+            protocol: TCP
+            targetPort: grpc
+            port: 6150

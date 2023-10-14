@@ -1,0 +1,248 @@
+# Reference: https://github.com/nats-io/k8s/blob/main/helm/charts/nats/templates/statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "nats-jetstream.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "nats-jetstream.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: nats-jetstream
+    {{- include "nats-jetstream.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "nats-jetstream.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: nats-jetstream
+  serviceName: {{ include "nats-jetstream.fullname" . }}-headless
+  {{- if .Values.jetstream.cluster.enabled }}
+  replicas: {{ .Values.jetstream.cluster.replicas }}
+  {{- else }}
+  replicas: 1
+  {{- end }}
+  {{- if eq "local" .Values.environment }}
+  podManagementPolicy: Parallel
+  {{- else }}
+  podManagementPolicy: OrderedReady
+  {{- end }}
+  template:
+    metadata:
+      annotations:
+        prometheus.io/port: "7777"
+        prometheus.io/scrape: "true"
+        checksum/nats.secrets.conf.encrypted.yaml: {{ printf "secrets/%s/%s/nats.secrets.conf.encrypted.yaml" .Values.vendor .Values.environment | .Files.Get | sha256sum }}
+        checksum/nats_v2.secrets.encrypted.yaml: {{ printf "secrets/%s/%s/nats_v2.secrets.encrypted.yaml" .Values.vendor .Values.environment | .Files.Get | sha256sum }}
+      {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        app.kubernetes.io/name: {{ include "nats-jetstream.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: nats-jetstream
+    spec:
+      {{- with .Values.jetstream }}
+      {{- $context := (mustMerge (deepCopy .) $) }}
+      affinity: {{- include "util.affinityNew" $context | nindent 8 }}
+      tolerations: {{- include "util.tolerations" $context | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "nats-jetstream.serviceAccountName" . }}
+      {{- with .Values.jetstream.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+      - name: decrypted-volume
+        emptyDir: {}
+      - name: configs-volume
+        configMap:
+          name: {{ include "nats-jetstream.fullname" . }}
+          items:
+          - key: nats.conf
+            path: nats.conf
+      - name: nats-secret
+        secret:
+          secretName: {{ include "nats-jetstream.fullname" . }}
+          items:
+        {{ range $path, $_ := .Files.Glob (printf "secrets/%s/%s/*nats*.secrets.conf.encrypted.yaml" .Values.vendor .Values.environment) }}
+          - key: {{ base $path }}
+            path: {{ base $path }}
+        {{ end }}
+        {{ range $path, $_ := .Files.Glob (printf "secrets/%s/%s/*nats*.secrets.encrypted.yaml" .Values.vendor .Values.environment) }}
+          - key: {{ base $path }}
+            path: {{ base $path }}
+        {{ end }}
+        {{ range $path, $_ := .Files.Glob (printf "secrets/%s/%s/*.secrets.encrypted.env" .Values.vendor .Values.environment) }}
+          - key: {{ base $path }}
+            path: {{ base $path }}
+        {{ end }}
+      {{- if eq "local" .Values.environment }}
+      - name: service-credential
+        secret:
+          secretName: {{ include "nats-jetstream.fullname" . }}
+          items:
+          - key: service_credential.json
+            path: service_credential.json
+      {{- end }}
+      - name: pid
+        emptyDir: {}
+      terminationGracePeriodSeconds: {{ .Values.jetstream.terminationGracePeriodSeconds }}
+      # shareProcessNamespace is required to be able to HUP signal and apply config
+      # reload to the server without restarting the pod.
+      shareProcessNamespace: true
+      initContainers:
+      - name: decrypt-secret
+        image: "{{ .Values.sopsImage.repository }}:{{ .Values.sopsImage.tag }}"
+        imagePullPolicy: IfNotPresent
+        command:
+          - /bin/sh
+          - -c
+          - |
+
+            set -e
+            if [ -f /configs/nats.secrets.encrypted.env ]; then
+              echo "doing decrypt for v2"
+              for file in /configs/*.secrets.encrypted.env; do
+                sops --decrypt "${file}" >> /decrypted/nats.secrets.conf
+              done
+            elif [ -f /configs/nats_v2.secrets.encrypted.yaml ]; then
+              echo "doing decrypt for v2"
+              for file in /configs/*_v2.secrets.encrypted.yaml; do
+                sops --decrypt "${file}" >> /decrypted/nats.secrets.conf
+              done
+            else
+              echo "doing decrypt for v1"
+              for file in /configs/*nats.secrets.conf.encrypted.yaml;
+              do
+                sops --decrypt --extract '["data"]' "$file" >> /decrypted/nats.secrets.conf
+              done
+            fi
+
+        volumeMounts:
+        - name: decrypted-volume
+          mountPath: /decrypted/
+      {{ range $path, $_ := .Files.Glob (printf "secrets/%s/%s/*nats*.secrets.conf.encrypted.yaml" .Values.vendor .Values.environment) }}
+        - name: nats-secret
+          mountPath: /configs/{{ base $path }}
+          subPath: {{ base $path }}
+          readOnly: true
+      {{ end }}
+      {{ range $path, $_ := .Files.Glob (printf "secrets/%s/%s/*nats_v2.secrets.encrypted.yaml" .Values.vendor .Values.environment) }}
+        - name: nats-secret
+          mountPath: /configs/{{ base $path }}
+          subPath: {{ base $path }}
+          readOnly: true
+      {{ end }}
+      {{ range $path, $_ := .Files.Glob (printf "secrets/%s/%s/*.secrets.encrypted.env" .Values.vendor .Values.environment) }}
+        - name: nats-secret
+          mountPath: /configs/{{ base $path }}
+          subPath: {{ base $path }}
+          readOnly: true
+      {{ end }}
+        {{- if eq "local" .Values.environment }}
+        - name: service-credential
+          mountPath: /configs/service_credential.json
+          subPath: service_credential.json
+          readOnly: true
+        env:
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: "/configs/service_credential.json"
+        {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.jetstream.image.repository }}:{{ .Values.jetstream.image.tag | default .Chart.AppVersion }}"
+          args: ["-c", "/configs/nats.conf"]
+          imagePullPolicy: {{ .Values.jetstream.image.pullPolicy }}
+          volumeMounts:
+          - name: configs-volume
+            mountPath: /configs/
+          - name: decrypted-volume
+            mountPath: /decrypted/
+          - name: nats-jetstream-pvc
+            mountPath: {{ .Values.jetstream.fileStorage.storageDirectory }}
+          - name: pid
+            mountPath: /var/run/nats
+          ports:
+            - name: tcp-client-port
+              containerPort: 4223
+              protocol: TCP
+            - name: cluster-port
+              containerPort: 6223
+            - name: tcp-admin-port
+              containerPort: 8223
+              protocol: TCP
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.namespace
+            - name: CLUSTER_ADVERTISE
+              value: {{ include "nats-jetstream.clusterAdvertise" . }}
+          resources: {{- toYaml .Values.jetstream.resources | nindent 12 }}
+          # Liveness/Readiness probes against the monitoring
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8223
+            initialDelaySeconds: 10
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8223
+            initialDelaySeconds: 10
+            timeoutSeconds: 5
+          lifecycle:
+            preStop:
+              exec:
+                # Using the alpine based NATS image, we add an extra sleep that is
+                # the same amount as the terminationGracePeriodSeconds to allow
+                # the NATS Server to gracefully terminate the client connections.
+                command:
+                - "/bin/sh"
+                - "-c"
+                - "nats-server -sl=ldm=/var/run/nats/nats.pid && /bin/sleep {{ .Values.jetstream.terminationGracePeriodSeconds }}"
+        - name: reloader
+          image: "{{ .Values.reloader.image.repository }}:{{ .Values.reloader.image.tag }}"
+          imagePullPolicy: {{ .Values.reloader.pullPolicy }}
+          command:
+          - "nats-server-config-reloader"
+          - "-pid"
+          - "/var/run/nats/nats.pid"
+          - "-config"
+          - "/configs/nats.conf"
+          volumeMounts:
+            - name: configs-volume
+              mountPath: /configs/
+            - name: pid
+              mountPath: /var/run/nats
+        - name: metrics
+          image: "{{ .Values.exporter.image.repository }}:{{ .Values.exporter.image.tag }}"
+          imagePullPolicy: {{ .Values.exporter.pullPolicy }}
+          args:
+          - -connz
+          - -routez
+          - -subz
+          - -varz
+          - -jsz=all
+          - -use_internal_server_id
+          - http://localhost:8223
+          ports:
+          - name: metrics-port
+            containerPort: 7777
+            protocol: TCP
+
+  volumeClaimTemplates:
+    - metadata:
+        name: nats-jetstream-pvc
+      spec:
+        accessModes: {{ .Values.jetstream.fileStorage.accessModes }}
+        storageClassName: {{ .Values.jetstream.fileStorage.storageClassName }}
+        resources:
+          requests:
+            storage: {{ .Values.jetstream.fileStorage.size }}

@@ -1,0 +1,9 @@
+affinity: {}
+affinityOverride: {}
+enabled: true
+hasuraEnabled: false
+migrationEnabled: false
+preHookUpsertKafkaTopic: true
+preHookUpsertStream: true
+readinessProbe:
+    enabled: false

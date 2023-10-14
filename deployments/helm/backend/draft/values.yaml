@@ -1,0 +1,88 @@
+adminHttpV2:
+    - match:
+        - uri:
+            prefix: /draft/
+        - uri:
+            prefix: /draftv2/
+      rewrite:
+        uri: /
+      route:
+        - destination:
+            host: draft-hasurav2
+            port:
+                number: 8080
+affinity: {}
+affinityOverride: {}
+alloydbProxy:
+    alloydbConnName: ""
+    enabled: false
+    image:
+        repository: gcr.io/alloydb-connectors/alloydb-auth-proxy
+        tag: 0.5.0
+    resources:
+        requests:
+            cpu: 5m
+            memory: 16Mi
+apiHttp:
+    - match:
+        - uri:
+            prefix: /draft
+        - uri:
+            prefix: /manabie.draft
+      route:
+        - destination:
+            host: draft
+            port:
+                number: 6050
+disableScanRLS: true
+grpcPort: 6050
+hasuraEnabled: false
+hasuraPodAnnotations:
+    cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+    sidecar.istio.io/proxyCPU: 50m
+    sidecar.istio.io/proxyMemory: 50Mi
+hasurav2:
+    allowList: true
+    enableConsole: true
+    enableRemoteSchemaPermission: false
+    enabledApis: metadata,graphql
+    experimentFeatures: naming_convention
+    namingConvention: hasura-default
+    resources:
+        requests:
+            memory: 256Mi
+    service:
+        port: 8080
+        type: ClusterIP
+    unauthorized:
+        enable: false
+        role: anonymous
+hasurav2Enabled: true
+httpPort: 6080
+jobs:
+    clean-data:
+        cmd: clean_test_data
+migrationEnabled: true
+nodeSelector: {}
+pdb:
+    enabled: true
+readinessProbe:
+    enabled: true
+replicaCount: 1
+resources:
+    requests:
+        memory: 128Mi
+service:
+    port: 6050
+    type: ClusterIP
+tolerations: null
+waitForServices: []
+webHttp:
+    - match:
+        - uri:
+            prefix: /draft-http/v1
+      route:
+        - destination:
+            host: draft
+            port:
+                number: 6080

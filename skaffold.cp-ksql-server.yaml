@@ -1,0 +1,27 @@
+apiVersion: skaffold/v2beta28
+kind: Config
+metadata:
+  name: cp-ksql-server
+deploy:
+  helm:
+    releases:
+      - name: cp-ksql-server
+        chartPath: deployments/helm/platforms/cp-ksql-server
+        namespace: '{{.ENV}}-{{.ORG}}-kafka'
+        createNamespace: true
+        skipBuildDependencies: true
+        valuesFiles:
+          - 'deployments/helm/platforms/cp-ksql-server/{{.ENV}}-{{.ORG}}-values.yaml'
+        setValueTemplates:
+          global:
+            vendor: '{{.ORG}}'
+            environment: '{{.ENV}}'
+
+profiles:
+  - name: local
+    activation:
+      - env: ENV=local
+    patches:
+      - op: add
+        path: /deploy/kubeContext
+        value: kind-kind

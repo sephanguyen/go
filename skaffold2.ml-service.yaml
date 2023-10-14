@@ -1,0 +1,103 @@
+apiVersion: skaffold/v4beta5
+kind: Config
+metadata:
+  name: ml-service
+profiles:
+  - name: ml-service-local
+    activation:
+      - env: SCHEDULING_DEPLOYMENT_ENABLED=true
+    build:
+      artifacts:
+        - image: asia-docker.pkg.dev/student-coach-e1e95/manaverse/auto-scheduling-grpc
+          context: .
+          custom:
+            buildCommand: |
+              cat <<EOF | bash
+              #!/bin/bash
+              set -eu
+              DOCKER_BUILDKIT=1 docker build \
+              --tag "$IMAGE" \
+              --file ./developments/python-service-dockerfile/auto-scheduling.Dockerfile "$BUILD_CONTEXT"
+              docker tag "$IMAGE" asia-docker.pkg.dev/student-coach-e1e95/manaverse/auto-scheduling-grpc:locally
+              echo "Loading asia-docker.pkg.dev/student-coach-e1e95/manaverse/auto-scheduling-grpc:locally into kind"
+              kind load docker-image asia-docker.pkg.dev/student-coach-e1e95/manaverse/auto-scheduling-grpc:locally
+
+              if [ "$PUSH_IMAGE" == "true" ]; then
+                >&2 echo "Arfifacts built in local should NOT be pushed"
+                exit 1
+              fi
+              EOF
+            dependencies:
+              paths:
+                - ./cmd/server/scheduling/**
+                - ./internal/scheduling/**
+                - ./developments/python-service-dockerfile/**
+        - image: asia-docker.pkg.dev/student-coach-e1e95/manaverse/auto-scheduling-http
+          context: .
+          custom:
+            buildCommand: |
+              cat <<EOF | bash
+              #!/bin/bash
+              set -eu
+              DOCKER_BUILDKIT=1 docker build \
+              --tag "$IMAGE" \
+              --file ./developments/python-service-dockerfile/auto-scheduling-http.Dockerfile "$BUILD_CONTEXT"
+              docker tag "$IMAGE" asia-docker.pkg.dev/student-coach-e1e95/manaverse/auto-scheduling-http:locally
+              echo "Loading asia-docker.pkg.dev/student-coach-e1e95/manaverse/auto-scheduling-http:locally into kind"
+              kind load docker-image asia-docker.pkg.dev/student-coach-e1e95/manaverse/auto-scheduling-http:locally
+
+              if [ "$PUSH_IMAGE" == "true" ]; then
+                >&2 echo "Arfifacts built in local should NOT be pushed"
+                exit 1
+              fi
+              EOF
+            dependencies:
+              paths:
+                - ./cmd/server/scheduling/**
+                - ./internal/scheduling/**
+      tagPolicy:
+        customTemplate:
+          template: 'locally'
+      local:
+        push: false
+
+    deploy:
+      helm:
+        releases:
+          - name: auto-scheduling
+            chartPath: deployments/helm/ml/scheduling
+            namespace: '{{.ENV}}-{{.ORG}}-services'
+            createNamespace: true
+            valuesFiles:
+              - "./deployments/helm/ml/scheduling/values.yaml"
+              - "./deployments/helm/ml/scheduling/local-manabie-values.yaml"
+            setValueTemplates:
+              environment: '{{.ENV}}'
+              vendor: '{{.ORG}}'
+              serviceAccountEmailSuffix: '{{.SERVICE_ACCOUNT_EMAIL_SUFFIX}}'
+              image.repository: asia-docker.pkg.dev/student-coach-e1e95/manaverse/auto-scheduling-grpc
+              httpEndpoint.image.repository: asia-docker.pkg.dev/student-coach-e1e95/manaverse/auto-scheduling-http
+
+  - name: ci-auto-scheduling-stag
+    activation:
+      - kubeContext: gke_staging-manabie-online_asia-southeast1-b_staging-2
+        env: SCHEDULING=true
+    deploy:
+      helm:
+        releases:
+        - name: auto-scheduling
+          chartPath: deployments/helm/ml/scheduling
+          namespace: '{{.ENV}}-{{.ORG}}-services'
+          createNamespace: true
+          valuesFiles:
+              - "./deployments/helm/ml/scheduling/values.yaml"
+              - "./deployments/helm/ml/scheduling/stag-manabie-values.yaml"
+          setValueTemplates:
+            environment: '{{.ENV}}'
+            vendor: '{{.ORG}}'
+            serviceAccountEmailSuffix: '{{.SERVICE_ACCOUNT_EMAIL_SUFFIX}}'
+            image:
+              tag: "2023081601"
+            httpEndpoint:
+              image:
+                tag: "2023082301"

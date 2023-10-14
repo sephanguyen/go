@@ -1,0 +1,1 @@
+CREATE INDEX CONCURRENTLY IF NOT EXISTS student_event_logs_study_plan_item_id_idx ON public.student_event_logs USING btree (study_plan_item_id);

@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package notificationmgmt.v2;
+
+import "common/v1/notifications.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/notificationmgmt/v2;npbv2";
+
+message RetrieveNotificationDetailRequest {
+    string user_notification_id = 1;
+}
+
+message RetrieveNotificationDetailResponse {
+    common.v1.Notification item = 1;
+    common.v1.UserNotification user_notification = 2; 
+    common.v1.UserQuestionnaire user_questionnaire = 3;
+}
+
+service NotificationReaderService {
+    rpc RetrieveNotificationDetail(RetrieveNotificationDetailRequest)
+        returns (RetrieveNotificationDetailResponse);
+}

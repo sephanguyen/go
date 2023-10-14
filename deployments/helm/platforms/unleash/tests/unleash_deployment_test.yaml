@@ -1,0 +1,22 @@
+suite: unleash
+templates:
+  - ../templates/deployment.yaml
+  - ../templates/proxy-deployment.yaml
+values:
+  - ../values.yaml
+  - ../local-manabie-values.yaml
+  - ../local-manabie-values.yaml
+tests:
+  - it: should have a proper deployment
+    set:
+      global.unleash.enabled: true
+      global.unleash.sops.enabled: true
+      global.environment: local
+      global.vendor: manabie
+      global.image.repository: local
+    asserts:
+      - isKind:
+          of: Deployment
+      - equal:
+          path: spec.template.metadata.annotations.[cluster-autoscaler.kubernetes.io/safe-to-evict]
+          value: 'true'

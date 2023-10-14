@@ -1,0 +1,158 @@
+name: deployment.ad-hoc
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        description: "Choose an environment to run your ad-hoc operation"
+        options:
+          - staging
+          - uat
+          - preproduction
+          - production
+        required: true
+      organization:
+        type: choice
+        description: "Choose an organization to run your ad-hoc operation"
+        required: true
+        options:
+          - manabie
+          - jprep
+          - synersia
+          - renseikai
+          - ga
+          - aic
+          - tokyo
+      resource:
+        type: choice
+        description: "Choose an resource to run your ad-hoc operation"
+        required: true
+        options:
+          - sql
+          # - k8s
+      database:
+        type: choice
+        description: "Enter database name you want to run ad-hoc. Require enter if your resource is `sql`"
+        options:
+          - auth
+          - bob
+          - calendar
+          - draft
+          - entryexitmgmt
+          - eureka
+          - fatima
+          - invoicemgmt
+          - lessonmgmt
+          - mastermgmt
+          - timesheet
+          - tom
+          - zeus
+      command:
+        description: "Enter the command. The command includes: <bash script file path> and [<option parameters>]. For example: ./scripts/ad-hoc_samples/test_execute-k8s.bash 'pod/zeus-7bf96c55fb-xx9kw' 'df -h'"
+        required: true
+
+jobs:
+  trigger-cloud-build:
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    runs-on: ["self-hosted", "100m-400mi", "spot", "persistent"]
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v3
+        timeout-minutes: 5
+
+      - name: Authenticate to Google Cloud by oidc
+        uses: ./.github/actions/auth-oidc
+        timeout-minutes: 5
+        with:
+          organization: ${{ inputs.organization }}
+          environment: ${{ inputs.environment }}
+
+      - name: Get config
+        id: config
+        timeout-minutes: 5
+        env:
+          PROJECT_ID: "${{ env.PROJECT_ID }}"
+          ENV: "${{ env.ENV }}"
+          ORG: "${{ env.ORG }}"
+        run: |
+          # Outputs the necessary configurations to Github Action
+
+          set -eu
+
+          imageName="asia.gcr.io/student-coach-e1e95/cloudbuild:0.0.3"
+          if [[ ${{ inputs.resource }} == 'k8s' ]]; then
+            imageName="gcr.io/google.com/cloudsdktool/google-cloud-cli:411.0.0"
+          fi
+          echo "image=${imageName}" >> "$GITHUB_OUTPUT"
+
+          branchName=${GITHUB_REF#refs/heads/}
+          echo "branch=${branchName}" >> "$GITHUB_OUTPUT"
+
+          adhocAccount="${ENV}-${ORG}-ad-hoc@${PROJECT_ID}.iam"
+          if [[ "${ENV}" == "dorp" || "${ENV}" == "preproduction" ]]; then
+            adhocAccount="prod-${ORG}-ad-hoc@${PROJECT_ID}.iam"
+          fi
+          echo "adhocAccount=${adhocAccount}" >> "$GITHUB_OUTPUT"
+
+      - name: Run trigger
+        timeout-minutes: 5
+        env:
+          PROJECT_ID: "${{ env.PROJECT_ID }}"
+          ENV: "${{ env.ENV }}"
+          ORG: "${{ env.ORG }}"
+        run: |
+          # Sends HTTP requests to GCP to trigger a cloud build
+
+          set -eu
+
+          cat > request.json <<EOF
+          {
+            "projectId": "${{ env.PROJECT_ID }}",
+            "branchName": "${{ steps.config.outputs.branch }}",
+            "substitutions":{
+              "_ENV": "${{ env.ENV }}",
+              "_ORG": "${{ env.ORG }}",
+              "_COMMAND": "${{ inputs.command }}",
+              "_RESOURCE": "${{ inputs.resource }}",
+              "_DATABASE": "${{ inputs.database }}",
+              "_DB_USER": "${{ steps.config.outputs.adhocAccount }}",
+              "_IMAGE_NAME": "${{ steps.config.outputs.image }}"
+            }
+          }
+          EOF
+
+          getTriggerRes=$(curl -X GET https://cloudbuild.googleapis.com/v1/projects/${{ env.PROJECT_ID }}/triggers/${{ env.ENV }}-${{ env.ORG }}-ad-hoc \
+            -H 'Content-Type: application/json' \
+            -H "Authorization: Bearer "$(gcloud auth print-access-token))
+          triggerId=$(echo $getTriggerRes | jq -r '.id')
+          runTriggerRes=$(curl -f -X POST https://cloudbuild.googleapis.com/v1/projects/${{ env.PROJECT_ID }}/triggers/$triggerId:run \
+            -H 'Content-Type: application/json' \
+            -H "Authorization: Bearer "$(gcloud auth print-access-token) \
+            -d @request.json)
+
+          exitcode=$?
+          if [ $exitcode -ne 0 ]; then
+            echo "Error: fail to create triggers"
+            exit $exitcode
+          fi
+
+          # get trigger's id from runTriggerRes
+          metadata=$(echo $runTriggerRes | jq -r '.metadata')
+          build=$(echo $metadata | jq -r '.build')
+          id=$(echo $build | jq -r '.id')
+          echo "build_id=${id}" >> $GITHUB_ENV
+
+      - name: Redirect to google-cloud-build
+        timeout-minutes: 5
+        run: |
+          echo '#### INPUT SUMMARY' >> $GITHUB_STEP_SUMMARY
+          echo '##### ORG: `${{ inputs.organization }}`' >> $GITHUB_STEP_SUMMARY
+          echo '##### ENV: `${{ inputs.environment }}`' >> $GITHUB_STEP_SUMMARY
+          echo '##### RESOURCE: `${{ inputs.resource }}`' >> $GITHUB_STEP_SUMMARY
+          if [[ ${{ inputs.resource }} == 'sql' ]]; then
+            echo '##### DATABASE: `${{ inputs.database }}`' >> $GITHUB_STEP_SUMMARY
+          fi
+          echo '##### COMMAND: `'${{ inputs.command }}'`' >> $GITHUB_STEP_SUMMARY
+          echo '##### URL to google-cloud-build https://console.cloud.google.com/cloud-build/builds;region=global/${{ env.build_id }}?project=${{ env.PROJECT_ID }}' >> $GITHUB_STEP_SUMMARY

@@ -1,0 +1,352 @@
+syntax = "proto3";
+
+package manabie.bob;
+
+import "enum.proto";
+import "courses.proto";
+import "schools.proto";
+import "user.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+import "google/protobuf/wrappers.proto";
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option (gogoproto.goproto_registration) = true;
+option go_package = "github.com/manabie-com/backend/pkg/genproto/bob;pb";
+
+message RegisterRequest {
+  string name = 1;
+  Country country = 2;
+  string phone = 3;
+  string email = 4;
+  string grade = 5;
+  string target_university = 6;
+  School school = 7;
+  string activation_code = 8;
+}
+
+message RegisterResponse {
+  bool successful = 1;
+  bool on_trial = 2;
+  google.protobuf.Timestamp billing_date = 3;
+}
+
+message GetStudentProfileRequest { repeated string student_ids = 1; }
+
+message StudentProfile {
+  string id = 1;
+  string name = 2;
+  Country country = 3;
+  string phone = 4;
+  string email = 5;
+  string grade = 6;
+  string target_university = 7;
+  string avatar = 8;
+  google.protobuf.Timestamp birthday = 9;
+  string biography = 10;
+  PaymentStatus payment_status = 11;
+  google.protobuf.Timestamp billing_date = 12;
+  google.protobuf.Timestamp created_at = 13;
+  School school = 14;
+  string plan_id = 15;
+  google.protobuf.Timestamp billing_at = 16;
+  bool is_tester = 17;
+  string facebook_id = 18;
+  repeated int64 divs = 19;
+}
+
+message GetStudentProfileResponse {
+  message Data {
+    StudentProfile profile = 1;
+    string coach_id = 2 [deprecated = true];
+  }
+  repeated Data datas = 1;
+}
+
+message UpdateProfileRequest {
+  string name = 1;
+  string grade = 2;
+  string target_university = 3;
+  string avatar = 4;
+  google.protobuf.Timestamp birthday = 5;
+  string biography = 6;
+  School school = 7;
+}
+
+message UpdateProfileResponse { bool successful = 1; }
+
+message RetrieveLearningProgressRequest {
+  string student_id = 1;
+  string session_id = 2;
+  google.protobuf.Timestamp from = 3;
+  google.protobuf.Timestamp to = 4;
+}
+
+message RetrieveLearningProgressResponse {
+  message DailyLearningTime {
+    int64 total_time_spent_in_day = 1;
+    google.protobuf.Timestamp day = 2;
+  }
+  repeated DailyLearningTime dailies = 1;
+}
+
+message StudentEventLog {
+  string event_id = 1;
+  string event_type = 2;
+  google.protobuf.Timestamp created_at = 3;
+  google.protobuf.Struct payload = 4;
+}
+
+message StudentComment {
+  string comment_id = 1;
+  string coach_id = 2 [deprecated = true];
+  string student_id = 3;
+  string comment_content = 4;
+  google.protobuf.Timestamp updated_at = 5;
+  google.protobuf.Timestamp created_at = 6;
+}
+
+message AssignToCoachRequest {
+  string coach_id = 1;
+  string student_id = 2;
+}
+
+message AssignToCoachResponse { bool successful = 1; }
+
+message RetrievePresetStudyPlansRequest {
+  string name = 1;
+  Country country = 2;
+  string grade = 3;
+  Subject subject = 4;
+}
+
+message RetrievePresetStudyPlansResponse {
+  repeated PresetStudyPlan preset_study_plans = 1;
+}
+
+message RetrievePresetStudyPlanWeekliesRequest {
+  string preset_study_plan_id = 1;
+}
+
+message RetrievePresetStudyPlanWeekliesResponse {
+  repeated PresetStudyPlanWeekly preset_study_plan_weeklies = 1;
+}
+
+message AssignPresetStudyPlansRequest {
+  message PlanDetail {
+    string preset_study_plan_id = 1;
+    int32 start_week = 2;
+    google.protobuf.Timestamp start_date = 3;
+  }
+  string student_id = 1;
+  repeated PlanDetail plan_details = 2;
+}
+
+message AssignPresetStudyPlansResponse { bool successful = 1; }
+
+message RetrieveStudentStudyPlansRequest {
+  string student_id = 1;
+  google.protobuf.Timestamp from = 2;
+  google.protobuf.Timestamp to = 3;
+}
+
+message RetrieveStudentStudyPlansResponse {
+  message PlanWithStartDate {
+    PresetStudyPlan plan = 1;
+    int32 week = 2;
+    google.protobuf.Timestamp start_date = 3;
+  }
+  repeated PlanWithStartDate plan_with_start_dates = 1;
+}
+
+message RetrieveStudentStudyPlanWeekliesRequest {
+  string student_id = 1;
+  google.protobuf.Timestamp from = 2;
+  google.protobuf.Timestamp to = 3;
+  bool retrieve_all = 4;
+}
+
+message RetrieveStudentStudyPlanWeekliesResponse {
+  message TopicWithStartDate {
+    string topic_id = 1;
+    string topic_name = 2;
+    google.protobuf.Timestamp start_date = 3;
+    int32 total_los = 4;
+    int32 total_finished_los = 5;
+    BasicProfile assigned_by = 6;
+    google.protobuf.Timestamp end_date = 7;
+  }
+  repeated TopicWithStartDate topic_with_start_dates = 1;
+}
+
+message StudentStat {
+  int32 total_learning_time = 1;
+  int32 total_lo_finished = 2;
+  int32 total_lo = 3;
+  map<string, int32> crowns = 4; // AchievementCrown string => total
+}
+
+message FindStudentRequest { string phone = 1; }
+
+message FindStudentResponse { StudentProfile profile = 1; }
+
+message UpsertStudentCommentRequest { StudentComment student_comment = 1; }
+
+message UpsertStudentCommentResponse { bool successful = 1; }
+
+message RetrieveStudentCommentRequest { string student_id = 1; }
+
+message CommentInfo {
+  string coach_name = 1 [deprecated = true];
+  StudentComment student_comment = 2;
+}
+message RetrieveStudentCommentResponse { repeated CommentInfo comment = 1; }
+
+message RetrieveDailyLOFinishedRequest {
+  string student_id = 1;
+  google.protobuf.Timestamp from = 2;
+  google.protobuf.Timestamp to = 3;
+}
+
+message RetrieveDailyLOFinishedResponse {
+  message DailyLOFinished {
+    int32 total_lo_finished = 1;
+    google.protobuf.Timestamp day = 2;
+  }
+  int32 total_lo = 1;
+  repeated DailyLOFinished dailies = 2;
+}
+
+message StudyAheadTopic {
+  string topic_id = 1;
+  int32 week = 2;
+}
+
+message RetrieveStudyAheadTopicsRequest { string student_id = 1; }
+
+message RetrieveStudyAheadTopicsResponse {
+  repeated StudyAheadTopic study_ahead_topics = 1;
+}
+
+message CountTotalLOsFinishedRequest {
+  string student_id = 1;
+  google.protobuf.Timestamp from = 2;
+  google.protobuf.Timestamp to = 3;
+}
+
+message CountTotalLOsFinishedResponse { int32 total_los_finished = 1; }
+
+message RetrieveArchivedTopicsRequest { string student_id = 1; }
+
+message ArchivedTopic {
+  string topic_id = 1;
+  enum Status {
+    ARCHIVED_STATUS_COMPLETED = 0;
+    ARCHIVED_STATUS_EXPIRED = 1;
+  }
+  Status status = 2;
+}
+
+message RetrieveArchivedTopicsResponse { repeated ArchivedTopic topics = 1; }
+
+message StudentPermissionRequest {}
+
+message PermissionAllowGrade {
+  Subject subject = 1;
+  repeated PlanPrivilege plan_privileges = 2;
+}
+message Permission { repeated PermissionAllowGrade permissionAllowGrades = 1; }
+message StudentPermissionResponse { map<int32, Permission> permissions = 1; }
+
+message TopicOverdue {
+  Topic topic = 1;
+  google.protobuf.Timestamp due_date = 2;
+  BasicProfile assigned_by = 3;
+}
+
+message RetrieveOverdueTopicRequest { string student_id = 1; }
+
+message RetrieveOverdueTopicResponse { repeated TopicOverdue topics = 1; }
+
+message RetrieveCompletedTopicWeekliesRequest {
+  string student_id = 1;
+  google.protobuf.Timestamp from = 2;
+  google.protobuf.Timestamp to = 3;
+}
+
+message RetrieveCompletedTopicWeekliesResponse {
+  message TopicWithAssignBy {
+    Topic topics = 1;
+    BasicProfile assigned_by = 2;
+    google.protobuf.Timestamp completed_at = 3;
+  }
+  repeated Topic topics = 1 [ deprecated = true ];
+  repeated TopicWithAssignBy topics_with_assign_by = 2;
+}
+
+message SubmitAssignmentRequest {
+  string topic_id = 1;
+  google.protobuf.StringValue content = 2;
+  repeated Attachment attachments = 3;
+}
+
+message SubmitAssignmentResponse { string submission_id = 1; }
+
+message ListStudentSubmissionsRequest {
+  string topic_id = 1;
+  int32 limit = 2;
+  google.protobuf.StringValue offset_id = 3;
+}
+
+service Student {
+  rpc Register(RegisterRequest) returns (RegisterResponse) {
+    option deprecated = true;
+  };
+  rpc GetStudentProfile(GetStudentProfileRequest)
+      returns (GetStudentProfileResponse);
+  rpc UpdateProfile(UpdateProfileRequest) returns (UpdateProfileResponse);
+  rpc FindStudent(FindStudentRequest) returns (FindStudentResponse);
+  rpc RetrieveDailyLOFinished(RetrieveDailyLOFinishedRequest)
+      returns (RetrieveDailyLOFinishedResponse);
+  rpc RetrieveStudyAheadTopics(RetrieveStudyAheadTopicsRequest)
+      returns (RetrieveStudyAheadTopicsResponse){option deprecated = true;};
+  rpc RetrieveArchivedTopics(RetrieveArchivedTopicsRequest)
+      returns (RetrieveArchivedTopicsResponse){option deprecated = true;};
+  rpc CountTotalLOsFinished(CountTotalLOsFinishedRequest)
+      returns (CountTotalLOsFinishedResponse);
+
+  rpc RetrieveLearningProgress(RetrieveLearningProgressRequest)
+      returns (RetrieveLearningProgressResponse);
+
+  rpc AssignToCoach(AssignToCoachRequest) returns (AssignToCoachResponse){option deprecated = true;};
+
+  rpc RetrievePresetStudyPlans(RetrievePresetStudyPlansRequest)
+      returns (RetrievePresetStudyPlansResponse);
+  rpc RetrievePresetStudyPlanWeeklies(RetrievePresetStudyPlanWeekliesRequest)
+      returns (RetrievePresetStudyPlanWeekliesResponse);
+  rpc AssignPresetStudyPlans(AssignPresetStudyPlansRequest)
+      returns (AssignPresetStudyPlansResponse){option deprecated = true;};
+  rpc RetrieveStudentStudyPlans(RetrieveStudentStudyPlansRequest)
+      returns (RetrieveStudentStudyPlansResponse);
+  rpc RetrieveStudentStudyPlanWeeklies(RetrieveStudentStudyPlanWeekliesRequest)
+      returns (RetrieveStudentStudyPlanWeekliesResponse);
+
+  rpc UpsertStudentComment(UpsertStudentCommentRequest)
+      returns (UpsertStudentCommentResponse);
+  rpc RetrieveStudentComment(RetrieveStudentCommentRequest)
+      returns (RetrieveStudentCommentResponse);
+
+  rpc StudentPermission(StudentPermissionRequest)
+      returns (StudentPermissionResponse);
+  // use in profile screen
+
+  rpc RetrieveOverdueTopic(RetrieveOverdueTopicRequest)
+      returns (RetrieveOverdueTopicResponse){option deprecated = true;};
+  rpc RetrieveCompletedTopicWeeklies(RetrieveCompletedTopicWeekliesRequest)
+      returns (RetrieveCompletedTopicWeekliesResponse);
+
+  rpc SubmitAssignment(SubmitAssignmentRequest)
+      returns (SubmitAssignmentResponse) {option deprecated = true;};
+  rpc ListSubmissions(ListStudentSubmissionsRequest)
+      returns (ListSubmissionsResponse){option deprecated = true;};
+}

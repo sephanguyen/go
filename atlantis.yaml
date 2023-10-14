@@ -1,0 +1,1187 @@
+version: 3
+parallel_plan: true
+parallel_apply: true
+abort_on_execution_order_fail: true
+projects:
+- name: access-control
+  dir: deployments/terraform/live/workspace/access-control/
+  # This project depends on the kms-key-{staging-manabie-online, student-coach-e1e95} project[1], so it
+  # need to be applied *after* those dependant projects. To do that we need to set its execution_order_group
+  # greater than the ones in the kms-key projects.
+  # See more details at https://www.runatlantis.io/docs/repo-level-atlantis-yaml.html#order-of-planning-applying.
+  #
+  # Setting the execution_order_group to 3 is enough since it's greater than the ones in the kms-key projects,
+  # which is set to 1 and 2, respectively for staging and production environment.
+  #
+  # [1] See more details at https://github.com/manabie-com/backend/blob/bcf7c1e23c27ddd9f54c16562ef5b684658f846a/deployments/terraform/modules/access-control/google_group.tf#L176-L177
+  execution_order_group: 3
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../../modules/access-control/*.tf"
+    - "../../../../decl/owners.yaml"
+  workflow: access-control
+
+- name: stag-manabie-vpc
+  dir: deployments/terraform/live/stag-manabie/vpc
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../../modules/vpc/*.tf"
+- name: stag-manabie-platforms
+  dir: deployments/terraform/live/stag-manabie/platforms
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/platforms.hcl"
+    - "../../../modules/platforms/*.tf"
+- name: stag-manabie-platforms2
+  dir: deployments/terraform/live/stag-manabie/platforms2
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/platforms.hcl"
+    - "../../../modules/platforms/*.tf"
+- name: stag-manabie-apps
+  dir: deployments/terraform/live/stag-manabie/apps
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/stag-apps.hcl"
+    - "../../../../decl/stag-defs.yaml"
+    - "../../../modules/apps/*.tf"
+  workflow: access-control
+- name: stag-manabie-postgresql-common
+  dir: deployments/terraform/live/stag-manabie/postgresql-common
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/stag-apps.hcl"
+    - "../../../../decl/stag-defs.yaml"
+    - "../../../modules/postgresql/*.tf"
+- name: stag-manabie-postgresql-lms
+  dir: deployments/terraform/live/stag-manabie/postgresql-lms
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/stag-apps.hcl"
+    - "../../../../decl/stag-defs.yaml"
+    - "../../../modules/postgresql/*.tf"
+- name: stag-manabie-postgresql-auth
+  dir: deployments/terraform/live/stag-manabie/postgresql-auth
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/stag-apps.hcl"
+    - "../../../../decl/stag-defs.yaml"
+    - "../../../modules/postgresql/*.tf"
+- name: stag-manabie-log-metrics
+  dir: deployments/terraform/live/stag-manabie/log-metrics
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/log-metrics.hcl"
+    - "../../../modules/log-metrics/*.tf"
+- name: stag-manabie-project-roles
+  dir: deployments/terraform/live/stag-manabie/project-roles
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/project-roles.hcl"
+    - "../../../modules/project-roles/*.tf"
+- name: stag-manabie-project-grant
+  dir: deployments/terraform/live/stag-manabie/project-grant
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/project-grant.hcl"
+    - "../../../modules/project-grant/*.tf"
+    # - "../../workspace/access-control/*.hcl"
+- name: stag-manabie-postgresql-roles-common
+  dir: deployments/terraform/live/stag-manabie/postgresql-roles-common
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/postgresql-roles.hcl"
+    - "../../../modules/postgresql-roles/*.tf"
+    # - "../../workspace/access-control/*.hcl"
+- name: stag-manabie-postgresql-roles-lms
+  dir: deployments/terraform/live/stag-manabie/postgresql-roles-lms
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/postgresql-roles.hcl"
+    - "../../../modules/postgresql-roles/*.tf"
+    # - "../../workspace/access-control/*.hcl"
+- name: stag-manabie-postgresql-roles-auth
+  dir: deployments/terraform/live/stag-manabie/postgresql-roles-auth
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/postgresql-roles.hcl"
+    - "../../../modules/postgresql-roles/*.tf"
+- name: stag-manabie-postgresql-grant-common
+  dir: deployments/terraform/live/stag-manabie/postgresql-grant-common
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/postgresql-grant-v2.hcl"
+    - "../../../modules/postgresql-grant/*.tf"
+    # - "../../workspace/access-control/*.hcl"
+- name: stag-manabie-postgresql-grant-lms
+  dir: deployments/terraform/live/stag-manabie/postgresql-grant-lms
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/postgresql-grant-v2.hcl"
+    - "../../../modules/postgresql-grant/*.tf"
+    # - "../../workspace/access-control/*.hcl"
+- name: stag-manabie-postgresql-grant-auth
+  dir: deployments/terraform/live/stag-manabie/postgresql-grant-auth
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/postgresql-grant-v2.hcl"
+    - "../../../modules/postgresql-grant/*.tf"
+- name: stag-manabie-postgresql-grant-role-common
+  dir: deployments/terraform/live/stag-manabie/postgresql-grant-role-common
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../../modules/postgresql-grant-role/*.tf"
+- name: stag-manabie-postgresql-grant-role-lms
+  dir: deployments/terraform/live/stag-manabie/postgresql-grant-role-lms
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../../modules/postgresql-grant-role/*.tf"
+- name: stag-manabie-postgresql-grant-role-auth
+  dir: deployments/terraform/live/stag-manabie/postgresql-grant-role-auth
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../../modules/postgresql-grant-role/*.tf"
+- name: stag-manabie-uptime-checks
+  dir: deployments/terraform/live/stag-manabie/uptime-checks
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/uptime-checks.hcl"
+    - "../../../modules/uptime-checks/*.tf"
+- name: stag-manabie-gcp-dashboard
+  dir: deployments/terraform/live/stag-manabie/dashboard-monitoring
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../../modules/dashboard-monitoring/*.tf"
+    - "../../../modules/dashboard-monitoring/default/*.json"
+- name: stag-manabie-postgresql-change-db-type
+  dir: deployments/terraform/live/stag-manabie/change-db-type
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../../modules/change-db-type/*.tf"
+    - "../../../modules/change-db-type/src/*.go"
+    - "../../../modules/change-db-type/src/go.mod"
+    - "../../../modules/change-db-type/src/go.sum"
+
+- name: uat-manabie-apps
+  dir: deployments/terraform/live/uat-manabie/apps
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/uat-apps.hcl"
+    - "../../../../decl/uat-defs.yaml"
+    - "../../../modules/apps/*.tf"
+  workflow: access-control
+- name: uat-manabie-postgresql-common
+  dir: deployments/terraform/live/uat-manabie/postgresql-common
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/uat-apps.hcl"
+    - "../../../../decl/uat-defs.yaml"
+    - "../../../modules/apps/*.tf"
+- name: uat-manabie-postgresql-lms
+  dir: deployments/terraform/live/uat-manabie/postgresql-lms
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/uat-apps.hcl"
+    - "../../../../decl/uat-defs.yaml"
+    - "../../../modules/apps/*.tf"
+- name: uat-manabie-postgresql-grant-common
+  dir: deployments/terraform/live/uat-manabie/postgresql-grant-common
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/postgresql-grant.hcl"
+    - "../../../modules/postgresql-grant/*.tf"
+    # - "../../workspace/access-control/*.hcl"
+- name: uat-manabie-postgresql-grant-lms
+  dir: deployments/terraform/live/uat-manabie/postgresql-grant-lms
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/postgresql-grant.hcl"
+    - "../../../modules/postgresql-grant/*.tf"
+    # - "../../workspace/access-control/*.hcl"
+- name: uat-manabie-postgresql-auth
+  dir: deployments/terraform/live/uat-manabie/postgresql-auth
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/uat-apps.hcl"
+    - "../../../../decl/uat-defs.yaml"
+    - "../../../modules/postgresql/*.tf"
+
+- name: stag-jprep-apps
+  dir: deployments/terraform/live/stag-jprep/apps
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/stag-apps.hcl"
+    - "../../../../decl/stag-defs.yaml"
+    - "../../../modules/apps/*.tf"
+  workflow: access-control
+- name: stag-jprep-postgresql
+  dir: deployments/terraform/live/stag-jprep/postgresql
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/stag-apps.hcl"
+    - "../../../../decl/stag-defs.yaml"
+    - "../../../modules/postgresql/*.tf"
+- name: stag-jprep-uptime-checks
+  dir: deployments/terraform/live/stag-jprep/uptime-checks
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/uptime-checks.hcl"
+    - "../../../modules/uptime-checks/*.tf"
+
+- name: uat-jprep-platforms
+  dir: deployments/terraform/live/uat-jprep/platforms
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/platforms.hcl"
+    - "../../../modules/platforms/*.tf"
+- name: uat-jprep-apps
+  dir: deployments/terraform/live/uat-jprep/apps
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/uat-apps.hcl"
+    - "../../../../decl/uat-defs.yaml"
+    - "../../../modules/apps/*.tf"
+  workflow: access-control
+- name: uat-jprep-postgresql-roles
+  dir: deployments/terraform/live/uat-jprep/postgresql-roles
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/postgresql-roles.hcl"
+    - "../../../modules/postgresql-roles/*.tf"
+    # - "../../workspace/access-control/*.hcl"
+- name: uat-jprep-postgresql-grant
+  dir: deployments/terraform/live/uat-jprep/postgresql-grant
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/postgresql-grant.hcl"
+    - "../../../modules/postgresql-grant/*.tf"
+    # - "../../workspace/access-control/*.hcl"
+- name: uat-jprep-postgresql-grant-role
+  dir: deployments/terraform/live/uat-jprep/postgresql-grant-role
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../../modules/postgresql-grant-role/*.tf"
+
+- name: uat-manabie-uptime-checks
+  dir: deployments/terraform/live/uat-manabie/uptime-checks
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/uptime-checks.hcl"
+    - "../../../modules/uptime-checks/*.tf"
+
+- name: uat-jprep-uptime-checks
+  dir: deployments/terraform/live/uat-jprep/uptime-checks
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/uptime-checks.hcl"
+    - "../../../modules/uptime-checks/*.tf"
+
+
+- name: prod-manabie-project-services
+  dir: deployments/terraform/live/prod-manabie/project-services
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/project-services.hcl"
+    - "../../../modules/project-services/*.tf"
+- name: prod-manabie-vpc
+  dir: deployments/terraform/live/prod-manabie/vpc
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../../modules/vpc/*.tf"
+- name: prod-manabie-platforms
+  dir: deployments/terraform/live/prod-manabie/platforms
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/platforms.hcl"
+    - "../../../modules/platforms/*.tf"
+    # - "../../workspace/access-control/*.hcl"
+
+- name: jp-partners-vpc
+  dir: deployments/terraform/live/jp-partners/vpc
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../../modules/vpc/*.tf"
+- name: jp-partners-platforms
+  dir: deployments/terraform/live/jp-partners/platforms
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/platforms.hcl"
+    - "../../../modules/platforms/*.tf"
+- name: jp-partners-project-roles
+  dir: deployments/terraform/live/jp-partners/project-roles
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/project-roles.hcl"
+    - "../../../modules/project-roles/*.tf"
+- name: jp-partners-project-grant
+  dir: deployments/terraform/live/jp-partners/project-grant
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/project-grant.hcl"
+    - "../../../modules/project-grant/*.tf"
+    # - "../../workspace/access-control/*.hcl"
+- name: jp-partners-postgresql-roles
+  dir: deployments/terraform/live/jp-partners/postgresql-roles
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/postgresql-roles.hcl"
+    - "../../../modules/postgresql-roles/*.tf"
+    # - "../../workspace/access-control/*.hcl"
+- name: jp-partners-postgresql-grant-role
+  dir: deployments/terraform/live/jp-partners/postgresql-grant-role
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../../modules/postgresql-grant-role/*.tf"
+- name: jp-partners-log-metrics
+  dir: deployments/terraform/live/jp-partners/log-metrics
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/log-metrics.hcl"
+    - "../../../modules/log-metrics/*.tf"
+
+- name: prod-ga-project-services
+  dir: deployments/terraform/live/prod-ga/project-services
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/project-services.hcl"
+    - "../../../modules/project-services/*.tf"
+- name: prod-ga-apps
+  dir: deployments/terraform/live/prod-ga/apps
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/prod-apps.hcl"
+    - "../../../../decl/prod-defs.yaml"
+    - "../../../modules/apps/*.tf"
+  workflow: access-control
+- name: prod-ga-postgresql-grant
+  dir: deployments/terraform/live/prod-ga/postgresql-grant
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/postgresql-grant.hcl"
+    - "../../../modules/postgresql-grant/*.tf"
+    # - "../../workspace/access-control/*.hcl"
+
+- name: prod-aic-project-services
+  dir: deployments/terraform/live/prod-aic/project-services
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/project-services.hcl"
+    - "../../../modules/project-services/*.tf"
+- name: prod-aic-apps
+  dir: deployments/terraform/live/prod-aic/apps
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/prod-apps.hcl"
+    - "../../../../decl/prod-defs.yaml"
+    - "../../../modules/apps/*.tf"
+  workflow: access-control
+- name: prod-aic-postgresql-grant
+  dir: deployments/terraform/live/prod-aic/postgresql-grant
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/postgresql-grant.hcl"
+    - "../../../modules/postgresql-grant/*.tf"
+    # - "../../workspace/access-control/*.hcl"
+
+- name: prod-renseikai-project-services
+  dir: deployments/terraform/live/prod-renseikai/project-services
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/project-services.hcl"
+    - "../../../modules/project-services/*.tf"
+- name: prod-renseikai-vpc
+  dir: deployments/terraform/live/prod-renseikai/vpc
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../../modules/vpc/*.tf"
+- name: prod-renseikai-platforms
+  dir: deployments/terraform/live/prod-renseikai/platforms
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/platforms.hcl"
+    - "../../../modules/platforms/*.tf"
+- name: prod-renseikai-apps
+  dir: deployments/terraform/live/prod-renseikai/apps
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/prod-apps.hcl"
+    - "../../../../decl/prod-defs.yaml"
+    - "../../../modules/apps/*.tf"
+  workflow: access-control
+- name: prod-renseikai-project-roles
+  dir: deployments/terraform/live/prod-renseikai/project-roles
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/project-roles.hcl"
+    - "../../../modules/project-roles/*.tf"
+- name: prod-renseikai-project-grant
+  dir: deployments/terraform/live/prod-renseikai/project-grant
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/project-grant.hcl"
+    - "../../../modules/project-grant/*.tf"
+    # - "../../workspace/access-control/*.hcl"
+- name: prod-renseikai-postgresql-roles
+  dir: deployments/terraform/live/prod-renseikai/postgresql-roles
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/postgresql-roles.hcl"
+    - "../../../modules/postgresql-roles/*.tf"
+    # - "../../workspace/access-control/*.hcl"
+- name: prod-renseikai-postgresql-grant
+  dir: deployments/terraform/live/prod-renseikai/postgresql-grant
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/postgresql-grant.hcl"
+    - "../../../modules/postgresql-grant/*.tf"
+    # - "../../workspace/access-control/*.hcl"
+- name: prod-renseikai-postgresql-grant-role
+  dir: deployments/terraform/live/prod-renseikai/postgresql-grant-role
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../../modules/postgresql-grant-role/*.tf"
+
+- name: prod-synersia-project-services
+  dir: deployments/terraform/live/prod-synersia/project-services
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/project-services.hcl"
+    - "../../../modules/project-services/*.tf"
+- name: prod-synersia-vpc
+  dir: deployments/terraform/live/prod-synersia/vpc
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../../modules/vpc/*.tf"
+- name: prod-synersia-platforms
+  dir: deployments/terraform/live/prod-synersia/platforms
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/platforms.hcl"
+    - "../../../modules/platforms/*.tf"
+- name: prod-synersia-apps
+  dir: deployments/terraform/live/prod-synersia/apps
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/prod-apps.hcl"
+    - "../../../../decl/prod-defs.yaml"
+    - "../../../modules/apps/*.tf"
+  workflow: access-control
+- name: prod-synersia-project-roles
+  dir: deployments/terraform/live/prod-synersia/project-roles
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/project-roles.hcl"
+    - "../../../modules/project-roles/*.tf"
+- name: prod-synersia-project-grant
+  dir: deployments/terraform/live/prod-synersia/project-grant
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/project-grant.hcl"
+    - "../../../modules/project-grant/*.tf"
+    # - "../../workspace/access-control/*.hcl"
+- name: prod-synersia-postgresql-roles
+  dir: deployments/terraform/live/prod-synersia/postgresql-roles
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/postgresql-roles.hcl"
+    - "../../../modules/postgresql-roles/*.tf"
+    # - "../../workspace/access-control/*.hcl"
+- name: prod-synersia-postgresql-grant
+  dir: deployments/terraform/live/prod-synersia/postgresql-grant
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/postgresql-grant.hcl"
+    - "../../../modules/postgresql-grant/*.tf"
+    # - "../../workspace/access-control/*.hcl"
+# - name: prod-synersia-postgresql-grant-role
+#   dir: deployments/terraform/live/prod-synersia/postgresql-grant-role
+#   autoplan:
+#     enabled: true
+#     when_modified:
+#     - "*.hcl"
+#     - "../../../modules/postgresql-grant-role/*.tf"
+
+- name: prod-jprep-project-services
+  dir: deployments/terraform/live/prod-jprep/project-services
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/project-services.hcl"
+    - "../../../modules/project-services/*.tf"
+- name: prod-jprep-vpc
+  dir: deployments/terraform/live/prod-jprep/vpc
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../../modules/vpc/*.tf"
+# - name: prod-jprep-platforms
+#   dir: deployments/terraform/live/prod-jprep/platforms
+#   autoplan:
+#     enabled: true
+#     when_modified:
+#     - "*.hcl"
+#     - "../../_env/platforms.hcl"
+#     - "../../../modules/platforms/*.tf"
+- name: prod-jprep2-platforms
+  dir: deployments/terraform/live/prod-jprep2/platforms
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/platforms.hcl"
+    - "../../../modules/platforms/*.tf"
+# - name: prod-jprep-apps
+#   dir: deployments/terraform/live/prod-jprep/apps
+#   autoplan:
+#     enabled: true
+#     when_modified:
+#     - "*.hcl"
+#     - "../../_env/prod-apps.hcl"
+#     - "../../../../decl/prod-defs.yaml"
+#     - "../../../modules/apps/*.tf"
+#   workflow: access-control
+- name: prod-jprep2-apps
+  dir: deployments/terraform/live/prod-jprep2/apps
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/prod-apps.hcl"
+    - "../../../../decl/prod-defs.yaml"
+    - "../../../modules/apps/*.tf"
+  workflow: access-control
+- name: prod-jprep-log-metrics
+  dir: deployments/terraform/live/prod-jprep/log-metrics
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/log-metrics.hcl"
+    - "../../../modules/log-metrics/*.tf"
+- name: prod-jprep-project-roles
+  dir: deployments/terraform/live/prod-jprep/project-roles
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/project-roles.hcl"
+    - "../../../modules/project-roles/*.tf"
+- name: prod-jprep-project-grant
+  dir: deployments/terraform/live/prod-jprep/project-grant
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/project-grant.hcl"
+    - "../../../modules/project-grant/*.tf"
+    # - "../../workspace/access-control/*.hcl"
+- name: prod-jprep-postgresql-roles
+  dir: deployments/terraform/live/prod-jprep2/postgresql-roles
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/postgresql-roles.hcl"
+    - "../../../modules/postgresql-roles/*.tf"
+    # - "../../workspace/access-control/*.hcl"
+- name: prod-jprep-postgresql-grant
+  dir: deployments/terraform/live/prod-jprep2/postgresql-grant
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/postgresql-grant.hcl"
+    - "../../../modules/postgresql-grant/*.tf"
+    # - "../../workspace/access-control/*.hcl"
+- name: prod-jprep-postgresql-grant-role
+  dir: deployments/terraform/live/prod-jprep2/postgresql-grant-role
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../../modules/postgresql-grant-role/*.tf"
+
+- name: prod-aic-uptime-checks
+  dir: deployments/terraform/live/prod-aic/uptime-checks
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/uptime-checks.hcl"
+    - "../../../modules/uptime-checks/*.tf"
+
+- name: prod-ga-uptime-checks
+  dir: deployments/terraform/live/prod-ga/uptime-checks
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/uptime-checks.hcl"
+    - "../../../modules/uptime-checks/*.tf"
+
+- name: prod-jprep-uptime-checks
+  dir: deployments/terraform/live/prod-jprep/uptime-checks
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/uptime-checks.hcl"
+    - "../../../modules/uptime-checks/*.tf"
+
+- name: prod-renseikai-uptime-checks
+  dir: deployments/terraform/live/prod-renseikai/uptime-checks
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/uptime-checks.hcl"
+    - "../../../modules/uptime-checks/*.tf"
+
+- name: prod-synersia-uptime-checks
+  dir: deployments/terraform/live/prod-synersia/uptime-checks
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/uptime-checks.hcl"
+    - "../../../modules/uptime-checks/*.tf"
+
+- name: jp-partners-deploy-bot-gke-rbac
+  dir: deployments/terraform/live/jp-partners/deploy-bot/gke-rbac
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../../../modules/deploy-bot/gke-rbac/*.tf"
+
+- name: jp-partners-dorp-deploy-bot-service-account
+  dir: deployments/terraform/live/jp-partners/deploy-bot/service-account
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../../../modules/deploy-bot/service-account/*.tf"
+
+- name: jp-partners-deploy-bot-iam
+  dir: deployments/terraform/live/jp-partners/deploy-bot/iam
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../../../modules/deploy-bot/iam/*.tf"
+
+- name: prod-aic-deploy-bot-gke-rbac
+  dir: deployments/terraform/live/prod-aic/deploy-bot/gke-rbac
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../../../modules/deploy-bot/gke-rbac/*.tf"
+
+- name: prod-ga-deploy-bot-gke-rbac
+  dir: deployments/terraform/live/prod-ga/deploy-bot/gke-rbac
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../../../modules/deploy-bot/gke-rbac/*.tf"
+
+- name: prod-jprep-deploy-bot-iam
+  dir: deployments/terraform/live/prod-jprep/deploy-bot/iam
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../../../modules/deploy-bot/iam/*.tf"
+
+- name: prod-renseikai-deploy-bot-gke-rbac
+  dir: deployments/terraform/live/prod-renseikai/deploy-bot/gke-rbac
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../../../modules/deploy-bot/gke-rbac/*.tf"
+
+- name: prod-renseikai-deploy-bot-iam
+  dir: deployments/terraform/live/prod-renseikai/deploy-bot/iam
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../../../modules/deploy-bot/iam/*.tf"
+
+- name: prod-synersia-deploy-bot-gke-rbac
+  dir: deployments/terraform/live/prod-synersia/deploy-bot/gke-rbac
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../../../modules/deploy-bot/gke-rbac/*.tf"
+
+- name: prod-synersia-deploy-bot-iam
+  dir: deployments/terraform/live/prod-synersia/deploy-bot/iam
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../../../modules/deploy-bot/iam/*.tf"
+
+# Sort all of this up sometimes, maybe in alphabetical order? @anhpngt
+# Try `yq 'sort_by(.dir)' atlantis.yaml`
+- name: prod-tokyo-apps
+  dir: deployments/terraform/live/prod-tokyo/apps
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/prod-apps.hcl"
+    - "../../../../decl/prod-defs.yaml"
+    - "../../../modules/apps/*.tf"
+  workflow: access-control
+- name: prod-tokyo-postgresql-common
+  dir: deployments/terraform/live/prod-tokyo/postgresql-common
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/prod-apps.hcl"
+    - "../../../../decl/prod-defs.yaml"
+    - "../../../modules/postgresql/*.tf"
+- name: prod-tokyo-postgresql-lms
+  dir: deployments/terraform/live/prod-tokyo/postgresql-lms
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/prod-apps.hcl"
+    - "../../../../decl/prod-defs.yaml"
+    - "../../../modules/postgresql/*.tf"
+- name: prod-tokyo-postgresql-data-warehouse
+  dir: deployments/terraform/live/prod-tokyo/postgresql-data-warehouse
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../../modules/postgresql/*.tf"
+- name: prod-tokyo-postgresql-auth
+  dir: deployments/terraform/live/prod-tokyo/postgresql-auth
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/prod-apps.hcl"
+    - "../../../../decl/prod-defs.yaml"
+    - "../../../modules/postgresql/*.tf"
+
+- name: prod-tokyo-platforms
+  dir: deployments/terraform/live/prod-tokyo/platforms
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/platforms.hcl"
+    - "../../../modules/platforms/*.tf"
+
+- name: prod-tokyo-postgresql-roles-auth
+  dir: deployments/terraform/live/prod-tokyo/postgresql-roles-auth
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/postgresql-roles.hcl"
+    - "../../../modules/postgresql-roles/*.tf"
+- name: prod-tokyo-postgresql-roles-common
+  dir: deployments/terraform/live/prod-tokyo/postgresql-roles-common
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/postgresql-roles.hcl"
+    - "../../../modules/postgresql-roles/*.tf"
+- name: prod-tokyo-postgresql-roles-lms
+  dir: deployments/terraform/live/prod-tokyo/postgresql-roles-lms
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/postgresql-roles.hcl"
+    - "../../../modules/postgresql-roles/*.tf"
+
+- name: prod-tokyo-postgresql-grant-auth
+  dir: deployments/terraform/live/prod-tokyo/postgresql-grant-auth
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/postgresql-grant-v2.hcl"
+    - "../../../modules/postgresql-grant/*.tf"
+- name: prod-tokyo-postgresql-grant-common
+  dir: deployments/terraform/live/prod-tokyo/postgresql-grant-common
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/postgresql-grant-v2.hcl"
+    - "../../../modules/postgresql-grant/*.tf"
+- name: prod-tokyo-postgresql-grant-lms
+  dir: deployments/terraform/live/prod-tokyo/postgresql-grant-lms
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/postgresql-grant-v2.hcl"
+    - "../../../modules/postgresql-grant/*.tf"
+
+- name: prod-tokyo-postgresql-grant-role-auth
+  dir: deployments/terraform/live/prod-tokyo/postgresql-grant-role-auth
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../../modules/postgresql-grant-role/*.tf"
+- name: prod-tokyo-postgresql-grant-role-common
+  dir: deployments/terraform/live/prod-tokyo/postgresql-grant-role-common
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../../modules/postgresql-grant-role/*.tf"
+- name: prod-tokyo-postgresql-grant-role-lms
+  dir: deployments/terraform/live/prod-tokyo/postgresql-grant-role-lms
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../../modules/postgresql-grant-role/*.tf"
+
+- name: prod-tokyo-project-grant
+  dir: deployments/terraform/live/prod-tokyo/project-grant
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/project-grant.hcl"
+    - "../../../modules/project-grant/*.tf"
+
+- name: prod-tokyo-vpc
+  dir: deployments/terraform/live/prod-tokyo/vpc
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../../modules/vpc/*.tf"
+
+- name: prod-tokyo-log-metrics
+  dir: deployments/terraform/live/prod-tokyo/log-metrics
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/log-metrics.hcl"
+    - "../../../modules/log-metrics/*.tf"
+
+- name: prod-tokyo-gcp-dashboard
+  dir: deployments/terraform/live/prod-tokyo/dashboard-monitoring
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../../modules/dashboard-monitoring/*.tf"
+    - "../../../modules/dashboard-monitoring/default/*.json"
+
+- name: prod-tokyo-uptime-checks
+  dir: deployments/terraform/live/prod-tokyo/uptime-checks
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/uptime-checks.hcl"
+    - "../../../modules/uptime-checks/*.tf"
+
+- name: analytics-apps
+  dir: deployments/terraform/live/prod-tokyo/analytics-apps
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    # - "../../../modules/apps/*.tf"
+
+- name: analytics-platforms
+  dir: deployments/terraform/live/prod-tokyo/analytics-platforms
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../_env/platforms.hcl"
+    - "../../../modules/platforms/*.tf"
+
+- name: create-trigger
+  dir: deployments/terraform/live/cloud-build-trigger/create-trigger
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../../modules/cloud-build-trigger/*.tf"
+
+- name: kms-key-staging-manabie-online
+  dir: deployments/terraform/live/kms-key/staging-manabie-online
+  execution_order_group: 1
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../env.hcl"
+    - "../../../../decl/stag-defs.yaml"
+    - "../../../../decl/uat-defs.yaml"
+    - "../../../modules/kms-key/*.tf"
+
+- name: kms-key-student-coach-e1e95
+  dir: deployments/terraform/live/kms-key/student-coach-e1e95
+  execution_order_group: 2
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../env.hcl"
+    - "../../../../decl/prod-defs.yaml"
+    - "../../../modules/kms-key/*.tf"
+
+- name: cloudflare-dns
+  dir: deployments/terraform/live/cloudflare/cloudflare-dns
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../../../modules/cloudflare-dns/*.tf"
+
+- name: staging-manabie-online-gh-oidc
+  dir: deployments/terraform/live/github-oidc/staging-manabie-online
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../env.hcl"
+    - "../../../modules/github-oidc/*.tf"
+
+- name: student-coach-e1e95-gh-oidc
+  dir: deployments/terraform/live/github-oidc/student-coach-e1e95
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../env.hcl"
+    - "../../../modules/github-oidc/*.tf"
+
+- name: uat-manabie-gh-oidc
+  dir: deployments/terraform/live/github-oidc/uat-manabie
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../env.hcl"
+    - "../../../modules/github-oidc/*.tf"
+
+- name: staging-manabie-online-logging-project-exclusions
+  dir: deployments/terraform/live/logging-project-exclusions/staging-manabie-online
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../env.hcl"
+    - "../../../modules//*.tf"
+    - "../../../../decl/stag-defs.yaml"
+    - "../../../../decl/uat-defs.yaml"
+
+- name: staging-manabie-online-logging-project-sinks
+  dir: deployments/terraform/live/logging-project-sinks/staging-manabie-online
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../env.hcl"
+    - "../../../modules//*.tf"
+    - "../../../../decl/stag-defs.yaml"
+    - "../../../../decl/uat-defs.yaml"
+
+- name: student-coach-e1e95-logging-project-exclusions
+  dir: deployments/terraform/live/logging-project-exclusions/student-coach-e1e95
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../env.hcl"
+    - "../../../modules//*.tf"
+    - "../../../../decl/prod-defs.yaml"
+
+- name: student-coach-e1e95-logging-project-sinks
+  dir: deployments/terraform/live/logging-project-sinks/student-coach-e1e95
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../env.hcl"
+    - "../../../modules//*.tf"
+    - "../../../../decl/prod-defs.yaml"
+
+- name: terraform-staging-state-bucket
+  dir: deployments/terraform/live/terraform-state-bucket/staging
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../env.hcl"
+    - "../../../modules/simple-bucket/*.tf"
+- name: terraform-production-state-bucket
+  dir: deployments/terraform/live/terraform-state-bucket/production
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.hcl"
+    - "../env.hcl"
+    - "../../../modules/simple-bucket/*.tf"

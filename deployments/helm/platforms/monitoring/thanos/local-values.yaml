@@ -1,0 +1,22 @@
+objstoreConfig: |-
+  type: S3
+  config:
+    bucket: thanos
+    endpoint: thanos-minio:9000
+    access_key: minio
+    secret_key: minio123
+    insecure: true
+
+query:
+  stores:
+    - prometheus-server-thanos:10901
+
+storegateway:
+  enabled: true
+
+minio:
+  enabled: true
+  auth:
+    rootUser: minio
+    rootPassword: minio123
+  defaultBuckets: thanos

@@ -1,0 +1,93 @@
+apiVersion: actions.summerwind.dev/v1alpha1
+kind: RunnerDeployment
+metadata:
+  name: 100m-400mi-spot-persistent-runnerdeploy
+  namespace: actions-runner-system
+spec:
+  template:
+    metadata:
+      labels:
+        app: 100m-400mi-spot-persistent-runnerdeploy
+      annotations:
+        cluster-autoscaler.kubernetes.io/safe-to-evict: 'true'
+    spec:
+      dockerMTU: 1400
+      dockerRegistryMirror: https://mirror.gcr.io/
+      dockerdWithinRunnerContainer: true
+      ephemeral: false
+      organization: manabie-com
+      image: asia-docker.pkg.dev/student-coach-e1e95/manaverse/actions-runner-dind:v2.307.1-ubuntu-20.04
+      labels:
+        - custom-runner
+        - 100m-400mi
+        - spot
+        - persistent
+        - 100m-400mi-spot-persistent-runner
+      env:
+        - name: DISABLE_RUNNER_UPDATE
+          value: 'true'
+        - name: RUNNER_GRACEFUL_STOP_TIMEOUT
+          value: '20' # See https://github.com/actions-runner-controller/actions-runner-controller/blob/master/docs/detailed-docs.md#runner-graceful-termination
+      nodeSelector:
+        cloud.google.com/gke-nodepool: 't2d-standard-1-runners-spot'
+      tolerations:
+        - effect: NoSchedule
+          key: 't2d-standard-1-runners-spot'
+          operator: Exists
+      resources:
+        requests:
+          cpu: 100m
+          memory: 400Mi
+        limits:
+          memory: 960Mi
+      imagePullPolicy: IfNotPresent
+      terminationGracePeriodSeconds: 25 # See https://cloud.google.com/kubernetes-engine/docs/concepts/spot-vms#termination-graceful-shutdown
+---
+apiVersion: actions.summerwind.dev/v1alpha1
+kind: HorizontalRunnerAutoscaler
+metadata:
+  name: 100m-400mi-spot-persistent-runner-deployment-autoscaler
+  namespace: actions-runner-system
+spec:
+  maxReplicas: 12
+  minReplicas: 0
+  scaleTargetRef:
+    name: 100m-400mi-spot-persistent-runnerdeploy
+    kind: RunnerDeployment
+  metrics:
+    # default values in documentation for now
+    - type: PercentageRunnersBusy
+      scaleUpThreshold: '0.8'
+      scaleUpFactor: '1.4'
+      scaleDownThreshold: '0.5'
+      scaleDownFactor: '0.7'
+    - repositoryNames:
+      - backend
+      - school-portal-admin
+      - student-app
+      - eibanam
+      - mana-packs
+      type: TotalNumberOfQueuedAndInProgressWorkflowRuns
+  scaleUpTriggers:
+    - amount: 1
+      duration: 30m0s
+      githubEvent:
+        workflowJob: {}
+  scheduledOverrides:
+    # On Sundays at 11:30 PM to next Monday 03:30 AM
+    - startTime: '2023-05-28T23:30:00+07:00'
+      endTime: '2023-05-29T03:30:00+07:00'
+      minReplicas: 3
+      recurrenceRule:
+        frequency: Weekly
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: 100m-400mi-spot-persistent-runnerdeploy
+  namespace: actions-runner-system
+spec:
+  minAvailable: 0
+  selector:
+    matchLabels:
+      runner-deployment-name: 100m-400mi-spot-persistent-runnerdeploy

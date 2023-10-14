@@ -1,0 +1,4 @@
+ALTER TABLE public.order
+    ADD COLUMN IF NOT EXISTS reason text DEFAULT NULL,
+    ADD COLUMN IF NOT EXISTS background text DEFAULT NULL,
+    ADD COLUMN IF NOT EXISTS future_measures text DEFAULT NULL;

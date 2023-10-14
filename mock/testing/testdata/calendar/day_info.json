@@ -1,0 +1,133 @@
+{
+	"schema": [
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "date",
+			"data_type": "date",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "day_type_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "location_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "opening_time",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "status",
+			"data_type": "USER-DEFINED",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "time_zone",
+			"data_type": "text",
+			"column_default": "current_setting('TIMEZONE'::text)",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "day_info",
+			"policyname": "rls_day_info",
+			"qual": "permission_check(resource_path, 'day_info'::text)",
+			"with_check": "permission_check(resource_path, 'day_info'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "day_info",
+			"policyname": "rls_day_info_restrictive",
+			"qual": "permission_check(resource_path, 'day_info'::text)",
+			"with_check": "permission_check(resource_path, 'day_info'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "day_info_fk",
+			"column_name": "day_type_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "day_info_fk",
+			"column_name": "resource_path",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "day_info_pk",
+			"column_name": "date",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "day_info_pk",
+			"column_name": "location_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "day_info",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

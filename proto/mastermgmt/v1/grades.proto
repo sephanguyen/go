@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package mastermgmt.v1;
+import "google/api/annotations.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/mastermgmt/v1;mpb";
+
+message ExportGradesRequest {
+}
+
+message ImportGradesRequest {
+  bytes payload = 1;
+}
+
+message ImportGradesResponse {
+}
+
+message ExportGradesResponse {
+  bytes data = 1;
+}
+
+service GradeService {
+  rpc ImportGrades(ImportGradesRequest) returns (ImportGradesResponse) {
+    option (google.api.http) = {
+      post: "/mastermgmt/api/v1/proxy/grades",
+      body: "*"
+    };
+  };
+  rpc ExportGrades(ExportGradesRequest) returns (ExportGradesResponse) {
+    option (google.api.http) = {
+        get: "/mastermgmt/api/v1/proxy/grades/export"
+    };
+  };
+}

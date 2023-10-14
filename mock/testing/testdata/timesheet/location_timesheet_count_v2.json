@@ -1,0 +1,112 @@
+{
+	"schema": [
+		{
+			"column_name": "approved_count",
+			"data_type": "bigint",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "confirmed_count",
+			"data_type": "bigint",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "draft_count",
+			"data_type": "bigint",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "is_confirmed",
+			"data_type": "boolean",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "location_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "name",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "submitted_count",
+			"data_type": "bigint",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "unconfirmed_count",
+			"data_type": "bigint",
+			"column_default": null,
+			"is_nullable": "YES"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "location_timesheet_count_v2",
+			"policyname": "rls_location_timesheet_count_v2",
+			"qual": "permission_check(resource_path, 'location_timesheet_count_v2'::text)",
+			"with_check": "permission_check(resource_path, 'location_timesheet_count_v2'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "location_timesheet_count_v2",
+			"policyname": "rls_location_timesheet_count_v2_restrictive",
+			"qual": "permission_check(resource_path, 'location_timesheet_count_v2'::text)",
+			"with_check": "permission_check(resource_path, 'location_timesheet_count_v2'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [],
+	"table_name": "location_timesheet_count_v2",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

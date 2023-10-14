@@ -1,0 +1,5 @@
+0000000000000000000000000000000000000000 45b09733a9959d704cba0d01641ba5d400243230 Tuan Anh <anh.pngt@gmail.com> 1668672354 +0700	commit (initial): Init test repository
+45b09733a9959d704cba0d01641ba5d400243230 2d51052a46b17886e85a8e5dfb6d187c385ea8d7 Tuan Anh <anh.pngt@gmail.com> 1668672645 +0700	commit: Add README.md
+2d51052a46b17886e85a8e5dfb6d187c385ea8d7 9bec05af56f52aed98764a83ac07b2a6676dd409 Tuan Anh <anh.pngt@gmail.com> 1668673966 +0700	commit (amend): Add README.md
+9bec05af56f52aed98764a83ac07b2a6676dd409 5c126559ff5a252dc51fbaac64a3dcbbf96c0844 Tuan Anh <anh.pngt@gmail.com> 1668673999 +0700	commit (amend): Add README.md and sample code
+5c126559ff5a252dc51fbaac64a3dcbbf96c0844 caa2bd67999e52096a34c9eed4a0966701570a47 Tuan Anh <anh.pngt@gmail.com> 1669628860 +0700	commit: Fix typo GIR_DIR->GIT_DIR

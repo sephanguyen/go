@@ -1,0 +1,64 @@
+@startuml RemoveTeacherFromSchool
+actor Client as Client order 10
+participant Yasuo as Yasuo order 20
+participant NATS as NATS order 30
+participant Tom as Tom order 40
+
+Client -> Yasuo: Call "/manabie.yasuo.SchoolService/RemoveTeacherFromSchool"
+activate Yasuo
+note over Yasuo
+ 1. handlePermissionToAddAndRemoveTeacherFromSchool 
+  * get schools in **bob.schools** by schoolID
+  * get teacher in **bob.teachers** by teacherID
+  * check teacher isInSchool
+ 2. get admin on **bob.user** by adminID
+ 3. if admin.Group == USER_GROUP_SCHOOL_ADMIN || 
+ admin.Group == USER_GROUP_SCHOOL_STAFF: 
+  * get schoolAdmin in **bob.school_admins** by adminID
+ 4. Run in transaction
+  * get classes in **bob.classes** by req.SchoolId
+  * update **bob.class_member** 
+  * publish msg EvtClassRoom_LeaveClass on "class_event"
+  * update **bob.teachers**
+  * addLogWhenAddAndRemoveTeacherFromSchool
+end note
+Yasuo -> NATS: Publish message EvtClassRoom_LeaveClass_\n on "lesson_event"
+Yasuo -> Client: Return RemoveTeacherFromSchoolResponse
+deactivate Yasuo
+note right Yasuo
+ &pb_bob.EvtClassRoom{
+   Message: &pb_bob.EvtClassRoom{
+    LeaveClass: &pb_bob.EvtClassRoom_LeaveClass{
+     ClassId: classID,
+     UserIds: []string{req.TeacherId},
+     IsKicked: true,
+     },
+    },
+  }
+end note
+NATS -> Tom: Publish message EvtClassRoom_LeaveClass_ on\n "class_event"
+activate Tom
+note over Tom
+ 1. handleEventLeaveClass
+ * get classConversation in conversation_class by classID
+ * ExecInTX:
+   - update status in **tom.conversation_members** 
+     by user_id and classConversation.conversation_id
+   - for range msg.userIds: sendMessage
+     + get conversationMembers in **tom.conversation_members** 
+       \tby conversationID
+     + insert **tom.messages**
+     + PublishEventCluster -> publish msg Event_EventNewMessage 
+       on "subject_send_chat_message"
+end note
+Tom -> NATS: publish Event_EventNewMessage\n on "subject_send_chat_message"
+deactivate Tom
+NATS -> Tom: Publish message Event_EventNewMessage on\n "subject_send_chat_message"
+note right Tom
+ &pb.Event{
+   Event: &pb.Event_EventNewMessage{
+     EventNewMessage: messageResponse,
+   },
+ }
+end note
+@enduml

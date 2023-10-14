@@ -1,0 +1,1 @@
+ALTER TABLE public.order ADD COLUMN student_full_name text NOT NULL;

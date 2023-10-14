@@ -1,0 +1,5 @@
+ALTER TABLE public.file
+DROP CONSTRAINT IF EXISTS file_pk;
+
+ALTER TABLE ONLY public.file
+ADD CONSTRAINT file_pk PRIMARY KEY (file_id);

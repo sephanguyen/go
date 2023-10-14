@@ -1,0 +1,12 @@
+- template: 1
+  tableName: invoice
+  locationCol: location_id
+  accessPathTable:
+    name: user_access_paths
+    columnMapping:
+      student_id: user_id
+  permissionPrefix: payment.invoice
+  permissions:
+    postgres: []
+    hasura: []
+  postgresPolicyVersion: 1

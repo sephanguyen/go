@@ -1,0 +1,155 @@
+- template: 1
+  tableName: info_notifications_access_paths
+  useCustomPolicy: true
+  postgresPolicy:
+    - name: rls_info_notifications_access_paths_location_permission_v4
+      for: all
+      using: |
+        true <= (
+          select
+              true
+          from
+              granted_permissions p
+          where
+              p.user_id = current_setting('app.user_id')
+              and p.location_id = info_notifications_access_paths.location_id
+              and (
+                  p.permission_id = (
+                    select p2.permission_id 
+                    from permission p2
+                    where p2.permission_name = 'communication.notification.read' and p2.resource_path = current_setting('permission.resource_path')
+                  )
+                  or (
+                      p.permission_id = (
+                        select p2.permission_id 
+                        from permission p2
+                        where p2.permission_name = 'communication.notification.owner' and p2.resource_path = current_setting('permission.resource_path')
+                      )
+                      and info_notifications_access_paths.created_user_id = current_setting('app.user_id')
+                  )
+              )
+          limit 1
+        )
+      withCheck: |
+        true <= (
+            select
+                true
+            from
+                granted_permissions p
+            where
+                p.user_id = current_setting('app.user_id')
+                and p.location_id = info_notifications_access_paths.location_id
+                and (
+                    p.permission_id = (
+                      select p2.permission_id 
+                      from permission p2
+                      where p2.permission_name = 'communication.notification.write' and p2.resource_path = current_setting('permission.resource_path')
+                    )
+                    or (
+                        p.permission_id = (
+                          select p2.permission_id 
+                          from permission p2
+                          where p2.permission_name = 'communication.notification.owner' and p2.resource_path = current_setting('permission.resource_path')
+                        )
+                        and info_notifications_access_paths.created_user_id = current_setting('app.user_id')
+                    )
+                )
+            limit 1
+        )
+        
+  useCustomHasuraPolicy: true
+  hasuraPolicy:
+    selectPermission:
+    - name: MANABIE
+      filter:
+      - _or:
+        - info_notifications_location_permission:
+            _and:
+            - permission_name:
+                _eq: communication.notification.read
+            - user_id:
+                _eq: X-Hasura-User-Id
+        - _and:
+          - info_notifications_location_permission:
+              _and:
+              - permission_name:
+                  _eq: communication.notification.owner
+              - user_id:
+                  _eq: X-Hasura-User-Id
+          - created_user_id:
+              _eq: X-Hasura-User-Id
+    - name: USER_GROUP_ADMIN
+      filter:
+      - _or:
+        - info_notifications_location_permission:
+            _and:
+            - permission_name:
+                _eq: communication.notification.read
+            - user_id:
+                _eq: X-Hasura-User-Id
+        - _and:
+          - info_notifications_location_permission:
+              _and:
+              - permission_name:
+                  _eq: communication.notification.owner
+              - user_id:
+                  _eq: X-Hasura-User-Id
+          - created_user_id:
+              _eq: X-Hasura-User-Id
+    - name: USER_GROUP_SCHOOL_ADMIN
+      filter:
+      - _or:
+        - info_notifications_location_permission:
+            _and:
+            - permission_name:
+                _eq: communication.notification.read
+            - user_id:
+                _eq: X-Hasura-User-Id
+        - _and:
+          - info_notifications_location_permission:
+              _and:
+              - permission_name:
+                  _eq: communication.notification.owner
+              - user_id:
+                  _eq: X-Hasura-User-Id
+          - created_user_id:
+              _eq: X-Hasura-User-Id
+    - name: USER_GROUP_TEACHER
+      filter:
+      - _or:
+        - info_notifications_location_permission:
+            _and:
+            - permission_name:
+                _eq: communication.notification.read
+            - user_id:
+                _eq: X-Hasura-User-Id
+        - _and:
+          - info_notifications_location_permission:
+              _and:
+              - permission_name:
+                  _eq: communication.notification.owner
+              - user_id:
+                  _eq: X-Hasura-User-Id
+          - created_user_id:
+              _eq: X-Hasura-User-Id
+    objectCustomRelationship:
+    - tableName: info_notifications_access_paths
+      manualConfig:
+        name: info_notifications_location_permission
+        using:
+          manual_configuration:
+            remote_table:
+              schema: public
+              name: granted_permissions
+            column_mapping:
+              location_id: location_id
+    - tableName: granted_permissions
+      manualConfig:
+        name: info_notifications_location_permission
+        using:
+          manual_configuration:
+            remote_table:
+              schema: public
+              name: info_notifications_access_paths
+            column_mapping:
+              location_id: location_id

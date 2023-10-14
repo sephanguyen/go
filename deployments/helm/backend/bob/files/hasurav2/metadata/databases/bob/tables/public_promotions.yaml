@@ -1,0 +1,37 @@
+table:
+  schema: public
+  name: promotions
+object_relationships:
+  - name: user
+    using:
+      foreign_key_constraint_on: owner_id
+array_relationships:
+  - name: promotion_rules
+    using:
+      foreign_key_constraint_on:
+        column: promotion_id
+        table:
+          schema: public
+          name: promotion_rules
+select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+        - promotion_id
+        - owner_id
+        - prefix_sequence_number
+        - country
+        - code_prefix
+        - code
+        - started_date
+        - expired_date
+        - status
+        - redemption_limit_per_code
+        - redemption_limit_per_user
+        - total_redemptions
+        - notes
+        - created_at
+        - updated_at
+      filter: {}
+      limit: 100
+      allow_aggregations: true

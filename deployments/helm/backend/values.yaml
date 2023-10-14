@@ -1,0 +1,87 @@
+global:
+  sqlProxy:
+    enabled: true
+    image:
+      repository: asia.gcr.io/cloud-sql-connectors/cloud-sql-proxy
+      tag: 2.2.0-alpine
+    resources:
+      requests:
+        cpu: "5m"
+        memory: "16Mi"
+  serviceAccountEmailSuffix: ""
+  cloudSQLCommonInstance: ""
+  cloudSQLLMSInstance: ""
+  cloudSQLUsePublicIP: false
+  image:
+    repository: asia.gcr.io/student-coach-e1e95/backend
+    tag: locally
+  hasura:
+    image:
+      repository: asia.gcr.io/student-coach-e1e95/customized-graphql-engine
+      tag: v1.3.3.cli-migrations-v2
+    migrationImage:
+      repository: asia.gcr.io/student-coach-e1e95/customized-graphql-engine
+      tag: v1.3.3.cli-migrations-v2-20230411
+    replicaCount: 2
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: cloud.google.com/gke-spot
+                  operator: In
+                  values: ["true"]
+    affinityOverride: {}
+    tolerations:
+      - effect: NoSchedule
+        key: cloud.google.com/gke-spot
+        operator: Exists
+    onDemandNodeDeployment:
+      replicaCount: 1
+      cronScheduledScaling:
+        - timezone: UTC
+          start: "1 20 * * *" # 3h01  ICT
+          end: "59 12 * * *" # 19h59 ICT
+          desiredReplicas: "1"
+  hasurav2:
+    image:
+      repository: asia.gcr.io/student-coach-e1e95/customized-graphql-engine
+      tag: v2.8.1.cli-migrations-v3
+  secrets:
+    serviceCredential: ""
+  liveReloadEnabled: false
+  localLogLevel: # overriden when $CI=true
+  vpa:
+    enabled: true
+    updateMode: "Auto"
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: cloud.google.com/gke-spot
+                operator: In
+                values: ["true"]
+  affinityOverride: {}
+  tolerations:
+    - effect: NoSchedule
+      key: cloud.google.com/gke-spot
+      operator: Exists
+  scanRLSResources:
+    requests:
+      memory: 35Mi
+  debug: false
+
+  onDemandNodeDeployment:
+    replicaCount: 1
+    cronScheduledScaling:
+      - timezone: UTC
+        start: "1 20 * * *" # 3h01  ICT
+        end: "59 12 * * *" # 19h59 ICT
+        desiredReplicas: "1"
+
+  caching:
+    redis:
+      image:
+        repository: redis
+        tag: 7.2.0-alpine3.18

@@ -1,0 +1,36 @@
+labels:
+  app: ""
+  istio: ingressgateway
+
+podAnnotations:
+  cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+
+service:
+  type: LoadBalancer
+  ports:
+  - name: status-port
+    port: 15021
+    protocol: TCP
+    targetPort: 15021
+  - name: http2
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  - name: https
+    port: 443
+    protocol: TCP
+    targetPort: 443
+  - port: 31400
+    targetPort: 31400
+    name: grpc-web-api
+  - port: 31500
+    targetPort: 31500
+    name: grpc-api
+  - port: 31600
+    targetPort: 31600
+    name: admin-panel
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 128Mi

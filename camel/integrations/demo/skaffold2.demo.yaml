@@ -1,0 +1,33 @@
+apiVersion: skaffold/v4beta5
+kind: Config
+metadata:
+  name: demo
+deploy:
+  helm:
+    releases:
+      - name: demo
+        chartPath: .
+        namespace: '{{.ENV}}-{{.ORG}}-backend'
+        valuesFiles:
+          - '{{.ENV}}-{{.ORG}}-values.yaml'
+        setValueTemplates:
+          global.environment: '{{.ENV}}'
+          global.vendor: '{{.ORG}}'
+          global.image.tag: '{{default "local" .CAMEL_IMAGE_TAG}}'
+        skipBuildDependencies: true
+        wait: true
+        skipTests: true
+profiles:
+  - name: local
+    activation:
+      - env: ENV=local
+    patches:
+      - op: add
+        path: /deploy/kubeContext
+        value: kind-kind
+      - op: add
+        path: /deploy/helm/hooks
+        value:
+          before:
+            - host:
+                command: ["kind", "load", "docker-image", "asia.gcr.io/student-coach-e1e95/camel-demo:local"]

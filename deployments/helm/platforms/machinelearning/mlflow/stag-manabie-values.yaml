@@ -1,0 +1,17 @@
+environment: "stag"
+vendor: "manabie"
+
+serviceAccountEmailSuffix: "staging-manabie-online"
+artifact:
+  gcs_path: "gs://stag-manabie-backend"
+
+postgres:
+  host: "localhost"
+  port: 5432
+  database: "mlflow"
+  users: "stag-mlflow@staging-manabie-online.iam"
+
+global:
+  sqlProxy:
+    enabled: true
+    connName: ""

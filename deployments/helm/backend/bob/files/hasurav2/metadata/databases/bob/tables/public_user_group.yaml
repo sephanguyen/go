@@ -1,0 +1,35 @@
+table:
+  schema: public
+  name: user_group
+array_relationships:
+  - name: granted_roles
+    using:
+      foreign_key_constraint_on:
+        column: user_group_id
+        table:
+          schema: public
+          name: granted_role
+  - name: user_group_members
+    using:
+      foreign_key_constraint_on:
+        column: user_group_id
+        table:
+          schema: public
+          name: user_group_member
+select_permissions:
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+        - created_at
+        - deleted_at
+        - is_system
+        - updated_at
+        - user_group_id
+        - user_group_name
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+          - resource_path:
+              _eq: X-Hasura-Resource-Path
+      allow_aggregations: true

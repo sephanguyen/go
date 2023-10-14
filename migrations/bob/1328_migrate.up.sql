@@ -1,0 +1,280 @@
+----- resource_path == -2147483634 -----
+INSERT INTO permission 
+		(permission_id, permission_name, created_at, updated_at, resource_path)
+	VALUES 
+		('01GDHQPYSTT9X424GAWBZGFAE3', 'communication.notification.owner', now(), now(), '-2147483634');
+
+INSERT INTO permission_role 
+	(permission_id, role_id, created_at, updated_at, resource_path)
+VALUES 
+  ('01GDHQPYSTT9X424GAWBZGFAE3', '01G8T4FQ2CZ0X2YD88HJE4CYGQ1', now(), now(), '-2147483634'),
+  ('01GDHQPYSTT9X424GAWBZGFAE3', '01G8T4FQ2CZ0X2YD88HJE4CYGQ2', now(), now(), '-2147483634'),
+  ('01GDHQPYSTT9X424GAWBZGFAE3', '01G8T4FQ2CZ0X2YD88HJE4CYGQ5', now(), now(), '-2147483634'),
+  ('01GDHQPYSTT9X424GAWBZGFAE3', '01G8T4FQ2CZ0X2YD88HJE4CYGQ8', now(), now(), '-2147483634'),
+  ('01GDHQPYSTT9X424GAWBZGFAE3', '01G8T4FQ2CZ0X2YD88HJE4CYGQ9', now(), now(), '-2147483634')
+  ON CONFLICT DO NOTHING;
+
+DELETE FROM permission_role WHERE permission_id = '01GDHQPYSTT9X424GAWBZGFAE2' AND role_id = '01G8T4FQ2CZ0X2YD88HJE4CYGQ1' AND resource_path = '-2147483634';
+DELETE FROM permission_role WHERE permission_id = '01GDHQPYSTT9X424GAWBZGFAE2' AND role_id = '01G8T4FQ2CZ0X2YD88HJE4CYGQ8' AND resource_path = '-2147483634';
+DELETE FROM permission_role WHERE permission_id = '01GDHQPYSTT9X424GAWBZGFAE2' AND role_id = '01G8T4FQ2CZ0X2YD88HJE4CYGQ9' AND resource_path = '-2147483634';
+
+----- resource_path == -2147483635 -----
+INSERT INTO permission 
+		(permission_id, permission_name, created_at, updated_at, resource_path)
+	VALUES 
+		('01GDHQSX3792NFE3475J01CMQ3', 'communication.notification.owner', now(), now(), '-2147483635');
+
+INSERT INTO permission_role 
+	(permission_id, role_id, created_at, updated_at, resource_path)
+VALUES 
+  ('01GDHQSX3792NFE3475J01CMQ3', '01G8T49ECX7SCTC723ZH6Q2MBE1', now(), now(), '-2147483635'),
+  ('01GDHQSX3792NFE3475J01CMQ3', '01G8T49ECX7SCTC723ZH6Q2MBE2', now(), now(), '-2147483635'),
+  ('01GDHQSX3792NFE3475J01CMQ3', '01G8T49ECX7SCTC723ZH6Q2MBE5', now(), now(), '-2147483635'),
+  ('01GDHQSX3792NFE3475J01CMQ3', '01G8T49ECX7SCTC723ZH6Q2MBE8', now(), now(), '-2147483635'),
+  ('01GDHQSX3792NFE3475J01CMQ3', '01G8T49ECX7SCTC723ZH6Q2MBE9', now(), now(), '-2147483635')
+  ON CONFLICT DO NOTHING;
+
+DELETE FROM permission_role WHERE permission_id = '01GDHQSX3792NFE3475J01CMQ2' AND role_id = '01G8T49ECX7SCTC723ZH6Q2MBE1' AND resource_path = '-2147483635';
+DELETE FROM permission_role WHERE permission_id = '01GDHQSX3792NFE3475J01CMQ2' AND role_id = '01G8T49ECX7SCTC723ZH6Q2MBE8' AND resource_path = '-2147483635';
+DELETE FROM permission_role WHERE permission_id = '01GDHQSX3792NFE3475J01CMQ2' AND role_id = '01G8T49ECX7SCTC723ZH6Q2MBE9' AND resource_path = '-2147483635';
+
+----- resource_path == -2147483637 -----
+INSERT INTO permission 
+		(permission_id, permission_name, created_at, updated_at, resource_path)
+	VALUES 
+		('01GDHQWEWMWR4NKR8TY1BS30Q3', 'communication.notification.owner', now(), now(), '-2147483637');
+
+INSERT INTO permission_role 
+	(permission_id, role_id, created_at, updated_at, resource_path)
+VALUES 
+  ('01GDHQWEWMWR4NKR8TY1BS30Q3', '01G6A5WBRD3B447Z2SVDQVAGJ2', now(), now(), '-2147483637'),
+  ('01GDHQWEWMWR4NKR8TY1BS30Q3', '01G6A5WBRD3B447Z2SVDQVAGJ3', now(), now(), '-2147483637'),
+  ('01GDHQWEWMWR4NKR8TY1BS30Q3', '01G7XGB49W2PCQPHNBE6SAZ371', now(), now(), '-2147483637'),
+  ('01GDHQWEWMWR4NKR8TY1BS30Q3', '01G7XGB49W2PCQPHNBE6SAZ374', now(), now(), '-2147483637'),
+  ('01GDHQWEWMWR4NKR8TY1BS30Q3', '01G7XGB49W2PCQPHNBE6SAZ375', now(), now(), '-2147483637')
+  ON CONFLICT DO NOTHING;
+
+DELETE FROM permission_role WHERE permission_id = '01GDHQWEWMWR4NKR8TY1BS30Q2' AND role_id = '01G6A5WBRD3B447Z2SVDQVAGJ2' AND resource_path = '-2147483637';
+DELETE FROM permission_role WHERE permission_id = '01GDHQWEWMWR4NKR8TY1BS30Q2' AND role_id = '01G7XGB49W2PCQPHNBE6SAZ374' AND resource_path = '-2147483637';
+DELETE FROM permission_role WHERE permission_id = '01GDHQWEWMWR4NKR8TY1BS30Q2' AND role_id = '01G7XGB49W2PCQPHNBE6SAZ375' AND resource_path = '-2147483637';
+
+----- resource_path == -2147483638 -----
+INSERT INTO permission 
+		(permission_id, permission_name, created_at, updated_at, resource_path)
+	VALUES 
+		('01GDHR22CJWMHTYMCTPNM96EK3', 'communication.notification.owner', now(), now(), '-2147483638');
+
+INSERT INTO permission_role 
+	(permission_id, role_id, created_at, updated_at, resource_path)
+VALUES
+  ('01GDHR22CJWMHTYMCTPNM96EK3', '01G6A6B3YP6P161SH6CJN3QPF0', now(), now(), '-2147483638'),
+  ('01GDHR22CJWMHTYMCTPNM96EK3', '01G6A6B3YP6P161SH6CJN3QPF1', now(), now(), '-2147483638'),
+  ('01GDHR22CJWMHTYMCTPNM96EK3', '01G7XGB49W2PCQPHNBE6SAZ381', now(), now(), '-2147483638'),
+  ('01GDHR22CJWMHTYMCTPNM96EK3', '01G7XGB49W2PCQPHNBE6SAZ384', now(), now(), '-2147483638'),
+  ('01GDHR22CJWMHTYMCTPNM96EK3', '01G7XGB49W2PCQPHNBE6SAZ385', now(), now(), '-2147483638')
+  ON CONFLICT DO NOTHING;
+
+DELETE FROM permission_role WHERE permission_id = '01GDHR22CJWMHTYMCTPNM96EK2' AND role_id = '01G6A6B3YP6P161SH6CJN3QPF0' AND resource_path = '-2147483638';
+DELETE FROM permission_role WHERE permission_id = '01GDHR22CJWMHTYMCTPNM96EK2' AND role_id = '01G7XGB49W2PCQPHNBE6SAZ384' AND resource_path = '-2147483638';
+DELETE FROM permission_role WHERE permission_id = '01GDHR22CJWMHTYMCTPNM96EK2' AND role_id = '01G7XGB49W2PCQPHNBE6SAZ385' AND resource_path = '-2147483638';
+
+----- resource_path == -2147483639 -----
+INSERT INTO permission 
+		(permission_id, permission_name, created_at, updated_at, resource_path)
+	VALUES 
+		('01GDHR6CTY0XZ7JBA2F81515A3', 'communication.notification.owner', now(), now(), '-2147483639');
+
+INSERT INTO permission_role 
+	(permission_id, role_id, created_at, updated_at, resource_path)
+VALUES
+  ('01GDHR6CTY0XZ7JBA2F81515A3', '01G1GQEKEHXKSM78NBW96NJ7K8', now(), now(), '-2147483639'),
+  ('01GDHR6CTY0XZ7JBA2F81515A3', '01G1GQEKEHXKSM78NBW96NJ7K9', now(), now(), '-2147483639'),
+  ('01GDHR6CTY0XZ7JBA2F81515A3', '01G7XGB49W2PCQPHNBE6SAZ391', now(), now(), '-2147483639'),
+  ('01GDHR6CTY0XZ7JBA2F81515A3', '01G7XGB49W2PCQPHNBE6SAZ394', now(), now(), '-2147483639'),
+  ('01GDHR6CTY0XZ7JBA2F81515A3', '01G7XGB49W2PCQPHNBE6SAZ395', now(), now(), '-2147483639')
+  ON CONFLICT DO NOTHING;
+
+DELETE FROM permission_role WHERE permission_id = '01GDHR6CTY0XZ7JBA2F81515A2' AND role_id = '01G1GQEKEHXKSM78NBW96NJ7K8' AND resource_path = '-2147483639';
+DELETE FROM permission_role WHERE permission_id = '01GDHR6CTY0XZ7JBA2F81515A2' AND role_id = '01G7XGB49W2PCQPHNBE6SAZ394' AND resource_path = '-2147483639';
+DELETE FROM permission_role WHERE permission_id = '01GDHR6CTY0XZ7JBA2F81515A2' AND role_id = '01G7XGB49W2PCQPHNBE6SAZ395' AND resource_path = '-2147483639';
+
+----- resource_path == -2147483640 -----
+INSERT INTO permission 
+		(permission_id, permission_name, created_at, updated_at, resource_path)
+	VALUES 
+		('01GDHRB8HRNDN65W6K16JKWGT3', 'communication.notification.owner', now(), now(), '-2147483640');
+
+INSERT INTO permission_role 
+	(permission_id, role_id, created_at, updated_at, resource_path)
+VALUES 
+  ('01GDHRB8HRNDN65W6K16JKWGT3', '01G1GQEKEHXKSM78NBW96NJ7K6', now(), now(), '-2147483640'),
+  ('01GDHRB8HRNDN65W6K16JKWGT3', '01G1GQEKEHXKSM78NBW96NJ7K7', now(), now(), '-2147483640'),
+  ('01GDHRB8HRNDN65W6K16JKWGT3', '01G7XGB49W2PCQPHNBE6SAZ401', now(), now(), '-2147483640'),
+  ('01GDHRB8HRNDN65W6K16JKWGT3', '01G7XGB49W2PCQPHNBE6SAZ404', now(), now(), '-2147483640'),
+  ('01GDHRB8HRNDN65W6K16JKWGT3', '01G7XGB49W2PCQPHNBE6SAZ405', now(), now(), '-2147483640')
+  ON CONFLICT DO NOTHING;
+
+DELETE FROM permission_role WHERE permission_id = '01GDHRB8HRNDN65W6K16JKWGT2' AND role_id = '01G1GQEKEHXKSM78NBW96NJ7K6' AND resource_path = '-2147483640';
+DELETE FROM permission_role WHERE permission_id = '01GDHRB8HRNDN65W6K16JKWGT2' AND role_id = '01G7XGB49W2PCQPHNBE6SAZ404' AND resource_path = '-2147483640';
+DELETE FROM permission_role WHERE permission_id = '01GDHRB8HRNDN65W6K16JKWGT2' AND role_id = '01G7XGB49W2PCQPHNBE6SAZ405' AND resource_path = '-2147483640';
+
+----- resource_path == -2147483641 -----
+INSERT INTO permission 
+		(permission_id, permission_name, created_at, updated_at, resource_path)
+	VALUES 
+		('01GDHRHZZSFQ2WQ2KG5J5DNFE3', 'communication.notification.owner', now(), now(), '-2147483641');
+
+INSERT INTO permission_role 
+	(permission_id, role_id, created_at, updated_at, resource_path)
+VALUES 
+  ('01GDHRHZZSFQ2WQ2KG5J5DNFE3', '01G1GQEKEHXKSM78NBW96NJ7K4', now(), now(), '-2147483641'),
+  ('01GDHRHZZSFQ2WQ2KG5J5DNFE3', '01G1GQEKEHXKSM78NBW96NJ7K5', now(), now(), '-2147483641'),
+  ('01GDHRHZZSFQ2WQ2KG5J5DNFE3', '01G7XGB49W2PCQPHNBE6SAZ411', now(), now(), '-2147483641'),
+  ('01GDHRHZZSFQ2WQ2KG5J5DNFE3', '01G7XGB49W2PCQPHNBE6SAZ414', now(), now(), '-2147483641'),
+  ('01GDHRHZZSFQ2WQ2KG5J5DNFE3', '01G7XGB49W2PCQPHNBE6SAZ415', now(), now(), '-2147483641')
+  ON CONFLICT DO NOTHING;
+
+DELETE FROM permission_role WHERE permission_id = '01GDHRHZZSFQ2WQ2KG5J5DNFE2' AND role_id = '01G1GQEKEHXKSM78NBW96NJ7K4' AND resource_path = '-2147483641';
+DELETE FROM permission_role WHERE permission_id = '01GDHRHZZSFQ2WQ2KG5J5DNFE2' AND role_id = '01G7XGB49W2PCQPHNBE6SAZ414' AND resource_path = '-2147483641';
+DELETE FROM permission_role WHERE permission_id = '01GDHRHZZSFQ2WQ2KG5J5DNFE2' AND role_id = '01G7XGB49W2PCQPHNBE6SAZ415' AND resource_path = '-2147483641';
+
+----- resource_path == -2147483642 -----
+INSERT INTO permission 
+		(permission_id, permission_name, created_at, updated_at, resource_path)
+	VALUES 
+		('01GDHRWA9YH1VAGDP01CFYEPP3', 'communication.notification.owner', now(), now(), '-2147483642');
+
+INSERT INTO permission_role 
+	(permission_id, role_id, created_at, updated_at, resource_path)
+VALUES 
+  ('01GDHRWA9YH1VAGDP01CFYEPP3', '01G1GQEKEHXKSM78NBW96NJ7K2', now(), now(), '-2147483642'),
+  ('01GDHRWA9YH1VAGDP01CFYEPP3', '01G1GQEKEHXKSM78NBW96NJ7K3', now(), now(), '-2147483642'),
+  ('01GDHRWA9YH1VAGDP01CFYEPP3', '01G7XGB49W2PCQPHNBE6SAZ421', now(), now(), '-2147483642'),
+  ('01GDHRWA9YH1VAGDP01CFYEPP3', '01G7XGB49W2PCQPHNBE6SAZ424', now(), now(), '-2147483642'),
+  ('01GDHRWA9YH1VAGDP01CFYEPP3', '01G7XGB49W2PCQPHNBE6SAZ425', now(), now(), '-2147483642')
+  ON CONFLICT DO NOTHING;
+
+DELETE FROM permission_role WHERE permission_id = '01GDHRWA9YH1VAGDP01CFYEPP2' AND role_id = '01G1GQEKEHXKSM78NBW96NJ7K2' AND resource_path = '-2147483642';
+DELETE FROM permission_role WHERE permission_id = '01GDHRWA9YH1VAGDP01CFYEPP2' AND role_id = '01G7XGB49W2PCQPHNBE6SAZ424' AND resource_path = '-2147483642';
+DELETE FROM permission_role WHERE permission_id = '01GDHRWA9YH1VAGDP01CFYEPP2' AND role_id = '01G7XGB49W2PCQPHNBE6SAZ425' AND resource_path = '-2147483642';
+
+----- resource_path == -2147483643 -----
+INSERT INTO permission 
+		(permission_id, permission_name, created_at, updated_at, resource_path)
+	VALUES 
+		('01GDHYB4ZNZHR46P2MW08A7TG3', 'communication.notification.owner', now(), now(), '-2147483643');
+
+INSERT INTO permission_role 
+	(permission_id, role_id, created_at, updated_at, resource_path)
+VALUES 
+  ('01GDHYB4ZNZHR46P2MW08A7TG3', '01G1GQEKEHXKSM78NBW96NJ7K0', now(), now(), '-2147483643'),
+  ('01GDHYB4ZNZHR46P2MW08A7TG3', '01G1GQEKEHXKSM78NBW96NJ7K1', now(), now(), '-2147483643'),
+  ('01GDHYB4ZNZHR46P2MW08A7TG3', '01G7XGB49W2PCQPHNBE6SAZ431', now(), now(), '-2147483643'),
+  ('01GDHYB4ZNZHR46P2MW08A7TG3', '01G7XGB49W2PCQPHNBE6SAZ434', now(), now(), '-2147483643'),
+  ('01GDHYB4ZNZHR46P2MW08A7TG3', '01G7XGB49W2PCQPHNBE6SAZ435', now(), now(), '-2147483643')
+  ON CONFLICT DO NOTHING;
+
+DELETE FROM permission_role WHERE permission_id = '01GDHYB4ZNZHR46P2MW08A7TG2' AND role_id = '01G1GQEKEHXKSM78NBW96NJ7K0' AND resource_path = '-2147483643';
+DELETE FROM permission_role WHERE permission_id = '01GDHYB4ZNZHR46P2MW08A7TG2' AND role_id = '01G7XGB49W2PCQPHNBE6SAZ434' AND resource_path = '-2147483643';
+DELETE FROM permission_role WHERE permission_id = '01GDHYB4ZNZHR46P2MW08A7TG2' AND role_id = '01G7XGB49W2PCQPHNBE6SAZ435' AND resource_path = '-2147483643';
+
+----- resource_path == -2147483644 -----
+INSERT INTO permission 
+		(permission_id, permission_name, created_at, updated_at, resource_path)
+	VALUES 
+		('01GDHXJ1527M7FNVBD9DQKD9Y3', 'communication.notification.owner', now(), now(), '-2147483644');
+
+INSERT INTO permission_role 
+	(permission_id, role_id, created_at, updated_at, resource_path)
+VALUES 
+  ('01GDHXJ1527M7FNVBD9DQKD9Y3', '01G1GQEKEHXKSM78NBW96NJ7H8', now(), now(), '-2147483644'),
+  ('01GDHXJ1527M7FNVBD9DQKD9Y3', '01G1GQEKEHXKSM78NBW96NJ7H9', now(), now(), '-2147483644'),
+  ('01GDHXJ1527M7FNVBD9DQKD9Y3', '01G7XGB49W2PCQPHNBE6SAZ441', now(), now(), '-2147483644'),
+  ('01GDHXJ1527M7FNVBD9DQKD9Y3', '01G7XGB49W2PCQPHNBE6SAZ444', now(), now(), '-2147483644'),
+  ('01GDHXJ1527M7FNVBD9DQKD9Y3', '01G7XGB49W2PCQPHNBE6SAZ445', now(), now(), '-2147483644')
+  ON CONFLICT DO NOTHING;
+
+DELETE FROM permission_role WHERE permission_id = '01GDHXJ1527M7FNVBD9DQKD9Y2' AND role_id = '01G1GQEKEHXKSM78NBW96NJ7H8' AND resource_path = '-2147483644';
+DELETE FROM permission_role WHERE permission_id = '01GDHXJ1527M7FNVBD9DQKD9Y2' AND role_id = '01G7XGB49W2PCQPHNBE6SAZ444' AND resource_path = '-2147483644';
+DELETE FROM permission_role WHERE permission_id = '01GDHXJ1527M7FNVBD9DQKD9Y2' AND role_id = '01G7XGB49W2PCQPHNBE6SAZ445' AND resource_path = '-2147483644';
+
+----- resource_path == -2147483645 -----
+INSERT INTO permission 
+		(permission_id, permission_name, created_at, updated_at, resource_path)
+	VALUES 
+		('01GDHXN8C0YFAA4TE432SFCXQ3', 'communication.notification.owner', now(), now(), '-2147483645');
+
+INSERT INTO permission_role 
+	(permission_id, role_id, created_at, updated_at, resource_path)
+VALUES 
+  ('01GDHXN8C0YFAA4TE432SFCXQ3', '01G1GQEKEHXKSM78NBW96NJ7H6', now(), now(), '-2147483645'),
+  ('01GDHXN8C0YFAA4TE432SFCXQ3', '01G1GQEKEHXKSM78NBW96NJ7H7', now(), now(), '-2147483645'),
+  ('01GDHXN8C0YFAA4TE432SFCXQ3', '01G7XGB49W2PCQPHNBE6SAZ451', now(), now(), '-2147483645'),
+  ('01GDHXN8C0YFAA4TE432SFCXQ3', '01G7XGB49W2PCQPHNBE6SAZ454', now(), now(), '-2147483645'),
+  ('01GDHXN8C0YFAA4TE432SFCXQ3', '01G7XGB49W2PCQPHNBE6SAZ455', now(), now(), '-2147483645')
+  ON CONFLICT DO NOTHING;
+
+DELETE FROM permission_role WHERE permission_id = '01GDHXN8C0YFAA4TE432SFCXQ2' AND role_id = '01G1GQEKEHXKSM78NBW96NJ7H6' AND resource_path = '-2147483645';
+DELETE FROM permission_role WHERE permission_id = '01GDHXN8C0YFAA4TE432SFCXQ2' AND role_id = '01G7XGB49W2PCQPHNBE6SAZ454' AND resource_path = '-2147483645';
+DELETE FROM permission_role WHERE permission_id = '01GDHXN8C0YFAA4TE432SFCXQ2' AND role_id = '01G7XGB49W2PCQPHNBE6SAZ455' AND resource_path = '-2147483645';
+
+----- resource_path == -2147483646 -----
+INSERT INTO permission 
+		(permission_id, permission_name, created_at, updated_at, resource_path)
+	VALUES 
+		('01GDHXVJV3JKFR221AJ5HDAX03', 'communication.notification.owner', now(), now(), '-2147483646');
+
+INSERT INTO permission_role 
+	(permission_id, role_id, created_at, updated_at, resource_path)
+VALUES 
+  ('01GDHXVJV3JKFR221AJ5HDAX03', '01G1GQEKEHXKSM78NBW96NJ7H4', now(), now(), '-2147483646'),
+  ('01GDHXVJV3JKFR221AJ5HDAX03', '01G1GQEKEHXKSM78NBW96NJ7H5', now(), now(), '-2147483646'),
+  ('01GDHXVJV3JKFR221AJ5HDAX03', '01G7XGB49W2PCQPHNBE6SAZ461', now(), now(), '-2147483646'),
+  ('01GDHXVJV3JKFR221AJ5HDAX03', '01G7XGB49W2PCQPHNBE6SAZ464', now(), now(), '-2147483646'),
+  ('01GDHXVJV3JKFR221AJ5HDAX03', '01G7XGB49W2PCQPHNBE6SAZ465', now(), now(), '-2147483646')
+  ON CONFLICT DO NOTHING;
+
+DELETE FROM permission_role WHERE permission_id = '01GDHXVJV3JKFR221AJ5HDAX02' AND role_id = '01G1GQEKEHXKSM78NBW96NJ7H4' AND resource_path = '-2147483646';
+DELETE FROM permission_role WHERE permission_id = '01GDHXVJV3JKFR221AJ5HDAX02' AND role_id = '01G7XGB49W2PCQPHNBE6SAZ464' AND resource_path = '-2147483646';
+DELETE FROM permission_role WHERE permission_id = '01GDHXVJV3JKFR221AJ5HDAX02' AND role_id = '01G7XGB49W2PCQPHNBE6SAZ465' AND resource_path = '-2147483646';
+
+----- resource_path == -2147483647 -----
+INSERT INTO permission 
+		(permission_id, permission_name, created_at, updated_at, resource_path)
+	VALUES 
+		('01GDHXX98F2V5HQ39C7ACXJDG3', 'communication.notification.owner', now(), now(), '-2147483647');
+
+INSERT INTO permission_role 
+	(permission_id, role_id, created_at, updated_at, resource_path)
+VALUES
+  ('01GDHXX98F2V5HQ39C7ACXJDG3', '01G1GQEKEHXKSM78NBW96NJ7H2', now(), now(), '-2147483647'),
+  ('01GDHXX98F2V5HQ39C7ACXJDG3', '01G1GQEKEHXKSM78NBW96NJ7H3', now(), now(), '-2147483647'),
+  ('01GDHXX98F2V5HQ39C7ACXJDG3', '01G7XGB49W2PCQPHNBE6SAZ471', now(), now(), '-2147483647'),
+  ('01GDHXX98F2V5HQ39C7ACXJDG3', '01G7XGB49W2PCQPHNBE6SAZ474', now(), now(), '-2147483647'),
+  ('01GDHXX98F2V5HQ39C7ACXJDG3', '01G7XGB49W2PCQPHNBE6SAZ475', now(), now(), '-2147483647')
+  ON CONFLICT DO NOTHING;
+
+DELETE FROM permission_role WHERE permission_id = '01GDHXX98F2V5HQ39C7ACXJDG2' AND role_id = '01G1GQEKEHXKSM78NBW96NJ7H2' AND resource_path = '-2147483647';
+DELETE FROM permission_role WHERE permission_id = '01GDHXX98F2V5HQ39C7ACXJDG2' AND role_id = '01G7XGB49W2PCQPHNBE6SAZ474' AND resource_path = '-2147483647';
+DELETE FROM permission_role WHERE permission_id = '01GDHXX98F2V5HQ39C7ACXJDG2' AND role_id = '01G7XGB49W2PCQPHNBE6SAZ475' AND resource_path = '-2147483647';
+
+
+----- resource_path == -2147483648 -----
+INSERT INTO permission 
+		(permission_id, permission_name, created_at, updated_at, resource_path)
+	VALUES 
+		('01GDHY1VFR1XAH795YVFX1D1P3', 'communication.notification.owner', now(), now(), '-2147483648');
+
+INSERT INTO permission_role 
+	(permission_id, role_id, created_at, updated_at, resource_path)
+VALUES 
+  ('01GDHY1VFR1XAH795YVFX1D1P3', '01G1GQEKEHXKSM78NBW96NJ7H0', now(), now(), '-2147483648'),
+  ('01GDHY1VFR1XAH795YVFX1D1P3', '01G1GQEKEHXKSM78NBW96NJ7H1', now(), now(), '-2147483648'),
+  ('01GDHY1VFR1XAH795YVFX1D1P3', '01G7XGB49W2PCQPHNBE6SAZ481', now(), now(), '-2147483648'),
+  ('01GDHY1VFR1XAH795YVFX1D1P3', '01G7XGB49W2PCQPHNBE6SAZ484', now(), now(), '-2147483648'),
+  ('01GDHY1VFR1XAH795YVFX1D1P3', '01G7XGB49W2PCQPHNBE6SAZ485', now(), now(), '-2147483648')
+  ON CONFLICT DO NOTHING;
+ 
+DELETE FROM permission_role WHERE permission_id = '01GDHY1VFR1XAH795YVFX1D1P2' AND role_id = '01G1GQEKEHXKSM78NBW96NJ7H0' AND resource_path = '-2147483648';
+DELETE FROM permission_role WHERE permission_id = '01GDHY1VFR1XAH795YVFX1D1P2' AND role_id = '01G7XGB49W2PCQPHNBE6SAZ484' AND resource_path = '-2147483648';
+DELETE FROM permission_role WHERE permission_id = '01GDHY1VFR1XAH795YVFX1D1P2' AND role_id = '01G7XGB49W2PCQPHNBE6SAZ485' AND resource_path = '-2147483648';

@@ -1,0 +1,73 @@
+name: deployment.set-log-level
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        description: "Choose an environment to deploy"
+        options:
+          - staging
+          - uat
+          - production
+        required: true
+      organization:
+        type: choice
+        description: "Choose an organization to deploy"
+        required: true
+        options:
+          - manabie
+          - jprep
+          - synersia
+          - renseikai
+          - ga
+          - aic
+          - tokyo
+      service:
+        type: string
+        description: "The service name that we change log level for all pods"
+        required: true
+      duration:
+        type: string
+        description: "The duration (minutes) of DEBUG log level. For example input: 30 -> the duration is 30 minutes"
+        required: true
+        default: "30"
+jobs:
+  change-log-level:
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    runs-on: ["self-hosted", "100m-400mi", "spot", "persistent"]
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v3
+        timeout-minutes: 5
+
+      - name: Authenticate to Google Cloud by oidc
+        uses: ./.github/actions/auth-oidc
+        with:
+          organization: ${{ inputs.organization }}
+          environment: ${{ inputs.environment }}
+
+      - name: Set DEBUG log level
+        env:
+          ENV: ${{ env.ENV }}
+          ORG: ${{ env.ORG }}
+          SERVICE: ${{ inputs.service }}
+          DURATION: ${{ inputs.duration }}
+        run: |
+          set -eu
+          curl -X GET https://logging.googleapis.com/v2/projects/${{ env.PROJECT_ID }}/sinks/$ENV-$ORG-$SERVICE \
+                -H 'Content-Type: application/json' \
+                -H "Authorization: Bearer "$(gcloud auth print-access-token) > data.json
+          filter=$(jq '.filter' data.json)
+          startime=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          startstr="timestamp>=\\\"${startime}\\\""
+          endtime=$(date -u -d "+ $DURATION minutes" +"%Y-%m-%dT%H:%M:%SZ")
+          endstr="timestamp<=\\\"${endtime}\\\"\\nAND"
+          newfilter=$(echo "${filter//timestamp<=*AND/"$endstr"}")
+          newfilter=$(echo "${newfilter//timestamp>=*\\\"/"$startstr"}")
+          echo $(jq ".filter = ${newfilter}" data.json) > data.json
+          curl -X PUT https://logging.googleapis.com/v2/projects/${{ env.PROJECT_ID }}/sinks/$ENV-$ORG-$SERVICE?uniqueWriterIdentity=true \
+                -H 'Content-Type: application/json' \
+                -H "Authorization: Bearer "$(gcloud auth print-access-token) \
+                -d @data.json

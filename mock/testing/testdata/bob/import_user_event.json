@@ -1,0 +1,122 @@
+{
+	"schema": [
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "import_user_event_id",
+			"data_type": "bigint",
+			"column_default": "import_user_event__import_user_event_id__next()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "importer_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "payload",
+			"data_type": "jsonb",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "sequence_number",
+			"data_type": "bigint",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "status",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "user_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "import_user_event",
+			"policyname": "rls_import_user_event",
+			"qual": "permission_check(resource_path, 'import_user_event'::text)",
+			"with_check": "permission_check(resource_path, 'import_user_event'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "import_user_event",
+			"policyname": "rls_import_user_event_restrictive",
+			"qual": "permission_check(resource_path, 'import_user_event'::text)",
+			"with_check": "permission_check(resource_path, 'import_user_event'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "fk__import_user_event__importer_id",
+			"column_name": "importer_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "fk__import_user_event__user_id",
+			"column_name": "user_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "pk__import_user_event",
+			"column_name": "import_user_event_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "import_user_event",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

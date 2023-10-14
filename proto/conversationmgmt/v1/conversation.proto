@@ -1,0 +1,118 @@
+syntax = "proto3";
+
+package conversationmgmt.v1;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/conversationmgmt/v1;cpb";
+
+enum ConversationMemberStatus {
+    CONVERSATION_MEMBER_STATUS_ACTIVE = 0;
+    CONVERSATION_MEMBER_STATUS_INACTIVE = 1;
+}
+
+message ChatVendorUser {
+    string user_id = 1;
+    string vendor_user_id = 2;
+}
+
+message ConversationMember {
+    string conversation_member_id = 1;
+    string conversation_id = 2;
+    ChatVendorUser user = 3;
+    ConversationMemberStatus status = 4;
+    google.protobuf.Timestamp seen_at = 5;
+    google.protobuf.Timestamp created_at = 6;
+    google.protobuf.Timestamp updated_at = 7;
+}
+
+message Conversation {
+    string conversation_id = 1;
+    string name = 2;
+    bytes latest_message = 3;
+    google.protobuf.Timestamp latest_message_sent_time = 4;
+    bytes optional_config = 5;
+    google.protobuf.Timestamp created_at = 6;
+    google.protobuf.Timestamp updated_at = 7;
+    repeated ConversationMember Members = 8;
+}
+
+message CreateConversationRequest{
+    string name = 1;
+    repeated string member_ids = 2;
+    bytes optional_config = 3;
+}
+
+message CreateConversationResponse{
+    string conversation_id = 1;
+    string name = 2;
+    repeated ChatVendorUser members = 3; 
+    bytes optional_config = 4;
+}
+
+message AddConversationMembersRequest{
+    string conversation_id = 1;
+    repeated string member_ids = 2;
+}
+
+
+message AddConversationMembersResponse{}
+
+message UpdateConversationInfoRequest {
+    string conversation_id = 1;
+    string name = 2;
+    bytes optional_config = 3;
+}
+
+message UpdateConversationInfoResponse {
+    string conversation_id = 1;
+    string name = 2;
+    bytes optional_config = 3;
+}
+
+message RemoveConversationMembersRequest {
+    string conversation_id = 1;
+    repeated string member_ids = 2;
+}
+
+message RemoveConversationMembersResponse {}
+
+message DeleteMessageRequest {
+    string conversation_id = 1;
+    string vendor_message_id = 2;
+}
+
+message DeleteMessageResponse {}
+
+service ConversationModifierService {
+    // Internal gRPC
+    rpc CreateConversation(CreateConversationRequest)
+        returns (CreateConversationResponse);
+    // Internal gRPC
+    rpc AddConversationMembers(AddConversationMembersRequest)
+        returns (AddConversationMembersResponse);
+    // Internal gRPC
+    rpc UpdateConversationInfo(UpdateConversationInfoRequest)
+        returns (UpdateConversationInfoResponse);
+    // Internal gRPC
+    rpc RemoveConversationMembers(RemoveConversationMembersRequest)
+        returns (RemoveConversationMembersResponse);
+    
+    // External gRPC
+    rpc DeleteMessage(DeleteMessageRequest)
+        returns (DeleteMessageResponse);
+}
+
+message GetConversationsDetailRequest {
+    repeated string conversation_ids = 1;
+}
+
+message GetConversationsDetailResponse {
+    repeated Conversation conversations = 1;
+}
+
+service ConversationReaderService {
+    // External gRPC
+    rpc GetConversationsDetail(GetConversationsDetailRequest)
+        returns (GetConversationsDetailResponse);
+}

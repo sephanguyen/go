@@ -1,0 +1,137 @@
+{
+	"schema": [
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "discount_tag_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "is_archived",
+			"data_type": "boolean",
+			"column_default": "false",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "max_slot_trigger",
+			"data_type": "integer",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "min_slot_trigger",
+			"data_type": "integer",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "package_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "product_group_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "package_discount_setting",
+			"policyname": "rls_package_discount_setting",
+			"qual": "permission_check(resource_path, 'package_discount_setting'::text)",
+			"with_check": "permission_check(resource_path, 'package_discount_setting'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "package_discount_setting",
+			"policyname": "rls_package_discount_setting_restrictive",
+			"qual": "permission_check(resource_path, 'package_discount_setting'::text)",
+			"with_check": "permission_check(resource_path, 'package_discount_setting'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "package_discount_setting_discount_tag_fk",
+			"column_name": "discount_tag_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "package_discount_setting_package_fk",
+			"column_name": "package_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "package_discount_setting_product_group_fk",
+			"column_name": "product_group_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "package_discount_setting__pk",
+			"column_name": "discount_tag_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "package_discount_setting__pk",
+			"column_name": "package_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "package_discount_setting__pk",
+			"column_name": "product_group_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "package_discount_setting",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

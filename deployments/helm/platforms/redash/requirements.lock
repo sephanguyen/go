@@ -1,0 +1,9 @@
+dependencies:
+- name: redis
+  repository: https://charts.bitnami.com/bitnami
+  version: 16.8.7
+- name: virtualservice
+  repository: file://../../libs/virtualservice
+  version: 0.1.0
+digest: sha256:f5e9a1a839afb3e1fd91ab56a478dc0d460596e1933e742d79703965550f5f40
+generated: "2022-04-22T10:28:53.134258347+07:00"

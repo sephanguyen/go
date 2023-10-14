@@ -1,0 +1,260 @@
+hostname: "localhost"  # Can be overriden by commandline argument, usually the name of the pod
+
+# Config for j4 runner
+runner:
+  port: "4080"
+
+# Config for discovery server
+discovery:
+  port: "12345"
+
+# Config for RQLite. Most fields' values are copied from default rqlited code.
+rqlite:
+  connection-host: j4-0.j4-headless
+  data-path: "./dataPath"   # Can be overriden by commandline argument
+  http-port: "4001"
+  http-addr: "" # If empty, default to "hostname:rqlite.http-port" instead in run-time
+  http-adv-addr: ""
+  join-source-ip: ""
+  tls1011: false
+  auth: ""
+  http-ca-cert: ""
+  http-cert: ""
+  http-key: ""
+  node-encrypt: false
+  node-ca-cert: ""
+  node-cert: ""
+  node-key: ""
+  node-id: ""
+  raft-port: "4002"
+  raft-addr: "" # If empty, default to "hostname:rqlite.raft-port" instead in run-time
+  raft-adv-addr: ""
+  join: ""
+  join-attempts: 5
+  join-interval: "5s"
+  http-no-verify: false
+  node-no-verify: false
+  disco-url: "http://j4-base-discovery:12345"
+  expvar: true
+  pprof: true
+  dsn: ""
+  on-disk: true
+  raft-log-level: "INFO"
+  raft-non-voter: false
+  raft-snap: 8192
+  raft-snap-int: "30s"
+  raft-leader-lease-timeout: "0s"
+  raft-timeout: "1s"
+  raft-election-timeout: "1s"
+  raft-apply-timeout: "10s"
+  raft-open-timeout: "120s"
+  raft-leader-wait: true
+  raft-remove-shutdown: false
+  compression-size: 150
+  compression-batch: 5
+  cpu-profile: ""
+  mem-profile: ""
+
+env: local
+cluster_grpc_addr: api.local-green.manabie.io:31500
+postgres_v2:
+  bob:
+    cloudsql_instance: '{{ .Values.global.cloudSQLCommonInstance }}'
+    cloudsql_use_public_ip: {{ .Values.global.cloudSQLUsePublicIP }}
+    cloudsql_auto_iam_authn: true
+    user: '{{ include "util.databaseUser" . }}'
+    host: '{{ include "util.databaseHost" . }}'
+    port: '5432'
+    dbname: '{{ .Values.global.dbPrefix }}bob'
+    max_conns: 8
+    retry_attempts: 10
+    retry_wait_interval: '5s'
+  tom:
+    cloudsql_instance: '{{ .Values.global.cloudSQLCommonInstance }}'
+    cloudsql_use_public_ip: {{ .Values.global.cloudSQLUsePublicIP }}
+    cloudsql_auto_iam_authn: true
+    user: '{{ include "util.databaseUser" . }}'
+    host: '{{ include "util.databaseHost" . }}'
+    port: '5432'
+    dbname: '{{ .Values.global.dbPrefix }}tom'
+    max_conns: 8
+    retry_attempts: 10
+    retry_wait_interval: '5s'
+  mastermgmt:
+    cloudsql_instance: '{{ .Values.global.cloudSQLCommonInstance }}'
+    cloudsql_use_public_ip: {{ .Values.global.cloudSQLUsePublicIP }}
+    cloudsql_auto_iam_authn: true
+    user: '{{ include "util.databaseUser" . }}'
+    host: '{{ include "util.databaseHost" . }}'
+    port: '5432'
+    dbname: '{{ .Values.global.dbPrefix }}tom'
+    max_conns: 8
+    retry_attempts: 10
+    retry_wait_interval: '5s'
+kafka_cluster:
+  address: "kafka-svc.{{ .Values.global.environment }}-{{ .Values.global.vendor }}-kafka.svc.cluster.local:9092"
+  object_name_prefix: {{ include "util.kafkaObjectNamePrefix" . }}
+  is_local: {{ include "util.kafkaIsLocal" . }}
+
+# this value is used for local, you need to generate a school admin somehow yourself
+school_id: -2147483644
+admin_id: thu.vo+e2eschool@manabie.com
+shamir_addr: shamir:5650
+hasura_configs:
+- name: bob
+  admin_addr: https://admin.local-green.manabie.io:31600
+- name: eureka
+  admin_addr: https://admin.local-green.manabie.io:31600/eureka
+- name: invoicemgmt
+  admin_addr: https://admin.local-green.manabie.io:31600/invoicemgmt
+- name: timesheet
+  admin_addr: https://admin.local-green.manabie.io:31600/timesheet
+- name: draft
+  admin_addr: https://admin.local-green.manabie.io:31600/draftv2
+
+
+scenario_configs:
+- name: spam_msg
+  interval: 3
+  target_count: 200
+  ramp_up_cycles: 20
+  hold_cycles: 600
+  ramp_down_cycles: 20
+  interval_between_execution: 10
+- name: import_student
+  interval: 3
+  target_count: 10
+  ramp_up_cycles: 10
+  hold_cycles: 100
+  ramp_down_cycles: 10
+  interval_between_execution: 5
+- name: noti_filter
+  interval: 3
+  target_count: 10
+  ramp_up_cycles: 10
+  hold_cycles: 100
+  ramp_down_cycles: 10
+  interval_between_execution: 5
+- name: User_StaffListV4
+  interval: 3
+  target_count: 10
+  ramp_up_cycles: 10
+  hold_cycles: 100
+  ramp_down_cycles: 10
+  interval_between_execution: 5
+- name: User_UserGroupListV2
+  interval: 3
+  target_count: 10
+  ramp_up_cycles: 10
+  hold_cycles: 100
+  ramp_down_cycles: 10
+  interval_between_execution: 5
+- name: User_CountStudentWithLocationsFilterV5
+  interval: 3
+  target_count: 10
+  ramp_up_cycles: 10
+  hold_cycles: 100
+  ramp_down_cycles: 10
+  interval_between_execution: 5
+- name: User_GetManyStudentLocationsFiltersV5
+  interval: 3
+  target_count: 10
+  ramp_up_cycles: 10
+  hold_cycles: 100
+  ramp_down_cycles: 10
+  interval_between_execution: 5
+- name: Invoice_InvoicesV2
+  interval: 3
+  target_count: 10
+  ramp_up_cycles: 10
+  hold_cycles: 100
+  ramp_down_cycles: 10
+  interval_between_execution: 5
+- name: Lesson_CoursesList
+  interval: 3
+  target_count: 10
+  ramp_up_cycles: 10
+  hold_cycles: 100
+  ramp_down_cycles: 10
+  interval_between_execution: 5
+- name: Syllabus_BooksListV2
+  interval: 3
+  target_count: 10
+  ramp_up_cycles: 10
+  hold_cycles: 100
+  ramp_down_cycles: 10
+  interval_between_execution: 5
+- name: Timesheet_CountTimesheetAdmin
+  interval: 3
+  target_count: 10
+  ramp_up_cycles: 10
+  hold_cycles: 100
+  ramp_down_cycles: 10
+  interval_between_execution: 5
+- name: Timesheet_TimesheetListAdmin
+  interval: 3
+  target_count: 10
+  ramp_up_cycles: 10
+  hold_cycles: 100
+  ramp_down_cycles: 10
+  interval_between_execution: 5
+- name: Payment_GetOrderList
+  interval: 3
+  target_count: 10
+  ramp_up_cycles: 10
+  hold_cycles: 100
+  ramp_down_cycles: 10
+  interval_between_execution: 5
+- name: E2EInstanceSquadTagsList
+  interval: 3
+  target_count: 100
+  ramp_up_cycles: 50
+  hold_cycles: 100
+  ramp_down_cycles: 10
+  interval_between_execution: 5
+- name: Virtualclassroom_GetLiveLessonState
+  interval: 3
+  target_count: 100
+  ramp_up_cycles: 10
+  hold_cycles: 100
+  ramp_down_cycles: 10
+- name: Virtualclassroom_ModifyLiveLessonState
+  interval: 3
+  target_count: 100
+  ramp_up_cycles: 10
+  hold_cycles: 100
+  ramp_down_cycles: 10
+- name: Syllabus_RetrieveCourseStatistic
+  interval: 3
+  target_count: 10
+  ramp_up_cycles: 10
+  hold_cycles: 100
+  ramp_down_cycles: 10
+  interval_between_execution: 5
+- name: Syllabus_RetrieveCourseStatisticV2
+  interval: 3
+  target_count: 10
+  ramp_up_cycles: 10
+  hold_cycles: 100
+  ramp_down_cycles: 10
+  interval_between_execution: 5
+- name: Notification_SystemNotificationTest
+  interval: 1
+  target_count: 200
+  ramp_up_cycles: 200
+  hold_cycles: 500
+  ramp_down_cycles: 200
+  interval_between_execution: 1
+
+virtualclassroom_config:
+  lesson_info:
+    course_id: VCSTRESSTESTCOURSE
+    location_id: VCSTRESSTESTLOCATION
+  school_id: -2147483644
+  admin_id: thu.vo+e2eschool@manabie.com
+
+syllabus_config:
+  course_id: 01H3H2NVRJAX94PNRB26SRR8FX
+  study_plan_id: 01H3H2QBGSKZHQYFEAYCJ10CTP
+  user_id: bdd_admin+manabie
+  resource_path: -2147483648

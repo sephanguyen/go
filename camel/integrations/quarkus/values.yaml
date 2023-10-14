@@ -1,0 +1,6 @@
+global:
+  environment: local
+  vendor: manabie
+  image:
+    repository: asia.gcr.io/student-coach-e1e95/camel-quarkus
+    tag: local

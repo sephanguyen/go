@@ -1,0 +1,63 @@
+syntax = "proto3";
+
+package eureka.v1;
+
+import "common/v1/contents.proto";
+import "common/v1/requests.proto";
+import "common/v1/question_group.proto";
+import "eureka/v1/enums.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/eureka/v1;epb";
+
+message RetrieveTotalQuizLOsRequest {
+    repeated string lo_ids = 1;
+}
+  
+message RetrieveTotalQuizLOsResponse {
+    message LoWithTotalQuiz {
+        string lo_id = 1;
+        int32 total_quiz = 2;
+    }
+    repeated LoWithTotalQuiz los_total_quiz = 1;
+}
+
+message RetrieveQuizTestsRequest {
+    repeated string study_plan_item_id = 1;
+    bool is_completed = 2;
+  }
+  
+  message RetrieveQuizTestsResponse {
+    map<string, common.v1.QuizTests> items = 1;
+    AchievementCrown highest_crown = 2;
+    int32 total_attempts = 3;    //only count for the origin attempts, not retry attempts
+    common.v1.HighestQuizScore highest_score = 4;
+  }
+
+message RetrieveSubmissionHistoryRequest {
+  string set_id = 1;
+  common.v1.Paging paging = 2;
+}
+
+message RetrieveSubmissionHistoryResponse {
+  repeated common.v1.AnswerLog logs = 1;
+  common.v1.Paging next_page = 2;
+  repeated common.v1.QuestionGroup question_groups = 3;
+}
+
+message ListQuizzesOfLORequest {
+  string lo_id = 1;
+  common.v1.Paging paging = 2;
+}
+
+message ListQuizzesOfLOResponse {
+  repeated common.v1.AnswerLog logs = 1;
+  common.v1.Paging next_page = 2;
+  repeated common.v1.QuestionGroup question_groups = 3;
+}
+
+service QuizReaderService {
+  rpc RetrieveQuizTests(RetrieveQuizTestsRequest) returns (RetrieveQuizTestsResponse); // TODO: x discuss
+  rpc RetrieveTotalQuizLOs(RetrieveTotalQuizLOsRequest) returns (RetrieveTotalQuizLOsResponse);
+  rpc RetrieveSubmissionHistory(RetrieveSubmissionHistoryRequest) returns (RetrieveSubmissionHistoryResponse);
+  rpc ListQuizzesOfLO(ListQuizzesOfLORequest) returns (ListQuizzesOfLOResponse);
+}

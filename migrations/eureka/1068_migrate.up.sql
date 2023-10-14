@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS student_learning_time_by_daily_student_id_idx ON public.student_learning_time_by_daily(student_id);

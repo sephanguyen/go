@@ -1,0 +1,118 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "mlflow.fullname" . }}
+  labels:
+    {{- include "mlflow.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "mlflow.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "mlflow.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "mlflow.serviceAccountName" . }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if eq "local" .Values.environment }}
+      volumes: # define volumes
+      - name: service-credential # name of the volumes
+        secret:
+          secretName: mlflow-secret # scret for mount
+          optional: false
+      - name: decrypt
+        emptyDir: {}
+      {{- end }}
+      {{- if eq "local" .Values.environment }}
+      initContainers:
+        - name: init-decrypt
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+          - name: service-credential
+            mountPath: /configs
+          - name: decrypt
+            mountPath: /decrypt
+          command:
+            - /bin/sh
+            - -c
+            - |
+              echo "decrypt service credential in local"
+              base64 -d /configs/service_credential.json > /decrypt/service_credential.json           
+      {{- end }}
+      containers:
+        {{- if .Values.global.sqlProxy.enabled }}
+        - name: cloud-sql-proxy
+          image: "{{ .Values.global.sqlProxy.image.repository }}:{{ .Values.global.sqlProxy.image.tag }}"
+          imagePullPolicy: IfNotPresent
+          command:
+            - "/cloud_sql_proxy"
+            - {{ printf "-instances=%s=tcp:5432" .Values.global.sqlProxy.connName }}
+            - "-enable_iam_login"
+          securityContext:
+            runAsNonRoot: true
+          resources:
+            {{- toYaml .Values.global.sqlProxy.resources | nindent 12 }}
+        {{- end }}
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+          - --backend-store-uri
+          - postgresql://{{ .Values.postgres.users }}{{- if eq "local" .Values.environment -}}:{{ .Values.postgres.password }}{{- end -}}@{{ .Values.postgres.host }}:{{ .Values.postgres.port }}/{{ .Values.postgres.database }}
+          - --artifacts-destination 
+          - {{ .Values.artifact.gcs_path }}
+          - --serve-artifacts
+          {{- if eq "local" .Values.environment }}
+          volumeMounts:
+          - name: service-credential
+            mountPath: "/configs"
+            readOnly: true
+          - name: decrypt
+            mountPath: "/decrypt"
+          env:
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: "/decrypt/service_credential.json"
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.containerPort.port }}
+              protocol: {{ .Values.containerPort.protocol }}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          
+          
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

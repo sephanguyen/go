@@ -1,0 +1,68 @@
+name: deployment.trigger
+
+on:
+  # pull_request:
+  #   paths-ignore:
+  #     - '.githooks/**'
+  #     - '.github/**'
+  #     - '.vscode/**'
+  #     - 'deployments/terraform/**'
+  #     - 'docs/**'
+  #     - 'examples/**'
+  #     - 'features/**'
+  #     - 'mock/**'
+  #     - 'scripts/**'
+  #     - '.golangci.yml'
+  #     - '.sops.yaml'
+  #     - 'atlantis.yaml'
+  #     - 'Makefile'
+  #     - 'README.md'
+  #   branches:
+  #     - 'release/**'
+  #     - 'develop'
+  #   types: [closed]
+
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "The tag is in the Github repo's release tab"
+        required: true
+
+jobs:
+  trigger:
+    if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
+    runs-on: ["self-hosted", "100m-400mi", "spot", "persistent"]
+    steps:
+      - uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.BUILD_GITHUB_TOKEN }}
+          script: |
+            let eventType = '';
+            let baseRef = '';
+            let headRef = '';
+            let tag = '';
+            let eventName = '${{ github.event_name }}';
+
+            if (eventName === 'pull_request') {
+              eventType = 'create_release_tag_be';
+              baseRef = '${{ github.base_ref }}';
+              headRef = '${{ github.head_ref }}';
+
+            } else if (eventName === 'workflow_dispatch') {
+              eventType = 'manual_trigger_be';
+              tag = '${{ github.event.inputs.tag }}';
+            }
+
+            await github.rest.repos.createDispatchEvent({
+              owner: context.repo.owner,
+              repo: 'backend',
+              event_type: eventType,
+              client_payload: {
+                be: {
+                  repo: context.repo.repo,
+                  base_ref: baseRef,
+                  head_ref: headRef,
+                  tag: tag,
+                }
+              },
+            });

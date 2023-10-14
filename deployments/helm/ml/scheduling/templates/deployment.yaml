@@ -1,0 +1,141 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "scheduling.fullname" . }}
+  labels:
+    {{- include "scheduling.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "scheduling.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+      labels:
+        {{- include "scheduling.selectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "util.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      volumes:
+        {{- if eq "local" .Values.environment }}
+        - name: service-credential # name of the volumes
+          secret:
+            secretName: {{ include "scheduling.fullname" . }}-secrets # secret for mount
+            items:
+              - key: service_credential.json.base64
+                path: service_credential.json.base64
+        {{- end }}
+        - name: {{ include "scheduling.fullname" . }}-secrets
+          secret:
+            secretName: {{ include "scheduling.fullname" . }}-secrets
+            items:
+              - key: scheduling.secrets.config.yaml
+                path: scheduling.secrets.config.yaml
+        - name: decrypt
+          emptyDir: {}
+        - name: config-volumns
+          configMap:
+            name: {{include "scheduling.fullname" .}}-configmap
+      initContainers:
+        - name: init-decrypt
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag}}"
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+          {{- if eq "local" .Values.environment }}
+          - name: service-credential
+            mountPath: /configs/service_credential.json.base64
+            subPath: service_credential.json.base64
+          {{- end }}
+          - name: {{ include "scheduling.fullname" . }}-secrets
+            mountPath: /configs/scheduling.secrets.config.yaml
+            subPath: scheduling.secrets.config.yaml
+          - name: decrypt
+            mountPath: /decrypt
+          command:
+            - /bin/sh
+            - -c
+            - |
+              {{- if eq "local" .Values.environment }}
+              base64 -d /configs/service_credential.json.base64 > /decrypt/service_credential.json
+              {{- end }}
+              sops -d /configs/scheduling.secrets.config.yaml > /decrypt/scheduling.secrets.decrypt.config.yaml
+          {{- if eq "local" .Values.environment }}
+          env:
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: "/decrypt/service_credential.json"
+          {{- end }}
+      containers:
+        # GRPC endpoint
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag}}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          volumeMounts:
+          {{- if eq "local" .Values.environment }}
+          - name: service-credential
+            mountPath: /configs/service_credential.json.base64
+            subPath: service_credential.json.base64
+            readOnly: true
+          {{- end }}
+          - name: {{ include "scheduling.fullname" . }}-secrets
+            mountPath: /configs/scheduling.secrets.config.yaml
+            subPath: scheduling.secrets.config.yaml
+          - name: decrypt
+            mountPath: /decrypt
+          ports:
+            - name: grpc
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          env:
+            - name: ENV
+              value: {{ .Values.environment }}
+            - name: ORG
+              value: {{ .Values.vendor }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+        # HTTP endpoint
+        - name: "{{ .Chart.Name }}-http"
+          image: "{{ .Values.httpEndpoint.image.repository }}:{{ .Values.httpEndpoint.image.tag}}"
+          imagePullPolicy: {{ .Values.httpEndpoint.image.pullPolicy }}
+          volumeMounts:
+          {{- if eq "local" .Values.environment }}
+          - name: service-credential
+            mountPath: /configs/service_credential.json.base64
+            subPath: service_credential.json.base64
+            readOnly: true
+          {{- end }}
+          - name: {{ include "scheduling.fullname" . }}-secrets
+            mountPath: /configs/scheduling.secrets.config.yaml
+            subPath: scheduling.secrets.config.yaml
+          - name: decrypt
+            mountPath: /decrypt
+          ports:
+            - name: http
+              containerPort: {{ .Values.httpEndpoint.service.port }}
+              protocol: TCP
+          env:
+            - name: ENV
+              value: {{ .Values.environment }}
+            - name: ORG
+              value: {{ .Values.vendor }}
+            {{- if eq "local" .Values.environment }}
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: "/decrypt/service_credential.json"
+            {{- end }}
+
+          resources:
+            {{- toYaml .Values.httpEndpoint.resources | nindent 12 }}
+
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

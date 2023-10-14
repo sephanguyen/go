@@ -1,0 +1,90 @@
+apiVersion: actions.summerwind.dev/v1alpha1
+kind: RunnerDeployment
+metadata:
+  name: 8-32-spot-runnerdeploy
+  namespace: actions-runner-system
+spec:
+  template:
+    metadata:
+      labels:
+        app: 8-32-spot-runnerdeploy
+      annotations:
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+    spec:
+      organization: manabie-com
+      dockerMTU: 1400
+      image: asia-docker.pkg.dev/student-coach-e1e95/manaverse/actions-runner-dind:v2.307.1-ubuntu-20.04
+      dockerdWithinRunnerContainer: true
+      labels:
+        - custom-runner
+        - 8-32-large-runner
+        - runnerdeploy
+        - 8-32-spot-runner
+        - 8-32-non-persistent-large-runner
+      env:
+      - name: DISABLE_RUNNER_UPDATE
+        value: "true"
+      nodeSelector:
+        cloud.google.com/gke-nodepool: "n2d-standard-8-runners-spot"
+      tolerations:
+      - effect: NoSchedule
+        key: "n2d-standard-8-runners-spot"
+        operator: Exists
+      volumeMounts:
+        - mountPath: /etc/docker/certs.d/kind-reg.actions-runner-system.svc
+          name: secret
+      volumes:
+      - name: secret
+        projected:
+          sources:
+          - secret:
+              name: kind-shared-registry-secret
+          - secret:
+              name: kind-shared-registry-ca
+      dockerRegistryMirror: https://mirror.gcr.io/
+      imagePullPolicy: IfNotPresent
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: runner-deployment-name
+                    operator: In
+                    values:
+                      - 8-32-spot-runnerdeploy
+              topologyKey: kubernetes.io/hostname
+---
+apiVersion: actions.summerwind.dev/v1alpha1
+kind: HorizontalRunnerAutoscaler
+metadata:
+  name: 8-32-spot-runnerdeploy-autoscaler
+  namespace: actions-runner-system
+spec:
+  scaleDownDelaySecondsAfterScaleOut: 300
+  scaleTargetRef:
+    name: 8-32-spot-runnerdeploy
+  minReplicas: 0
+  maxReplicas: 20
+  metrics:
+  - repositoryNames:
+    - backend
+    - school-portal-admin
+    - student-app
+    - eibanam
+    type: TotalNumberOfQueuedAndInProgressWorkflowRuns
+  scaleUpTriggers:
+  - githubEvent:
+      workflowJob: {}
+    amount: 1
+    duration: "10m"
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: 8-32-spot-runnerdeploy
+  namespace: actions-runner-system
+spec:
+  maxUnavailable: 0
+  selector:
+    matchLabels:
+      runner-deployment-name: 8-32-spot-runnerdeploy

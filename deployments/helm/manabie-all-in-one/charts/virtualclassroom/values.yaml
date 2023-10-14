@@ -1,0 +1,136 @@
+grpcPort: 6750
+httpPort: 6760
+
+resources:
+  requests:
+    memory: 128Mi
+affinity: {}
+affinityOverride: {}
+
+podAnnotations:
+  sidecar.istio.io/proxyCPU: "10m"
+  sidecar.istio.io/proxyMemory: "50Mi"
+
+
+metrics:
+  enabled: true
+  podAnnotations:
+    prometheus.io/scheme: "http"
+    prometheus.io/port: "8888"
+    prometheus.io/scrape: "true"
+
+clientVersion: "v0.30.0"
+
+nodeSelector: {}
+
+apiHttp:
+  - match:
+    - uri:
+        prefix: /virtualclassroom.v1.InternalService
+    route:
+      - destination:
+          host: virtualclassroom
+          port:
+            number: 6750
+    fault:
+      abort:
+        percentage:
+          value: 100
+        httpStatus: 403
+  - match:
+    - uri:
+        prefix: /virtualclassroom.v1
+    route:
+      - destination:
+          host: virtualclassroom
+          port:
+            number: 6750
+  - match:
+    - uri:
+        prefix: /api/virtualclassroom/v1
+    route:
+      - destination:
+          host: virtualclassroom
+          port:
+            number: 6760
+
+webHttp:
+  - match:
+    - uri:
+        prefix: /virtualclassroom.v1
+    route:
+    - destination:
+        host: virtualclassroom
+        port:
+          number: 6750
+    corsPolicy:
+      allowOrigins:
+        - regex: ".*"
+      allowMethods:
+        - POST
+        - GET
+        - OPTIONS
+        - PUT
+        - DELETE
+      allowHeaders:
+        - grpc-timeout
+        - content-type
+        - keep-alive
+        - user-agent
+        - cache-control
+        - content-type
+        - content-transfer-encoding
+        - token
+        - x-accept-content-transfer-encoding
+        - x-accept-response-streaming
+        - x-user-agent
+        - x-grpc-web
+        - pkg
+        - version
+      maxAge: 100s
+      exposeHeaders:
+        - grpc-status
+        - grpc-message
+  - match:
+      - uri:
+          prefix: /api/virtualclassroom/v1
+    route:
+      - destination:
+          host: virtualclassroom
+          port:
+            number: 6760
+    corsPolicy:
+      allowOrigins:
+        - regex: ".*"
+      allowMethods:
+        - POST
+        - GET
+        - OPTIONS
+        - PUT
+        - DELETE
+      allowHeaders:
+        - grpc-timeout
+        - content-type
+        - keep-alive
+        - user-agent
+        - cache-control
+        - content-type
+        - content-transfer-encoding
+        - token
+        - x-accept-content-transfer-encoding
+        - x-accept-response-streaming
+        - x-user-agent
+        - x-grpc-web
+        - pkg
+        - version
+        - Agora-Signature-V2
+      allowCredentials: true
+      maxAge: 100s
+
+pdb:
+  enabled: false
+
+cronjobs:
+  send-upcoming-lesson-notification:
+    cmd: send_upcoming_live_lesson_notification
+    schedule: "*/1 * * * *"

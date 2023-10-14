@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package scheduling.v1;
+
+enum SchedulingServiceStatus{
+  SUCCESS = 0;
+  ERROR_IN_CREATE_JOB = 1;
+ }
+
+
+service SchedulingService {
+  rpc Scheduling(SchedulingRequest) returns (SchedulingResponse);
+}
+
+
+message SchedulingRequest {
+  string id_req = 1;
+  string student_available_slot_master = 2;
+  string teacher_available_slot_master = 3;
+  string applied_slot = 4;
+  string center_opening_slot= 5;
+  string time_slot = 6;
+  string teacher_subject = 7;
+  repeated int32 weight_soft_constraints = 8;
+  repeated int32 list_hard_constraints = 9;
+}
+
+message SchedulingResponse {
+  string id_res = 1;
+  string id_req = 2;
+  SchedulingServiceStatus status = 3;
+}

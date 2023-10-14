@@ -1,0 +1,235 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: web-api-{{ include "gateway.fullname" . }}
+spec:
+  commonName: {{ index .Values.dnsNames.webApi 0 }}
+  dnsNames:
+{{ toYaml .Values.dnsNames.webApi | indent 2 }}
+  issuerRef:
+    kind: ClusterIssuer
+    name: {{ include "gateway.fullname" . }}
+  secretName: cert-web-api-{{ include "gateway.fullname" . }}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: admin-{{ include "gateway.fullname" . }}
+spec:
+  commonName: {{ index .Values.dnsNames.admin 0 }}
+  dnsNames:
+{{ toYaml .Values.dnsNames.admin | indent 2 }}
+  issuerRef:
+    kind: ClusterIssuer
+    name: {{ include "gateway.fullname" . }}
+  secretName: cert-admin-{{ include "gateway.fullname" . }}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: api-{{ include "gateway.fullname" . }}
+spec:
+  commonName: {{ index .Values.dnsNames.api 0 }}
+  dnsNames:
+{{ toYaml .Values.dnsNames.api | indent 2 }}
+  issuerRef:
+    kind: ClusterIssuer
+    name: {{ include "gateway.fullname" . }}
+  secretName: cert-api-{{ include "gateway.fullname" . }}
+{{- if .Values.dnsNames.teacher }}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: teacher-{{ include "gateway.fullname" . }}
+spec:
+  commonName: {{ index .Values.dnsNames.teacher 0 }}
+  dnsNames:
+{{ toYaml .Values.dnsNames.teacher | indent 2 }}
+  issuerRef:
+    kind: ClusterIssuer
+    name: {{ include "gateway.fullname" . }}
+  secretName: cert-teacher-{{ include "gateway.fullname" . }}
+{{- end }}
+{{- if .Values.dnsNames.learner }}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: learner-{{ include "gateway.fullname" . }}
+spec:
+  commonName: {{ index .Values.dnsNames.learner 0 }}
+  dnsNames:
+{{ toYaml .Values.dnsNames.learner | indent 2 }}
+  issuerRef:
+    kind: ClusterIssuer
+    name: {{ include "gateway.fullname" . }}
+  secretName: cert-learner-{{ include "gateway.fullname" . }}
+{{- end }}
+{{- if gt (len .Values.dnsNames.backoffice) 0 }}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: backoffice-{{ include "gateway.fullname" . }}
+spec:
+  commonName: {{ index .Values.dnsNames.backoffice 0 }}
+  dnsNames:
+{{ toYaml .Values.dnsNames.backoffice | indent 2 }}
+  issuerRef:
+    kind: ClusterIssuer
+    name: {{ include "gateway.fullname" . }}
+  secretName: cert-backoffice-{{ include "gateway.fullname" . }}
+{{- end }}
+{{- if .Values.dnsNames.backofficeMfe }}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: backoffice-mfe-{{ include "gateway.fullname" . }}
+spec:
+  commonName: {{ index .Values.dnsNames.backofficeMfe 0 }}
+  dnsNames:
+{{ toYaml .Values.dnsNames.backofficeMfe | indent 2 }}
+  issuerRef:
+    kind: ClusterIssuer
+    name: {{ include "gateway.fullname" . }}
+  secretName: cert-backoffice-mfe-{{ include "gateway.fullname" . }}
+{{- end }}
+{{- if .Values.dnsNames.grafana }}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: grafana-{{ include "gateway.fullname" . }}
+spec:
+  commonName: {{ index .Values.dnsNames.grafana 0 }}
+  dnsNames:
+{{ toYaml .Values.dnsNames.grafana | indent 2 }}
+  issuerRef:
+    kind: ClusterIssuer
+    name: {{ include "gateway.fullname" . }}
+  secretName: cert-grafana-{{ include "gateway.fullname" . }}
+{{- end }}
+{{- if .Values.dnsNames.redash }}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: redash-{{ include "gateway.fullname" . }}
+spec:
+  commonName: {{ index .Values.dnsNames.redash 0 }}
+  dnsNames:
+{{ toYaml .Values.dnsNames.redash | indent 2 }}
+  issuerRef:
+    kind: ClusterIssuer
+    name: {{ include "gateway.fullname" . }}
+  secretName: cert-redash-{{ include "gateway.fullname" . }}
+{{- end }}
+{{- if eq .Values.environment "local" }}
+{{- if .Values.dnsNames.kiali }}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: kiali-{{ include "gateway.fullname" . }}
+spec:
+  commonName: {{ index .Values.dnsNames.kiali 0 }}
+  dnsNames:
+{{ toYaml .Values.dnsNames.kiali | indent 2 }}
+  issuerRef:
+    kind: ClusterIssuer
+    name: {{ include "gateway.fullname" . }}
+  secretName: cert-kiali-{{ include "gateway.fullname" . }}
+{{- end }}
+{{- end }}
+{{- if .Values.dnsNames.appsmith }}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: appsmith-{{ include "gateway.fullname" . }}
+spec:
+  commonName: {{ index .Values.dnsNames.appsmith 0 }}
+  dnsNames:
+{{ toYaml .Values.dnsNames.appsmith | indent 2 }}
+  issuerRef:
+    kind: ClusterIssuer
+    name: {{ include "gateway.fullname" . }}
+  secretName: cert-appsmith-{{ include "gateway.fullname" . }}
+{{- end }}
+{{- if .Values.dnsNames.minio }}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: minio-{{ include "gateway.fullname" . }}
+spec:
+  commonName: {{ index .Values.dnsNames.minio 0 }}
+  dnsNames:
+{{ toYaml .Values.dnsNames.minio | indent 2 }}
+  issuerRef:
+    kind: ClusterIssuer
+    name: {{ include "gateway.fullname" . }}
+  secretName: cert-minio-{{ include "gateway.fullname" . }}
+{{- end }}
+{{- if .Values.dnsNames.learnosityWebView }}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: learnosity-web-view-{{ include "gateway.fullname" . }}
+spec:
+  commonName: {{ index .Values.dnsNames.learnosityWebView 0 }}
+  dnsNames:
+{{ toYaml .Values.dnsNames.learnosityWebView | indent 2 }}
+  issuerRef:
+    kind: ClusterIssuer
+    name: {{ include "gateway.fullname" . }}
+  secretName: cert-learnosity-web-view-{{ include "gateway.fullname" . }}
+{{- end }}
+{{- if .Values.dnsNames.internal }}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: internal-{{ include "gateway.fullname" . }}
+spec:
+  commonName: {{ index .Values.dnsNames.internal 0 }}
+  dnsNames:
+{{ toYaml .Values.dnsNames.internal | indent 2 }}
+  issuerRef:
+    kind: ClusterIssuer
+    name: {{ include "gateway.fullname" . }}
+  secretName: cert-internal-{{ include "gateway.fullname" . }}
+{{- end }}
+{{- if .Values.dnsNames.uatInternal }}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: uat-internal-{{ include "gateway.fullname" . }}
+spec:
+  commonName: {{ index .Values.dnsNames.uatInternal 0 }}
+  dnsNames:
+{{ toYaml .Values.dnsNames.uatInternal | indent 2 }}
+  issuerRef:
+    kind: ClusterIssuer
+    name: {{ include "gateway.fullname" . }}
+  secretName: cert-uat-internal-{{ include "gateway.fullname" . }}
+{{- end }}
+{{- if .Values.dnsNames.internalTool }}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: prod-internaltool-{{ include "gateway.fullname" . }}
+spec:
+  commonName: {{ index .Values.dnsNames.internalTool 0 }}
+  dnsNames:
+{{ toYaml .Values.dnsNames.internalTool | indent 2 }}
+  issuerRef:
+    kind: ClusterIssuer
+    name: {{ include "gateway.fullname" . }}
+  secretName: cert-prod-internaltool-{{ include "gateway.fullname" . }}
+{{- end }}

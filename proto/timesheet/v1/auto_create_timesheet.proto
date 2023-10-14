@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package timesheet.v1;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/timesheet/v1;tpb";
+
+message UpdateAutoCreateTimesheetFlagRequest {
+  string staff_id = 1;
+  bool flag_on = 2;
+}
+
+message UpdateAutoCreateTimesheetFlagResponse {
+  bool successful = 1;
+}
+
+service AutoCreateTimesheetService {
+  rpc UpdateAutoCreateTimesheetFlag(UpdateAutoCreateTimesheetFlagRequest) returns (UpdateAutoCreateTimesheetFlagResponse);
+}
+
+message NatsUpdateAutoCreateTimesheetFlagRequest {
+  string staff_id = 1;
+  bool flag_on = 2;
+}

@@ -1,0 +1,55 @@
+{
+	"schema": [
+		{
+			"column_name": "user_notification_id",
+			"data_type": "text",
+			"column_default": null
+		},
+		{
+			"column_name": "notification_id",
+			"data_type": "text",
+			"column_default": null
+		},
+		{
+			"column_name": "status",
+			"data_type": "text",
+			"column_default": "'USER_NOTIFICATION_STATUS_NEW'::text"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null
+		},
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null
+		},
+		{
+			"column_name": "user_id",
+			"data_type": "text",
+			"column_default": null
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "user_notifications",
+			"policyname": "rls_user_notifications",
+			"qual": "permission_check(resource_path, 'user_notifications'::text)",
+			"with_check": "permission_check(resource_path, 'user_notifications'::text)",
+			"relrowsecurity": false,
+			"relforcerowsecurity": false
+		}
+	],
+	"table_name": "user_notifications"
+}

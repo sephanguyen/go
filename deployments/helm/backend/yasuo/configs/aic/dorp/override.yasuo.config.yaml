@@ -1,0 +1,3 @@
+elasticsearch:
+  addresses:
+    - https://elasticsearch-elastic.dorp-aic-elastic.svc.cluster.local:9200

@@ -1,0 +1,127 @@
+syntax = "proto3";
+
+package syllabus.v1;
+
+import "syllabus/v1/learning_material.proto";
+import "google/protobuf/timestamp.proto";
+import "syllabus/v1/quiz_service.proto";
+import "syllabus/v1/study_plan.proto";
+import "common/v1/requests.proto";
+import "common/v1/contents.proto";
+import "common/v1/question_group.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/syllabus/v1;sspb";
+
+
+//LearningObjectiveBase is learning objective metadata
+message LearningObjectiveBase {
+    //Learning Material metadata
+    LearningMaterialBase base = 1;
+    //video_id is instruction video
+    string video_id = 2;
+    //video_script is text script
+    string video_script = 3;
+    //study_guide is learning guide
+    string study_guide = 4;
+    //total_question is total learning material question
+    int32 total_question = 5;
+    bool manual_grading = 6; 
+}
+
+
+message InsertLearningObjectiveRequest {
+    // We only need send some fields bellow
+    // 1. LearningMaterialBase 
+        // 1. No learning_material 
+        // 2. topic_id
+        // 3. name
+        // 4. No send type
+    //2. video_id
+    //3. video_script
+    //4. study_guide
+    LearningObjectiveBase learning_objective = 1;
+}
+
+message InsertLearningObjectiveResponse {
+    // return generated Learning Material ULID
+    string learning_material_id = 1;
+}
+
+message UpdateLearningObjectiveRequest{
+    // We only need send some fields bellow
+    // 1. LearningMaterialBase 
+        // 1. No learning_material 
+        // 2. No topic_id
+        // 3. name
+        // 4. No type
+    //2. video_id
+    //3. video_script
+    //4. study_guide
+    LearningObjectiveBase learning_objective = 1;
+}
+
+// UpdateLearningObjectiveResponse is empty message 
+message UpdateLearningObjectiveResponse{
+}
+
+message ListLearningObjectiveRequest {
+    repeated string learning_material_ids = 1;
+}
+
+message ListLearningObjectiveResponse {
+    repeated LearningObjectiveBase learning_objectives = 1;
+}
+
+message UpsertLOProgressionRequest {
+    StudyPlanItemIdentity study_plan_item_identity = 1;
+    repeated QuizAnswer quiz_answer = 2;
+    string shuffled_quiz_set_id = 3;
+    uint32 last_index = 4;
+    string session_id = 5;
+}
+
+message UpsertLOProgressionResponse {
+    string progression_id = 1;
+    google.protobuf.Timestamp updated_at = 2;
+}
+
+message QuizAnswer {
+    string quiz_id = 1;
+    repeated Answer answer = 2;
+}
+
+message QuizAnswerInfo {
+    common.v1.Quiz quiz = 1;
+    QuizAnswer quiz_answer = 2; // Mark at this nullable since they can skip quiz
+}
+
+message RetrieveLOProgressionRequest {
+    StudyPlanItemIdentity study_plan_item_identity = 1;
+    common.v1.Paging paging = 2;
+}
+
+message RetrieveLOProgressionResponse {
+    string original_shuffled_quiz_set_id = 1;
+    repeated QuizAnswerInfo items = 2;
+    repeated common.v1.QuestionGroup question_groups = 3;
+    uint32 last_index = 4;
+    common.v1.Paging next_page = 5;
+    google.protobuf.Timestamp updated_at = 6;
+    string session_id = 7;
+}
+
+// LearningObjective is a gRPC service used for Learning Objective type 
+service LearningObjective {
+    // InsertLearningObjective insert a Learning Objective
+    rpc InsertLearningObjective(InsertLearningObjectiveRequest)
+        returns (InsertLearningObjectiveResponse);
+    // UpdateLearningObjective update a Learning Objective
+    rpc UpdateLearningObjective(UpdateLearningObjectiveRequest)
+        returns (UpdateLearningObjectiveResponse);
+    rpc ListLearningObjective(ListLearningObjectiveRequest)
+        returns (ListLearningObjectiveResponse);
+    rpc UpsertLOProgression(UpsertLOProgressionRequest)
+        returns (UpsertLOProgressionResponse);
+    rpc RetrieveLOProgression(RetrieveLOProgressionRequest)
+        returns (RetrieveLOProgressionResponse);
+}

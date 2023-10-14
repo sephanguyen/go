@@ -1,0 +1,99 @@
+{
+	"schema": [
+		{
+			"column_name": "created_at",
+			"data_type": "timestamp with time zone",
+			"column_default": "timezone('utc'::text, now())",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "deleted_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "flag_on",
+			"data_type": "boolean",
+			"column_default": "false",
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "staff_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "updated_at",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "auto_create_timesheet_flag",
+			"policyname": "rls_auto_create_timesheet_flag",
+			"qual": "permission_check(resource_path, 'auto_create_timesheet_flag'::text)",
+			"with_check": "permission_check(resource_path, 'auto_create_timesheet_flag'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "auto_create_timesheet_flag",
+			"policyname": "rls_auto_create_timesheet_flag_restrictive",
+			"qual": "permission_check(resource_path, 'auto_create_timesheet_flag'::text)",
+			"with_check": "permission_check(resource_path, 'auto_create_timesheet_flag'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "auto_create_timesheet_flag_staff_id__fk",
+			"column_name": "staff_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "auto_create_timesheet_flag__pk",
+			"column_name": "staff_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "auto_create_timesheet_flag",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

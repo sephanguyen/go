@@ -1,0 +1,348 @@
+unleash:
+  featureFlags:
+    architecture:
+      - name: Architecture_MasterManagement_BackOffice_MasterData
+        description: "A feature flag to show location, location_type, class on master data import (LT-18080)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Architecture_MasterManagement_BackOffice_MasterData_Reserve
+        description: "A feature flag to show grades on master data import (LT-20372)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Architecture_BACKEND_RetrieveClassByIDs_Use_Mastermgmt_Repo
+        description: "A feature flag to use logic of mastermgmt service (LT-18229)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Architecture_BACKEND_AccessControl_LocationGrantedOnly
+        description: "for flag get location with grated only (LT-17398)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "none"
+            constraints: []
+      - name: Architecture_BACKEND_RetrieveClassMembers_Use_Mastermgmt_Repo
+        description: "A feature flag to use logic of mastermgmt service (LT-18934)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Architecture_AccessControl_Teacher_AutoSelectFirstLocation
+        description: "A feature flag to auto select first location in location dialog on Teacher Web (LT-19851)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Architecture_AccessControl_BackOffice_AutoSelectFirstLocation
+        description: "A feature flag to auto select first location in location dialog on BO site (LT-19850)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Architecture_MasterManagement_BackOffice_EnableExportMasterData
+        description: "A feature flag to enable exporting master data (LT-21540)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Architecture_CourseManagement_BackOffice_CourseType
+        description: "A feature flag to enable course type (LT-25567)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Architecture_Appsmith_BackOffice_Configuration
+        description: "A feature flag to enable page Configuration demo Appsmith (LT-28616)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: Architecture_Appsmith_BackOffice_LessonList
+        description: "A feature flag to enable page Lesson List demo Appsmith (LT-31665)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: Architecture_Appsmith_BackOffice_CustomPage
+        description: "A feature flag to enable custom page Appsmith (LT-34490)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Architecture_BackOffice_Customizable_Column
+        description: "A feature flag to enable customizable column feature (LT-33580)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "none"
+            constraints: []
+      - name: Architecture_Appsmith_BackOffice_External_Feature_Settings
+        description: "A feature flag to enable External Feature Settings(LT-31746)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: Architecture_BACKEND_Location_NewLocationStructure
+        description: "A feature flag to enable new structure of location & type hierarchy (LT-33846)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Architecture_BackOffice_MFE_Sidebar_Bridge
+        description: "A feature flag to enable bridge between sidebar and MFE (LT-36049)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Architecture_BACKEND_RetrieveBrightCoveProfile
+        description: "A feature flag to use brightcover profile store in database"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+      - name: Architecture_BackOffice_Location_NewLocationStructure
+        description: "A feature flag to enable handle new location structure from BE (LT-33631)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Architecture_Teacher_Go_Router
+        description: "A feature flag to enable go router on Teacher app (LT-34347)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: Architecture_Learner_Go_Router
+        description: "A feature flag to enable go router on Learner app"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: Architecture_BackOffice_Subject_Enable
+        description: "A feature flag to enable new Entity Subject with Course (LT-36126)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: Architecture_BackOffice_LowCode_Master_Data_Import
+        description: "A feature flag to enable apply lowcode for master data import (LT-37941)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Architecture_Enabled_New_Structure_Sidebar
+        description: "A feature toggle to enable new structure group for sidebar (LT-37087)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Architecture_Maintenance_Mode
+        description: "A feature toggle to enable maintainace mode"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "none"
+            constraints: []
+      - name: Architecture_Default_All_Locations_Selection
+        description: "A feature toggle to enable a new default all locations selection feature (LT-39596)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Architecture_BackOffice_Course_AccessPath_Enabled
+        description: "A feature flag to enable Course access path import and export (LT-40877)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Architecture_BackOffice_Sidebar_Improvement
+        description: "A feature flag to enable sidebar improvements (LT-36260)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Architecture_BackOffice_Master_Subject
+        description: "A feature flag to enable feature import export subject (LT-37322)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Architecture_BackOffice_Decoupled_Location
+        description: "A feature flag to decouple location logic from arch (LT-42515)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: Architecture_BACKEND_Location_New_Policy_Rule
+        description: "A feature flag to enable new policy & rules update location and location type (LT-42311)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Architecture_BACKEND_MasterData_Course_TeachingMethod
+        description: "A feature flag to add teaching_method to master data import export course (LT-43174)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat"
+            constraints: []
+          - name: strategy_organization
+            parameters:
+              organizations: "-2147483635,-2147483642,-2147483639,-2147483623,-2147483628"
+            constraints: []

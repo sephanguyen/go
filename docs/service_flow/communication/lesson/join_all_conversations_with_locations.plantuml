@@ -1,0 +1,17 @@
+@startuml communication_simplified
+hide circle
+
+actor User as User order 10
+participant Postgres as Postgres order 30
+participant SupportTom as SupportTom order 20
+participant CoreTom as CoreTom order 50
+participant Nats as Nats order 40
+User -> SupportTom:  Call "JoinAllConversationsWithLocations"
+activate SupportTom
+SupportTom <-> Postgres: find access_paths of given location_ids in conversation_locations table
+SupportTom <-> Postgres: find conversation_id having access_path is prefix of access_paths in request (WHERE access_path LIKE ANY '{ap1%,ap2%,ap3%}')
+SupportTom -> Postgres: construct new memberships and upsert to conversation_members
+SupportTom -> Nats: publish "chat.chat.members.updated" to notify elasticsearch indexer
+SupportTom -> CoreTom: publish system message "CODES_MESSAGE_TYPE_JOINED_CONVERSATION" to current online users of conversations
+deactivate SupportTom
+@enduml

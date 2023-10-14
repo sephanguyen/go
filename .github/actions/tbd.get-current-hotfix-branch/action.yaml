@@ -1,0 +1,49 @@
+name: "tbd.get-current-hotfix-branch"
+description: "Get current hotfix branch from a repo"
+
+inputs:
+  github-token:
+    description: Github token
+    required: true
+  repo:
+    description: repo to get hotfix branches from
+    required: true
+  environment:
+    description: environment to get hotfix branches
+    required: true
+  organization:
+    description: organization to get hotfix branches
+    required: true
+
+outputs:
+  branch:
+    description: be hotfix branch of the env org inputs
+    value: ${{ steps.hotfix-branch.outputs.branch }}
+
+runs:
+  using: composite
+  steps:
+    - name: Get current release tag
+      id: current-release
+      uses: ./.github/actions/tbd.get-current-tags
+      with:
+        organization: ${{ inputs.organization }}
+        environment: ${{ inputs.environment }}
+
+    - id: get-release-tag
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const repo_tag_list = {
+            'backend': '${{ steps.current-release.outputs.be_release_tag }}',
+            'school-portal-admin': '${{ steps.current-release.outputs.fe_release_tag }}',
+            'student-app': '${{ steps.current-release.outputs.me_release_tag }}',
+          }
+          core.setOutput('releaseTag', repo_tag_list['${{inputs.repo}}'])
+
+    - id: hotfix-branch
+      uses: ./.github/actions/tbd.get-hotfixes-branch
+      with:
+        repo: ${{ inputs.repo }}
+        release-tag: ${{ steps.get-release-tag.outputs.releaseTag }}
+        github-token: ${{ inputs.github-token }}

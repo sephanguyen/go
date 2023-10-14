@@ -1,0 +1,69 @@
+unleash:
+  featureFlags:
+    architecture:
+      - name: Architecture_BACKEND_RetrieveClassByIDs_Use_Mastermgmt_Repo
+        description: "A feature flag to use logic of mastermgmt service (LT-18229)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Architecture_BACKEND_RetrieveClassMembers_Use_Mastermgmt_Repo
+        description: "A feature flag to use logic of mastermgmt service (LT-18934)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag,uat,prod"
+            constraints: []
+      - name: Architecture_BACKEND_Location_NewLocationStructure
+        description: "A feature flag to enable new structure of location & type hierarchy (LT-33846)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: Architecture_Teacher_Go_Router
+        description: "A feature flag to enable go router on Teacher app (LT-34347)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: Architecture_Learner_Go_Router
+        description: "A feature flag to enable go router on Learner app"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "stag"
+            constraints: []
+      - name: Architecture_BackOffice_Subject_Enable
+        description: "A feature flag to enable new Entity Subject with Course (LT-36126)"
+        type: release
+        enabled: true
+        stale: false
+        variants: []
+        strategies:
+          - name: strategy_environment
+            parameters:
+              environments: "none"
+            constraints: []

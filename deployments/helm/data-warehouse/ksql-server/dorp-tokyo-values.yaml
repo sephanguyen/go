@@ -1,0 +1,27 @@
+affinityOverride:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: cloud.google.com/gke-spot
+          operator: In
+          values: ["true"]
+        - key: environment
+          operator: In
+          values: ["preproduction"]
+tolerations:
+  - effect: NoSchedule
+    key: cloud.google.com/gke-spot
+    operator: Exists
+  - effect: NoSchedule
+    key: environment
+    operator: Equal
+    value: preproduction
+resources:
+  requests:
+    cpu: 200m
+    memory: 6144Mi
+  limits:
+    cpu: 2500m
+    memory: 7812Mi
+

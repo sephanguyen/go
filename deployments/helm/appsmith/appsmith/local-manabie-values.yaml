@@ -1,0 +1,17 @@
+resources:
+  limits: {}
+  requests:
+    cpu: 200m
+    memory: 1000Mi
+
+applicationConfig:
+  APPSMITH_ENCRYPTION_PASSWORD: "uPyx7PYxMiVog"
+  APPSMITH_ENCRYPTION_SALT: "izc8mjX1y1ccV"
+  APPSMITH_MAIL_ENABLED: true
+  APPSMITH_MAIL_HOST: "smtp.sendgrid.net"
+  APPSMITH_MAIL_PORT: 587
+  APPSMITH_MAIL_SMTP_TLS_ENABLED: true
+  APPSMITH_MAIL_SMTP_AUTH: true
+  APPSMITH_MAIL_USERNAME: "apikey"
+  APPSMITH_MAIL_FROM: "loc.nguyen@manabie.com"
+  APPSMITH_REPLY_TO: "loc.nguyen@manabie.com"

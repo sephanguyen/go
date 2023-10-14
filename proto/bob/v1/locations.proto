@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package bob.v1;
+
+import "common/v1/enums.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/bob/v1;bpb";
+
+message City {
+  int32 id = 1;
+  string name = 2;
+  common.v1.Country country = 3;
+}
+
+message District {
+  int32 id = 1;
+  string name = 2;
+  common.v1.Country country = 3;
+  City city = 4;
+}
+
+message Point {
+  double lat = 1;
+  double long = 2;
+}

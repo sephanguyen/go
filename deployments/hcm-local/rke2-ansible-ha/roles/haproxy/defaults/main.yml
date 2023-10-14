@@ -1,0 +1,39 @@
+---
+haproxy_socket: /var/lib/haproxy/stats
+haproxy_chroot: /var/lib/haproxy
+haproxy_user: haproxy
+haproxy_group: haproxy
+
+# Frontend settings.
+haproxy_frontend_name: 'hafrontend'
+haproxy_frontend_bind_address: '*'
+haproxy_frontend_port: 8080
+haproxy_frontend_mode: 'tcp'
+haproxy_frontend_stats: true
+
+# Backend settings.
+haproxy_backend_name: 'habackend'
+haproxy_backend_mode: 'tcp'
+haproxy_backend_balance_method: 'source'
+haproxy_backend_httpchk: ''
+haproxy_backend_port: '9345'
+
+# List of backend servers.
+# haproxy_backend_servers: []
+# - name: app1
+#   address: 192.168.0.1:80
+# - name: app2
+#   address: 192.168.0.2:80
+
+# Extra global vars (see README for example usage).
+haproxy_global_vars: []
+
+# Default haproxy timeouts
+haproxy_connect_timeout: 5000
+haproxy_client_timeout: 50000
+haproxy_server_timeout: 50000
+
+# Keepalived
+rke2_apiserver_dest_port: 6443
+rke2_data_path: "/var/lib/rancher/rke2"
+rke2_api_ip: "10.26.161.112"

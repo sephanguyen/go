@@ -1,0 +1,18 @@
+hasura:
+    onDemandNodeDeployment:
+        enabled: true
+    resources:
+        requests:
+            cpu: 10m
+            memory: 180Mi
+hasuraEnabled: true
+migrationEnabled: true
+onDemandNodeDeployment:
+    enabled: true
+podAnnotations:
+    sidecar.istio.io/proxyCPU: 3m
+    sidecar.istio.io/proxyMemory: 60Mi
+resources:
+    requests:
+        cpu: 10m
+        memory: 70Mi

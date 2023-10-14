@@ -1,0 +1,278 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: prometheus
+  namespace: istio-system
+spec:
+  commonName: prometheus.prod.tokyo.manabie.io
+  dnsNames:
+    - prometheus.prod.tokyo.manabie.io
+  issuerRef:
+    kind: ClusterIssuer
+    name: prod-tokyo-gateway
+  secretName: cert-prometheus
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: thanos-sidecar
+  namespace: istio-system
+spec:
+  commonName: thanos-sidecar.prod.tokyo.manabie.io
+  dnsNames:
+    - thanos-sidecar.prod.tokyo.manabie.io
+  issuerRef:
+    kind: ClusterIssuer
+    name: prod-tokyo-gateway
+  secretName: cert-thanos-sidecar
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: alertmanager
+  namespace: istio-system
+spec:
+  commonName: alertmanager.prod.tokyo.manabie.io
+  dnsNames:
+    - alertmanager.prod.tokyo.manabie.io
+  issuerRef:
+    kind: ClusterIssuer
+    name: prod-tokyo-gateway
+  secretName: cert-alertmanager
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: jaeger
+  namespace: istio-system
+spec:
+  commonName: jaeger.prod.tokyo.manabie.io
+  dnsNames:
+    - jaeger.prod.tokyo.manabie.io
+  issuerRef:
+    kind: ClusterIssuer
+    name: prod-tokyo-gateway
+  secretName: cert-jaeger
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: kiali
+  namespace: istio-system
+spec:
+  commonName: kiali.prod.tokyo.manabie.io
+  dnsNames:
+    - kiali.prod.tokyo.manabie.io
+  issuerRef:
+    kind: ClusterIssuer
+    name: prod-tokyo-gateway
+  secretName: cert-kiali
+---
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: monitoring
+  namespace: istio-system
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - hosts:
+    - prometheus.prod.tokyo.manabie.io
+    port:
+      name: https-prometheus
+      number: 443
+      protocol: HTTPS
+    tls:
+      credentialName: cert-prometheus
+      mode: SIMPLE
+      privateKey: sds
+      serverCertificate: sds
+  - hosts:
+    - thanos-sidecar.prod.tokyo.manabie.io
+    port:
+      name: https-thanos-sidecar
+      number: 443
+      protocol: HTTPS
+    tls:
+      credentialName: cert-thanos-sidecar
+      mode: SIMPLE
+      privateKey: sds
+      serverCertificate: sds
+  - hosts:
+    - alertmanager.prod.tokyo.manabie.io
+    port:
+      name: https-alertmanager
+      number: 443
+      protocol: HTTPS
+    tls:
+      credentialName: cert-alertmanager
+      mode: SIMPLE
+      privateKey: sds
+      serverCertificate: sds
+  - hosts:
+    - jaeger.prod.tokyo.manabie.io
+    port:
+      name: https-jaeger
+      number: 443
+      protocol: HTTPS
+    tls:
+      credentialName: cert-jaeger
+      mode: SIMPLE
+      privateKey: sds
+      serverCertificate: sds
+  - hosts:
+    - kiali.prod.tokyo.manabie.io
+    port:
+      name: https-kiali
+      number: 443
+      protocol: HTTPS
+    tls:
+      credentialName: cert-kiali
+      mode: SIMPLE
+      privateKey: sds
+      serverCertificate: sds
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: prometheus
+  namespace: monitoring
+spec:
+  exportTo:
+  - istio-system
+  gateways:
+  - istio-system/monitoring
+  hosts:
+  - prometheus.prod.tokyo.manabie.io
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: prometheus-server
+        port:
+          number: 80
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: thanos-sidecar
+  namespace: monitoring
+spec:
+  exportTo:
+  - istio-system
+  gateways:
+  - istio-system/monitoring
+  hosts:
+  - thanos-sidecar.prod.tokyo.manabie.io
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: prometheus-server-thanos
+        port:
+          number: 10901
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: alertmanager
+  namespace: monitoring
+spec:
+  exportTo:
+  - istio-system
+  gateways:
+  - istio-system/monitoring
+  hosts:
+  - alertmanager.prod.tokyo.manabie.io
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: prometheus-alertmanager
+        port:
+          number: 80
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: jaeger
+  namespace: monitoring
+spec:
+  exportTo:
+  - istio-system
+  gateways:
+  - istio-system/monitoring
+  hosts:
+  - jaeger.prod.tokyo.manabie.io
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: jaeger-all-in-one
+        port:
+          number: 16686
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: kiali
+  namespace: istio-system
+spec:
+  exportTo:
+  - istio-system
+  gateways:
+  - istio-system/monitoring
+  hosts:
+  - kiali.prod.tokyo.manabie.io
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: kiali
+        port:
+          number: 20001
+---
+apiVersion: security.istio.io/v1beta1
+kind: RequestAuthentication
+metadata:
+  name: jwt-x-manabie-auth
+  namespace: istio-system
+spec:
+  selector:
+    matchLabels:
+      istio: ingressgateway
+  jwtRules:
+  - issuer: "https://securetoken.google.com/staging-manabie-online"
+    jwksUri: "https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com"
+    fromHeaders:
+    - name: x-manabie-auth
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: jaeger-host
+  namespace: istio-system
+spec:
+  selector:
+    matchLabels:
+      istio: ingressgateway
+  action: DENY
+  rules:
+  - from:
+    - source:
+        notRequestPrincipals: ["*"]
+    to:
+    - operation:
+        hosts: ["jaeger.prod.tokyo.manabie.io"]
+        notPaths: ["/.well-known/acme-challenge/*"]

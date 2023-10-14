@@ -1,0 +1,15 @@
+enabled: true
+hasura:
+    resources:
+        requests:
+            cpu: 10m
+            memory: 192Mi
+metrics:
+    enabled: false
+podAnnotations:
+    sidecar.istio.io/proxyCPU: 10m
+    sidecar.istio.io/proxyMemory: 64Mi
+resources:
+    requests:
+        cpu: 5m
+        memory: 64Mi

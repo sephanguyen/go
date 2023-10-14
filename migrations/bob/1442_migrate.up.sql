@@ -1,0 +1,1 @@
+ALTER TABLE courses ADD COLUMN IF NOT EXISTS course_partner_id TEXT;

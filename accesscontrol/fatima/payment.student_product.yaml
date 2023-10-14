@@ -1,0 +1,14 @@
+- template: 1
+  tableName: student_product
+  permissionPrefix: payment.student_product
+  permissions:
+    postgres: []
+
+- template: 1.2
+  tableName: student_product
+  useCustomPolicy: true
+  postgresPolicy:
+    - name: rls_student_product_read_all
+      for: select
+      using: |
+        1 = 1

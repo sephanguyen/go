@@ -1,0 +1,9 @@
+dependencies:
+- name: util
+  repository: file://../../libs/util
+  version: 0.1.0
+- name: common
+  repository: oci://registry-1.docker.io/bitnamicharts
+  version: 2.2.5
+digest: sha256:9a274cfa00100affd97d4cd308e4855c515c6a7808d39995e872124f7fe444e0
+generated: "2023-05-05T11:52:37.256668437+07:00"

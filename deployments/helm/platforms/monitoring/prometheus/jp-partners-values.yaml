@@ -1,0 +1,121 @@
+alertmanager:
+  extraArgs:
+    web.config.file: /etc/alertmanager/web_config.yml
+  probeHeaders:
+    - name: Authorization
+      value: Basic YWRtaW46NzI4N2FiYzU2OWE5MzQ5ODE5NWZkOWRi
+  baseURL: https://alertmanager.jp-partners.manabie.io
+  tolerations:
+    - key: monitoring
+      operator: Equal
+      value: "true"
+      effect: NoSchedule
+  persistentVolume:
+    size: 2Gi
+
+  # ========= New configs in Prometheus Helm >= v21.0.0 =========
+  livenessProbe:
+    httpGet:
+      path: /
+      port: http
+      httpHeaders:
+        - name: Authorization
+          value: Basic YWRtaW46NzI4N2FiYzU2OWE5MzQ5ODE5NWZkOWRi
+
+  readinessProbe:
+    httpGet:
+      path: /
+      port: http
+      httpHeaders:
+        - name: Authorization
+          value: Basic YWRtaW46NzI4N2FiYzU2OWE5MzQ5ODE5NWZkOWRi
+
+  templates:
+    web_config.yml: |
+      basic_auth_users:
+        admin: $2y$12$m9QxlaXbghnq/9EahlBwouB5Vb98Q5lcVPbvTfQmqthLnsyzTldRy
+
+  configmapReload:
+    enabled: false
+
+extraManifests:
+  - |
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: {{ template "prometheus.server.fullname" . }}-thanos
+      labels:
+    {{- include "prometheus.server.labels" . | nindent 4 }}
+    data:
+      bucket.yaml: |
+        type: GCS
+        config:
+          bucket: manabie-thanos
+      prometheus_http_auth.yaml: |
+        basic_auth:
+          username: admin
+          password: d80cd018018fa6b89d1ca9cc
+  - |
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: {{ template "prometheus.server.fullname" . }}-thanos
+      labels:
+    {{- include "prometheus.server.labels" . | nindent 4 }}
+    spec:
+      type: ClusterIP
+      ports:
+        - name: grpc
+          port: 10901
+          targetPort: grpc
+          protocol: TCP
+      selector:
+      {{- include "prometheus.server.matchLabels" . | nindent 4 }}
+
+server:
+  persistentVolume:
+    size: 150Gi
+  extraArgs:
+    web.config.file: /etc/config/web_config.yml
+  probeHeaders:
+    - name: Authorization
+      value: Basic YWRtaW46ZDgwY2QwMTgwMThmYTZiODlkMWNhOWNj
+  global:
+    external_labels:
+      gke_cluster: jp-partners
+      project: student-coach-e1e95
+  alertmanagers:
+    - static_configs:
+      - targets:
+        - prometheus-alertmanager
+      basic_auth:
+        username: admin
+        password: 7287abc569a93498195fd9db
+  baseURL: https://prometheus.jp-partners.manabie.io
+  retention: "2h"
+  tolerations:
+    - key: monitoring
+      operator: Equal
+      value: "true"
+      effect: NoSchedule
+  resources:
+    requests:
+      memory: 8Gi
+  nodeSelector:
+    cloud.google.com/gke-nodepool: pool-monitoring
+
+serverFiles:
+  web_config.yml:
+    basic_auth_users:
+      admin: $2y$12$IpJA5sFrM6.XTBlBDAeoQuqO5t3Jg.BlJWZonndw.XXarBOdlZam6
+
+configmapReload:
+  reloadUrl: http://admin:d80cd018018fa6b89d1ca9cc@127.0.0.1:9090/-/reload
+  prometheus:
+    enabled: true
+    # extraArgs:
+    #   webhook-url: http://admin:d80cd018018fa6b89d1ca9cc@127.0.0.1:9090/-/reload
+  alertmanager:
+    enabled: true
+    extraArgs:
+      webhook-url: http://admin:7287abc569a93498195fd9db@127.0.0.1:9093/-/reload

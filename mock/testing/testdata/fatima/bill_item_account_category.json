@@ -1,0 +1,101 @@
+{
+	"schema": [
+		{
+			"column_name": "accounting_category_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "bill_item_sequence_number",
+			"data_type": "integer",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "bill_item_account_category",
+			"policyname": "rls_bill_item_account_category",
+			"qual": "permission_check(resource_path, 'bill_item_account_category'::text)",
+			"with_check": "permission_check(resource_path, 'bill_item_account_category'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "bill_item_account_category",
+			"policyname": "rls_bill_item_account_category_restrictive",
+			"qual": "permission_check(resource_path, 'bill_item_account_category'::text)",
+			"with_check": "permission_check(resource_path, 'bill_item_account_category'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "fk_bill_item_account_category_accounting_category_id",
+			"column_name": "accounting_category_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "fk_bill_item_account_category_bill_item_sequence_number",
+			"column_name": "bill_item_sequence_number",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "fk_bill_item_account_category_bill_item_sequence_number",
+			"column_name": "resource_path",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "bill_item_account_category_pk",
+			"column_name": "accounting_category_id",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "bill_item_account_category_pk",
+			"column_name": "bill_item_sequence_number",
+			"constraint_type": "PRIMARY KEY"
+		},
+		{
+			"constraint_name": "bill_item_account_category_pk",
+			"column_name": "resource_path",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "bill_item_account_category",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

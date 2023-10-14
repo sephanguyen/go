@@ -1,0 +1,39 @@
+connect:
+  resources:
+    limits:
+      cpu: 2000m
+      memory: 5096Mi
+  topologySpreadConstraints:
+    maxSkew: 1
+    topologyKey: cloud.google.com/gke-nodepool
+    whenUnsatisfiable: ScheduleAnyway
+  affinityOverride:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 10
+        preference:
+          matchExpressions:
+          - key: cloud.google.com/gke-nodepool
+            operator: In
+            values:
+            - "n2d-highmem-2-on-demand"
+  tolerations:
+    - effect: NoSchedule
+      key: cloud.google.com/gke-spot
+      operator: Exists
+
+alloydbProxy:
+  enabled: true
+  alloydbConnName: "projects/staging-manabie-online/locations/asia-southeast1/clusters/stag-alloydb/instances/stag-alloydb-w01?port=6432"
+
+syncAlloydbEnabled: true
+
+global:
+  sqlProxy:
+    lmsConnName: "staging-manabie-online:asia-southeast1:manabie-lms-de12e08e"
+    newConnName: "staging-manabie-online:asia-southeast1:manabie-auth-f2dc7988"
+
+hpa:
+    averageCPUUtilization: 400
+    maxReplicas: 3
+    minReplicas: 1

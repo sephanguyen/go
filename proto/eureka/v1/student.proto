@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package eureka.v1;
+
+import "common/v1/requests.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/eureka/v1;epb";
+
+message GetStudentsByLocationAndCourseRequest {
+  common.v1.Paging paging = 1;
+  string course_id = 2;
+  string student_name = 3;
+  repeated string location_ids = 4;
+}
+  
+message GetStudentsByLocationAndCourseResponse {  
+  message Student {
+    string student_id = 1;
+    string name = 2;
+  }
+
+  repeated Student students = 1;
+  uint32 total_items = 2;
+  common.v1.Paging next_page = 3;
+}
+
+service StudentService {
+  rpc GetStudentsByLocationAndCourse(GetStudentsByLocationAndCourseRequest) returns (GetStudentsByLocationAndCourseResponse);
+}

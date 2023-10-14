@@ -1,0 +1,87 @@
+{
+	"schema": [
+		{
+			"column_name": "custom_billing_date",
+			"data_type": "timestamp with time zone",
+			"column_default": null,
+			"is_nullable": "YES"
+		},
+		{
+			"column_name": "material_id",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "material_type",
+			"data_type": "text",
+			"column_default": null,
+			"is_nullable": "NO"
+		},
+		{
+			"column_name": "resource_path",
+			"data_type": "text",
+			"column_default": "autofillresourcepath()",
+			"is_nullable": "NO"
+		}
+	],
+	"policies": [
+		{
+			"tablename": "material",
+			"policyname": "rls_material",
+			"qual": "permission_check(resource_path, 'material'::text)",
+			"with_check": "permission_check(resource_path, 'material'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "PERMISSIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		},
+		{
+			"tablename": "material",
+			"policyname": "rls_material_restrictive",
+			"qual": "permission_check(resource_path, 'material'::text)",
+			"with_check": "permission_check(resource_path, 'material'::text)",
+			"relrowsecurity": true,
+			"relforcerowsecurity": true,
+			"permissive": "RESTRICTIVE",
+			"roles": {
+				"Elements": [
+					"public"
+				],
+				"Dimensions": [
+					{
+						"Length": 1,
+						"LowerBound": 1
+					}
+				],
+				"Status": 2
+			}
+		}
+	],
+	"constraint": [
+		{
+			"constraint_name": "fk_material_material_id",
+			"column_name": "material_id",
+			"constraint_type": "FOREIGN KEY"
+		},
+		{
+			"constraint_name": "material_pk",
+			"column_name": "material_id",
+			"constraint_type": "PRIMARY KEY"
+		}
+	],
+	"table_name": "material",
+	"type": "BASE TABLE",
+	"owner": "postgres"
+}

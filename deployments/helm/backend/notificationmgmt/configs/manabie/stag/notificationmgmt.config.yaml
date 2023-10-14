@@ -1,0 +1,20 @@
+common:
+  google_cloud_project: staging-manabie-online
+  firebase_project: staging-manabie-online
+postgres_v2:
+  bob:
+    max_conns: 16
+  notificationmgmt:
+    max_conns: 16
+issuers:
+  - issuer: manabie
+    audience: manabie-stag
+    jwks_endpoint: http://shamir:5680/.well-known/jwks.json
+  - issuer: https://securetoken.google.com/staging-manabie-online
+    audience: staging-manabie-online
+    jwks_endpoint: https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com
+jwt_applicant: manabie-stag
+storage:
+  bucket: stag-manabie-backend
+scheduled_notification:
+  is_running_for_all_tenants: true

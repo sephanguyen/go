@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+package lessonmgmt.v1;
+
+import "google/protobuf/timestamp.proto";
+import "lessonmgmt/v1/enums.proto";
+import "google/protobuf/duration.proto";
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/lessonmgmt/v1;lpb";
+
+message ConvertedImage {
+  int32 width = 1;
+  int32 height = 2;
+  string image_url = 3;
+}
+
+message Comment {
+  string comment = 1;
+  google.protobuf.Duration duration = 2;
+}
+
+message Media {
+  string media_id = 1;
+  string name = 2;
+  string resource = 3;
+  repeated Comment comments = 4;
+  MediaType type = 5;
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp updated_at = 7;
+  repeated ConvertedImage images = 8;
+  int64 file_size_bytes = 9;
+  google.protobuf.Duration duration = 10;
+}
+
+message RetrieveMediasByIDsRequest {
+  repeated string media_ids = 1;
+}
+
+message RetrieveMediasByIDsResponse {
+  repeated Media medias = 1;
+}
+
+message CreateMediaRequest {
+  Media media = 1;
+}
+
+message CreateMediaResponse {}
+
+message DeleteMediasRequest {
+  repeated string media_ids = 1;
+}
+
+message DeleteMediasResponse {}
+
+service MediaReaderService {
+  rpc RetrieveMediasByIDs(RetrieveMediasByIDsRequest) returns (RetrieveMediasByIDsResponse);
+  rpc CreateMedia(CreateMediaRequest) returns (CreateMediaResponse);
+  rpc DeleteMedias(DeleteMediasRequest) returns (DeleteMediasResponse);
+}

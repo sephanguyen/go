@@ -1,0 +1,12 @@
+table:
+  schema: public
+  name: e2e_instances_group_by_date
+select_permissions:
+  - role: user
+    permission:
+      columns:
+        - created_date
+        - status
+        - instances_count
+      filter: {}
+      allow_aggregations: true

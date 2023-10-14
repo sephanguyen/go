@@ -1,0 +1,23 @@
+{
+  "name": "prod_tokyo_mastermgmt_to_eureka_academic_year_sink_connector",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+    "tasks.max": "1",
+    "topics": "prod.tokyo.mastermgmt.public.academic_year",
+    "connection.url": "${file:/config/kafka-connect-config.properties:eureka_url}",
+    "auto.create": "false",
+    "insert.mode": "upsert",
+    "table.name.format": "academic_year",
+    "fields.whitelist": "academic_year_id,created_at,deleted_at,end_date,name,resource_path,start_date,updated_at",
+    "transforms": "unwrap,route",
+    "transforms.route.type": "org.apache.kafka.connect.transforms.RegexRouter",
+    "transforms.route.regex": "([^.]+).([^.]+).([^.]+).([^.]+).([^.]+)",
+    "transforms.route.replacement": "$5",
+    "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+    "delete.enabled": "false",
+    "pk.mode": "record_value",
+    "pk.fields": "academic_year_id",
+    "transforms.unwrap.drop.tombstones": "true",
+    "transforms.unwrap.delete.handling.mode": "drop"
+  }
+}

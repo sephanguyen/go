@@ -1,0 +1,2 @@
+ALTER TABLE IF EXISTS assessment_session
+    ADD COLUMN IF NOT EXISTS status TEXT;

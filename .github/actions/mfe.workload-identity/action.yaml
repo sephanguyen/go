@@ -1,0 +1,40 @@
+name: "mfe.workload-identity"
+description: "cloud auth for MFE"
+
+
+inputs:
+  env: 
+    description: "Environment"
+    required: true
+    default: "staging"
+    
+runs:
+  using: "composite"
+  steps:
+      - name: Staging bucket
+        if: ${{ inputs.env == 'staging'  ||  inputs.env == 'stag' }}
+        uses: google-github-actions/auth@v1
+        with:
+          workload_identity_provider: "projects/456005132078/locations/global/workloadIdentityPools/gh-action-pool/providers/mfe-deploy-provider"
+          service_account: "stag-mfe-upload-artifacts@staging-manabie-online.iam.gserviceaccount.com"
+
+      - name: UAT bucket
+        if: ${{ inputs.env == 'uat' }}
+        uses: google-github-actions/auth@v1
+        with:
+          workload_identity_provider: "projects/401512356686/locations/global/workloadIdentityPools/gh-action-pool/providers/mfe-deploy-provider"
+          service_account: "uat-mfe-upload-artifacts@uat-manabie.iam.gserviceaccount.com"
+
+      - name: DORP bucket
+        if: ${{ inputs.env == 'preproduction' ||  inputs.env == 'dorp' ||  inputs.env == 'prep' }}
+        uses: google-github-actions/auth@v1
+        with:
+          workload_identity_provider: "projects/401512356686/locations/global/workloadIdentityPools/gh-action-pool/providers/mfe-deploy-provider"
+          service_account: "uat-mfe-upload-artifacts@uat-manabie.iam.gserviceaccount.com"
+
+      - name: Production bucket
+        if: ${{ inputs.env == 'production' ||  inputs.env == 'prod' }}
+        uses: google-github-actions/auth@v1
+        with:
+          workload_identity_provider: "projects/418860883682/locations/global/workloadIdentityPools/gh-action-pool/providers/mfe-deploy-provider"
+          service_account: "prod-mfe-upload-artifacts@student-coach-e1e95.iam.gserviceaccount.com"

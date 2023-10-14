@@ -1,0 +1,1656 @@
+- name: allowed-queries
+  definition:
+    queries:
+      - name: StudentPackageList
+        query: >-
+          query StudentPackageList($student_id: String! = "", $order_by:
+          student_packages_order_by! = {created_at: desc}, $limit: Int, $offset:
+          Int) {
+            student_packages(where: {student_id: {_eq: $student_id}}, order_by: [$order_by], limit: $limit, offset: $offset) {
+              ...StudentAttrs
+            }
+            student_packages_aggregate(where: {student_id: {_eq: $student_id}}) {
+              aggregate {
+                count
+              }
+            }
+          }
+
+
+          fragment StudentAttrs on student_packages {
+            start_at
+            end_at
+            properties
+            student_package_id
+          }
+      - name: StudentPackagesByListStudentId
+        query: >-
+          query StudentPackagesByListStudentId($student_ids: [String!] = [],
+          $order_by: student_packages_order_by! = {created_at: desc}) {
+            student_packages(where: {student_id: {_in: $student_ids}}, order_by: [$order_by]) {
+              ...StudentAttrsWithListStudentId
+            }
+          }
+
+
+          fragment StudentAttrsWithListStudentId on student_packages {
+            properties
+            student_package_id
+            student_id
+            end_at
+            start_at
+          }
+      - name: StudentPackageById
+        query: |-
+          query StudentPackageById($id: String!) {
+            student_packages(where: {student_package_id: {_eq: $id}}) {
+              ...StudentAttrs
+            }
+          }
+          fragment StudentAttrs on student_packages {
+            start_at
+            end_at
+            properties
+            student_package_id
+          }
+      - name: User_StudentPackagesByListStudentIdV2
+        query: >
+          query User_StudentPackagesByListStudentIdV2($student_ids: [String!] =
+          [], $order_by: student_packages_order_by! = {created_at: desc}) {
+            student_packages(
+              where: {student_id: {_in: $student_ids}}
+              order_by: [$order_by]
+            ) {
+              ...StudentAttrsWithListStudentId
+              location_ids
+            }
+          }
+
+
+          fragment StudentAttrsWithListStudentId on student_packages {
+            properties
+            student_package_id
+            student_id
+            end_at
+            start_at
+          }
+      - name: Payment_GetLocationNameByLocationId
+        query: |
+          query Payment_GetLocationNameByLocationId($location_id: String!) {
+            locations(where: {location_id: {_eq: $location_id}}) {
+              name
+            }
+          }
+      - name: Payment_GetManyActionLogsByOrderId
+        query: >
+          query Payment_GetManyActionLogsByOrderId($order_id: String!, $limit:
+          Int = 5, $offset: Int = 0) {
+            order_action_log(
+              where: {order_id: {_eq: $order_id}}
+              limit: $limit
+              offset: $offset
+              order_by: {created_at: desc}
+            ) {
+              ...Payment_ActionLogsAttr
+            }
+            order_action_log_aggregate(where: {order_id: {_eq: $order_id}}) {
+              aggregate {
+                count
+              }
+            }
+          }
+
+
+          fragment Payment_ActionLogsAttr on order_action_log {
+            user_id
+            action
+            comment
+            created_at
+          }
+      - name: Payment_GetOrderItemsByOrderId
+        query: >
+          query Payment_GetOrderItemsByOrderId($orderId: String!, $limit: Int =
+          5, $offset: Int) {
+            order_item(limit: $limit, offset: $offset, where: {order_id: {_eq: $orderId}}) {
+              discount_id
+              product_id
+              start_date
+            }
+            order_item_aggregate(where: {order_id: {_eq: $orderId}}) {
+              aggregate {
+                count
+              }
+            }
+          }
+      - name: Payment_GetManyDiscountsByDiscountIds
+        query: |
+          query Payment_GetManyDiscountsByDiscountIds($discountIds: [String!]) {
+            discount(where: {discount_id: {_in: $discountIds}}, order_by: {discount_id: asc}) {
+              ...DiscountAttrs
+            }
+          }
+
+          fragment DiscountAttrs on discount {
+            available_from
+            available_until
+            created_at
+            discount_amount_type
+            discount_amount_value
+            discount_type
+            discount_id
+            name
+            recurring_valid_duration
+            remarks
+            updated_at
+          }
+      - name: Payment_GetManyDiscounts
+        query: >-
+          query Payment_GetManyDiscounts($current_date: timestamptz!, $name:
+          String, $limit: Int = 30) {
+              discount(
+                  limit: $limit
+                  where: {
+                      _and: [
+                          { available_from: { _lte: $current_date } }
+                          { available_until: { _gte: $current_date } }
+                          { name: { _ilike: $name } }
+                      ]
+                  }
+              ) {
+                  ...DiscountAttrs
+              }
+          }
+
+          fragment DiscountAttrs on discount {
+              available_from
+              available_until
+              created_at
+              discount_amount_type
+              discount_amount_value
+              discount_type
+              discount_id
+              name
+              recurring_valid_duration
+              remarks
+              updated_at
+          }
+      - name: Payment_GetOrderByOrderId
+        query: |
+          query Payment_GetOrderByOrderId($order_id: String!) {
+            order(where: {order_id: {_eq: $order_id}}) {
+              order_id
+              order_sequence_number
+              order_status
+              order_type
+              student_id
+              location_id
+              created_at
+              is_reviewed
+              version_number
+            }
+          }
+      - name: Payment_GetManyProductsByProductIdsAndAvailableDate
+        query: >
+          query Payment_GetManyProductsByProductIdsAndAvailableDate($name:
+          String, $product_ids: [String!] = [], $available_from: timestamptz,
+          $available_until: timestamptz) {
+            product(
+              where: {available_from: {_lte: $available_from}, available_until: {_gte: $available_until}, name: {_ilike: $name}, product_id: {_in: $product_ids}}
+              order_by: {created_at: desc}
+            ) {
+              ...ProductAttrs
+            }
+          }
+
+
+          fragment ProductAttrs on product {
+            product_id
+            available_from
+            available_until
+            billing_schedule_id
+            created_at
+            custom_billing_period
+            disable_pro_rating_flag
+            name
+            product_type
+            remarks
+            tax_id
+            updated_at
+          }
+      - name: Payment_GetManyProductsReference
+        query: >
+          query Payment_GetManyProductsReference($name: String, $limit: Int =
+          30) {
+            product(limit: $limit, where: {name: {_ilike: $name}}) {
+              ...ProductAttrs
+            }
+          }
+
+
+          fragment ProductAttrs on product {
+            product_id
+            available_from
+            available_until
+            billing_schedule_id
+            created_at
+            custom_billing_period
+            disable_pro_rating_flag
+            name
+            product_type
+            remarks
+            tax_id
+            updated_at
+          }
+      - name: Payment_GetManyProductsByProductIds
+        query: |
+          query Payment_GetManyProductsByProductIds($productIds: [String!]) {
+            product(where: {product_id: {_in: $productIds}}, order_by: {product_id: asc}) {
+              ...ProductAttrs
+            }
+          }
+
+          fragment ProductAttrs on product {
+            product_id
+            available_from
+            available_until
+            billing_schedule_id
+            created_at
+            custom_billing_period
+            disable_pro_rating_flag
+            name
+            product_type
+            remarks
+            tax_id
+            updated_at
+          }
+      - name: Payment_GetManyProductsByProductIdsV2
+        query: >
+          query Payment_GetManyProductsByProductIdsV2($productIds: [String!],
+          $current_date: timestamptz) {
+            product(
+              where: {product_id: {_in: $productIds}, _and: [{available_from: {_lte: $current_date}}, {available_until: {_gte: $current_date}}]}
+              order_by: {product_id: asc}
+            ) {
+              ...ProductAttrs
+            }
+          }
+
+
+          fragment ProductAttrs on product {
+            product_id
+            available_from
+            available_until
+            billing_schedule_id
+            created_at
+            custom_billing_period
+            disable_pro_rating_flag
+            name
+            product_type
+            remarks
+            tax_id
+            updated_at
+          }
+      - name: Payment_GetProductPriceByProductId
+        query: |-
+          query Payment_GetProductPriceByProductId($product_id: String!) {
+            product_price(where: {product_id: {_eq: $product_id}}) {
+              ...ProductPriceAttrs
+            }
+          }
+
+          fragment ProductPriceAttrs on product_price {
+                  product_price_id
+                  billing_schedule_period_id
+                  created_at
+                  price
+                  product_id
+                  quantity
+          }
+      - name: Payment_GetFeeByProductId
+        query: |
+          query Payment_GetFeeByProductId($product_id: String!) {
+            fee(where: {fee_id: {_eq: $product_id}}) {
+              fee_type
+            }
+          }
+      - name: Payment_GetProductIdsByGradeIds
+        query: |-
+          query Payment_GetProductIdsByGradeIds($grade_ids: [String!] = []) {
+                  product_grade(where: { grade_id: { _in: $grade_ids } }) {
+                      product_id
+                  }
+              }
+      - name: Payment_GetProductIdsByLocationIds
+        query: >
+          query Payment_GetProductIdsByLocationIds($location_ids: [String!] =
+          []) {
+            product_location(where: {location_id: {_in: $location_ids}}) {
+              product_id
+            }
+          }
+      - name: Payment_GetMaterialByProductId
+        query: |
+          query Payment_GetMaterialByProductId($product_id: String!) {
+            material(where: {material_id: {_eq: $product_id}}) {
+              custom_billing_date
+              material_type
+            }
+          }
+      - name: Payment_GetManyMaterialsByProductIdsV2
+        query: |
+          query Payment_GetManyMaterialsByProductIdsV2($productIds: [String!]) {
+            material(where: {material_id: {_in: $productIds}}) {
+              material_id
+              material_type
+              custom_billing_date
+            }
+          }
+      - name: Payment_GetPackageByProductId
+        query: |
+          query Payment_GetPackageByProductId($product_id: String!) {
+            package(where: {package_id: {_eq: $product_id}}) {
+              max_slot
+              package_end_date
+              package_start_date
+              package_type
+            }
+          }
+      - name: Payment_GetManyProductPricesByProductIds
+        query: >
+          query Payment_GetManyProductPricesByProductIds($productIds: [String!])
+          {
+            product_price(
+              where: {product_id: {_in: $productIds}}
+              order_by: {product_id: asc}
+            ) {
+              ...ProductPriceAttrs
+            }
+          }
+
+
+          fragment ProductPriceAttrs on product_price {
+            product_price_id
+            billing_schedule_period_id
+            created_at
+            price
+            product_id
+            quantity
+          }
+      - name: Payment_Eibanam_GetBillingSchedulePeriodIdByName
+        query: >
+          query Payment_Eibanam_GetBillingSchedulePeriodIdByName($name: String)
+          {
+            billing_schedule_period(where: {name: {_eq: $name}}) {
+              billing_schedule_period_id
+            }
+          }
+      - name: Payment_Eibanam_GetBillingScheduleIdByName
+        query: |
+          query Payment_Eibanam_GetBillingScheduleIdByName($name: String) {
+            billing_schedule(where: {name: {_eq: $name}}) {
+              billing_schedule_id
+            }
+          }
+      - name: Payment_Eibanam_GetManyDiscounts
+        query: |
+          query Payment_Eibanam_GetManyDiscounts {
+            discount(where: {is_archived: {_eq: false}}) {
+              available_from
+              available_until
+              created_at
+              discount_amount_type
+              discount_amount_value
+              discount_type
+              discount_id
+              name
+              recurring_valid_duration
+              remarks
+              updated_at
+            }
+          }
+      - name: Payment_Eibanam_GetProductIdByName
+        query: |
+          query Payment_Eibanam_GetProductIdByName($name: String) {
+            product(where: {name: {_eq: $name}}) {
+              product_id
+            }
+          }
+      - name: Payment_Eibanam_GetTaxIdByName
+        query: |
+          query Payment_Eibanam_GetTaxIdByName($name: String) {
+            tax(where: {name: {_eq: $name}}) {
+              tax_id
+            }
+          }
+      - name: Payment_Eibanam_GetDiscountIdByName
+        query: |
+          query Payment_Eibanam_GetDiscountIdByName($name: String) {
+            discount(where: {name: {_eq: $name}}) {
+              discount_id
+            }
+          }
+      - name: Payment_GetManyCourseByCourseIds
+        query: |-
+          query Payment_GetManyCourseByCourseIds($course_ids: [String!] = []) {
+                  courses(where: { course_id: { _in: $course_ids } }) {
+                      course_id
+                      grade
+                      name
+                  }
+              }
+      - name: Payment_GetManyPackageCourseByPackageId
+        query: |-
+          query Payment_GetManyPackageCourseByPackageId($package_id: String!) {
+                  package_course(where: { package_id: { _eq: $package_id } }) {
+                      course_id
+                      course_weight
+                      created_at
+                      mandatory_flag
+                      max_slots_per_course
+                      package_id
+                  }
+              }
+      - name: Payment_GetManyFeesByProductIds
+        query: |-
+          query Payment_GetManyFeesByProductIds($productIds: [String!]) {
+              fee(where: { fee_id: { _in: $productIds } }, order_by: { fee_id: asc }) {
+                  fee_id
+                  fee_type
+              }
+          }
+      - name: Payment_GetManyBillItemsV2
+        query: >-
+          query Payment_GetManyBillItemsV2($order_id: String!, $limit: Int = 5,
+          $offset: Int = 0) {
+              bill_item(
+                  where: { order_id: { _eq: $order_id } }
+                  limit: $limit
+                  offset: $offset
+                  order_by: { bill_item_sequence_number: asc }
+              ) {
+                  bill_item_sequence_number
+                  product_description
+                  billing_status
+                  billing_date
+                  final_price
+                  order_id
+                  product_id
+              }
+              bill_item_aggregate(where: { order_id: { _eq: $order_id } }) {
+                  aggregate {
+                      count
+                  }
+              }
+          }
+      - name: Payment_GetTaxByTaxIdV2
+        query: |-
+          query Payment_GetTaxByTaxIdV2($tax_id: String!) {
+              tax(where: { tax_id: { _eq: $tax_id } }) {
+                  ...TaxAttrs
+              }
+          }
+
+          fragment TaxAttrs on tax {
+              tax_percentage
+              tax_category
+          }
+      - name: Payment_GetManyTaxesByTaxIds
+        query: |-
+          query Payment_GetManyTaxesByTaxIds($tax_ids: [String!]) {
+              tax(where: { tax_id: { _in: $tax_ids } }) {
+                  ...TaxAttrs
+                  tax_id
+              }
+          }
+
+          fragment TaxAttrs on tax {
+              tax_percentage
+              tax_category
+          }
+      - name: Payment_GetManyPackageCourseFeesByPackageId
+        query: |-
+          query Payment_GetManyPackageCourseFeesByPackageId(
+              $current_date: timestamptz!
+              $package_id: String!
+          ) {
+              package_course_fee(
+                  where: {
+                      package_id: { _eq: $package_id }
+                      _and: [
+                          { available_from: { _lte: $current_date } }
+                          { available_until: { _gte: $current_date } }
+                      ]
+                  }
+              ) {
+                  available_from
+                  available_until
+                  course_id
+                  created_at
+                  fee_id
+                  package_id
+              }
+          }
+      - name: Payment_GetManyPackageCourseMaterialsByPackageId
+        query: |-
+          query Payment_GetManyPackageCourseMaterialsByPackageId(
+              $current_date: timestamptz!
+              $package_id: String!
+          ) {
+              package_course_material(
+                  where: {
+                      package_id: { _eq: $package_id }
+                      _and: [
+                          { available_from: { _lte: $current_date } }
+                          { available_until: { _gte: $current_date } }
+                      ]
+                  }
+              ) {
+                  available_from
+                  available_until
+                  course_id
+                  created_at
+                  material_id
+                  package_id
+              }
+          }
+      - name: User_StudentPackagesClassListWithFilter
+        query: >
+          query User_StudentPackagesClassListWithFilter($student_id: String!,
+          $student_package_ids: [String!] = []) {
+            student_package_class(
+              where: {student_package_id: {_in: $student_package_ids}, student_id: {_eq: $student_id}}
+            ) {
+              class_id
+              course_id
+              location_id
+              student_package_id
+            }
+          }
+      - name: Payment_GetManyBillItemsByStudentProductIds
+        query: >-
+          query
+          Payment_GetManyBillItemsByStudentProductIds($student_product_ids:
+          [String!]) {
+              bill_item(where: { student_product_id: { _in: $student_product_ids } }) {
+                  product_id
+                  product_pricing
+                  discount_amount_type
+                  discount_amount_value
+                  tax_id
+                  tax_category
+                  tax_percentage
+                  order_id
+                  billing_status
+                  billing_date
+                  billing_schedule_period_id
+                  bill_item_sequence_number
+                  discount_amount
+                  tax_amount
+                  final_price
+                  billing_approval_status
+                  billing_item_description
+                  student_product_id
+              }
+          }
+      - name: Payment_GetManyOrderItemsByStudentProductIds
+        query: >-
+          query
+          Payment_GetManyOrderItemsByStudentProductIds($student_product_ids:
+          [String!]) {
+              order_item(where: { student_product_id: { _in: $student_product_ids } }) {
+                  student_product_id
+                  discount_id
+                  product_id
+                  order_id
+              }
+          }
+      - name: Payment_GetManyStudentProductsByStudentProductIds
+        query: >-
+          query
+          Payment_GetManyStudentProductsByStudentProductIds($student_product_ids:
+          [String!]) {
+              student_product(where: { student_product_id: { _in: $student_product_ids } }) {
+                  approval_status
+                  end_date
+                  location_id
+                  product_id
+                  product_status
+                  start_date
+                  student_id
+                  student_product_id
+                  upcoming_billing_date
+              }
+          }
+      - name: Payment_GetManyTaxesReference
+        query: |-
+          query Payment_GetManyTaxesReference($name: String, $limit: Int = 30) {
+            tax(limit: $limit, where: {name: {_ilike: $name}}) {
+              ...TaxAttrs
+              tax_id
+              name
+            }
+          }
+
+          fragment TaxAttrs on tax {
+            tax_percentage
+            tax_category
+          }
+      - name: Payment_GetEnrollmentProductIdsByProductIds
+        query: >-
+          query Payment_GetEnrollmentProductIdsByProductIds($productIds:
+          [String!]) {
+            product_setting(
+                where: {
+                    product_id: { _in: $productIds }
+                    _and: { is_enrollment_required: { _eq: true } }
+                }
+            ) {
+                product_id
+            }
+          }
+      - name: Payment_GetPackagesByProductIds
+        query: |-
+          query Payment_GetPackagesByProductIds($productIds: [String!]) {
+            package(where: { package_id: { _in: $productIds } }) {
+                package_id
+                max_slot
+                package_end_date
+                package_start_date
+                package_type
+            }
+          }
+      - name: Payment_GetManyBillingSchedulePeriodsByBillingScheduleId
+        query: >-
+          query
+          Payment_GetManyBillingSchedulePeriodsByBillingScheduleId($billingScheduleId:
+          String!) {
+            billing_schedule_period(
+                where: { billing_schedule_id: { _eq: $billingScheduleId } }
+                order_by: { start_date: asc }
+            ) {
+                billing_schedule_period_id
+                billing_schedule_id
+                name
+                billing_date
+                start_date
+                end_date
+                billing_ratios(order_by: { start_date: asc }) {
+                    ...BillingRatioAttrs
+                }
+            }
+          }
+
+          fragment BillingRatioAttrs on billing_ratio {
+            billing_ratio_id
+            start_date
+            end_date
+            billing_schedule_period_id
+            billing_ratio_numerator
+            billing_ratio_denominator
+          }
+      - name: Payment_GetManyBillingRatiosByBillingSchedulePeriodId
+        query: >
+          query
+          Payment_GetManyBillingRatiosByBillingSchedulePeriodId($billingSchedulePeriodId:
+          String!) {
+            billing_ratio(
+              where: {billing_schedule_period_id: {_eq: $billingSchedulePeriodId}}
+            ) {
+              ...BillingRatioAttrs
+            }
+          }
+
+
+          fragment BillingRatioAttrs on billing_ratio {
+            billing_ratio_id
+            start_date
+            end_date
+            billing_schedule_period_id
+            billing_ratio_numerator
+            billing_ratio_denominator
+          }
+      - name: Payment_GetManyBillItemsByStudentProductIdsV2
+        query: >-
+          query
+          Payment_GetManyBillItemsByStudentProductIdsV2($student_product_ids:
+          [String!]) {
+              bill_item(where: { student_product_id: { _in: $student_product_ids } }) {
+                  product_id
+                  product_pricing
+                  discount_amount_type
+                  discount_amount_value
+                  tax_id
+                  tax_category
+                  tax_percentage
+                  order_id
+                  billing_status
+                  billing_date
+                  billing_schedule_period_id
+                  bill_item_sequence_number
+                  discount_amount
+                  tax_amount
+                  final_price
+                  billing_approval_status
+                  billing_item_description
+                  student_product_id
+                  previous_bill_item_status
+                  previous_bill_item_sequence_number
+                  is_latest_bill_item
+                  adjustment_price
+                  price
+                  old_price
+                  billing_ratio_numerator
+                  billing_ratio_denominator
+              }
+          }
+      - name: Payment_GetManyStudentProductsByStudentProductIdsV2
+        query: >-
+          query
+          Payment_GetManyStudentProductsByStudentProductIdsV2($student_product_ids:
+          [String!]) {
+              student_product(where: { student_product_id: { _in: $student_product_ids } }) {
+                  approval_status
+                  location_id
+                  product_id
+                  product_status
+                  start_date
+                  end_date
+                  student_id
+                  student_product_id
+                  upcoming_billing_date
+                  updated_from_student_product_id
+                  updated_to_student_product_id
+                  student_product_label
+              }
+          }
+      - name: Payment_GetManyBillingSchedulePeriodsByManyBillingScheduleId
+        query: |-
+          query Payment_GetManyBillingSchedulePeriodsByManyBillingScheduleId(
+              $billingScheduleIds: [String!]
+          ) {
+              billing_schedule_period(
+                  where: { billing_schedule_id: { _in: $billingScheduleIds } }
+                  order_by: { start_date: asc }
+              ) {
+                  billing_schedule_period_id
+                  billing_schedule_id
+                  name
+                  billing_date
+                  start_date
+                  end_date
+                  billing_ratios {
+                      ...BillingRatioAttrs
+                  }
+              }
+          }
+
+          fragment BillingRatioAttrs on billing_ratio {
+            billing_ratio_id
+            start_date
+            end_date
+            billing_schedule_period_id
+            billing_ratio_numerator
+            billing_ratio_denominator
+          }
+      - name: Payment_GetManyBillItemCoursesByBillItemSequenceNumbers
+        query: >
+          query
+          Payment_GetManyBillItemCoursesByBillItemSequenceNumbers($billItemSequenceNumbers:
+          [Int!]) {
+            bill_item_course(
+              where: {bill_item_sequence_number: {_in: $billItemSequenceNumbers}}
+            ) {
+              bill_item_sequence_number
+              course_id
+              course_name
+              course_slot
+              course_slot_per_week
+              course_weight
+            }
+          }
+      - name: Payment_GetManyAssociatedStudentProductsByStudentProductIds
+        query: >
+          query
+          Payment_GetManyAssociatedStudentProductsByStudentProductIds($studentProductIds:
+          [String!]) {
+            student_associated_product(
+              where: {student_product_id: {_in: $studentProductIds}}
+            ) {
+              student_product_id
+              associated_product_id
+            }
+          }
+      - name: Payment_GetManyProductIdsForWithdrawalGraduate
+        query: |
+          query Payment_GetManyProductIdsForWithdrawalGraduate(
+              $student_id: String!
+              $location_id: String!
+          ) {
+              student_product(
+                  where: {
+                      student_id: { _eq: $student_id }
+                      product_status: { _eq: "ORDERED" }
+                      product: {
+                          _or: [
+                              { product_materials: { material_type: { _eq: "MATERIAL_TYPE_RECURRING" } } }
+                              {
+                                  product_packages: {
+                                      package_type: {
+                                          _in: ["PACKAGE_TYPE_SCHEDULED", "PACKAGE_TYPE_FREQUENCY"]
+                                      }
+                                  }
+                              }
+                              { product_fees: { fee_type: { _eq: "FEE_TYPE_RECURRING" } } }
+                          ]
+                      }
+                      updated_to_student_product_id: { _is_null: true }
+                      student_product_label: { _nin: ["WITHDRAWAL_SCHEDULED", "GRADUATION_SCHEDULED"] }
+                      location_id: { _eq: $location_id }
+                  }
+              ) {
+                  student_product_id
+                  location_id
+                  start_date
+              }
+          }
+      - name: >-
+          Payment_GetManyActiveRecurringStudentProduct_NotScheduledForWithdrawalOrGraduate
+        query: >
+          query
+          Payment_GetManyActiveRecurringStudentProduct_NotScheduledForWithdrawalOrGraduate(
+              $student_id: String!
+              $location_id: String!
+          ) {
+              student_product(
+                  where: {
+                      student_id: { _eq: $student_id }
+                      product_status: { _eq: "ORDERED" }
+                      product: {
+                          _or: [
+                              { product_materials: { material_type: { _eq: "MATERIAL_TYPE_RECURRING" } } }
+                              {
+                                  product_packages: {
+                                      package_type: {
+                                          _in: ["PACKAGE_TYPE_SCHEDULED", "PACKAGE_TYPE_FREQUENCY"]
+                                      }
+                                  }
+                              }
+                              { product_fees: { fee_type: { _eq: "FEE_TYPE_RECURRING" } } }
+                          ]
+                      }
+                      updated_to_student_product_id: { _is_null: true }
+                      student_product_label: { _nin: ["WITHDRAWAL_SCHEDULED", "GRADUATION_SCHEDULED"] }
+                      location_id: { _eq: $location_id }
+                  }
+              ) {
+                  student_product_id
+                  location_id
+                  start_date
+              }
+          }
+      - name: Payment_GetManyAssociatedDiscountsByProductId
+        query: >-
+          query Payment_GetManyAssociatedDiscountsByProductId($product_id:
+          String!, $current_date: timestamptz!, $name: String, $limit: Int = 30)
+          {
+            product_discount(where: {product_id: {_eq: $product_id}, discount: {_and: [{available_from: {_lte: $current_date}}, {available_until: {_gte: $current_date}}, {name: {_ilike: $name}}]}}, limit: $limit) {
+              ...AssociatedDiscountAttrs
+            }
+          }
+
+
+          fragment AssociatedDiscountAttrs on product_discount {
+            discount {
+              available_from
+              available_until
+              created_at
+              discount_amount_type
+              discount_amount_value
+              discount_type
+              discount_id
+              name
+              recurring_valid_duration
+              remarks
+              updated_at
+            }
+          }
+      - name: Payment_GetManyPackageCoursesByPackageIds
+        query: >-
+          query Payment_GetManyPackageCoursesByPackageIds($package_ids:
+          [String!]) {
+              package_course(where: { package_id: { _in: $package_ids } }) {
+                  course_id
+                  course_weight
+                  created_at
+                  mandatory_flag
+                  max_slots_per_course
+                  package_id
+              }
+          }
+      - name: Payment_GetManyProductsByProductIdsV3
+        query: |-
+          query Payment_GetManyProductsByProductIdsV3(
+                $productIds: [String!]
+                $current_date: timestamptz
+              ) {
+                  product(
+                      where: {
+                          product_id: { _in: $productIds }
+                          _and: [
+                              { available_from: { _lte: $current_date } }
+                              { available_until: { _gte: $current_date } }
+                          ]
+                      }
+                      order_by: { product_id: asc }
+                  ) {
+                      product_id
+                      available_from
+                      available_until
+                      billing_schedule_id
+                      created_at
+                      custom_billing_period
+                      disable_pro_rating_flag
+                      name
+                      product_type
+                      remarks
+                      tax_id
+                      updated_at
+                      is_unique
+                  }
+              }
+      - name: Payment_GetManyAssociatedDiscountsByProductIdV2
+        query: >-
+          query Payment_GetManyAssociatedDiscountsByProductIdV2($product_id:
+          String!, $current_date: timestamptz!, $name: String, $limit: Int = 30)
+          {
+            product_discount(where: {product_id: {_eq: $product_id}, discount: {_and: [{available_from: {_lte: $current_date}}, {available_until: {_gte: $current_date}}, {name: {_ilike: $name}}]}}, limit: $limit) {
+              ...AssociatedDiscountAttrs
+            }
+          }
+
+
+          fragment AssociatedDiscountAttrs on product_discount {
+            discount {
+              available_from
+              available_until
+              created_at
+              discount_amount_type
+              discount_amount_value
+              discount_type
+              discount_id
+              name
+              recurring_valid_duration
+              remarks
+              updated_at
+              parent_tag_id_validation
+              student_tag_id_validation
+            }
+          }
+      - name: Payment_GetManyDiscountsByDiscountIdsV2
+        query: >-
+          query Payment_GetManyDiscountsByDiscountIdsV2($discountIds: [String!])
+          {
+            discount(where: {discount_id: {_in: $discountIds}}, order_by: {discount_id: asc}) {
+              ...CommonDiscountAttrs
+            }
+          }
+
+
+          fragment CommonDiscountAttrs on discount {
+            available_from
+            available_until
+            created_at
+            discount_amount_type
+            discount_amount_value
+            discount_type
+            discount_id
+            name
+            recurring_valid_duration
+            remarks
+            updated_at
+            parent_tag_id_validation
+            student_tag_id_validation
+          }
+      - name: Payment_GetManyAssociatedDiscountsByProductIdV3
+        query: >-
+          query Payment_GetManyAssociatedDiscountsByProductIdV3($product_id:
+          String!, $current_date: timestamptz!, $name: String, $limit: Int = 30)
+          {
+            product_discount(where: {product_id: {_eq: $product_id}, discount: {_and: [{available_from: {_lte: $current_date}}, {available_until: {_gte: $current_date}}, {name: {_ilike: $name}}]}}, limit: $limit) {
+              ...AssociatedDiscountAttrs
+            }
+          }
+
+
+          fragment AssociatedDiscountAttrs on product_discount {
+            discount {
+              ...CommonDiscountAttrs
+            }
+          }
+
+
+          fragment CommonDiscountAttrs on discount {
+            available_from
+            available_until
+            created_at
+            discount_amount_type
+            discount_amount_value
+            discount_type
+            discount_id
+            name
+            recurring_valid_duration
+            remarks
+            updated_at
+            parent_tag_id_validation
+            student_tag_id_validation
+          }
+      - name: Payment_GetManyBillItemsByStudentProductIdsV3
+        query: >
+          query
+          Payment_GetManyBillItemsByStudentProductIdsV3($student_product_ids:
+          [String!]) {
+            bill_item(where: {student_product_id: {_in: $student_product_ids}}) {
+              product_id
+              product_pricing
+              discount_amount_type
+              discount_amount_value
+              tax_id
+              tax_category
+              tax_percentage
+              order_id
+              billing_status
+              billing_date
+              billing_schedule_period_id
+              bill_item_sequence_number
+              discount_amount
+              tax_amount
+              final_price
+              billing_approval_status
+              billing_item_description
+              student_product_id
+              previous_bill_item_status
+              previous_bill_item_sequence_number
+              is_latest_bill_item
+              adjustment_price
+              price
+              old_price
+              billing_ratio_numerator
+              billing_ratio_denominator
+              raw_discount_amount
+            }
+          }
+      - name: Payment_GetManyAccountingCategories
+        query: >
+          query Payment_GetManyAccountingCategories($name: String, $limit: Int =
+          30) {
+            accounting_category(limit: $limit, where: {name: {_ilike: $name}}) {
+              accounting_category_id
+              name
+            }
+          }
+      - name: Payment_GetManyProductsReferenceV2
+        query: >
+          query Payment_GetManyProductsReferenceV2($name: String, $locationIds:
+          [String!], $limit: Int = 30) {
+            product(
+              limit: $limit
+              where: {name: {_ilike: $name}, product_locations: {location_id: {_in: $locationIds}}}
+            ) {
+              ...ProductAttrs
+            }
+          }
+
+
+          fragment ProductAttrs on product {
+            product_id
+            available_from
+            available_until
+            billing_schedule_id
+            created_at
+            custom_billing_period
+            disable_pro_rating_flag
+            name
+            product_type
+            remarks
+            tax_id
+            updated_at
+          }
+      - name: Payment_GetAllGrades
+        query: |
+          query Payment_GetAllGrades {
+            grade(where: {is_archived: {_eq: false}}, order_by: {sequence: asc}) {
+              grade_id
+              name
+              sequence
+              partner_internal_id
+            }
+          }
+      - name: Payment_GetManyPackageCourseFeesByPackageIdV2
+        query: >
+          query Payment_GetManyPackageCourseFeesByPackageIdV2($current_date:
+          timestamptz!, $package_id: String!) {
+            package_course_fee(
+              where: {package_id: {_eq: $package_id}, _and: [{available_from: {_lte: $current_date}}, {available_until: {_gte: $current_date}}]}
+            ) {
+              available_from
+              available_until
+              course_id
+              created_at
+              fee_id
+              package_id
+              is_added_by_default
+            }
+          }
+      - name: Payment_GetManyPackageCourseMaterialsByPackageIdV2
+        query: >
+          query
+          Payment_GetManyPackageCourseMaterialsByPackageIdV2($current_date:
+          timestamptz!, $package_id: String!) {
+            package_course_material(
+              where: {package_id: {_eq: $package_id}, _and: [{available_from: {_lte: $current_date}}, {available_until: {_gte: $current_date}}]}
+            ) {
+              available_from
+              available_until
+              course_id
+              created_at
+              material_id
+              package_id
+              is_added_by_default
+            }
+          }
+      - name: Order_GetManyProductIdsByInfoStudent
+        query: >
+          query Order_GetManyProductIdsByInfoStudent($isUnique: [Boolean!] =
+          [true, false], $isRequiredEnrollment: [Boolean!] = [true, false],
+          $locationId: String!, $gradeId: String!) {
+            product(
+              where: {product_settings: {is_enrollment_required: {_in: $isRequiredEnrollment}}, product_locations: {location_id: {_eq: $locationId}}, is_unique: {_in: $isUnique}, product_grades: {grade_id: {_eq: $gradeId}}}
+            ) {
+              product_id
+            }
+          }
+      - name: Order_GetManyStudentProductsByStudentProductIds
+        query: >
+          query
+          Order_GetManyStudentProductsByStudentProductIds($student_product_ids:
+          [String!]) {
+            student_product(where: {student_product_id: {_in: $student_product_ids}}) {
+              approval_status
+              location_id
+              product_id
+              product_status
+              start_date
+              end_date
+              student_id
+              student_product_id
+              upcoming_billing_date
+              updated_from_student_product_id
+              updated_to_student_product_id
+              student_product_label
+              version_number
+            }
+          }
+      - name: Order_GetManyProductIdsByInfoStudentV2
+        query: >
+          query Order_GetManyProductIdsByInfoStudentV2($isUnique: [Boolean!],
+          $isRequiredEnrollment: [Boolean!], $locationId: String!, $gradeId:
+          String!) {
+            product(
+              where: {product_settings: {is_enrollment_required: {_in: $isRequiredEnrollment}}, product_locations: {location_id: {_eq: $locationId}}, is_unique: {_in: $isUnique}, product_grades: {grade_id: {_eq: $gradeId}}}
+            ) {
+              product_id
+            }
+          }
+      # START FOR LOW CODE
+      - name: Order_GetProductSettingByProductId
+        query: >
+          query Order_GetProductSettingByProductId($productId: String!) {
+            product_setting(where: {product_id: {_eq: $productId}}) {
+              product_id
+              is_enrollment_required
+              is_pausable
+              updated_at
+              created_at
+            }
+          }
+      - name: Order_GetBillingScheduleById
+        query: >
+          query Order_GetBillingScheduleById($billingScheduleId: String!) {
+            billing_schedule(where: {billing_schedule_id: {_eq: $billingScheduleId}}) {
+              billing_schedule_id
+              created_at
+              is_archived
+              name
+              remarks
+              updated_at
+            }
+          }
+      - name: Order_GetProductGradeAndLocationIds
+        query: >
+          query Order_GetProductGradeAndLocationIds($productId: String!) {
+            product_grade(where: {product_id: {_eq: $productId}}) {
+              created_at
+              grade_id
+              product_id
+            }
+            product_location(where: {product_id: {_eq: $productId}}) {
+              created_at
+              location_id
+              product_id
+            }
+          }
+      # END FOR LOW CODE
+      - name: Order_GetManyProductIdsAddedToEnrollmentByDefault
+        query: >
+          query Order_GetManyProductIdsAddedToEnrollmentByDefault($locationId:
+          String!, $gradeId: String!) {
+            product(
+              where: {product_settings: {is_added_to_enrollment_by_default: {_eq: true}}, product_locations: {location_id: {_eq: $locationId}}, product_grades: {grade_id: {_eq: $gradeId}}}
+            ) {
+              product_id
+            }
+          }
+      - name: Payment_GetManyLeavingReasonsByRequestType
+        query: >
+          query Payment_GetManyLeavingReasonsByRequestType($name: String,
+          $limit: Int = 30, $requestType: String!) {
+            leaving_reason(
+              limit: $limit
+              where: {_and: {name: {_ilike: $name}, leaving_reason_type: {_eq: $requestType}}}
+            ) {
+              leaving_reason_id
+              name
+              leaving_reason_type
+              updated_at
+              created_at
+            }
+          }
+      - name: StudentCourse_GetManyStudentPackagesClassByFilter
+        query: >
+          query StudentCourse_GetManyStudentPackagesClassByFilter($student_id:
+          String!, $student_package_ids: [String!] = []) {
+            student_package_class(
+              where: {student_package_id: {_in: $student_package_ids}, student_id: {_eq: $student_id}}
+            ) {
+              class_id
+              course_id
+              location_id
+              student_package_id
+            }
+          }
+      - name: StudentCourse_GetManyStudentPackagesByStudentIds
+        query: >
+          query StudentCourse_GetManyStudentPackagesByStudentIds($student_ids:
+          [String!] = [], $order_by: student_packages_order_by! = {created_at:
+          desc}) {
+            student_packages(
+              where: {student_id: {_in: $student_ids}}
+              order_by: [$order_by]
+            ) {
+              properties
+              student_package_id
+              student_id
+              end_at
+              start_at
+              location_ids
+            }
+          }
+      - name: Order_GetManyProductPricesByProductIds
+        query: |
+          query Order_GetManyProductPricesByProductIds($productIds: [String!]) {
+            product_price(
+              where: {product_id: {_in: $productIds}}
+              order_by: {product_id: asc}
+            ) {
+              product_price_id
+              billing_schedule_period_id
+              created_at
+              price
+              product_id
+              quantity
+              price_type
+            }
+          }
+      - name: Payment_GetOrderByOrderIdV2
+        query: |
+          query Payment_GetOrderByOrderIdV2($order_id: String!) {
+            order(where: {order_id: {_eq: $order_id}}) {
+              order_id
+              order_sequence_number
+              order_status
+              order_type
+              student_id
+              location_id
+              created_at
+              is_reviewed
+              version_number
+              withdrawal_effective_date
+              loa_start_date
+              loa_end_date
+              background
+              future_measures
+              student_full_name
+              order_comment
+              updated_at
+            }
+          }
+      - name: Lesson_GetPackageId
+        query: |
+          query Lesson_GetPackageId($subscription_id: String!) {
+            student_packages(
+              where: {student_package_id: {_eq: $subscription_id}, package_id: {_is_null: false}}
+            ) {
+              package_id
+            }
+          }
+      - name: Lesson_GetProductName
+        query: |
+          query Lesson_GetProductName($package_id: String!) {
+            product(where: {product_id: {_eq: $package_id}}) {
+              name
+            }
+          }
+      - name: Payment_GetManyDiscountsByDiscountTypes
+        query: >-
+          query Payment_GetManyDiscountsByDiscountTypes($discountTypes:
+          [String!]) {
+                  discount(
+                      where: { discount_type: { _in: $discountTypes } }
+                      order_by: { discount_id: asc }
+                  ) {
+                      ...CommonDiscountAttrs
+                  }
+              }
+              
+          fragment CommonDiscountAttrs on discount {
+            available_from
+            available_until
+            created_at
+            discount_amount_type
+            discount_amount_value
+            discount_type
+            discount_id
+            name
+            recurring_valid_duration
+            remarks
+            updated_at
+            parent_tag_id_validation
+            student_tag_id_validation
+          }
+      - name: Order_GetReasonsByOrderId
+        query: |
+          query Order_GetReasonsByOrderId($order_id: String!) {
+            order_leaving_reason(where: {order_id: {_eq: $order_id}}) {
+              leaving_reason {
+                created_at
+                leaving_reason_id
+                leaving_reason_type
+                name
+                updated_at
+                remark
+                is_archived
+              }
+            }
+          }
+      - name: Payment_GetDiscountTypesByUserId
+        query: |-
+          query Payment_GetDiscountTypesByUserId($user_id: String!) {
+                  user_discount_tag(where: { user_id: { _eq: $user_id } }) {
+                      discount_type
+                      deleted_at
+                      created_at
+                      updated_at
+                      start_date
+                      end_date
+                      product_id
+                      location_id
+                      user_id
+                  }
+              }
+      - name: Order_GetOrderItemByStudentProductId
+        query: |
+          query Order_GetOrderItemByStudentProductId($studentProductId: String!) {
+              order_item(
+                  where: { student_product_id: { _eq: $studentProductId } }
+                  order_by: { created_at: desc }
+                  limit: 1
+              ) {
+                  student_product_id
+                  discount_id
+                  product_id
+                  order_id
+              }
+          }
+      - name: Lesson_GetPackageInfo
+        query: |
+          query Lesson_GetPackageInfo($package_id: String!) {
+            package(where: {package_id: {_eq: $package_id}}) {
+              package_type
+              product {
+                name
+              }
+            }
+          }
+      - name: Order_GetManyTeachingMethodByCourseIds
+        query: |
+          query Order_GetManyTeachingMethodByCourseIds($courseIds: [String!]) {
+            courses(where: {course_id: {_in: $courseIds}}) {
+              course_id
+              teaching_method
+            }
+          }
+      - name: Order_GetManyStudentPackageOrderByOrderId
+        query: |
+          query Order_GetManyStudentPackageOrderByOrderId($orderId: String!) {
+            student_package_order(where: {order_id: {_eq: $orderId}}) {
+              course_id
+              start_at
+            }
+          }
+      - name: Order_GetAllGrades
+        query: |-
+          query Order_GetAllGrades($name: String, $limit: Int = 30) {
+            grade(where: {is_archived: {_eq: false}, name: {_ilike: $name}}, order_by: {sequence: asc}, limit: $limit) {
+              grade_id
+              name
+              sequence
+              partner_internal_id
+            }
+          }
+      - name: Order_GetManyDiscountTags
+        query: |-
+          query Order_GetManyDiscountTags($name: String, $limit: Int = 30) {
+            discount_tag(limit: $limit, where: {discount_tag_name: {_ilike: $name}, is_archived: {_eq: false}}) {
+              discount_tag_id
+              discount_tag_name
+              selectable
+              is_archived
+            }
+          }
+      - name: Order_GetManyProductsByProductIdsAndAvailableDate
+        query: >
+          query Order_GetManyProductsByProductIdsAndAvailableDate($name:
+          String, $product_ids: [String!] = [], $available_from: timestamptz,
+          $available_until: timestamptz) {
+            product(
+              where: {available_from: {_lte: $available_from}, available_until: {_gte: $available_until}, name: {_ilike: $name}, product_id: {_in: $product_ids}}
+              order_by: {product_partner_id: desc_nulls_last}
+            ) {
+              ...ProductAttrs
+            }
+          }
+
+
+          fragment ProductAttrs on product {
+            product_id
+            available_from
+            available_until
+            billing_schedule_id
+            created_at
+            custom_billing_period
+            disable_pro_rating_flag
+            name
+            product_type
+            remarks
+            tax_id
+            updated_at
+          } 
+      - name: Lesson_GetManyProductsReference
+        query: |
+          query Lesson_GetManyProductsReference($name: String, $limit: Int = 30) {
+            product(
+              limit: $limit
+              where: {name: {_ilike: $name}, is_archived: {_eq: false}}
+              order_by: {name: asc}
+            ) {
+              name
+              product_id
+            }
+          }
+      - name: Order_GetDiscountTagIdsByUserId
+        query: |-
+          query Order_GetDiscountTagIdsByUserId($user_id: String!) {
+            user_discount_tag(where: { user_id: { _eq: $user_id } }) {
+                discount_type
+                deleted_at
+                created_at
+                updated_at
+                start_date
+                end_date
+                product_id
+                location_id
+                user_id
+                discount_tag_id
+                product_group_id
+            }
+          }
+      - name: Order_GetManyDiscountsByDiscountTagIds
+        query: |-
+          query Order_GetManyDiscountsByDiscountTagIds($discountTagIds: [String!]) {
+            discount(
+                where: { discount_tag_id: { _in: $discountTagIds } }
+                order_by: { discount_id: asc }
+            ) {
+                ...CommonDiscountAttrs
+            }
+          }
+
+          fragment CommonDiscountAttrs on discount {
+            available_from
+            available_until
+            created_at
+            discount_amount_type
+            discount_amount_value
+            discount_type
+            discount_id
+            name
+            recurring_valid_duration
+            remarks
+            updated_at
+            parent_tag_id_validation
+            student_tag_id_validation
+          }
+      - name: Order_GetManyBillingSchedulePeriodsByManyBillingScheduleId
+        query: |-
+          query Order_GetManyBillingSchedulePeriodsByManyBillingScheduleId(
+              $billingScheduleIds: [String!]
+          ) {
+              billing_schedule_period(
+                  where: { billing_schedule_id: { _in: $billingScheduleIds } }
+                  order_by: { start_date: asc }
+              ) {
+                  billing_schedule_period_id
+                  billing_schedule_id
+                  name
+                  billing_date
+                  start_date
+                  end_date
+                  billing_ratios(order_by: { start_date: asc }) {
+                    ...BillingRatioAttrs
+                }
+              }
+          }
+          fragment BillingRatioAttrs on billing_ratio {
+            billing_ratio_id
+            start_date
+            end_date
+            billing_schedule_period_id
+            billing_ratio_numerator
+            billing_ratio_denominator
+          }
+      - name: Order_GetDiscountTagIdsByUserIdV2
+        query: |-
+          query Order_GetDiscountTagIdsByUserIdV2($user_id: String!) {
+            user_discount_tag(
+                where: {
+                  user_id: { _eq: $user_id }
+                  deleted_at: { _is_null: true }
+                  _or: [
+                    {
+                      _and: [
+                        { discount_type: { _neq: "DISCOUNT_TYPE_COMBO" } }
+                        { discount_type: { _neq: "DISCOUNT_TYPE_SIBLING" } }
+                      ]
+                    }
+                    {
+                      _and: [
+                        { discount_type: { _eq: "DISCOUNT_TYPE_COMBO" } }
+                        { start_date: { _lte: "now()" } }
+                        { end_date: { _gte: "now()" } }
+                      ]
+                    }
+                    {
+                      _and: [
+                        { discount_type: { _eq: "DISCOUNT_TYPE_SIBLING" } }
+                        { start_date: { _lte: "now()" } }
+                        { end_date: { _gte: "now()" } }
+                      ]
+                    }
+                  ]
+                }
+            ) {
+                discount_type
+                deleted_at
+                created_at
+                updated_at
+                start_date
+                end_date
+                product_id
+                location_id
+                user_id
+                discount_tag_id
+                product_group_id
+            }
+          }
+      - name: Order_GetDiscountTagIdsByUserIdV3
+        query: |-
+          query Order_GetDiscountTagIdsByUserIdV3($user_id: String!) {
+              user_discount_tag(
+                  where: {
+                      user_id: { _eq: $user_id }
+                      deleted_at: { _is_null: true }
+                      _or: [
+                          { discount_type: { _neq: "DISCOUNT_TYPE_SIBLING" } }
+                          {
+                              _and: [
+                                  { discount_type: { _eq: "DISCOUNT_TYPE_SIBLING" } }
+                                  { start_date: { _lte: "now()" } }
+                                  { end_date: { _gte: "now()" } }
+                              ]
+                          }
+                      ]
+                  }
+              ) {
+                  discount_type
+                  deleted_at
+                  created_at
+                  updated_at
+                  start_date
+                  end_date
+                  product_id
+                  location_id
+                  user_id
+                  discount_tag_id
+                  product_group_id
+              }
+          }

@@ -1,0 +1,271 @@
+name: tbd.pick-tag-and-deploy-uat
+
+on:
+  schedule:
+    - cron: "00 0 * * 1" # 7AM Monday auto build + deploy UAT
+  workflow_dispatch:
+    inputs:
+      build-and-deploy:
+        description: Build and deploy UAT using latest trunk tags
+        required: true
+        type: boolean
+        default: false
+
+      slack-notify:
+        description: Notify on Slack
+        required: true
+        type: boolean
+        default: false
+
+      slack-channel:
+        description: Channel to notify
+        required: true
+        type: choice
+        default: tiered-quality-gate-alert
+        options:
+          - slack-message-testing
+          - dev-release
+
+env:
+  SLACK_NOTIFY: ${{ inputs.slack-notify }}
+  SLACK_CHANNEL: ${{ inputs.slack-channel }}
+  GITHUB_TOKEN: ${{ secrets.BUILD_GITHUB_TOKEN }}
+
+jobs:
+  get-current-tag-on-production:
+    permissions:
+      contents: "read"
+      id-token: "write"
+    timeout-minutes: 5
+    runs-on: ["self-hosted", "100m-400mi", "spot", "persistent"]
+    outputs:
+      be_tag: ${{ steps.production-release.outputs.be_release_tag }}
+      fe_tag: ${{ steps.production-release.outputs.fe_release_tag }}
+      me_tag: ${{ steps.production-release.outputs.me_release_tag }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Get current Production tags
+        id: production-release
+        uses: ./.github/actions/tbd.get-current-tags
+        with:
+          summary: false
+          organization: tokyo
+          environment: production
+
+  get-latest-tag-on-trunk:
+    timeout-minutes: 15
+    runs-on: ["self-hosted", "100m-400mi", "spot", "persistent"]
+    outputs:
+      be_tag: ${{ steps.trunk-release.outputs.be_tag }}
+      fe_tag: ${{ steps.trunk-release.outputs.fe_tag }}
+      me_tag: ${{ steps.trunk-release.outputs.me_tag }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Get current release tag on Trunk
+        id: trunk-release
+        uses: ./.github/actions/tbd.get-latest-tag-on-trunk
+        with:
+          github-token: ${{ env.GITHUB_TOKEN }}
+
+  generate-summary:
+    needs: [get-current-tag-on-production, get-latest-tag-on-trunk]
+    timeout-minutes: 2
+    runs-on: ["self-hosted", "100m-400mi", "spot", "persistent"]
+    env:
+      prod_be: "${{ needs.get-current-tag-on-production.outputs.be_tag }}"
+      prod_be_url: "https://github.com/manabie-com/backend/releases/tag/${{ needs.get-current-tag-on-production.outputs.be_tag }}"
+
+      prod_fe: "${{ needs.get-current-tag-on-production.outputs.fe_tag }}"
+      prod_fe_url: "https://github.com/manabie-com/school-portal-admin/releases/tag/${{ needs.get-current-tag-on-production.outputs.fe_tag }}"
+
+      prod_me: "${{ needs.get-current-tag-on-production.outputs.me_tag }}"
+      prod_me_url: "https://github.com/manabie-com/student-app/releases/tag/${{ needs.get-current-tag-on-production.outputs.me_tag }}"
+
+      trunk_be: "${{ needs.get-latest-tag-on-trunk.outputs.be_tag }}"
+      trunk_be_url: "https://github.com/manabie-com/backend/releases/tag/${{ needs.get-latest-tag-on-trunk.outputs.be_tag }}"
+
+      trunk_fe: "${{ needs.get-latest-tag-on-trunk.outputs.fe_tag }}"
+      trunk_fe_url: "https://github.com/manabie-com/school-portal-admin/releases/tag/${{ needs.get-latest-tag-on-trunk.outputs.fe_tag }}"
+
+      trunk_me: "${{ needs.get-latest-tag-on-trunk.outputs.me_tag }}"
+      trunk_me_url: "https://github.com/manabie-com/student-app/releases/tag/${{ needs.get-latest-tag-on-trunk.outputs.me_tag }}"
+
+    steps:
+      - run: |
+          cat <<EOF > $GITHUB_STEP_SUMMARY
+          | Type | Current on Prod | Latest on Trunk |
+          | --- | --- | --- |
+          | BE | [$prod_be]($prod_be_url) | [$trunk_be]($trunk_be_url) |
+          | FE | [$prod_fe]($prod_fe_url) | [$trunk_fe]($trunk_fe_url) |
+          | ME | [$prod_me]($prod_me_url) | [$trunk_me]($trunk_me_url) |
+          EOF
+        shell: bash
+
+      - name: Get current date
+        id: date
+        shell: bash
+        run: |
+          echo "today=$(date +"%B %d, %Y")" >> $GITHUB_OUTPUT
+
+      - name: Gen schedule run inputs
+        if: github.event_name == 'schedule'
+        run: |
+          echo "SLACK_CHANNEL=dev-release" >> $GITHUB_ENV
+          echo "SLACK_NOTIFY=true" >> $GITHUB_ENV
+
+      - name: Get channel
+        id: channel
+        run: |
+          input=${{ env.SLACK_CHANNEL }}
+
+          case $input in
+            dev-release)
+              echo "url=https://hooks.slack.com/services/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" >> $GITHUB_OUTPUT
+              ;;
+            slack-message-testing)
+              echo "url=https://hooks.slack.com/services/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" >> $GITHUB_OUTPUT
+              ;;
+            *)
+              echo "url=https://hooks.slack.com/services/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" >> $GITHUB_OUTPUT
+              ;;
+          esac
+
+      - name: Send JSON data to Slack
+        if: env.SLACK_NOTIFY == 'true'
+        uses: slackapi/slack-github-action@v1.23.0
+        env:
+          SLACK_WEBHOOK_URL: ${{ steps.channel.outputs.url }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+        with:
+          payload: |
+            {
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "Weekly UAT Release Update"
+                  }
+                },
+                {
+                  "type": "context",
+                  "elements": [
+                    {
+                      "text": "*${{ steps.date.outputs.today }}*  |  @tech-func-automation's announcement",
+                      "type": "mrkdwn"
+                    }
+                  ]
+                },
+                {
+                  "type": "divider"
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Backend Tag*"
+                  }
+                },
+                {
+                  "type": "context",
+                  "elements": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "Current on Prod \t <${{ env.prod_be_url }}|${{ env.prod_be }}>\nLatest on Trunk \t  <${{ env.trunk_be_url }}|${{ env.trunk_be }}>"
+                    }
+                  ]
+                },
+                {
+                  "type": "divider"
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Frontend Tag*"
+                  }
+                },
+                {
+                  "type": "context",
+                  "elements": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "Current on Prod \t <${{ env.prod_fe_url }}|${{ env.prod_fe }}>\nLatest on Trunk \t  <${{ env.trunk_fe_url }}|${{ env.trunk_fe }}>"
+                    }
+                  ]
+                },
+                {
+                  "type": "divider"
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Mobile Tag*"
+                  }
+                },
+                {
+                  "type": "context",
+                  "elements": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "Current on Prod \t <${{ env.prod_me_url }}|${{ env.prod_me }}>\nLatest on Trunk \t  <${{ env.trunk_me_url }}|${{ env.trunk_me }}>"
+                    }
+                  ]
+                }
+              ]
+            }
+
+  create-release:
+    needs: [get-current-tag-on-production, get-latest-tag-on-trunk]
+    timeout-minutes: 5
+    runs-on: ["self-hosted", "100m-400mi", "spot", "persistent"]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - repo: backend
+            previous-release: ${{ needs.get-current-tag-on-production.outputs.be_tag }}
+            current-release: ${{ needs.get-latest-tag-on-trunk.outputs.be_tag }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Create Release
+        uses: ./.github/actions/tbd.create-release
+        with:
+          github-token: ${{ env.GITHUB_TOKEN }}
+          repo-name: ${{ matrix.repo }}
+          previous-release: ${{ matrix.previous-release }}
+          current-release: ${{ matrix.current-release }}
+
+  build-and-deploy-uat:
+    needs: get-latest-tag-on-trunk
+    if: inputs.build-and-deploy || github.event_name == 'schedule'
+    timeout-minutes: 2
+    runs-on: ["self-hosted", "100m-400mi", "spot", "persistent"]
+    steps:
+      - name: Build and Deploy
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ env.GITHUB_TOKEN }}
+          script: |
+            await github.rest.repos.createDispatchEvent({
+              owner: context.repo.owner,
+              repo: "backend",
+              event_type: 'tbd.build_all',
+              client_payload: {
+                  payload: {
+                      be_release_tag: "${{ needs.get-latest-tag-on-trunk.outputs.be_tag }}",
+                      fe_release_tag: "${{ needs.get-latest-tag-on-trunk.outputs.fe_tag }}",
+                      me_release_tag: "${{ needs.get-latest-tag-on-trunk.outputs.me_tag }}",
+                      env: "uat",
+                      orgs: "manabie, jprep",
+                      me_apps: "learner, teacher",
+                      me_platforms: "android, ios, web",
+                      auto_deploy: true,
+                      workflow_ref: context.ref,
+                  },
+              },
+            });

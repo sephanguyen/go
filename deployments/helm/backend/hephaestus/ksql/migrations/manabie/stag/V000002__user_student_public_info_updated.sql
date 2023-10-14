@@ -1,0 +1,21 @@
+CREATE SINK CONNECTOR SINK_BASIC_USER_INFO_NEW_V4 WITH (
+      'connector.class'='io.confluent.connect.jdbc.JdbcSinkConnector',
+      'transforms.unwrap.delete.handling.mode'='drop',
+      'tasks.max'='1',
+      'topics'='STUDENT_PUBLIC_INFO_V3',
+      'fields.whitelist'='user_id,name,current_grade,grade_id,created_at,updated_at',
+      'key.converter'='org.apache.kafka.connect.storage.StringConverter',
+      'value.converter'='io.confluent.connect.avro.AvroConverter',
+      'value.converter.schema.registry.url'='http://cp-schema-registry:8081',
+      'delete.enabled'='false',
+      'transforms.unwrap.drop.tombstones'='true',
+      'auto.create'='false',
+      'connection.url'='${file:/config/kafka-connect-config.properties:bob_url}',
+      'insert.mode'='upsert',
+      'table.name.format'='public.user_basic_info',
+      'pk.mode'='record_key',
+      'transforms'='RenameField',
+      'transforms.RenameField.type'= 'org.apache.kafka.connect.transforms.ReplaceField$Value',
+      'transforms.RenameField.renames'='USER_ID:user_id,NAME:name,CURRENT_GRADE:current_grade,GRADE_ID:grade_id,CREATED_AT:created_at,UPDATED_AT:updated_at',
+      'pk.fields'='user_id'
+);

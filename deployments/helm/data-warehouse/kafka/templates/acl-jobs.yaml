@@ -1,0 +1,225 @@
+{{- if .Values.createACL }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "kafka.fullname" . }}-acl-job
+  labels:
+    app.kubernetes.io/name: {{ include "kafka.name" . }}-acl-job
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  # selector:
+  #   matchLabels:
+  #     app.kubernetes.io/name: {{ include "kafka.name" . }}-acl-job
+  #     app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "kafka.name" . }}-acl-job
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      restartPolicy: Never
+      serviceAccountName: {{ include "util.serviceAccountName" . }}
+      {{- with .Values.kafka.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+      - name: decrypted-secret
+        emptyDir: {}
+      - name: {{ include "kafka.name" . }}-acl-job
+        secret:
+          secretName: {{ include "kafka.name" . }}-acl-job
+          items:
+          - key: kafka_acl_job.encrypted.conf
+            path: kafka_acl_job.encrypted.conf
+          - key: consumer.encrypted.properties
+            path: consumer.encrypted.properties
+{{- if eq "local" .Values.environment }}
+      - name: service-credential
+        secret:
+          secretName: {{ include "kafka.name" . }}-acl-job
+          items:
+          - key: service_credential.json
+            path: service_credential.json
+{{- end }}
+      initContainers:
+      - name: decrypt-secret
+        image: "{{ .Values.decryptorImage.repository }}:{{ .Values.decryptorImage.tag }}"
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+        - name: decrypted-secret
+          mountPath: /decrypted
+        - name: {{ include "kafka.name" . }}-acl-job
+          mountPath: /secrets/kafka_acl_job.encrypted.conf
+          subPath: kafka_acl_job.encrypted.conf
+        - name: {{ include "kafka.name" . }}-acl-job
+          mountPath: /secrets/consumer.encrypted.properties
+          subPath: consumer.encrypted.properties
+        {{- if eq "local" .Values.environment }}
+        - name: service-credential
+          mountPath: /configs/service_credential.json
+          subPath: service_credential.json
+          readOnly: true
+        {{- end }}
+        env:
+        {{- if eq "local" .Values.environment }}
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: "/configs/service_credential.json"
+        {{- end }}
+        - name: HOSTNAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        command:
+          - /bin/bash
+          - -c
+          - |
+
+            set -e
+            echo "====="
+            sops -d --output /decrypted/kafka_acl_job.conf /secrets/kafka_acl_job.encrypted.conf
+            echo "====="
+            sops -d --output /decrypted/consumer.properties /secrets/consumer.encrypted.properties
+      - name: wait-for-kafka
+        image: "{{ .Values.aclImage.image.repository }}:{{ .Values.aclImage.image.tag }}"
+        imagePullPolicy: {{ .Values.aclImage.image.pullPolicy }}
+        command:
+          - /bin/bash
+          - -c
+          - |
+            set -e
+            cp -a /kafka/config.orig/connect-log4j.properties /kafka/config/connect-log4j.properties
+            cp -a /kafka/config.orig/tools-log4j.properties /kafka/config/tools-log4j.properties
+            . /decrypted/kafka_acl_job.conf
+            /kafka/bin/kafka-broker-api-versions.sh --bootstrap-server={{ .Values.aclImage.bootstrapServers.host }}:{{ .Values.aclImage.bootstrapServers.port }} --command-config /decrypted/consumer.properties
+        volumeMounts:
+        - name: decrypted-secret
+          mountPath: /decrypted
+      containers:
+      - name: create-kafka-acl
+        image: "{{ .Values.aclImage.image.repository }}:{{ .Values.aclImage.image.tag }}"
+        imagePullPolicy: {{ .Values.aclImage.image.pullPolicy }}
+        command:
+          - /bin/bash
+          - -c
+          - |
+            set -e
+            cp -a /kafka/config.orig/connect-log4j.properties /kafka/config/connect-log4j.properties
+            cp -a /kafka/config.orig/tools-log4j.properties /kafka/config/tools-log4j.properties
+            . /decrypted/kafka_acl_job.conf
+
+            ACL_LIST=$(/kafka/bin/kafka-acls.sh --bootstrap-server {{ .Values.aclImage.bootstrapServers.host }}:{{ .Values.aclImage.bootstrapServers.port }} --command-config /decrypted/consumer.properties --list)
+            echo "$ACL_LIST"
+            if [[ "$ACL_LIST" == "" ]]; then
+              echo "Creating ACL for Kafka"
+
+              # Allow ksqlDB to discover the cluster:
+              /kafka/bin/kafka-acls.sh --bootstrap-server={{ .Values.aclImage.bootstrapServers.host }}:{{ .Values.aclImage.bootstrapServers.port }} --command-config /decrypted/consumer.properties \
+              --add --allow-principal User:$SASL_USERNAME \
+              --operation DescribeConfigs \
+              --operation Describe \
+              --cluster
+
+              /kafka/bin/kafka-acls.sh --bootstrap-server={{ .Values.aclImage.bootstrapServers.host }}:{{ .Values.aclImage.bootstrapServers.port }} --command-config /decrypted/consumer.properties \
+              --add --allow-principal User:$SASL_USERNAME \
+              --operation Describe \
+              --topic * \
+              --group *
+
+
+              # Allow ksqlDB to read the input topics:
+              /kafka/bin/kafka-acls.sh --bootstrap-server={{ .Values.aclImage.bootstrapServers.host }}:{{ .Values.aclImage.bootstrapServers.port }} --command-config /decrypted/consumer.properties \
+              --add --allow-principal User:$SASL_USERNAME \
+              --operation Read \
+              --operation Describe \
+              --topic {{ .Values.environment }}.kec. \
+              --resource-pattern-type prefixed
+
+              /kafka/bin/kafka-acls.sh --bootstrap-server={{ .Values.aclImage.bootstrapServers.host }}:{{ .Values.aclImage.bootstrapServers.port }} --command-config /decrypted/consumer.properties \
+              --add --allow-principal User:$SASL_USERNAME \
+              --operation Read \
+              --operation Describe \
+              --topic _schemas \
+              --topic __consumer_offsets \
+              --topic __transaction_state \
+              --topic connect-configs \
+              --topic connect-offsets \
+              --topic connect-status \
+              --topic connect-statuses
+
+              # Allow ksqlDB usage migration topics
+              /kafka/bin/kafka-acls.sh --bootstrap-server={{ .Values.aclImage.bootstrapServers.host }}:{{ .Values.aclImage.bootstrapServers.port }} --command-config /decrypted/consumer.properties \
+              --add --allow-principal User:$SASL_USERNAME \
+              --operation All \
+              --topic KEC_MIGRATION_EVENTS \
+              --topic KEC_MIGRATION_SCHEMA_VERSIONS \
+              --topic MIGRATION_EVENTS \
+              --topic MIGRATION_SCHEMA_VERSIONS \
+              --resource-pattern-type prefixed
+
+              # Allow ksqlDB full permission on their topic and their group
+              /kafka/bin/kafka-acls.sh --bootstrap-server={{ .Values.aclImage.bootstrapServers.host }}:{{ .Values.aclImage.bootstrapServers.port }} --command-config /decrypted/consumer.properties \
+              --add --allow-principal User:$SASL_USERNAME \
+              --operation All \
+              --topic _confluent- \
+              --resource-pattern-type prefixed
+
+              /kafka/bin/kafka-acls.sh --bootstrap-server={{ .Values.aclImage.bootstrapServers.host }}:{{ .Values.aclImage.bootstrapServers.port }} --command-config /decrypted/consumer.properties \
+              --add --allow-principal User:$SASL_USERNAME \
+              --producer \
+              --topic _confluent-ksql-manabie_ \
+              --resource-pattern-type prefixed
+
+              /kafka/bin/kafka-acls.sh --bootstrap-server={{ .Values.aclImage.bootstrapServers.host }}:{{ .Values.aclImage.bootstrapServers.port }} --command-config /decrypted/consumer.properties \
+              --add --allow-principal User:$SASL_USERNAME \
+              --consumer \
+              --topic _confluent- \
+              --group * \
+              --resource-pattern-type prefixed
+
+              /kafka/bin/kafka-acls.sh --bootstrap-server={{ .Values.aclImage.bootstrapServers.host }}:{{ .Values.aclImage.bootstrapServers.port }} --command-config /decrypted/consumer.properties \
+              --add --allow-principal User:$SASL_USERNAME \
+              --operation All \
+              --topic _confluent-ksql-manabie_query_CTAS_MIGRATION_SCHEMA_VERSIONS_1-Aggregate-Aggregate-Materialize- \
+              --topic _confluent-ksql-manabie_query_ \
+              --resource-pattern-type prefixed
+
+              /kafka/bin/kafka-acls.sh --bootstrap-server={{ .Values.aclImage.bootstrapServers.host }}:{{ .Values.aclImage.bootstrapServers.port }} --command-config /decrypted/consumer.properties \
+              --add --allow-principal User:$SASL_USERNAME \
+              --consumer \
+              --topic _confluent-ksql-manabie_query_CTAS_MIGRATION_SCHEMA_VERSIONS_1-Aggregate-Aggregate-Materialize- \
+              --topic _confluent-ksql-manabie_query_ \
+              --group _confluent-ksql-manabie_query_ \
+              --resource-pattern-type prefixed
+
+              # Allow ksqlDB full permission on their topic and their group
+              /kafka/bin/kafka-acls.sh --bootstrap-server={{ .Values.aclImage.bootstrapServers.host }}:{{ .Values.aclImage.bootstrapServers.port }} --command-config /decrypted/consumer.properties \
+              --add --allow-principal User:$SASL_USERNAME \
+              --operation All \
+              --topic "output-{{ .Values.environment }}-kec-" \
+              --resource-pattern-type prefixed
+
+              # Allow ksqlDB full permission on their topic and their group
+              /kafka/bin/kafka-acls.sh --bootstrap-server={{ .Values.aclImage.bootstrapServers.host }}:{{ .Values.aclImage.bootstrapServers.port }} --command-config /decrypted/consumer.properties \
+              --add --allow-principal User:$SASL_USERNAME \
+              --operation All \
+              --topic manabie_ \
+              --resource-pattern-type prefixed
+
+              # Allow ksql to write transaction to topic _confluent-ksql-manabie__command_topic
+              /kafka/bin/kafka-acls.sh --bootstrap-server={{ .Values.aclImage.bootstrapServers.host }}:{{ .Values.aclImage.bootstrapServers.port }} --command-config /decrypted/consumer.properties \
+              --add --allow-principal User:$SASL_USERNAME \
+              --producer --topic _confluent-ksql-manabie__command_topic \
+              --transactional-id manabie_
+
+            fi
+            
+        volumeMounts:
+        - name: decrypted-secret
+          mountPath: /decrypted
+{{- end }}

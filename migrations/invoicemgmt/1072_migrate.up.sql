@@ -1,0 +1,2 @@
+ALTER TABLE ONLY public.invoice_schedule ADD CONSTRAINT invoice_schedule_users_fk FOREIGN KEY(user_id) REFERENCES public.users(user_id);
+ALTER TABLE ONLY public.invoice_schedule ALTER COLUMN user_id SET NOT NULL;

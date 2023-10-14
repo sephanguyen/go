@@ -1,0 +1,1 @@
+ALTER TABLE public.students ADD COLUMN IF NOT EXISTS student_note TEXT DEFAULT ''::TEXT NOT NULL;

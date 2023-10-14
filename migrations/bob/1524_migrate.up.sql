@@ -1,0 +1,1 @@
+ALTER TABLE IF EXISTS students ALTER COLUMN enrollment_status DROP NOT NULL; 

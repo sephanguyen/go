@@ -1,0 +1,23 @@
+{
+  "name": "local_e2e_bob_to_eureka_locations_sink_connector",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+    "tasks.max": "1",
+    "topics": "local.e2e.bob.public.locations",
+    "connection.url": "${file:/config/kafka-connect-config.properties:eureka_url}",
+    "auto.create": "false",
+    "insert.mode": "upsert",
+    "table.name.format": "locations",
+    "fields.whitelist": "access_path,created_at,deleted_at,is_archived,location_id,location_type,name,parent_location_id,partner_internal_id,partner_internal_parent_id,resource_path,updated_at",
+    "transforms": "unwrap,route",
+    "transforms.route.type": "org.apache.kafka.connect.transforms.RegexRouter",
+    "transforms.route.regex": "([^.]+).([^.]+).([^.]+).([^.]+).([^.]+)",
+    "transforms.route.replacement": "$5",
+    "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+    "delete.enabled": "false",
+    "pk.mode": "record_value",
+    "pk.fields": "location_id",
+    "transforms.unwrap.drop.tombstones": "true",
+    "transforms.unwrap.delete.handling.mode": "drop"
+  }
+}

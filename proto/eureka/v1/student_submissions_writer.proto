@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package eureka.v1;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/eureka/v1;epb";
+
+message DeleteStudentSubmissionRequest {
+  string student_submission_id = 1;
+}
+
+message DeleteStudentSubmissionResponse {}
+
+service StudentSubmissionModifierService {
+  rpc DeleteStudentSubmission(DeleteStudentSubmissionRequest) returns (DeleteStudentSubmissionResponse);
+}

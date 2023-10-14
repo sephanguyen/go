@@ -1,0 +1,22 @@
+ALTER TABLE public.user_group_member ALTER COLUMN resource_path SET DEFAULT autofillresourcepath();
+ALTER TABLE public.granted_role ALTER COLUMN resource_path SET DEFAULT autofillresourcepath();
+ALTER TABLE public.granted_role_access_path ALTER COLUMN resource_path SET DEFAULT autofillresourcepath();
+ALTER TABLE public.role ALTER COLUMN resource_path SET DEFAULT autofillresourcepath();
+ALTER TABLE public.user_group ALTER COLUMN resource_path SET DEFAULT autofillresourcepath();
+ALTER TABLE public.permission ALTER COLUMN resource_path SET DEFAULT autofillresourcepath();
+ALTER TABLE public.permission_role ALTER COLUMN resource_path SET DEFAULT autofillresourcepath(); 
+
+ALTER TABLE public.user_group_member ALTER COLUMN resource_path SET NOT NULL;
+ALTER TABLE public.granted_role ALTER COLUMN resource_path SET NOT NULL;
+ALTER TABLE public.granted_role_access_path ALTER COLUMN resource_path SET NOT NULL;
+ALTER TABLE public.role ALTER COLUMN resource_path SET NOT NULL;
+ALTER TABLE public.user_group ALTER COLUMN resource_path SET NOT NULL;
+ALTER TABLE public.permission ALTER COLUMN resource_path SET NOT NULL;
+ALTER TABLE public.permission_role ALTER COLUMN resource_path SET NOT NULL;
+ALTER TABLE public.students ALTER COLUMN resource_path SET NOT NULL;
+ALTER TABLE public.user_access_paths ALTER COLUMN resource_path SET NOT NULL;
+ALTER TABLE public.users ALTER COLUMN resource_path SET NOT NULL;
+ALTER TABLE public.locations ALTER COLUMN resource_path SET NOT NULL;
+ALTER TABLE public.locations ALTER COLUMN name SET NOT NULL;
+ALTER TABLE public.students ALTER COLUMN enrollment_status SET NOT NULL;
+ALTER TABLE public.student_parents ALTER COLUMN resource_path SET NOT NULL;

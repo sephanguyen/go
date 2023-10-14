@@ -1,0 +1,5 @@
+rules:
+  - name: integration-blocker-test
+  - name: unit-test
+  - name: e2e-test
+  - name: lint

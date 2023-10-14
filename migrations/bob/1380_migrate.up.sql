@@ -1,0 +1,1 @@
+ALTER TABLE public.lessons DROP CONSTRAINT IF EXISTS zoom_id_fk;

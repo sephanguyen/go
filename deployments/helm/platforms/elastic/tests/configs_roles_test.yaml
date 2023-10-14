@@ -1,0 +1,24 @@
+suite: elastic roles config file
+templates:
+  - configmap.yaml
+values:
+  - ../configs/roles.yml
+tests:
+  - it: Index patterns must be *
+    set:
+      environment: local
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - matchRegex:
+          path: data.[roles.yml]
+          pattern: '(.*)- index_patterns:\n    - "*"(.*)'
+  - it: Resource path filter must be correct
+    set:
+      environment: local
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - matchRegex:
+          path: data.[roles.yml]
+          pattern: '(.*)dls: "\{\\"bool\\":\{\\"filter\\":\[\{\\"term\\":\{\\"resource_path\\":\\"\$\{attr\.jwt\.resource_path\}\\"\}\}]\}\}"(.*)'

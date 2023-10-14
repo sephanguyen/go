@@ -1,0 +1,209 @@
+name: deployment.preproduction
+on:
+  workflow_dispatch:
+    inputs:
+      be-tag:
+        description: "Backend tag"
+        required: true
+      organization:
+        description: "Organization (partner)"
+        required: true
+        type: choice
+        default: tokyo
+        options:
+          - tokyo
+          - jprep
+          - synersia
+          - renseikai
+          - ga
+          - aic
+      sync-database:
+        description: "Sync database"
+        required: true
+        default: false
+        type: boolean
+      install-gateway:
+        description: "Install Istio Gateway"
+        required: true
+        default: true
+        type: boolean
+      install-backbone:
+        description: "Install backbone (without kafka-connect)"
+        required: true
+        default: true
+        type: boolean
+      install-services:
+        description: "Install services"
+        required: true
+        default: true
+        type: boolean
+
+concurrency:
+  group: deploy-preproduction-${{ github.event.inputs.organization }}
+
+env:
+  ORG: ${{ github.event.inputs.organization }}
+  ENV: dorp
+  ENVIRONMENT: preproduction
+  BACKEND_TAG: ${{ github.event.inputs.be-tag }}
+  IMG: asia.gcr.io/student-coach-e1e95/backend
+  TAG: ${{ github.event.inputs.be-tag }}
+  BE_TAG: ${{ github.event.inputs.be-tag }} # unused
+jobs:
+  deploy:
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    runs-on: ["self-hosted", "100m-400mi", "spot", "persistent"]
+    steps:
+      - name: Checkout backend source
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ inputs.be-tag }} # Use the correct helm chart version
+        timeout-minutes: 5
+
+      - name: Get deployment configuration
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const organization = '${{ env.ORG }}';
+            const environment = '${{ env.ENVIRONMENT }}';
+            const getDeploymentConfiguration = require('./.github/scripts/get-deployment-configuration.js');
+            const c = await getDeploymentConfiguration({ organization, environment });
+
+            if (c) {
+              core.exportVariable('CLUSTER', c.cluster);
+              core.exportVariable('REGION', c.region);
+              core.exportVariable('PROJECT_ID', c.projectId);
+              core.exportVariable('SERVICE_ACCOUNT_EMAIL_SUFFIX', c.serviceAccountEmailSuffix);
+              core.exportVariable('NAMESPACE', c.namespace);
+              core.exportVariable('SQL_PROXY_CONN_NAME', c.sqlProxyConnectionName);
+              core.exportVariable('SQL_PROXY_SOURCE_CONN_NAME', c.sqlProxySourceConnectionName);
+              core.exportVariable('ELASTIC_NAMESPACE', c.elasticNamespace);
+              core.exportVariable('ELASTIC_RELEASE_NAME', c.elasticReleaseName);
+              core.exportVariable('ELASTIC_NAME_OVERRIDE', c.elasticNameOverride);
+              core.exportVariable('ELASTIC_REPLICAS', c.elasticReplicas);
+              core.exportVariable('ELASTIC_STORAGE_CLASS', c.elasticStorageClass);
+              core.exportVariable('ELASTIC_STORAGE_SIZE', c.elasticStorageSize);
+              core.exportVariable('ELASTIC_SNAPSHOT_ENABLED', c.elasticSnapshotEnabled);
+              core.exportVariable('ELASTIC_SNAPSHOT_STORAGE_CLASS', c.elasticSnapshotStorageClass);
+              core.exportVariable('ELASTIC_SNAPSHOT_STORAGE_SIZE', c.elasticSnapshotStorageSize);
+              core.exportVariable('ELASTIC_CREATE_SERVICE_ACCOUNT', c.elasticCreateServiceAccount);
+              core.exportVariable('ELASTIC_INIT_INDICES', c.elasticInitIndices);
+            } else {
+              core.setFailed(`No deployment configuration found for organization: ${organization} and environment: ${environment}`);
+            }
+
+      # - name: Setup Cloud SDK with project ${{ env.PROJECT_ID }}
+      #   if: env.ENVIRONMENT == 'preproduction'
+      #   uses: google-github-actions/setup-gcloud@v0
+      #   with:
+      #     project_id: ${{ env.PROJECT_ID }}
+      #     service_account_key: ${{ secrets.DORP_DEPLOYMENT_SA_JSON }}
+      #     export_default_credentials: true
+
+      # - name: Sync database between prod & preprod
+      #   if: github.event.inputs.sync-database == 'true'
+      #   run: |
+      #     set -eu
+
+      #     sqlTargetAttrs=(${SQL_PROXY_CONN_NAME//:/ })
+      #     sqlTargetProjectID=${sqlTargetAttrs[0]}
+      #     sqlTargetInstance=${sqlTargetAttrs[2]}
+      #     sqlSourceAttrs=(${SQL_PROXY_SOURCE_CONN_NAME//:/ })
+      #     sqlSourceProjectID=${sqlSourceAttrs[0]}
+      #     sqlSourceInstance=${sqlSourceAttrs[2]}
+
+      #     # Some sanity checks
+      #     if [[ $ORG != "jprep" ]]; then
+      #       if [[ "${sqlTargetProjectID}" != "${sqlSourceProjectID}" ]]; then
+      #         >&2 echo "ERROR: Unexpected project ID (${sqlTargetProjectID} vs ${sqlSourceProjectID})"
+      #         exit 1
+      #       fi
+      #       if [[ "${sqlTargetInstance}" != "clone-${sqlSourceInstance}" ]]; then
+      #         >&2 echo "ERROR: Unexpected target instance name (${sqlTargetInstance} vs clone-${sqlSourceInstance})"
+      #         exit 1
+      #       fi
+      #     else
+      #       if [[ "${sqlTargetInstance}" != "clone-jprep-6a98" ]]; then
+      #         >&2 echo "ERROR: Unexpected target database name (${sqlTargetInstance} vs clone-jprep-6a98)"
+      #         exit 1
+      #       fi
+      #       if [[ "${sqlSourceInstance}" != "jprep-6a98" ]]; then
+      #         >&2 echo "ERROR: Unexpected source database name (${sqlSourceInstance} vs jprep-6a98)"
+      #         exit 1
+      #       fi
+      #     fi
+
+      #     # echo "Creating new backup of source database"
+      #     # gcloud sql backups create --instance=$sqlSourceInstance --project=$sqlSourceProjectID
+
+      #     echo "List current backups"
+      #     gcloud sql backups list --instance=$sqlSourceInstance --project=$sqlSourceProjectID
+
+      #     # Get the latest backup
+      #     backupRunID=$(gcloud sql backups list --instance=$sqlSourceInstance --project=$sqlSourceProjectID --format="get(id)" --limit 1)
+
+      #     echo "Restoring using backup instance $backupRunID"
+      #     # gcloud sql backups restore $backupRunID --restore-instance=$sqlTargetInstance --backup-instance=$sqlSourceInstance --project=$sqlTargetProjectID
+      #     cat > cloudsql_request.json <<EOF
+      #     {
+      #       "restoreBackupContext":
+      #       {
+      #         "backupRunId": ${backupRunID},
+      #         "project": "${sqlSourceProjectID}",
+      #         "instanceId": "${sqlSourceInstance}"
+      #       }
+      #     }
+      #     EOF
+
+      #     curl -X POST \
+      #       -H "Authorization: Bearer "$(gcloud auth print-access-token) \
+      #       -H "Content-Type: application/json; charset=utf-8" \
+      #       -d @cloudsql_request.json \
+      #       "https://sqladmin.googleapis.com/v1/projects/${sqlTargetProjectID}/instances/${sqlTargetInstance}/restoreBackup"
+
+      # Note that gateway's config is not clone. preprod's gateways are not the same as prod's gateways.
+      - name: Replicate preproduction config/secrets from production
+        run: ./.github/scripts/clone_prod_configs.bash
+
+      # We go back and use the old bot here, since the new bot lacks some cluster-wide permissions
+      - name: Setup Kubernetes for preproduction-${{ inputs.organization }}
+        if: env.ENVIRONMENT == 'preproduction'
+        uses: ./.github/actions/setup-k8s
+        with:
+          organization: ${{ inputs.organization }}
+          environment: 'preproduction'
+
+      - name: Install gateway
+        if: github.event.inputs.install-gateway == 'true'
+        run: |
+          set -eu
+          . ./deployments/setup_istio.bash
+          install_istio_gateway
+          kubectl label namespace ${{ env.ENV }}-${{ env.ORG }}-services istio.io/rev=stable --overwrite
+
+      - name: Deploy backbone
+        if: github.event.inputs.install-backbone == 'true'
+        run: |
+          if [[ "$ORG" == "synersia" || "$ORG" == "renseikai" || "$ORG" == "aic" ]]; then
+            skaffold deploy -f skaffold.backbone.yaml -p dorp-synersia
+          else
+            skaffold deploy -f skaffold.backbone.yaml
+            skaffold deploy -f skaffold.cp-ksql-server.yaml
+          fi
+
+      - name: Deploy all services
+        if: github.event.inputs.install-services == 'true'
+        run: |
+          . ./.github/actions/tbd.get-current-tags/get-current-tags.sh
+
+          TAG=${TAG:-$(get_current_tag "bob")}
+
+          if [[ "$ORG" == "synersia" || "$ORG" == "renseikai" || "$ORG" == "aic" ]]; then
+            skaffold deploy -f skaffold.manaverse.yaml -p dorp-synersia
+          else
+            skaffoldv2 deploy -f skaffold2.backend.yaml
+            skaffold deploy -f skaffold.manaverse.yaml
+          fi

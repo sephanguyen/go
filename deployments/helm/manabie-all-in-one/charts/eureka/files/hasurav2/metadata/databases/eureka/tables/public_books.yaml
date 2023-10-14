@@ -1,0 +1,101 @@
+table:
+  schema: public
+  name: books
+array_relationships:
+  - name: book_chapters
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: books_chapters
+        insertion_order: null
+        column_mapping:
+          book_id: book_id
+  - name: course_books
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: courses_books
+        insertion_order: null
+        column_mapping:
+          book_id: book_id
+select_permissions:
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+        - book_id
+        - copied_from
+        - country
+        - created_at
+        - deleted_at
+        - grade
+        - name
+        - school_id
+        - subject
+        - updated_at
+        - book_type
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+        - book_id
+        - copied_from
+        - country
+        - created_at
+        - deleted_at
+        - grade
+        - name
+        - school_id
+        - subject
+        - updated_at
+        - book_type
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+          - school_id:
+              _in: X-Hasura-School-Ids
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_STAFF
+    permission:
+      columns:
+        - grade
+        - school_id
+        - book_id
+        - country
+        - name
+        - subject
+        - created_at
+        - deleted_at
+        - updated_at
+        - book_type
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+          - school_id:
+              _in: X-Hasura-School-Ids
+      allow_aggregations: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+        - grade
+        - school_id
+        - book_id
+        - country
+        - name
+        - subject
+        - created_at
+        - deleted_at
+        - updated_at
+        - book_type
+      filter:
+        _and:
+          - deleted_at:
+              _is_null: true
+      allow_aggregations: true

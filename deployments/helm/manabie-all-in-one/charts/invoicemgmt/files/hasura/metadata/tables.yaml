@@ -1,0 +1,2226 @@
+- table:
+    schema: public
+    name: bank
+  insert_permissions:
+  - role: MANABIE
+    permission:
+      check:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      set:
+        resource_path: x-hasura-Resource-Path
+      columns:
+      - bank_code
+      - bank_id
+      - bank_name
+      - bank_name_phonetic
+      - is_archived
+      backend_only: false
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      check:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      set:
+        resource_path: x-hasura-Resource-Path
+      columns:
+      - bank_code
+      - bank_id
+      - bank_name
+      - bank_name_phonetic
+      - is_archived
+      backend_only: false
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - bank_code
+      - bank_id
+      - bank_name
+      - bank_name_phonetic
+      - created_at
+      - is_archived
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - bank_code
+      - bank_id
+      - bank_name
+      - bank_name_phonetic
+      - created_at
+      - is_archived
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  update_permissions:
+  - role: MANABIE
+    permission:
+      check:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      columns:
+      - bank_code
+      - bank_name
+      - bank_name_phonetic
+      - is_archived
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      check:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      columns:
+      - bank_code
+      - bank_name
+      - bank_name_phonetic
+      - is_archived
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+- table:
+    schema: public
+    name: bank_account
+  object_relationships:
+  - name: bank
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: bank
+        column_mapping:
+          bank_id: bank_id
+  - name: bank_branch
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: bank_branch
+        column_mapping:
+          bank_branch_id: bank_branch_id
+  array_relationships:
+  - name: user_access_paths
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: user_access_paths
+        column_mapping:
+          student_id: user_id
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - bank_account_holder
+      - bank_account_id
+      - bank_account_number
+      - bank_account_type
+      - bank_branch_id
+      - bank_id
+      - is_verified
+      - student_id
+      - student_payment_detail_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - bank_account_holder
+      - bank_account_id
+      - bank_account_number
+      - bank_account_type
+      - bank_branch_id
+      - bank_id
+      - is_verified
+      - student_id
+      - student_payment_detail_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - bank_account_holder
+      - bank_account_id
+      - bank_account_number
+      - bank_account_type
+      - bank_branch_id
+      - bank_id
+      - is_verified
+      - student_id
+      - student_payment_detail_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+- table:
+    schema: public
+    name: bank_branch
+  insert_permissions:
+  - role: MANABIE
+    permission:
+      check:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      set:
+        resource_path: x-hasura-Resource-Path
+      columns:
+      - bank_branch_code
+      - bank_branch_id
+      - bank_branch_name
+      - bank_branch_phonetic_name
+      - bank_id
+      - is_archived
+      backend_only: false
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      check:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      set:
+        resource_path: x-hasura-Resource-Path
+      columns:
+      - bank_branch_code
+      - bank_branch_id
+      - bank_branch_name
+      - bank_branch_phonetic_name
+      - bank_id
+      - is_archived
+      backend_only: false
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - bank_branch_code
+      - bank_branch_id
+      - bank_branch_name
+      - bank_branch_phonetic_name
+      - bank_id
+      - created_at
+      - is_archived
+      - resource_path
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - bank_branch_code
+      - bank_branch_id
+      - bank_branch_name
+      - bank_branch_phonetic_name
+      - bank_id
+      - created_at
+      - is_archived
+      - resource_path
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  update_permissions:
+  - role: MANABIE
+    permission:
+      check:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      columns:
+      - bank_branch_code
+      - bank_branch_name
+      - bank_branch_phonetic_name
+      - bank_id
+      - is_archived
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      check:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      columns:
+      - bank_branch_code
+      - bank_branch_name
+      - bank_branch_phonetic_name
+      - bank_id
+      - is_archived
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+- table:
+    schema: public
+    name: bank_mapping
+  insert_permissions:
+  - role: MANABIE
+    permission:
+      check:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      set:
+        resource_path: x-hasura-Resource-Path
+      columns:
+      - bank_id
+      - bank_mapping_id
+      - is_archived
+      - partner_bank_id
+      - remarks
+      - updated_at
+      backend_only: false
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      check:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      set:
+        resource_path: x-hasura-Resource-Path
+      columns:
+      - bank_id
+      - bank_mapping_id
+      - is_archived
+      - partner_bank_id
+      - remarks
+      - updated_at
+      backend_only: false
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - bank_id
+      - bank_mapping_id
+      - created_at
+      - is_archived
+      - partner_bank_id
+      - remarks
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - bank_id
+      - bank_mapping_id
+      - created_at
+      - is_archived
+      - partner_bank_id
+      - remarks
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+  update_permissions:
+  - role: MANABIE
+    permission:
+      check:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      columns:
+      - bank_id
+      - bank_mapping_id
+      - is_archived
+      - partner_bank_id
+      - remarks
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      check:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      columns:
+      - bank_id
+      - bank_mapping_id
+      - is_archived
+      - partner_bank_id
+      - remarks
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+- table:
+    schema: public
+    name: bill_item
+  object_relationships:
+  - name: bill_item_location_permission
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: granted_permissions
+        column_mapping:
+          location_id: location_id
+  - name: discount
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: discount
+        column_mapping:
+          discount_id: discount_id
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - adjustment_price
+      - bill_item_sequence_number
+      - bill_type
+      - billing_approval_status
+      - billing_date
+      - billing_from
+      - billing_item_description
+      - billing_schedule_period_id
+      - billing_status
+      - billing_to
+      - discount_amount
+      - discount_amount_type
+      - discount_amount_value
+      - final_price
+      - location_name
+      - order_id
+      - product_description
+      - product_pricing
+      - student_id
+      - tax_amount
+      - tax_category
+      - tax_id
+      - tax_percentage
+      - is_reviewed
+      - discount_id
+      filter:
+        _and:
+        - bill_item_location_permission:
+            _and:
+            - user_id:
+                _eq: X-Hasura-User-Id
+            - permission_name:
+                _eq: payment.bill_item.read
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - adjustment_price
+      - bill_item_sequence_number
+      - bill_type
+      - billing_approval_status
+      - billing_date
+      - billing_from
+      - billing_item_description
+      - billing_schedule_period_id
+      - billing_status
+      - billing_to
+      - discount_amount
+      - discount_amount_type
+      - discount_amount_value
+      - final_price
+      - location_name
+      - order_id
+      - product_description
+      - product_pricing
+      - student_id
+      - tax_amount
+      - tax_category
+      - tax_id
+      - tax_percentage
+      - is_reviewed
+      - discount_id
+      filter:
+        _and:
+        - bill_item_location_permission:
+            _and:
+            - user_id:
+                _eq: X-Hasura-User-Id
+            - permission_name:
+                _eq: payment.bill_item.read
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - adjustment_price
+      - bill_item_sequence_number
+      - bill_type
+      - billing_approval_status
+      - billing_date
+      - billing_from
+      - billing_item_description
+      - billing_schedule_period_id
+      - billing_status
+      - billing_to
+      - discount_amount
+      - discount_amount_type
+      - discount_amount_value
+      - final_price
+      - location_name
+      - order_id
+      - product_description
+      - product_pricing
+      - student_id
+      - tax_amount
+      - tax_category
+      - tax_id
+      - tax_percentage
+      - is_reviewed
+      - discount_id
+      filter:
+        _and:
+        - bill_item_location_permission:
+            _and:
+            - user_id:
+                _eq: X-Hasura-User-Id
+            - permission_name:
+                _eq: payment.bill_item.read
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+- table:
+    schema: public
+    name: billing_address
+  object_relationships:
+  - name: prefecture
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: prefecture
+        column_mapping:
+          prefecture_code: prefecture_code
+  array_relationships:
+  - name: user_access_paths
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: user_access_paths
+        column_mapping:
+          user_id: user_id
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - billing_address_id
+      - city
+      - postal_code
+      - prefecture_code
+      - street1
+      - street2
+      - student_payment_detail_id
+      - user_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - billing_address_id
+      - city
+      - postal_code
+      - prefecture_code
+      - street1
+      - street2
+      - student_payment_detail_id
+      - user_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - billing_address_id
+      - city
+      - postal_code
+      - prefecture_code
+      - street1
+      - street2
+      - student_payment_detail_id
+      - user_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+- table:
+    schema: public
+    name: bulk_payment_request
+  array_relationships:
+  - name: bulk_payment_request_files
+    using:
+      foreign_key_constraint_on:
+        column: bulk_payment_request_id
+        table:
+          schema: public
+          name: bulk_payment_request_file
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - bulk_payment_request_id
+      - created_at
+      - payment_due_date_from
+      - payment_due_date_to
+      - payment_method
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - bulk_payment_request_id
+      - created_at
+      - payment_due_date_from
+      - payment_due_date_to
+      - payment_method
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+- table:
+    schema: public
+    name: bulk_payment_request_file
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - bulk_payment_request_file_id
+      - bulk_payment_request_id
+      - created_at
+      - deleted_at
+      - file_name
+      - file_sequence_number
+      - file_url
+      - is_downloaded
+      - parent_payment_request_file_id
+      - total_file_count
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - bulk_payment_request_file_id
+      - bulk_payment_request_id
+      - created_at
+      - deleted_at
+      - file_name
+      - file_sequence_number
+      - file_url
+      - is_downloaded
+      - parent_payment_request_file_id
+      - total_file_count
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+- table:
+    schema: public
+    name: bulk_payment_validations
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - bulk_payment_validations_id
+      - created_at
+      - deleted_at
+      - failed_payments
+      - payment_method
+      - successful_payments
+      - updated_at
+      - validation_date
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - bulk_payment_validations_id
+      - created_at
+      - deleted_at
+      - failed_payments
+      - payment_method
+      - successful_payments
+      - updated_at
+      - validation_date
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+- table:
+    schema: public
+    name: invoice
+  object_relationships:
+  - name: student
+    using:
+      foreign_key_constraint_on: student_id
+  - name: user
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: users
+        column_mapping:
+          student_id: user_id
+  - name: user_basic_info
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: user_basic_info
+        column_mapping:
+          student_id: user_id
+  array_relationships:
+  - name: payments
+    using:
+      foreign_key_constraint_on:
+        column: invoice_id
+        table:
+          schema: public
+          name: payment
+  - name: user_access_paths
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: user_access_paths
+        column_mapping:
+          student_id: user_id
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - created_at
+      - invoice_id
+      - invoice_sequence_number
+      - is_exported
+      - status
+      - student_id
+      - sub_total
+      - total
+      - outstanding_balance
+      - amount_paid
+      - amount_refunded
+      - type
+      filter:
+        _and:
+        - user_access_paths:
+            _and:
+            - invoice_location_permission:
+                _and:
+                - user_id:
+                    _eq: X-Hasura-User-Id
+                - permission_name:
+                    _eq: payment.invoice.read
+            - deleted_at:
+                _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - created_at
+      - invoice_id
+      - invoice_sequence_number
+      - is_exported
+      - status
+      - student_id
+      - sub_total
+      - total
+      - outstanding_balance
+      - amount_paid
+      - amount_refunded
+      - type
+      filter:
+        _and:
+        - user_access_paths:
+            _and:
+            - invoice_location_permission:
+                _and:
+                - user_id:
+                    _eq: X-Hasura-User-Id
+                - permission_name:
+                    _eq: payment.invoice.read
+            - deleted_at:
+                _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - created_at
+      - invoice_id
+      - invoice_sequence_number
+      - is_exported
+      - status
+      - student_id
+      - sub_total
+      - total
+      - outstanding_balance
+      - amount_paid
+      - amount_refunded
+      - type
+      filter:
+        _and:
+        - user_access_paths:
+            _and:
+            - invoice_location_permission:
+                _and:
+                - user_id:
+                    _eq: X-Hasura-User-Id
+                - permission_name:
+                    _eq: payment.invoice.read
+            - deleted_at:
+                _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+- table:
+    schema: public
+    name: invoice_action_log
+  object_relationships:
+  - name: result_code
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: bulk_payment_validations_detail
+        column_mapping:
+          bulk_payment_validations_id: bulk_payment_validations_id
+          invoice_id: invoice_id
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - action
+      - action_comment
+      - action_detail
+      - created_at
+      - invoice_action_id
+      - invoice_id
+      - payment_sequence_number
+      - updated_at
+      - user_id
+      - bulk_payment_validations_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - action
+      - action_comment
+      - action_detail
+      - created_at
+      - invoice_action_id
+      - invoice_id
+      - payment_sequence_number
+      - updated_at
+      - user_id
+      - bulk_payment_validations_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+- table:
+    schema: public
+    name: invoice_bill_item
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - bill_item_sequence_number
+      - invoice_bill_item_id
+      - invoice_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - bill_item_sequence_number
+      - invoice_bill_item_id
+      - invoice_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+- table:
+    schema: public
+    name: invoice_schedule
+  object_relationships:
+  - name: invoice_schedule_history
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: invoice_schedule_history
+        column_mapping:
+          invoice_schedule_id: invoice_schedule_id
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - created_at
+      - invoice_date
+      - invoice_schedule_id
+      - status
+      - updated_at
+      - scheduled_date
+      - is_archived
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - created_at
+      - invoice_date
+      - invoice_schedule_id
+      - status
+      - updated_at
+      - scheduled_date
+      - is_archived
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+- table:
+    schema: public
+    name: invoice_schedule_history
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - created_at
+      - execution_end_date
+      - execution_start_date
+      - invoice_schedule_history_id
+      - invoice_schedule_id
+      - number_of_failed_invoices
+      - total_students
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - created_at
+      - execution_end_date
+      - execution_start_date
+      - invoice_schedule_history_id
+      - invoice_schedule_id
+      - number_of_failed_invoices
+      - total_students
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+- table:
+    schema: public
+    name: invoice_schedule_student
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - error_details
+      - invoice_schedule_history_id
+      - student_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - error_details
+      - invoice_schedule_history_id
+      - student_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+- table:
+    schema: public
+    name: partner_convenience_store
+  insert_permissions:
+  - role: MANABIE
+    permission:
+      check:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      set:
+        resource_path: x-hasura-Resource-Path
+      columns:
+      - address1
+      - address2
+      - company_code
+      - company_name
+      - company_tel_number
+      - is_archived
+      - manufacturer_code
+      - message1
+      - message10
+      - message11
+      - message12
+      - message13
+      - message14
+      - message15
+      - message16
+      - message17
+      - message18
+      - message19
+      - message2
+      - message20
+      - message21
+      - message22
+      - message23
+      - message24
+      - message3
+      - message4
+      - message5
+      - message6
+      - message7
+      - message8
+      - message9
+      - partner_convenience_store_id
+      - postal_code
+      - remarks
+      - shop_code
+      backend_only: false
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      check:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      set:
+        resource_path: x-hasura-Resource-Path
+      columns:
+      - address1
+      - address2
+      - company_code
+      - company_name
+      - company_tel_number
+      - is_archived
+      - manufacturer_code
+      - message1
+      - message10
+      - message11
+      - message12
+      - message13
+      - message14
+      - message15
+      - message16
+      - message17
+      - message18
+      - message19
+      - message2
+      - message20
+      - message21
+      - message22
+      - message23
+      - message24
+      - message3
+      - message4
+      - message5
+      - message6
+      - message7
+      - message8
+      - message9
+      - partner_convenience_store_id
+      - postal_code
+      - remarks
+      - shop_code
+      backend_only: false
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - address1
+      - address2
+      - company_code
+      - company_name
+      - company_tel_number
+      - created_at
+      - is_archived
+      - manufacturer_code
+      - message1
+      - message10
+      - message11
+      - message12
+      - message13
+      - message14
+      - message15
+      - message16
+      - message17
+      - message18
+      - message19
+      - message2
+      - message20
+      - message21
+      - message22
+      - message23
+      - message24
+      - message3
+      - message4
+      - message5
+      - message6
+      - message7
+      - message8
+      - message9
+      - partner_convenience_store_id
+      - postal_code
+      - remarks
+      - shop_code
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - address1
+      - address2
+      - company_code
+      - company_name
+      - company_tel_number
+      - created_at
+      - is_archived
+      - manufacturer_code
+      - message1
+      - message10
+      - message11
+      - message12
+      - message13
+      - message14
+      - message15
+      - message16
+      - message17
+      - message18
+      - message19
+      - message2
+      - message20
+      - message21
+      - message22
+      - message23
+      - message24
+      - message3
+      - message4
+      - message5
+      - message6
+      - message7
+      - message8
+      - message9
+      - partner_convenience_store_id
+      - postal_code
+      - remarks
+      - shop_code
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  update_permissions:
+  - role: MANABIE
+    permission:
+      check:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      columns:
+      - address1
+      - address2
+      - company_code
+      - company_name
+      - company_tel_number
+      - is_archived
+      - manufacturer_code
+      - message1
+      - message10
+      - message11
+      - message12
+      - message13
+      - message14
+      - message15
+      - message16
+      - message17
+      - message18
+      - message19
+      - message2
+      - message20
+      - message21
+      - message22
+      - message23
+      - message24
+      - message3
+      - message4
+      - message5
+      - message6
+      - message7
+      - message8
+      - message9
+      - postal_code
+      - remarks
+      - shop_code
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      check:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      columns:
+      - address1
+      - address2
+      - company_code
+      - company_name
+      - company_tel_number
+      - is_archived
+      - manufacturer_code
+      - message1
+      - message10
+      - message11
+      - message12
+      - message13
+      - message14
+      - message15
+      - message16
+      - message17
+      - message18
+      - message19
+      - message2
+      - message20
+      - message21
+      - message22
+      - message23
+      - message24
+      - message3
+      - message4
+      - message5
+      - message6
+      - message7
+      - message8
+      - message9
+      - postal_code
+      - remarks
+      - shop_code
+      - updated_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+- table:
+    schema: public
+    name: payment
+  object_relationships:
+  - name: bulk_payment
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: bulk_payment
+        column_mapping:
+          bulk_payment_id: bulk_payment_id
+  - name: student
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: users
+        column_mapping:
+          student_id: user_id
+  - name: users
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: user_basic_info
+        column_mapping:
+          student_id: user_id
+  - name: invoice
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: invoice
+        column_mapping:
+          invoice_id: invoice_id
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - amount
+      - created_at
+      - invoice_id
+      - is_exported
+      - payment_date
+      - payment_due_date
+      - payment_expiry_date
+      - payment_id
+      - payment_method
+      - payment_sequence_number
+      - payment_status
+      - result
+      - result_code
+      - updated_at
+      - student_id
+      - validated_date
+      - receipt_date
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - amount
+      - created_at
+      - invoice_id
+      - is_exported
+      - payment_date
+      - payment_due_date
+      - payment_expiry_date
+      - payment_id
+      - payment_method
+      - payment_sequence_number
+      - payment_status
+      - result
+      - result_code
+      - updated_at
+      - student_id
+      - validated_date
+      - receipt_date
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - amount
+      - created_at
+      - invoice_id
+      - is_exported
+      - payment_date
+      - payment_due_date
+      - payment_expiry_date
+      - payment_id
+      - payment_method
+      - payment_sequence_number
+      - payment_status
+      - result
+      - result_code
+      - updated_at
+      - student_id
+      - validated_date
+      - receipt_date
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+- table:
+    schema: public
+    name: prefecture
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - country
+      - name
+      - prefecture_code
+      - prefecture_id
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - country
+      - name
+      - prefecture_code
+      - prefecture_id
+      filter:
+        _and:
+        - deleted_at:
+            _is_null: true
+- table:
+    schema: public
+    name: student_payment_detail
+  array_relationships:
+  - name: bank_accounts
+    using:
+      foreign_key_constraint_on:
+        column: student_payment_detail_id
+        table:
+          schema: public
+          name: bank_account
+  - name: billing_addresses
+    using:
+      foreign_key_constraint_on:
+        column: student_payment_detail_id
+        table:
+          schema: public
+          name: billing_address
+  - name: user_access_paths
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: user_access_paths
+        column_mapping:
+          student_id: user_id
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - payer_name
+      - payer_phone_number
+      - payment_method
+      - student_id
+      - student_payment_detail_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - payer_name
+      - payer_phone_number
+      - payment_method
+      - student_id
+      - student_payment_detail_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - payer_name
+      - payer_phone_number
+      - payment_method
+      - student_id
+      - student_payment_detail_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+- table:
+    schema: public
+    name: students
+  object_relationships:
+  - name: user
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: users
+        column_mapping:
+          student_id: user_id
+  array_relationships:
+  - name: user_access_paths
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: user_access_paths
+        column_mapping:
+          student_id: user_id
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - created_at
+      - current_grade
+      - deleted_at
+      - resource_path
+      - student_id
+      - updated_at
+      filter:
+        _and:
+        - user_access_paths:
+            _and:
+            - students_location_permission:
+                _and:
+                - user_id:
+                    _eq: X-Hasura-User-Id
+                - permission_name:
+                    _eq: user.student.read
+            - deleted_at:
+                _is_null: true
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - created_at
+      - current_grade
+      - deleted_at
+      - resource_path
+      - student_id
+      - updated_at
+      filter:
+        _and:
+        - user_access_paths:
+            _and:
+            - students_location_permission:
+                _and:
+                - user_id:
+                    _eq: X-Hasura-User-Id
+                - permission_name:
+                    _eq: user.student.read
+            - deleted_at:
+                _is_null: true
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - created_at
+      - current_grade
+      - deleted_at
+      - resource_path
+      - student_id
+      - updated_at
+      filter:
+        _and:
+        - user_access_paths:
+            _and:
+            - students_location_permission:
+                _and:
+                - user_id:
+                    _eq: X-Hasura-User-Id
+                - permission_name:
+                    _eq: user.student.read
+            - deleted_at:
+                _is_null: true
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - created_at
+      - current_grade
+      - deleted_at
+      - resource_path
+      - student_id
+      - updated_at
+      filter:
+        _and:
+        - user_access_paths:
+            _and:
+            - students_location_permission:
+                _and:
+                - user_id:
+                    _eq: X-Hasura-User-Id
+                - permission_name:
+                    _eq: user.student.read
+            - deleted_at:
+                _is_null: true
+        - deleted_at:
+            _is_null: true
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+- table:
+    schema: public
+    name: user_access_paths
+  object_relationships:
+  - name: bank_account
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: bank_account
+        column_mapping:
+          user_id: student_id
+  - name: billing_address
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: billing_address
+        column_mapping:
+          user_id: user_id
+  - name: invoice_location_permission
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: granted_permissions
+        column_mapping:
+          location_id: location_id
+  - name: invoice
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: invoice
+        column_mapping:
+          user_id: student_id
+  - name: payment_location_permission
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: granted_permissions
+        column_mapping:
+          location_id: location_id
+  - name: payment
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: payment
+        column_mapping:
+          user_id: student_id
+  - name: student_payment_detail
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: student_payment_detail
+        column_mapping:
+          user_id: student_id
+  - name: students_location_permission
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: granted_permissions
+        column_mapping:
+          location_id: location_id
+  - name: students
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: students
+        column_mapping:
+          user_id: student_id
+  - name: user_access_paths_location_permission
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: granted_permissions
+        column_mapping:
+          location_id: location_id
+  - name: users_location_permission
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: granted_permissions
+        column_mapping:
+          location_id: location_id
+  - name: users
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: users
+        column_mapping:
+          user_id: user_id
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - access_path
+      - created_at
+      - location_id
+      - user_id
+      filter:
+        _and:
+        - user_access_paths_location_permission:
+            _and:
+            - user_id:
+                _eq: X-Hasura-User-Id
+            - permission_name:
+                _eq: user.user.read
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - access_path
+      - created_at
+      - location_id
+      - user_id
+      filter:
+        _and:
+        - user_access_paths_location_permission:
+            _and:
+            - user_id:
+                _eq: X-Hasura-User-Id
+            - permission_name:
+                _eq: user.user.read
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - access_path
+      - created_at
+      - location_id
+      - user_id
+      filter:
+        _and:
+        - user_access_paths_location_permission:
+            _and:
+            - user_id:
+                _eq: X-Hasura-User-Id
+            - permission_name:
+                _eq: user.user.read
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+- table:
+    schema: public
+    name: users
+  array_relationships:
+  - name: invoice
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: invoice
+        column_mapping:
+          user_id: student_id
+  - name: user_access_paths
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: user_access_paths
+        column_mapping:
+          user_id: user_id
+  select_permissions:
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - name
+      - user_id
+      filter:
+        _and:
+        - _or:
+          - user_access_paths:
+              _and:
+              - users_location_permission:
+                  _and:
+                  - user_id:
+                      _eq: X-Hasura-User-Id
+                  - permission_name:
+                      _eq: user.user.read
+              - deleted_at:
+                  _is_null: true
+          - user_id:
+              _eq: X-Hasura-User-Id
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - name
+      - user_id
+      filter:
+        _and:
+        - _or:
+          - user_access_paths:
+              _and:
+              - users_location_permission:
+                  _and:
+                  - user_id:
+                      _eq: X-Hasura-User-Id
+                  - permission_name:
+                      _eq: user.user.read
+              - deleted_at:
+                  _is_null: true
+          - user_id:
+              _eq: X-Hasura-User-Id
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - name
+      - user_id
+      filter:
+        _and:
+        - _or:
+          - user_access_paths:
+              _and:
+              - users_location_permission:
+                  _and:
+                  - user_id:
+                      _eq: X-Hasura-User-Id
+                  - permission_name:
+                      _eq: user.user.read
+              - deleted_at:
+                  _is_null: true
+          - user_id:
+              _eq: X-Hasura-User-Id
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+- table:
+    schema: public
+    name: granted_permissions
+  object_relationships:
+  - name: bill_item_location_permission
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: bill_item
+        column_mapping:
+          location_id: location_id
+  - name: invoice_location_permission
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: user_access_paths
+        column_mapping:
+          location_id: location_id
+  - name: payment_location_permission
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: user_access_paths
+        column_mapping:
+          location_id: location_id
+  - name: students_location_permission
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: user_access_paths
+        column_mapping:
+          location_id: location_id
+  - name: user_access_paths_location_permission
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: user_access_paths
+        column_mapping:
+          location_id: location_id
+  - name: users_location_permission
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: user_access_paths
+        column_mapping:
+          location_id: location_id
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - user_id
+      - permission_name
+      - location_id
+      - resource_path
+      filter:
+        _and:
+        - user_id:
+            _eq: X-Hasura-User-Id
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+- table:
+    schema: public
+    name: invoice_adjustment
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - invoice_adjustment_id
+      - invoice_id
+      - description
+      - amount
+      - invoice_adjustment_sequence_number
+      - created_at
+      - deleted_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - invoice_adjustment_id
+      - invoice_id
+      - description
+      - amount
+      - invoice_adjustment_sequence_number
+      - created_at
+      - deleted_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+- table:
+    schema: public
+    name: bulk_payment_validations_detail
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - validated_result_code
+      - previous_result_code
+      - bulk_payment_validations_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - validated_result_code
+      - previous_result_code
+      - bulk_payment_validations_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+- table:
+    schema: public
+    name: discount
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - discount_id
+      - name
+      - discount_type
+      - discount_amount_type
+      - discount_amount_value
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - discount_id
+      - name
+      - discount_type
+      - discount_amount_type
+      - discount_amount_value
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+      allow_aggregations: true
+- table:
+    schema: public
+    name: company_detail
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - company_address
+      - company_detail_id
+      - company_name
+      - company_phone_number
+      - company_logo_url
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - company_address
+      - company_detail_id
+      - company_name
+      - company_phone_number
+      - company_logo_url
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - company_address
+      - company_detail_id
+      - company_name
+      - company_phone_number
+      - company_logo_url
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+- table:
+    schema: public
+    name: user_basic_info
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - deleted_at
+      - name
+      - user_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_ADMIN
+    permission:
+      columns:
+      - deleted_at
+      - name
+      - user_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - deleted_at
+      - name
+      - user_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_TEACHER
+    permission:
+      columns:
+      - deleted_at
+      - name
+      - user_id
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+- table:
+    schema: public
+    name: bulk_payment
+  array_relationships:
+  - name: payments
+    using:
+      manual_configuration:
+        remote_table:
+          schema: public
+          name: payment
+        column_mapping:
+          bulk_payment_id: bulk_payment_id
+  select_permissions:
+  - role: MANABIE
+    permission:
+      columns:
+      - bulk_payment_id
+      - bulk_payment_status
+      - created_at
+      - payment_method
+      - invoice_status
+      - invoice_type
+      - payment_status
+      - resource_path
+      - deleted_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true
+  - role: USER_GROUP_SCHOOL_ADMIN
+    permission:
+      columns:
+      - bulk_payment_id
+      - bulk_payment_status
+      - created_at
+      - payment_method
+      - invoice_status
+      - invoice_type
+      - payment_status
+      - resource_path
+      - deleted_at
+      filter:
+        _and:
+        - resource_path:
+            _eq: X-Hasura-Resource-Path
+        - deleted_at:
+            _is_null: true
+      allow_aggregations: true

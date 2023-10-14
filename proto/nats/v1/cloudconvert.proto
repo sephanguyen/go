@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package nats.v1;
+
+option go_package = "github.com/manabie-com/backend/pkg/manabuf/nats/v1;npb";
+
+message CloudConvertJobData {
+  string job_id = 1;
+  string job_status = 2;
+  string signature = 3;
+  bytes raw_payload = 4;
+  string export_name = 5;
+  repeated string converted_files = 6;
+}

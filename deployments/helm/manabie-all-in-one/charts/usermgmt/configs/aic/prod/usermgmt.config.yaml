@@ -1,0 +1,13 @@
+common:
+  google_cloud_project: student-coach-e1e95
+  firebase_project: production-aic
+  identity_platform_project: student-coach-e1e95
+issuers:
+  - issuer: manabie
+    audience: prod-aic
+    jwks_endpoint: http://shamir:5680/.well-known/jwks.json
+postgres_v2:
+  bob:
+    shard_id: 8
+identity_platform:
+  token_signer_account_id: prod-aic-usermgmt@student-coach-e1e95.iam.gserviceaccount.com

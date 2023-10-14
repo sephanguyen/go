@@ -1,0 +1,19 @@
+affinityOverride:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: cloud.google.com/gke-spot
+          operator: In
+          values: ["true"]
+        - key: environment
+          operator: In
+          values: ["preproduction"]
+tolerations:
+  - effect: NoSchedule
+    key: cloud.google.com/gke-spot
+    operator: Exists
+  - effect: NoSchedule
+    key: environment
+    operator: Equal
+    value: preproduction
